@@ -7,6 +7,10 @@ import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
+import nl.pim16aap2.commandparser.renderer.ColorScheme;
+import nl.pim16aap2.commandparser.renderer.TextComponent;
+import nl.pim16aap2.commandparser.renderer.TextStyle;
+import nl.pim16aap2.commandparser.renderer.TextType;
 
 import java.util.List;
 
@@ -35,6 +39,8 @@ public class Main
     public static void main(final String... args)
     {
         String executor = "mip";
+
+        testTextComponents();
 
         CommandManager commandManager = initCommandManager();
 
@@ -135,5 +141,37 @@ public class Main
         commandManager.addCommand(addOwner);
         commandManager.addCommand(bigdoors);
         return commandManager;
+    }
+
+    static void testTextComponents()
+    {
+        final ColorScheme colorScheme =
+            ColorScheme.builder()
+                       .commandStyle(new TextStyle(MinecraftStyle.BLACK.getStringValue(),
+                                                   MinecraftStyle.RESET.getStringValue()))
+                       .optionalParameterStyle(new TextStyle(MinecraftStyle.WHITE.getStringValue(),
+                                                             MinecraftStyle.RESET.getStringValue()))
+                       .requiredParameterStyle(new TextStyle(MinecraftStyle.GREEN.getStringValue(),
+                                                             MinecraftStyle.RESET.getStringValue()))
+                       .summaryStyle(new TextStyle(MinecraftStyle.BLUE.getStringValue(),
+                                                   MinecraftStyle.RESET.getStringValue()))
+                       .regularTextStyle(new TextStyle(MinecraftStyle.GOLD.getStringValue(),
+                                                       MinecraftStyle.RESET.getStringValue()))
+                       .headerStyle(new TextStyle(MinecraftStyle.AQUA.getStringValue(),
+                                                  MinecraftStyle.RESET.getStringValue()))
+                       .footerStyle(new TextStyle(MinecraftStyle.DARK_RED.getStringValue(),
+                                                  MinecraftStyle.RESET.getStringValue()))
+                       .build();
+
+        final TextComponent textComponent = new TextComponent(colorScheme);
+        textComponent.add("This is a command", TextType.COMMAND).add("\n")
+                     .add("This is an optional parameter", TextType.OPTIONAL_PARAMETER).add("\n")
+                     .add("This is something else? I can't remember the types :(", TextType.HEADER).add("\n");
+
+
+        final TextComponent textComponent2 = new TextComponent(colorScheme);
+        textComponent2.add("This is the second TextComponent!", TextType.REQUIRED_PARAMETER).add("\n");
+
+        System.out.println(textComponent.add(textComponent2).toString());
     }
 }
