@@ -1,11 +1,7 @@
 package nl.pim16aap2.commandparser;
 
 import lombok.NonNull;
-import nl.pim16aap2.commandparser.argument.OptionalArgument;
-import nl.pim16aap2.commandparser.argument.RepeatableArgument;
-import nl.pim16aap2.commandparser.argument.RequiredArgument;
-import nl.pim16aap2.commandparser.argument.argumentparser.FlagParser;
-import nl.pim16aap2.commandparser.argument.argumentparser.StringParser;
+import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
@@ -88,8 +84,6 @@ public class Main
     private static CommandManager initCommandManager()
     {
         final CommandManager commandManager = new CommandManager();
-//        RepeatableArgument<List<String>, String> repArg =
-//            new RepeatableArgument<>("", Collections.emptyList(), "", Boolean.TRUE, str -> str);
 
         Command addOwner =
             Command.builder()
@@ -97,29 +91,24 @@ public class Main
                    .description("Add 1 or more players or groups of players as owners of a door.")
                    .summary("Add another owner to a door.")
                    .argument(
-                       RequiredArgument.<String>builder()
-                           .name("doorID")
-                           .summary("The name or UID of the door")
-                           .parser(StringParser.create())
-                           .build())
-                   .argument(OptionalArgument.<Boolean>builder()
-                                 .name("a")
-                                 .alias("admin")
-                                 .summary("Make the user an admin for the given door. " +
-                                              "Only applies to players.")
-                                 .parser(FlagParser.create(Boolean.TRUE))
-                                 .flag(true)
-                                 .build())
-                   .argument(RepeatableArgument.<List<String>, String>builder()
-                                 .name("p")
-                                 .summary("The name of the player to add as owner")
-                                 .parser(StringParser.create())
-                                 .build())
-                   .argument(RepeatableArgument.<List<String>, String>builder()
-                                 .name("g")
-                                 .summary("The name of the group to add as owner")
-                                 .parser(StringParser.create())
-                                 .build())
+                       Argument.StringArgument.getRequired()
+                                              .name("doorID")
+                                              .summary("The name or UID of the door")
+                                              .build())
+                   .argument(Argument.FlagArgument.getOptional(true)
+                                                  .name("a")
+                                                  .alias("admin")
+                                                  .summary("Make the user an admin for the given door. " +
+                                                               "Only applies to players.")
+                                                  .build())
+                   .argument(Argument.StringArgument.getRepeating()
+                                                    .name("p")
+                                                    .summary("The name of the player to add as owner")
+                                                    .build())
+                   .argument(Argument.StringArgument.getRepeating()
+                                                    .name("g")
+                                                    .summary("The name of the group to add as owner")
+                                                    .build())
                    .commandExecutor(
                        commandResult ->
                            new AddOwner(commandResult.getParsedArgument("doorID"),
