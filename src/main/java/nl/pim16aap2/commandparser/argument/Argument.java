@@ -10,10 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static nl.pim16aap2.commandparser.argument.OptionalArgument.OptionalArgumentBuilder;
-import static nl.pim16aap2.commandparser.argument.RepeatableArgument.RepeatableArgumentBuilder;
-import static nl.pim16aap2.commandparser.argument.RequiredArgument.RequiredArgumentBuilder;
-
 @AllArgsConstructor
 @Getter
 public abstract class Argument<T>
@@ -36,17 +32,17 @@ public abstract class Argument<T>
 
     public static class StringArgument
     {
-        public static OptionalArgumentBuilder<String> getOptional()
+        public static OptionalArgument.OptionalArgumentBuilder<String> getOptional()
         {
             return OptionalArgument.<String>builder().parser(StringParser.create());
         }
 
-        public static RequiredArgumentBuilder<String> getRequired()
+        public static RequiredArgument.RequiredArgumentBuilder<String> getRequired()
         {
             return RequiredArgument.<String>builder().parser(StringParser.create());
         }
 
-        public static RepeatableArgumentBuilder<List<String>, String> getRepeating()
+        public static RepeatableArgument.RepeatableArgumentBuilder<List<String>, String> getRepeating()
         {
             return RepeatableArgument.<List<String>, String>builder().parser(StringParser.create());
         }
@@ -54,7 +50,7 @@ public abstract class Argument<T>
 
     public static class FlagArgument
     {
-        public static OptionalArgumentBuilder<Boolean> getOptional(final @NonNull Boolean value)
+        public static OptionalArgument.OptionalArgumentBuilder<Boolean> getOptional(final @NonNull Boolean value)
         {
             return OptionalArgument.<Boolean>builder().parser(FlagParser.create(value)).flag(true);
         }

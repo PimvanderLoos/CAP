@@ -90,25 +90,28 @@ public class Main
                    .name("addowner")
                    .description("Add 1 or more players or groups of players as owners of a door.")
                    .summary("Add another owner to a door.")
-                   .argument(
-                       Argument.StringArgument.getRequired()
-                                              .name("doorID")
-                                              .summary("The name or UID of the door")
-                                              .build())
-                   .argument(Argument.FlagArgument.getOptional(true)
-                                                  .name("a")
-                                                  .alias("admin")
-                                                  .summary("Make the user an admin for the given door. " +
-                                                               "Only applies to players.")
-                                                  .build())
-                   .argument(Argument.StringArgument.getRepeating()
-                                                    .name("p")
-                                                    .summary("The name of the player to add as owner")
-                                                    .build())
-                   .argument(Argument.StringArgument.getRepeating()
-                                                    .name("g")
-                                                    .summary("The name of the group to add as owner")
-                                                    .build())
+                   .argument(Argument.StringArgument
+                                 .getRequired()
+                                 .name("doorID")
+                                 .summary("The name or UID of the door")
+                                 .build())
+                   .argument(Argument.FlagArgument
+                                 .getOptional(true)
+                                 .name("a")
+                                 .alias("admin")
+                                 .summary("Make the user an admin for the given door. " +
+                                              "Only applies to players.")
+                                 .build())
+                   .argument(Argument.StringArgument
+                                 .getRepeating()
+                                 .name("p")
+                                 .summary("The name of the player to add as owner")
+                                 .build())
+                   .argument(Argument.StringArgument
+                                 .getRepeating()
+                                 .name("g")
+                                 .summary("The name of the group to add as owner")
+                                 .build())
                    .commandExecutor(
                        commandResult ->
                            new AddOwner(commandResult.getParsedArgument("doorID"),
