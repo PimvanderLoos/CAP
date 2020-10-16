@@ -3,7 +3,6 @@ package nl.pim16aap2.commandparser.argument;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Singular;
 import nl.pim16aap2.commandparser.argument.argumentparser.ArgumentParser;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
@@ -23,11 +22,11 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
     private final Boolean flag;
 
     @Builder
-    public RepeatableArgument(final @NonNull String name, final @NonNull @Singular List<String> aliases,
+    public RepeatableArgument(final @NonNull String name, final @Nullable String longName,
                               final @Nullable String summary, final @Nullable Boolean flag,
                               final @NonNull ArgumentParser<U> parser)
     {
-        super(name, aliases, summary == null ? "" : summary, parser);
+        super(name, Util.valOrDefault(longName, ""), summary == null ? "" : summary, parser);
         this.flag = Util.valOrDefault(flag, Boolean.FALSE);
     }
 

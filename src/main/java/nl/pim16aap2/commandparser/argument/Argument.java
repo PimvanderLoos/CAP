@@ -16,7 +16,7 @@ public abstract class Argument<T>
 {
     protected final @NonNull String name;
 
-    protected final @NonNull List<String> aliases;
+    protected final @NonNull String longName;
 
     protected @NonNull String summary;
 

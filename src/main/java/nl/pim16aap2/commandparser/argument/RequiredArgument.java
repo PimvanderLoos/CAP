@@ -4,10 +4,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import lombok.Singular;
 import nl.pim16aap2.commandparser.argument.argumentparser.ArgumentParser;
-
-import java.util.List;
+import nl.pim16aap2.commandparser.util.Util;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 public class RequiredArgument<T> extends Argument<T>
@@ -18,11 +17,10 @@ public class RequiredArgument<T> extends Argument<T>
     private final T defaultValue;
 
     @Builder
-    public RequiredArgument(final @NonNull String name, final @NonNull @Singular List<String> aliases,
-                            final @NonNull String summary, final T defaultValue,
-                            final @NonNull ArgumentParser<T> parser)
+    public RequiredArgument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
+                            final T defaultValue, final @NonNull ArgumentParser<T> parser)
     {
-        super(name, aliases, summary, parser);
+        super(name, Util.valOrDefault(longName, ""), summary, parser);
         this.defaultValue = defaultValue;
     }
 }

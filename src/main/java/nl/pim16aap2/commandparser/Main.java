@@ -98,7 +98,7 @@ public class Main
                    .argument(Argument.FlagArgument
                                  .getOptional(true)
                                  .name("a")
-                                 .alias("admin")
+                                 .longName("admin")
                                  .summary("Make the user an admin for the given door. " +
                                               "Only applies to players.")
                                  .build())
