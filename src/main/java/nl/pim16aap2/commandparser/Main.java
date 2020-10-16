@@ -14,8 +14,14 @@ import nl.pim16aap2.commandparser.renderer.TextType;
 
 import java.util.List;
 
-// TODO: Consider using ByteBuddy to generate the commands?
-//       Might be completely overkill, though
+// TODO: Consider using ByteBuddy to generate the commands? Might be completely overkill, though
+// TODO: Add some way to inject text into the TextComponent system. For example, when adding a piece of text with
+//       a command, store which command it is and if it is listed as a subcommand or a supercommand.
+//       Allow registering event handlers or something when a new component is added.
+//       This is useful for stuff like clickable text. In Minecraft, this would be the ability to click on a command
+//       in a help menu to execute the help command for that command. 
+// TODO: Rename TextComponent class. The StyledSection class should have this name, while the TextComponent should be
+//       something else; it's not a component after all, it's the whole thing.
 public class Main
 {
     private static @NonNull String arrToString(final @NonNull String... args)
