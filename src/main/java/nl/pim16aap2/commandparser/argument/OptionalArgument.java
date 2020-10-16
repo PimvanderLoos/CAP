@@ -4,11 +4,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import nl.pim16aap2.commandparser.argument.argumentparser.ArgumentParser;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Function;
 
 @Getter
 public class OptionalArgument<T> extends Argument<T>
@@ -24,7 +24,7 @@ public class OptionalArgument<T> extends Argument<T>
     @Builder
     public OptionalArgument(final @NonNull String name, final @NonNull @Singular List<String> aliases,
                             final @NonNull String summary, final T defaultValue, final @Nullable Boolean flag,
-                            final @NonNull Function<@NonNull String, T> parser)
+                            final @NonNull ArgumentParser<T> parser)
     {
         super(name, aliases, summary, parser);
         this.defaultValue = defaultValue;

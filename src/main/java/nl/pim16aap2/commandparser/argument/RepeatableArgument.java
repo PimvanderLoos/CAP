@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import nl.pim16aap2.commandparser.argument.argumentparser.ArgumentParser;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 @Getter
 public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
@@ -25,7 +25,7 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
     @Builder
     public RepeatableArgument(final @NonNull String name, final @NonNull @Singular List<String> aliases,
                               final @Nullable String summary, final @Nullable Boolean flag,
-                              final @NonNull Function<@NonNull String, U> parser)
+                              final @NonNull ArgumentParser<U> parser)
     {
         super(name, aliases, summary == null ? "" : summary, parser);
         this.flag = Util.valOrDefault(flag, Boolean.FALSE);
@@ -59,7 +59,7 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
                              final @NonNull String value)
         {
             System.out.println(super.value.getClass().getCanonicalName());
-            Objects.requireNonNull(super.value).add((U) repeatableArgument.parser.apply(value));
+            Objects.requireNonNull(super.value).add((U) repeatableArgument.parser.parseArgument(value));
         }
     }
 }

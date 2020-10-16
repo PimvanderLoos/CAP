@@ -4,13 +4,14 @@ import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.OptionalArgument;
 import nl.pim16aap2.commandparser.argument.RepeatableArgument;
 import nl.pim16aap2.commandparser.argument.RequiredArgument;
+import nl.pim16aap2.commandparser.argument.argumentparser.FlagParser;
+import nl.pim16aap2.commandparser.argument.argumentparser.StringParser;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
 
-import java.util.Collections;
 import java.util.List;
 
 // TODO: Consider using ByteBuddy to generate the commands?
@@ -87,8 +88,8 @@ public class Main
     private static CommandManager initCommandManager()
     {
         final CommandManager commandManager = new CommandManager();
-        RepeatableArgument<List<String>, String> repArg =
-            new RepeatableArgument<>("", Collections.emptyList(), "", Boolean.TRUE, str -> str);
+//        RepeatableArgument<List<String>, String> repArg =
+//            new RepeatableArgument<>("", Collections.emptyList(), "", Boolean.TRUE, str -> str);
 
         Command addOwner =
             Command.builder()
@@ -96,29 +97,28 @@ public class Main
                    .description("Add 1 or more players or groups of players as owners of a door.")
                    .summary("Add another owner to a door.")
                    .argument(
-                       RequiredArgument.builder()
-                                       .name("doorID")
-                                       .summary("The name or UID of the door")
-                                       .parser(str -> str)
-                                       .build())
-                   .argument(OptionalArgument.builder()
-                                             .name("a")
-                                             .alias("admin")
-                                             .summary("Make the user an admin for the given door. " +
-                                                          "Only applies to players.")
-                                             .parser(str -> true)
-                                             .flag(true)
-                                             .defaultValue(Boolean.FALSE)
-                                             .build())
+                       RequiredArgument.<String>builder()
+                           .name("doorID")
+                           .summary("The name or UID of the door")
+                           .parser(StringParser.create())
+                           .build())
+                   .argument(OptionalArgument.<Boolean>builder()
+                                 .name("a")
+                                 .alias("admin")
+                                 .summary("Make the user an admin for the given door. " +
+                                              "Only applies to players.")
+                                 .parser(FlagParser.create(Boolean.TRUE))
+                                 .flag(true)
+                                 .build())
                    .argument(RepeatableArgument.<List<String>, String>builder()
                                  .name("p")
                                  .summary("The name of the player to add as owner")
-                                 .parser(str -> str) // TODO: This is dumb
+                                 .parser(StringParser.create())
                                  .build())
                    .argument(RepeatableArgument.<List<String>, String>builder()
                                  .name("g")
                                  .summary("The name of the group to add as owner")
-                                 .parser(str -> str) // TODO: This is dumb
+                                 .parser(StringParser.create())
                                  .build())
                    .commandExecutor(
                        commandResult ->

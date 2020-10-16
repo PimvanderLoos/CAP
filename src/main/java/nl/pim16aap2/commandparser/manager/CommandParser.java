@@ -65,6 +65,11 @@ class CommandParser
         return results;
     }
 
+    private @NonNull ParsedArgument<?> parseArgument(final @NonNull Argument<?> argument, final @NonNull String value)
+    {
+        return new ParsedArgument<>(argument.getParser().parseArgument(value));
+    }
+
     private @NonNull Map<@NonNull String, ParsedArgument<?>> parseArguments(final @NonNull Command command,
                                                                             final int idx)
         throws NonExistingArgumentException, MissingArgumentException
@@ -98,7 +103,7 @@ class CommandParser
                     command.getRequiredArgumentFromIdx(requiredArgumentIdx)
                            .orElseThrow(() -> new MissingArgumentException("Missing required argument at pos: " +
                                                                                requiredArgumentIdx));
-                results.put(argument.getName(), new ParsedArgument<>(argument.getParser().apply(nextArg)));
+                results.put(argument.getName(), parseArgument(argument, nextArg));
             }
         }
 
@@ -130,15 +135,14 @@ class CommandParser
         throws MissingArgumentException
     {
         if (argument.getFlag())
-            results.put(argumentName, new ParsedArgument<>(argument.getParser().apply(argumentName)));
+            results.put(argumentName, parseArgument(argument, argumentName));
         else
         {
             // TODO: Merge all subsequent parts? Or only split on the first?
             final @Nullable String valStr = parts.length == 2 ? parts[1] : null;
             if (valStr == null)
                 throw new MissingArgumentException(argumentName);
-
-            results.put(argumentName, new ParsedArgument<>(argument.getParser().apply(valStr)));
+            results.put(argumentName, parseArgument(argument, valStr));
         }
     }
 

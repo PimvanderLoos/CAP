@@ -1,14 +1,22 @@
 package nl.pim16aap2.commandparser.argument.argumentparser;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
-import static nl.pim16aap2.commandparser.argument.Argument.ParsedArgument;
-
-public class StringParser extends ArgumentParser<String>
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class StringParser<T extends String> extends ArgumentParser<T>
 {
     @Override
-    public @NonNull ParsedArgument<String> parseArgument(final @NonNull String value)
+    @SuppressWarnings("unchecked")
+    public @NonNull T parseArgument(final @NonNull String value)
     {
-        return new ParsedArgument<>(value);
+        // TODO: Try/catch this stuff.
+        return (T) value;
+    }
+
+    public static StringParser<String> create()
+    {
+        return new StringParser<>();
     }
 }

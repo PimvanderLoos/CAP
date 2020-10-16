@@ -3,10 +3,10 @@ package nl.pim16aap2.commandparser.argument;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+import nl.pim16aap2.commandparser.argument.argumentparser.ArgumentParser;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Function;
 
 @AllArgsConstructor
 @Getter
@@ -18,7 +18,7 @@ public abstract class Argument<T>
 
     protected @NonNull String summary;
 
-    protected @NonNull Function<@NonNull String, T> parser;
+    protected @NonNull ArgumentParser<T> parser;
 
     @AllArgsConstructor
     @Getter
