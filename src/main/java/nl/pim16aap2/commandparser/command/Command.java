@@ -1,12 +1,14 @@
-package nl.pim16aap2.commandparser.commandline.command;
+package nl.pim16aap2.commandparser.command;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.Singular;
-import nl.pim16aap2.commandparser.commandline.argument.Argument;
-import nl.pim16aap2.commandparser.commandline.argument.OptionalArgument;
-import nl.pim16aap2.commandparser.commandline.argument.RequiredArgument;
+import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.argument.OptionalArgument;
+import nl.pim16aap2.commandparser.argument.RepeatableArgument;
+import nl.pim16aap2.commandparser.argument.RequiredArgument;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,21 +33,30 @@ public class Command
     // TODO: Create classes for these.
     protected final @NonNull Map<@NonNull String, @NonNull OptionalArgument<?>> optionalArguments = new HashMap<>();
 
+    protected final @NonNull Map<@NonNull String, @NonNull RepeatableArgument<? extends List<?>, ?>> repeatableArguments = new HashMap<>();
+
     protected final @NonNull Map<@NonNull String, @NonNull RequiredArgument<?>> requiredArguments = new HashMap<>();
 
+    protected final @NonNull Map<@NonNull String, @NonNull Argument<?>> arguments = new HashMap<>();
+
     protected final @NonNull Consumer<@NonNull CommandResult> commandExecutor;
+
+    @Setter
+    protected boolean hidden;
 
     @Builder
     private Command(final @NonNull String name, final @Nullable String description, final @Nullable String summary,
                     final @Nullable @Singular List<Command> subCommands,
                     final @NonNull Consumer<@NonNull CommandResult> commandExecutor,
-                    final @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments)
+                    final @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
+                    final boolean hidden)
     {
         this.name = name;
         this.description = Util.valOrDefault(description, "");
         this.summary = Util.valOrDefault(summary, "");
         this.subCommands = generateSubCommandMap(subCommands);
         this.commandExecutor = commandExecutor;
+        this.hidden = hidden;
         parseArguments(arguments);
     }
 
@@ -65,6 +76,11 @@ public class Command
     public @NonNull Optional<OptionalArgument<?>> getOptionalArgument(final @NonNull String name)
     {
         return Optional.ofNullable(optionalArguments.get(name));
+    }
+
+    public @NonNull Optional<Argument<?>> getArgument(final @NonNull String name)
+    {
+        return Optional.ofNullable(arguments.get(name));
     }
 
     public @NonNull Optional<Command> getSubCommand(final @NonNull String name)
@@ -92,14 +108,23 @@ public class Command
         int requiredIndex = 0;
         for (Argument<?> argument : arguments)
         {
-            if (argument instanceof OptionalArgument<?>)
+            if (argument instanceof OptionalArgument)
+            {
                 optionalArguments.put(argument.getName(), (OptionalArgument<?>) argument);
-            else if (argument instanceof RequiredArgument<?>)
+                this.arguments.put(argument.getName(), argument); // TODO: This is dumb
+            }
+            else if (argument instanceof RequiredArgument)
             {
                 final RequiredArgument<?> requiredArgument = (RequiredArgument<?>) argument;
                 requiredArguments.put(argument.getName(), requiredArgument);
+                this.arguments.put(argument.getName(), argument); // TODO: This is dumb
                 requiredArgument.setPosition(requiredIndex);
                 requiredIndex++;
+            }
+            else if (argument instanceof RepeatableArgument)
+            {
+                repeatableArguments.put(argument.getName(), (RepeatableArgument<? extends List<?>, ?>) argument);
+                this.arguments.put(argument.getName(), argument); // TODO: This is dumb
             }
             else
                 throw new RuntimeException(

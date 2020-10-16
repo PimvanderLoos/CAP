@@ -1,4 +1,4 @@
-package nl.pim16aap2.commandparser.commandline.argument;
+package nl.pim16aap2.commandparser.argument;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -19,16 +19,15 @@ public class OptionalArgument<T> extends Argument<T>
      */
     private final Boolean flag;
 
-    private final Boolean repeatable;
+    private final T defaultValue;
 
     @Builder
     public OptionalArgument(final @NonNull String name, final @NonNull @Singular List<String> aliases,
-                            final @NonNull String summary, final T defautValue, final @Nullable Boolean flag,
-                            final @Nullable Boolean repeatable,
-                            final @NonNull Function<@NonNull String, ParsedArgument<T>> parser)
+                            final @NonNull String summary, final T defaultValue, final @Nullable Boolean flag,
+                            final @NonNull Function<@NonNull String, T> parser)
     {
-        super(name, aliases, summary, defautValue, parser);
+        super(name, aliases, summary, parser);
+        this.defaultValue = defaultValue;
         this.flag = Util.valOrDefault(flag, Boolean.FALSE);
-        this.repeatable = Util.valOrDefault(repeatable, Boolean.FALSE);
     }
 }

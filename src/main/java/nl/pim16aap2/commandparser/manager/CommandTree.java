@@ -1,7 +1,7 @@
-package nl.pim16aap2.commandparser.commandline.manager;
+package nl.pim16aap2.commandparser.manager;
 
 import lombok.NonNull;
-import nl.pim16aap2.commandparser.commandline.command.Command;
+import nl.pim16aap2.commandparser.command.Command;
 
 import java.util.HashMap;
 import java.util.Map;

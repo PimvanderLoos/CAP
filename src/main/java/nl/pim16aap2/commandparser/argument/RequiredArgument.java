@@ -1,4 +1,4 @@
-package nl.pim16aap2.commandparser.commandline.argument;
+package nl.pim16aap2.commandparser.argument;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -15,13 +15,14 @@ public class RequiredArgument<T> extends Argument<T>
     @Setter
     private Integer position;
 
+    private final T defaultValue;
+
     @Builder
     public RequiredArgument(final @NonNull String name, final @NonNull @Singular List<String> aliases,
-                            final @NonNull String summary, final T defautValue,
-                            final @NonNull Function<@NonNull String, ParsedArgument<T>> parser)
+                            final @NonNull String summary, final T defaultValue,
+                            final @NonNull Function<@NonNull String, T> parser)
     {
-        super(name, aliases, summary, defautValue, parser);
+        super(name, aliases, summary, parser);
+        this.defaultValue = defaultValue;
     }
-
-
 }

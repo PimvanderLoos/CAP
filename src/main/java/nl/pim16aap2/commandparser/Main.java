@@ -1,16 +1,20 @@
 package nl.pim16aap2.commandparser;
 
 import lombok.NonNull;
-import nl.pim16aap2.commandparser.command.AddOwner;
-import nl.pim16aap2.commandparser.commandline.argument.Argument;
-import nl.pim16aap2.commandparser.commandline.argument.OptionalArgument;
-import nl.pim16aap2.commandparser.commandline.argument.RequiredArgument;
-import nl.pim16aap2.commandparser.commandline.command.Command;
-import nl.pim16aap2.commandparser.commandline.manager.CommandManager;
+import nl.pim16aap2.commandparser.argument.OptionalArgument;
+import nl.pim16aap2.commandparser.argument.RepeatableArgument;
+import nl.pim16aap2.commandparser.argument.RequiredArgument;
+import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
+import nl.pim16aap2.commandparser.manager.CommandManager;
 
+import java.util.Collections;
+import java.util.List;
+
+// TODO: Consider using ByteBuddy to generate the commands?
+//       Might be completely overkill, though
 public class Main
 {
     private static @NonNull String arrToString(final @NonNull String... args)
@@ -37,7 +41,8 @@ public class Main
 
         CommandManager commandManager = initCommandManager();
 
-        String[] a = {"bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a"};
+//        String[] a = {"bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a"};
+        String[] a = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
 
         try
         {
@@ -82,6 +87,9 @@ public class Main
     private static CommandManager initCommandManager()
     {
         final CommandManager commandManager = new CommandManager();
+        RepeatableArgument<List<String>, String> repArg =
+            new RepeatableArgument<>("", Collections.emptyList(), "", Boolean.TRUE, str -> str);
+
         Command addOwner =
             Command.builder()
                    .name("addowner")
@@ -91,69 +99,33 @@ public class Main
                        RequiredArgument.builder()
                                        .name("doorID")
                                        .summary("The name or UID of the door")
-                                       .parser(Argument.ParsedArgument::new)
+                                       .parser(str -> str)
                                        .build())
                    .argument(OptionalArgument.builder()
                                              .name("a")
                                              .alias("admin")
                                              .summary("Make the user an admin for the given door. " +
                                                           "Only applies to players.")
-                                             .parser(str -> new Argument.ParsedArgument(true))
+                                             .parser(str -> true)
                                              .flag(true)
-                                             .defautValue(Boolean.FALSE)
+                                             .defaultValue(Boolean.FALSE)
                                              .build())
-                   .argument(OptionalArgument.builder()
-                                             .name("p")
-                                             .summary("The name of the player to add as owner")
-                                             .repeatable(true)
-                                             .parser(Argument.ParsedArgument::new)
-                                             .defautValue("")
-                                             .build())
-                   .argument(OptionalArgument.builder()
-                                             .name("g")
-                                             .summary("The name of the group to add as owner")
-                                             .repeatable(true)
-                                             .parser(Argument.ParsedArgument::new)
-                                             .defautValue("")
-                                             .build())
+                   .argument(RepeatableArgument.<List<String>, String>builder()
+                                 .name("p")
+                                 .summary("The name of the player to add as owner")
+                                 .parser(str -> str) // TODO: This is dumb
+                                 .build())
+                   .argument(RepeatableArgument.<List<String>, String>builder()
+                                 .name("g")
+                                 .summary("The name of the group to add as owner")
+                                 .parser(str -> str) // TODO: This is dumb
+                                 .build())
                    .commandExecutor(
                        commandResult ->
-                       {
-                           try
-                           {
-                               Argument.ParsedArgument<?> doorIdArg = commandResult.getParsedArgument("doorID");
-                               String doorId = doorIdArg == null ? null : (String) doorIdArg.getValue();
-
-                               Argument.ParsedArgument<?> playerArg = commandResult.getParsedArgument("p");
-                               String player = playerArg == null ? null : (String) playerArg.getValue();
-
-                               Argument.ParsedArgument<?> groupArg = commandResult.getParsedArgument("g");
-                               String group = groupArg == null ? null : (String) groupArg.getValue();
-
-                               Argument.ParsedArgument<?> adminArg = commandResult.getParsedArgument("a");
-                               Boolean admin = adminArg == null ? Boolean.FALSE : (Boolean) adminArg.getValue();
-
-                               new AddOwner(doorId,
-                                            player,
-                                            group,
-                                            admin).runCommand();
-
-                           }
-                           catch (Throwable t)
-                           {
-                               t.printStackTrace();
-                           }
-                       }
-
-
-//                           new AddOwner(commandResult.getParsedArgument("doorID").getValue(),
-//                                        commandResult.getParsedArgument(""),
-//                                        commandResult.getParsedArgument(""),
-//                                        commandResult.getParsedArgument("")
-//                           ).runCommand()
-//                                        System.out.print("PARSED A COMMAND: " +
-//                                                                          commandResult.getCommand().getName())
-
+                           new AddOwner(commandResult.getParsedArgument("doorID"),
+                                        commandResult.getParsedArgument("p"),
+                                        commandResult.<List<String>>getParsedArgument("g"),
+                                        commandResult.getParsedArgument("a")).runCommand()
                    )
                    .build();
 

@@ -1,4 +1,4 @@
-package nl.pim16aap2.commandparser.command;
+package nl.pim16aap2.commandparser;
 
 
 import lombok.NonNull;
@@ -39,10 +39,15 @@ public class AddOwner
 
     private static String listToString(final @NonNull List<?> lst)
     {
-        final StringBuilder sb = new StringBuilder();
+        if (lst.isEmpty())
+            return "";
+
+        final StringBuilder sb = new StringBuilder().append("[");
         lst.forEach(val -> sb.append(val.toString()).append(", "));
         final String result = sb.toString();
-        return result.substring(0, result.length() - 2);
+        if (result.length() < 3)
+            return "";
+        return result.substring(0, result.length() - 2) + "]";
     }
 }
 

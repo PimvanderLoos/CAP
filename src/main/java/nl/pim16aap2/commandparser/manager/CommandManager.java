@@ -1,8 +1,8 @@
-package nl.pim16aap2.commandparser.commandline.manager;
+package nl.pim16aap2.commandparser.manager;
 
 import lombok.NonNull;
-import nl.pim16aap2.commandparser.commandline.command.Command;
-import nl.pim16aap2.commandparser.commandline.command.CommandResult;
+import nl.pim16aap2.commandparser.command.Command;
+import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;

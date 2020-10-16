@@ -1,4 +1,4 @@
-package nl.pim16aap2.commandparser.commandline.argument;
+package nl.pim16aap2.commandparser.argument;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,15 +18,13 @@ public abstract class Argument<T>
 
     protected @NonNull String summary;
 
-    protected T defautValue;
-
-    protected @NonNull Function<@NonNull String, ParsedArgument<T>> parser;
+    protected @NonNull Function<@NonNull String, T> parser;
 
     @AllArgsConstructor
     @Getter
     public static class ParsedArgument<T>
     {
         @Nullable
-        private final T value;
+        protected final T value;
     }
 }

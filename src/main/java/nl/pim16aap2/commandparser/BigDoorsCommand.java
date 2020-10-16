@@ -1,4 +1,4 @@
-package nl.pim16aap2.commandparser.command;
+package nl.pim16aap2.commandparser;
 
 //@CommandLine.Command(name = "bigdoors", mixinStandardHelpOptions = false,
 //    description = "BigDoors allows you to create many different kinds of animated objects. " +
@@ -16,6 +16,6 @@ public class BigDoorsCommand implements Runnable
     @Override
     public void run()
     {
-        
+
     }
 }

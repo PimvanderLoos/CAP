@@ -1,10 +1,9 @@
-package nl.pim16aap2.commandparser.commandline.command;
+package nl.pim16aap2.commandparser.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import nl.pim16aap2.commandparser.commandline.argument.Argument;
-import org.jetbrains.annotations.Nullable;
+import nl.pim16aap2.commandparser.argument.Argument;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,10 +20,11 @@ public class CommandResult
         return Optional.ofNullable(parsedArguments.get(name));
     }
 
-    @Nullable
-    public Argument.ParsedArgument<?> getParsedArgument(final @NonNull String name)
+    @SuppressWarnings("unchecked")
+    public <T> T getParsedArgument(final @NonNull String name)
     {
-        return parsedArguments.get(name);
+        final Argument.ParsedArgument<T> result = (Argument.ParsedArgument<T>) parsedArguments.get(name);
+        return result == null ? null : result.getValue();
     }
 
     public void run()
