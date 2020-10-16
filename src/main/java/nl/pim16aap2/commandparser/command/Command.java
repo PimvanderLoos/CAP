@@ -108,7 +108,12 @@ public class Command
         int requiredIndex = 0;
         for (Argument<?> argument : arguments)
         {
-            if (argument instanceof OptionalArgument)
+            if (argument instanceof RepeatableArgument)
+            {
+                repeatableArguments.put(argument.getName(), (RepeatableArgument<? extends List<?>, ?>) argument);
+                this.arguments.put(argument.getName(), argument); // TODO: This is dumb
+            }
+            else if (argument instanceof OptionalArgument)
             {
                 optionalArguments.put(argument.getName(), (OptionalArgument<?>) argument);
                 this.arguments.put(argument.getName(), argument); // TODO: This is dumb
@@ -120,11 +125,6 @@ public class Command
                 this.arguments.put(argument.getName(), argument); // TODO: This is dumb
                 requiredArgument.setPosition(requiredIndex);
                 requiredIndex++;
-            }
-            else if (argument instanceof RepeatableArgument)
-            {
-                repeatableArguments.put(argument.getName(), (RepeatableArgument<? extends List<?>, ?>) argument);
-                this.arguments.put(argument.getName(), argument); // TODO: This is dumb
             }
             else
                 throw new RuntimeException(

@@ -16,7 +16,7 @@ public class RequiredArgument<T> extends Argument<T>
 
     private final T defaultValue;
 
-    @Builder
+    @Builder(builderMethodName = "requiredBuilder")
     public RequiredArgument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                             final T defaultValue, final @NonNull ArgumentParser<T> parser)
     {

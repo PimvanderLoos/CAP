@@ -34,17 +34,17 @@ public abstract class Argument<T>
     {
         public static OptionalArgument.OptionalArgumentBuilder<String> getOptional()
         {
-            return OptionalArgument.<String>builder().parser(StringParser.create());
+            return OptionalArgument.<String>optionalBuilder().parser(StringParser.create());
         }
 
         public static RequiredArgument.RequiredArgumentBuilder<String> getRequired()
         {
-            return RequiredArgument.<String>builder().parser(StringParser.create());
+            return RequiredArgument.<String>requiredBuilder().parser(StringParser.create());
         }
 
         public static RepeatableArgument.RepeatableArgumentBuilder<List<String>, String> getRepeating()
         {
-            return RepeatableArgument.<List<String>, String>builder().parser(StringParser.create());
+            return RepeatableArgument.<List<String>, String>repeatableBuilder().parser(StringParser.create());
         }
     }
 
@@ -52,7 +52,7 @@ public abstract class Argument<T>
     {
         public static OptionalArgument.OptionalArgumentBuilder<Boolean> getOptional(final @NonNull Boolean value)
         {
-            return OptionalArgument.<Boolean>builder().parser(FlagParser.create(value)).flag(true);
+            return OptionalArgument.<Boolean>optionalBuilder().parser(FlagParser.create(value)).flag(true);
         }
     }
 }

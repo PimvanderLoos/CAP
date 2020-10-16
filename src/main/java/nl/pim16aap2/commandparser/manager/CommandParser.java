@@ -90,11 +90,11 @@ class CommandParser
                 final @NonNull Argument<?> argument = command.getArgument(argumentName).orElseThrow(
                     () -> new NonExistingArgumentException(argumentName));
 
-                if (argument instanceof OptionalArgument) // TODO: The argument type should do this on its own.
-                    parseOptionalArgument(results, (OptionalArgument<?>) argument, argumentName, parts);
-                else if (argument instanceof RepeatableArgument)
+                if (argument instanceof RepeatableArgument) // TODO: The argument type should do this on its own.
                     parseRepeatableArgument(results, (RepeatableArgument<? extends List<?>, ?>) argument, argumentName,
                                             parts);
+                else if (argument instanceof OptionalArgument)
+                    parseOptionalArgument(results, (OptionalArgument<?>) argument, argumentName, parts);
             }
             else
             {

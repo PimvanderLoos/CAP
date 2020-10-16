@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Getter
-public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
+public class RepeatableArgument<T extends List<U>, U> extends OptionalArgument<U>
 {
     /**
      * Whether or not this is a flag argument. A flag argument doesn't take any values. Just their presence/absence is
@@ -21,12 +21,12 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
      */
     private final Boolean flag;
 
-    @Builder
+    @Builder(builderMethodName = "repeatableBuilder")
     public RepeatableArgument(final @NonNull String name, final @Nullable String longName,
                               final @Nullable String summary, final @Nullable Boolean flag,
                               final @NonNull ArgumentParser<U> parser)
     {
-        super(name, Util.valOrDefault(longName, ""), summary == null ? "" : summary, parser);
+        super(name, longName, summary, null, false, parser);
         this.flag = Util.valOrDefault(flag, Boolean.FALSE);
     }
 
@@ -57,7 +57,6 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
         public void addValue(final RepeatableArgument<? extends List<?>, ?> repeatableArgument,
                              final @NonNull String value)
         {
-            System.out.println(super.value.getClass().getCanonicalName());
             Objects.requireNonNull(super.value).add((U) repeatableArgument.parser.parseArgument(value));
         }
     }
