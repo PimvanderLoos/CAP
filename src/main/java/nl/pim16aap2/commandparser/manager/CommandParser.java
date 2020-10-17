@@ -88,20 +88,21 @@ class CommandParser
                 final String[] parts = SEPARATOR_PATTERN.split(nextArg);
                 final String argumentName = parts[0].substring(1);
                 final @NonNull Argument<?> argument = command.getArgument(argumentName).orElseThrow(
-                    () -> new NonExistingArgumentException(argumentName));
+                    () -> new NonExistingArgumentException(command, argumentName));
 
                 if (argument instanceof RepeatableArgument) // TODO: The argument type should do this on its own.
-                    parseRepeatableArgument(results, (RepeatableArgument<? extends List<?>, ?>) argument, argumentName,
-                                            parts);
+                    parseRepeatableArgument(command, results, (RepeatableArgument<? extends List<?>, ?>) argument,
+                                            argumentName, parts);
                 else if (argument instanceof OptionalArgument)
-                    parseOptionalArgument(results, (OptionalArgument<?>) argument, argumentName, parts);
+                    parseOptionalArgument(command, results, (OptionalArgument<?>) argument, argumentName, parts);
             }
             else
             {
                 // TODO: Better Exception.
                 final @NonNull RequiredArgument<?> argument =
                     command.getRequiredArgumentFromIdx(requiredArgumentIdx)
-                           .orElseThrow(() -> new MissingArgumentException("Missing required argument at pos: " +
+                           .orElseThrow(() -> new MissingArgumentException(command,
+                                                                           "Missing required argument at pos: " +
                                                                                requiredArgumentIdx));
                 results.put(argument.getName(), parseArgument(argument, nextArg));
             }
@@ -114,7 +115,8 @@ class CommandParser
         return results;
     }
 
-    private void parseRepeatableArgument(final @NonNull Map<String, ParsedArgument<?>> results,
+    private void parseRepeatableArgument(final @NonNull Command command,
+                                         final @NonNull Map<String, ParsedArgument<?>> results,
                                          final @NonNull RepeatableArgument<? extends List<?>, ?> argument,
                                          final @NonNull String argumentName, final @NonNull String[] parts)
         throws MissingArgumentException
@@ -122,16 +124,17 @@ class CommandParser
         // TODO: Reduce code duplication with optional argument
         final @Nullable String valStr = parts.length == 2 ? parts[1] : null;
         if (valStr == null)
-            throw new MissingArgumentException(argumentName);
+            throw new MissingArgumentException(command, argumentName);
 
         final @Nullable ParsedRepeatableArgument<? extends List<?>, ?> parsed =
             (ParsedRepeatableArgument<? extends List<?>, ?>) results.get(argumentName);
         Objects.requireNonNull(parsed).addValue(argument, valStr);
     }
 
-    private void parseOptionalArgument(final @NonNull Map<String, ParsedArgument<?>> results,
-                                       final @NonNull OptionalArgument<?> argument,
-                                       final @NonNull String argumentName, final @NonNull String[] parts)
+    private void parseOptionalArgument(final @NonNull Command command,
+                                       final @NonNull Map<String, ParsedArgument<?>> results,
+                                       final @NonNull OptionalArgument<?> argument, final @NonNull String argumentName,
+                                       final @NonNull String[] parts)
         throws MissingArgumentException
     {
         if (argument.getFlag())
@@ -141,7 +144,7 @@ class CommandParser
             // TODO: Merge all subsequent parts? Or only split on the first?
             final @Nullable String valStr = parts.length == 2 ? parts[1] : null;
             if (valStr == null)
-                throw new MissingArgumentException(argumentName);
+                throw new MissingArgumentException(command, argumentName);
             results.put(argumentName, parseArgument(argument, valStr));
         }
     }

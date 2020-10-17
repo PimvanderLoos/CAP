@@ -19,7 +19,7 @@ import java.util.List;
 //       a command, store which command it is and if it is listed as a subcommand or a supercommand.
 //       Allow registering event handlers or something when a new component is added.
 //       This is useful for stuff like clickable text. In Minecraft, this would be the ability to click on a command
-//       in a help menu to execute the help command for that command. 
+//       in a help menu to execute the help command for that command.
 // TODO: Rename TextComponent class. The StyledSection class should have this name, while the TextComponent should be
 //       something else; it's not a component after all, it's the whole thing.
 public class Main
@@ -64,12 +64,14 @@ public class Main
         }
         catch (NonExistingArgumentException e)
         {
-            System.out.println("Failed to find argument: " + e.getNonExistingArgument());
+            System.out.println("Failed to find argument: \"" + e.getNonExistingArgument() + "\" for command: \"" +
+                                   e.getCommand().getName() + "\"");
             e.printStackTrace();
         }
         catch (MissingArgumentException e)
         {
-            System.out.println("Failed to find value for argument: " + e.getMissingArgument());
+            System.out.println("Failed to find value for argument: \"" + e.getMissingArgument() + "\" for command: \"" +
+                                   e.getCommand().getName() + "\"");
             e.printStackTrace();
         }
 
