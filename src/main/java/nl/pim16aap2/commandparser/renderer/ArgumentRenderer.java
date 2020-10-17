@@ -42,9 +42,6 @@ public class ArgumentRenderer
 
     protected TextComponent renderRequired(final @NonNull RequiredArgument<?> argument)
     {
-        return new TextComponent(colorScheme)
-            .add("<", TextType.REQUIRED_PARAMETER)
-            .add(argument.getLabel(), TextType.REQUIRED_PARAMETER)
-            .add(">", TextType.REQUIRED_PARAMETER);
+        return new TextComponent(colorScheme).add("<" + argument.getLabel() + ">", TextType.REQUIRED_PARAMETER);
     }
 }

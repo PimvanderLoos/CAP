@@ -174,32 +174,56 @@ public class Main
             .hidden(true)
             .build();
 
+
         // TODO: Allow specifying the name instead of the subcommand instance?
         //       If the CommandManager becomes a builder, it can just retrieve the instances is the ctor.
 
         commandManager.addCommand(addOwner);
         commandManager.addCommand(bigdoors);
+
+
+        {
+            DefaultHelpCommand helpCommand = DefaultHelpCommand.builder().firstPageSize(10)
+                                                               .colorScheme(getColorScheme())
+                                                               .build();
+            System.out.println(helpCommand.render(bigdoors));
+        }
+        System.exit(0);
+
+
         return commandManager;
+    }
+
+    static ColorScheme getClearColorScheme()
+    {
+        return ColorScheme.builder().build();
     }
 
     static ColorScheme getColorScheme()
     {
-        return ColorScheme.builder()
-                          .commandStyle(new TextStyle(MinecraftStyle.BLACK.getStringValue(),
+        return ColorScheme
+            .builder()
+            .commandStyle(new TextStyle(MinecraftStyle.GOLD.getStringValue(),
+                                        MinecraftStyle.RESET.getStringValue()))
+            .optionalParameterStyle(new TextStyle(MinecraftStyle.BLUE.getStringValue(),
+                                                  MinecraftStyle.RESET.getStringValue()))
+            .optionalParameterFlagStyle(new TextStyle(MinecraftStyle.LIGHT_PURPLE.getStringValue(),
                                                       MinecraftStyle.RESET.getStringValue()))
-                          .optionalParameterStyle(new TextStyle(MinecraftStyle.WHITE.getStringValue(),
-                                                                MinecraftStyle.RESET.getStringValue()))
-                          .requiredParameterStyle(new TextStyle(MinecraftStyle.GREEN.getStringValue(),
-                                                                MinecraftStyle.RESET.getStringValue()))
-                          .summaryStyle(new TextStyle(MinecraftStyle.BLUE.getStringValue(),
-                                                      MinecraftStyle.RESET.getStringValue()))
-                          .regularTextStyle(new TextStyle(MinecraftStyle.GOLD.getStringValue(),
-                                                          MinecraftStyle.RESET.getStringValue()))
-                          .headerStyle(new TextStyle(MinecraftStyle.AQUA.getStringValue(),
-                                                     MinecraftStyle.RESET.getStringValue()))
-                          .footerStyle(new TextStyle(MinecraftStyle.DARK_RED.getStringValue(),
-                                                     MinecraftStyle.RESET.getStringValue()))
-                          .build();
+            .optionalParameterSeparatorStyle(new TextStyle(MinecraftStyle.WHITE.getStringValue(),
+                                                           MinecraftStyle.RESET.getStringValue()))
+            .optionalParameterLabelStyle(new TextStyle(MinecraftStyle.GRAY.getStringValue(),
+                                                       MinecraftStyle.RESET.getStringValue()))
+            .requiredParameterStyle(new TextStyle(MinecraftStyle.RED.getStringValue(),
+                                                  MinecraftStyle.RESET.getStringValue()))
+            .summaryStyle(new TextStyle(MinecraftStyle.AQUA.getStringValue(),
+                                        MinecraftStyle.RESET.getStringValue()))
+            .regularTextStyle(new TextStyle(MinecraftStyle.GOLD.getStringValue(),
+                                            MinecraftStyle.RESET.getStringValue()))
+            .headerStyle(new TextStyle(MinecraftStyle.GREEN.getStringValue(),
+                                       MinecraftStyle.RESET.getStringValue()))
+            .footerStyle(new TextStyle(MinecraftStyle.DARK_RED.getStringValue(),
+                                       MinecraftStyle.RESET.getStringValue()))
+            .build();
     }
 
     static void testTextComponents()

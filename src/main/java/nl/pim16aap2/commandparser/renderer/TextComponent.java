@@ -24,6 +24,14 @@ public class TextComponent
 
     private static final @NonNull Pattern NEWLINE = Pattern.compile("\n");
 
+    // CopyConstructor
+    public TextComponent(final @NonNull TextComponent other)
+    {
+        this.colorScheme = other.colorScheme;
+        this.stringBuilder.append(other.stringBuilder);
+        other.styledSections.forEach(section -> styledSections.add(new StyledSection(section)));
+    }
+
     public TextComponent add(final @NonNull String text)
     {
         stringBuilder.append(text);
@@ -88,6 +96,14 @@ public class TextComponent
     {
         private int startIndex, length;
         private final @NonNull TextStyle style;
+
+        // Copy constructor
+        public StyledSection(final @NonNull StyledSection other)
+        {
+            this.startIndex = other.startIndex;
+            this.length = other.length;
+            this.style = other.style;
+        }
 
         void shift(final int distance)
         {
