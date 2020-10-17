@@ -42,7 +42,7 @@ public abstract class Argument<T>
             return RequiredArgument.<String>requiredBuilder().parser(StringParser.create());
         }
 
-        public static RepeatableArgument.RepeatableArgumentBuilder<List<String>, String> getRepeating()
+        public static RepeatableArgument.RepeatableArgumentBuilder<List<String>, String> getRepeatable()
         {
             return RepeatableArgument.<List<String>, String>repeatableBuilder().parser(StringParser.create());
         }

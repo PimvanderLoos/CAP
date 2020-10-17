@@ -117,12 +117,12 @@ public class Main
                                               "Only applies to players.")
                                  .build())
                    .argument(Argument.StringArgument
-                                 .getRepeating()
+                                 .getRepeatable()
                                  .name("p")
                                  .summary("The name of the player to add as owner")
                                  .build())
                    .argument(Argument.StringArgument
-                                 .getRepeating()
+                                 .getRepeatable()
                                  .name("g")
                                  .summary("The name of the group to add as owner")
                                  .build())
