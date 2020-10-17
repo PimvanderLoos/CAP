@@ -22,6 +22,9 @@ import java.util.List;
 //       in a help menu to execute the help command for that command.
 // TODO: Rename TextComponent class. The StyledSection class should have this name, while the TextComponent should be
 //       something else; it's not a component after all, it's the whole thing.
+// TODO: Allow positional optional arguments. Perhaps Required and OptionalPositional can both extend a Positional interface?
+//       Maybe also extend a FlaggedArgument interface for stuff that does require flags?
+// TODO: Allow using space as a separator of flag-value pairs.
 public class Main
 {
     private static @NonNull String arrToString(final @NonNull String... args)
@@ -33,29 +36,14 @@ public class Main
         return sb.toString();
     }
 
-    private static void tryArgs(final @NonNull String... args)
+    private static void tryArgs(final @NonNull CommandManager commandManager, final @NonNull String... args)
     {
         final String command = arrToString(args);
         System.out.println(command + ":\n");
 
-
-        System.out.println("=============\n");
-    }
-
-    public static void main(final String... args)
-    {
-        String executor = "mip";
-
-        testTextComponents();
-
-        CommandManager commandManager = initCommandManager();
-
-//        String[] a = {"bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a"};
-        String[] a = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
-
         try
         {
-            commandManager.parseCommand(a).run();
+            commandManager.parseCommand(args).run();
         }
         catch (CommandNotFoundException e)
         {
@@ -75,6 +63,32 @@ public class Main
             e.printStackTrace();
         }
 
+        System.out.println("=============\n");
+    }
+
+    public static void main(final String... args)
+    {
+        String executor = "mip";
+
+        testTextComponents();
+
+        CommandManager commandManager = initCommandManager();
+
+//        String[] a = {"bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a"};
+        String[] b = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
+//        String[] c = {"bigdoors", "help", "addowner"};
+//        String[] d = {"addowner", "myDoor", "-p=pim16aap2", "--admin"};
+//        String[] e = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "--admin"};
+//        String[] f = {"help"};
+
+//        tryArgs(commandManager, a);
+        tryArgs(commandManager, b);
+//        tryArgs(commandManager, c);
+//        tryArgs(commandManager, d);
+//        tryArgs(commandManager, e);
+//        tryArgs(commandManager, f);
+
+
 //        String[] a = {"bigdoors", "addowner", "myDoor", "-p", "pim16aap2", "--admin"};
 //        String[] b = {"bigdoors", "help", "addowner"};
 //        String[] c = {"addowner", "myDoor", "-p ", "pim16aap2", "--admin"};
@@ -87,12 +101,6 @@ public class Main
 //        String[] c = {"addowner", "myDoor", "-p ", "pim16aap2", "--admin"};
 //        String[] d = {"addowner", "myDoor", "-p ", "pim16aap2", "-p ", "pim16aap3", "--admin"};
 //        String[] e = {"help"};
-//
-//        tryArgs(a);
-//        tryArgs(b);
-//        tryArgs(c);
-//        tryArgs(d);
-//        tryArgs(e);
     }
 
     private static CommandManager initCommandManager()
