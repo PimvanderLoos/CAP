@@ -20,7 +20,7 @@ public class RequiredArgument<T> extends Argument<T>
     public RequiredArgument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                             final T defaultValue, final @NonNull ArgumentParser<T> parser)
     {
-        super(name, Util.valOrDefault(longName, ""), summary, parser);
+        super(name, Util.valOrDefault(longName, ""), summary, parser, name);
         this.defaultValue = defaultValue;
     }
 }

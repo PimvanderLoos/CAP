@@ -1,6 +1,9 @@
 package nl.pim16aap2.commandparser.manager;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.argument.OptionalArgument;
 import nl.pim16aap2.commandparser.argument.RepeatableArgument;
@@ -10,7 +13,6 @@ import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
-import nl.pim16aap2.commandparser.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -44,10 +46,12 @@ class CommandParser
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException
 
     {
-        final @NonNull Pair<Command, Integer> parsedCommand = getLastCommand();
-        System.out.print("Found parsedCommand: " + parsedCommand.first.getName() + " at idx: " + parsedCommand.second);
+        final @NonNull ParsedCommand parsedCommand = getLastCommand();
+        System.out.print("Found parsedCommand: " + parsedCommand.getCommand().getName() +
+                             " at idx: " + parsedCommand.getIndex());
 
-        return new CommandResult(parsedCommand.first, parseArguments(parsedCommand.first, parsedCommand.second));
+        return new CommandResult(parsedCommand.getCommand(), parseArguments(parsedCommand.getCommand(),
+                                                                            parsedCommand.getIndex()));
     }
 
     private @NonNull Map<@NonNull String, ParsedArgument<?>> prepareParsing(final @NonNull Command command)
@@ -148,7 +152,7 @@ class CommandParser
     /**
      * See {@link #getLastCommand(Command, int)}.
      */
-    private @NonNull Pair<Command, Integer> getLastCommand()
+    private @NonNull ParsedCommand getLastCommand()
         throws CommandNotFoundException
     {
         return getLastCommand(null, 0);
@@ -172,7 +176,7 @@ class CommandParser
      *                                  previous command or if the subcommand has not registered the supercommand as
      *                                  such.
      */
-    private @NonNull Pair<Command, Integer> getLastCommand(final @Nullable Command command, final int idx)
+    private @NonNull ParsedCommand getLastCommand(final @Nullable Command command, final int idx)
         throws CommandNotFoundException
     {
         if (command == null)
@@ -192,24 +196,52 @@ class CommandParser
         }
 
         if (command.getSubCommands().isEmpty())
-            return new Pair<>(command, idx);
+            return new ParsedCommand(command, idx);
 
         final int nextIdx = idx + 1;
         final @Nullable String nextArg = args.length > nextIdx ? args[nextIdx] : null;
         // If there's no argument available after the current one, we've reached the end of the arguments.
         // This means that the last command we found is the last argument (by definition), so return that.
         if (nextArg == null)
-            return new Pair<>(command, idx);
+            return new ParsedCommand(command, idx);
 
         final @NonNull Optional<Command> subCommandOpt = command.getSubCommand(nextArg);
         if (!subCommandOpt.isPresent())
-            return new Pair<>(command, idx);
+            return new ParsedCommand(command, idx);
 
         final @NonNull Command subCommand = subCommandOpt.get();
 
         if (!subCommand.getSuperCommand().isPresent() || subCommand.getSuperCommand().get() != command)
             throw new CommandNotFoundException("super command of: " + subCommand.getName() + "");
 
-        return new Pair<>(subCommand, nextIdx);
+        return new ParsedCommand(subCommand, nextIdx);
+    }
+
+    /**
+     * Represents a parsed {@link Command}, disregarding any arguments.
+     *
+     * @author Pim
+     */
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    private static class ParsedCommand
+    {
+        Command command;
+        Integer index;
+
+        /**
+         * The value of the help command that was requested.
+         * <p>
+         * When no arguments are provided, this String will be empty.
+         * <p>
+         * If this is null, no help was requested.
+         */
+        @Nullable String helpString;
+
+        public ParsedCommand(final @NonNull Command command, final @NonNull Integer index)
+        {
+            this(command, index, null);
+        }
     }
 }

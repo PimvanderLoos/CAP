@@ -24,9 +24,9 @@ public class RepeatableArgument<T extends List<U>, U> extends OptionalArgument<U
     @Builder(builderMethodName = "repeatableBuilder")
     public RepeatableArgument(final @NonNull String name, final @Nullable String longName,
                               final @Nullable String summary, final @Nullable Boolean flag,
-                              final @NonNull ArgumentParser<U> parser)
+                              final @NonNull ArgumentParser<U> parser, final @NonNull String label)
     {
-        super(name, longName, summary, null, false, parser);
+        super(name, longName, summary, null, false, parser, label);
         this.flag = Util.valOrDefault(flag, Boolean.FALSE);
     }
 

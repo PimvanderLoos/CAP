@@ -20,9 +20,10 @@ public class OptionalArgument<T> extends Argument<T>
 
     @Builder(builderMethodName = "optionalBuilder")
     public OptionalArgument(final @NonNull String name, final @Nullable String longName, final @Nullable String summary,
-                            final T defaultValue, final @Nullable Boolean flag, final @NonNull ArgumentParser<T> parser)
+                            final T defaultValue, final @Nullable Boolean flag, final @NonNull ArgumentParser<T> parser,
+                            final @NonNull String label)
     {
-        super(name, Util.valOrDefault(longName, ""), Util.valOrDefault(summary, ""), parser);
+        super(name, Util.valOrDefault(longName, ""), Util.valOrDefault(summary, ""), parser, label);
         this.defaultValue = defaultValue;
         this.flag = Util.valOrDefault(flag, Boolean.FALSE);
     }

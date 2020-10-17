@@ -41,6 +41,8 @@ public class Command
 
     protected final @NonNull Consumer<@NonNull CommandResult> commandExecutor;
 
+    protected final @NonNull String header;
+
     @Getter
     private Optional<Command> superCommand = Optional.empty();
 
@@ -52,11 +54,12 @@ public class Command
                     final @Nullable @Singular List<Command> subCommands,
                     final @NonNull Consumer<@NonNull CommandResult> commandExecutor,
                     final @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
-                    final boolean hidden)
+                    final boolean hidden, final @Nullable String header)
     {
         this.name = name;
         this.description = Util.valOrDefault(description, "");
         this.summary = Util.valOrDefault(summary, "");
+        this.header = Util.valOrDefault(header, "");
         this.subCommands = generateSubCommandMap(subCommands);
         this.commandExecutor = commandExecutor;
         this.hidden = hidden;

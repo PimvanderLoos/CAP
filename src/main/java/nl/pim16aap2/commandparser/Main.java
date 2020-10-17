@@ -3,6 +3,7 @@ package nl.pim16aap2.commandparser;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
+import nl.pim16aap2.commandparser.command.DefaultHelpCommand;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
@@ -34,6 +35,15 @@ import java.util.List;
 //       so you can just provide your own custom one if the options aren't sufficient.
 // TODO: Add permissions to commands (and arguments?). Probably a setter via an interface.
 // TODO: Command/argument(name/value) completion.
+// TODO: Subcommand sorting + sorting options (alphabetical? Length?).
+// TODO: Allow defining and supplying custom renderers.
+// TODO: For the argument renderers, allow specifying long/short name requirements and stuff. In some situations,
+//       having both might be nice, while in other, it's better to only have the short version. Right?
+// TODO: Customizable bracket types for optional/required arguments.
+// TODO: Make is possible to have certain commands be server-only or player-only. These commands shouldn't show up in
+//       the help menus.
+// TODO: Maybe flag parameters (e.g. --admin), aka valueless parameters should have their own class?
+
 public class Main
 {
     private static @NonNull String arrToString(final @NonNull String... args)
@@ -82,6 +92,9 @@ public class Main
         testTextComponents();
 
         CommandManager commandManager = initCommandManager();
+
+        final ColorScheme colorScheme = getColorScheme();
+        DefaultHelpCommand.builder().colorScheme(colorScheme).pageSize(16).firstPageSize(1).build();
 
         String[] a = {"bigdoors", "addowner", "addowner", "myDoor", "-p=pim16aap2", "-a"};
 //        String[] b = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
@@ -134,11 +147,13 @@ public class Main
             .argument(Argument.StringArgument
                           .getRepeatable()
                           .name("p")
+                          .label("player")
                           .summary("The name of the player to add as owner")
                           .build())
             .argument(Argument.StringArgument
                           .getRepeatable()
                           .name("g")
+                          .label("group")
                           .summary("The name of the group to add as owner")
                           .build())
             .commandExecutor(
@@ -167,25 +182,29 @@ public class Main
         return commandManager;
     }
 
+    static ColorScheme getColorScheme()
+    {
+        return ColorScheme.builder()
+                          .commandStyle(new TextStyle(MinecraftStyle.BLACK.getStringValue(),
+                                                      MinecraftStyle.RESET.getStringValue()))
+                          .optionalParameterStyle(new TextStyle(MinecraftStyle.WHITE.getStringValue(),
+                                                                MinecraftStyle.RESET.getStringValue()))
+                          .requiredParameterStyle(new TextStyle(MinecraftStyle.GREEN.getStringValue(),
+                                                                MinecraftStyle.RESET.getStringValue()))
+                          .summaryStyle(new TextStyle(MinecraftStyle.BLUE.getStringValue(),
+                                                      MinecraftStyle.RESET.getStringValue()))
+                          .regularTextStyle(new TextStyle(MinecraftStyle.GOLD.getStringValue(),
+                                                          MinecraftStyle.RESET.getStringValue()))
+                          .headerStyle(new TextStyle(MinecraftStyle.AQUA.getStringValue(),
+                                                     MinecraftStyle.RESET.getStringValue()))
+                          .footerStyle(new TextStyle(MinecraftStyle.DARK_RED.getStringValue(),
+                                                     MinecraftStyle.RESET.getStringValue()))
+                          .build();
+    }
+
     static void testTextComponents()
     {
-        final ColorScheme colorScheme =
-            ColorScheme.builder()
-                       .commandStyle(new TextStyle(MinecraftStyle.BLACK.getStringValue(),
-                                                   MinecraftStyle.RESET.getStringValue()))
-                       .optionalParameterStyle(new TextStyle(MinecraftStyle.WHITE.getStringValue(),
-                                                             MinecraftStyle.RESET.getStringValue()))
-                       .requiredParameterStyle(new TextStyle(MinecraftStyle.GREEN.getStringValue(),
-                                                             MinecraftStyle.RESET.getStringValue()))
-                       .summaryStyle(new TextStyle(MinecraftStyle.BLUE.getStringValue(),
-                                                   MinecraftStyle.RESET.getStringValue()))
-                       .regularTextStyle(new TextStyle(MinecraftStyle.GOLD.getStringValue(),
-                                                       MinecraftStyle.RESET.getStringValue()))
-                       .headerStyle(new TextStyle(MinecraftStyle.AQUA.getStringValue(),
-                                                  MinecraftStyle.RESET.getStringValue()))
-                       .footerStyle(new TextStyle(MinecraftStyle.DARK_RED.getStringValue(),
-                                                  MinecraftStyle.RESET.getStringValue()))
-                       .build();
+        final ColorScheme colorScheme = getColorScheme();
 
         final TextComponent textComponent = new TextComponent(colorScheme);
         textComponent.add("This is a command", TextType.COMMAND).add("\n")

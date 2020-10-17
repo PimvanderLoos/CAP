@@ -22,6 +22,8 @@ public abstract class Argument<T>
 
     protected @NonNull ArgumentParser<T> parser;
 
+    protected final @NonNull String label;
+
     @AllArgsConstructor
     @Getter
     public static class ParsedArgument<T>
@@ -52,7 +54,7 @@ public abstract class Argument<T>
     {
         public static OptionalArgument.OptionalArgumentBuilder<Boolean> getOptional(final @NonNull Boolean value)
         {
-            return OptionalArgument.<Boolean>optionalBuilder().parser(FlagParser.create(value)).flag(true);
+            return OptionalArgument.<Boolean>optionalBuilder().parser(FlagParser.create(value)).flag(true).label("");
         }
     }
 }
