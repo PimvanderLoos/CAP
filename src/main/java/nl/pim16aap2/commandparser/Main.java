@@ -99,49 +99,49 @@ public class Main
     {
         final CommandManager commandManager = new CommandManager();
 
-        Command addOwner =
-            Command.builder()
-                   .name("addowner")
-                   .description("Add 1 or more players or groups of players as owners of a door.")
-                   .summary("Add another owner to a door.")
-                   .argument(Argument.StringArgument
-                                 .getRequired()
-                                 .name("doorID")
-                                 .summary("The name or UID of the door")
-                                 .build())
-                   .argument(Argument.FlagArgument
-                                 .getOptional(true)
-                                 .name("a")
-                                 .longName("admin")
-                                 .summary("Make the user an admin for the given door. " +
-                                              "Only applies to players.")
-                                 .build())
-                   .argument(Argument.StringArgument
-                                 .getRepeatable()
-                                 .name("p")
-                                 .summary("The name of the player to add as owner")
-                                 .build())
-                   .argument(Argument.StringArgument
-                                 .getRepeatable()
-                                 .name("g")
-                                 .summary("The name of the group to add as owner")
-                                 .build())
-                   .commandExecutor(
-                       commandResult ->
-                           new AddOwner(commandResult.getParsedArgument("doorID"),
-                                        commandResult.getParsedArgument("p"),
-                                        commandResult.<List<String>>getParsedArgument("g"),
-                                        commandResult.getParsedArgument("a")).runCommand()
-                   )
-                   .build();
+        final Command addOwner = Command
+            .builder()
+            .name("addowner")
+            .description("Add 1 or more players or groups of players as owners of a door.")
+            .summary("Add another owner to a door.")
+            .argument(Argument.StringArgument
+                          .getRequired()
+                          .name("doorID")
+                          .summary("The name or UID of the door")
+                          .build())
+            .argument(Argument.FlagArgument
+                          .getOptional(true)
+                          .name("a")
+                          .longName("admin")
+                          .summary("Make the user an admin for the given door. Only applies to players.")
+                          .build())
+            .argument(Argument.StringArgument
+                          .getRepeatable()
+                          .name("p")
+                          .summary("The name of the player to add as owner")
+                          .build())
+            .argument(Argument.StringArgument
+                          .getRepeatable()
+                          .name("g")
+                          .summary("The name of the group to add as owner")
+                          .build())
+            .commandExecutor(
+                commandResult ->
+                    new AddOwner(commandResult.getParsedArgument("doorID"),
+                                 commandResult.getParsedArgument("p"),
+                                 commandResult.<List<String>>getParsedArgument("g"),
+                                 commandResult.getParsedArgument("a")).runCommand()
+            )
+            .build();
 
-        Command bigdoors =
-            Command.builder()
-                   .name("bigdoors")
-                   .subCommand(addOwner)
-                   .commandExecutor(commandResult -> System.out.print("PARSED A COMMAND: " +
-                                                                          commandResult.getCommand().getName()))
-                   .build();
+        final Command bigdoors = Command
+            .builder()
+            .name("bigdoors")
+            .subCommand(addOwner)
+            .commandExecutor(commandResult ->
+                                 System.out.print("PARSED A COMMAND: " + commandResult.getCommand().getName()))
+            .hidden(true)
+            .build();
 
         // TODO: Allow specifying the name instead of the subcommand instance?
         //       If the CommandManager becomes a builder, it can just retrieve the instances is the ctor.
