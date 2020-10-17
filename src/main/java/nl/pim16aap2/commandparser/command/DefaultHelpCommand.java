@@ -146,7 +146,7 @@ public class DefaultHelpCommand implements IHelpCommand
         final TextComponent newSuperCommands =
             new TextComponent(superCommands).add(command.getName(), TextType.COMMAND).add(" ");
 
-        for (final Command subCommand : command.getSubCommands().values())
+        for (final Command subCommand : command.getSubCommands())
         {
             added += renderCommands(textComponent, newSuperCommands, subCommand, count - added);
             if (added >= count)

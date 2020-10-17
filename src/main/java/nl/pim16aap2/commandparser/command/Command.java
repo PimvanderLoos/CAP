@@ -28,7 +28,7 @@ public class Command
 
     protected @NonNull String summary;
 
-    protected final @NonNull Map<@NonNull String, @NonNull Command> subCommands;
+    protected final @NonNull List<@NonNull Command> subCommands;
 
     // TODO: Create classes for these.
     protected final @NonNull Map<@NonNull String, @NonNull OptionalArgument<?>> optionalArguments = new HashMap<>();
@@ -60,10 +60,10 @@ public class Command
         this.description = Util.valOrDefault(description, "");
         this.summary = Util.valOrDefault(summary, "");
         this.header = Util.valOrDefault(header, "");
-        this.subCommands = generateSubCommandMap(subCommands);
+        this.subCommands = Util.valOrDefault(subCommands, Collections.emptyList());
         this.commandExecutor = commandExecutor;
         this.hidden = hidden;
-        this.subCommands.values().forEach(subCommand -> subCommand.superCommand = Optional.of(this));
+        this.subCommands.forEach(subCommand -> subCommand.superCommand = Optional.of(this));
         parseArguments(arguments);
     }
 
@@ -94,19 +94,7 @@ public class Command
     {
         if (name == null)
             return Optional.empty();
-        return Optional.ofNullable(subCommands.get(name));
-    }
-
-    private static Map<@NonNull String, @NonNull Command> generateSubCommandMap(
-        final @Nullable List<Command> subCommands)
-    {
-        if (subCommands == null)
-            return Collections.emptyMap();
-
-        final Map<@NonNull String, @NonNull Command> ret = new HashMap<>(subCommands.size());
-        for (final @NonNull Command cmd : subCommands)
-            ret.put(cmd.getName(), cmd);
-        return ret;
+        return Util.searchIterable(subCommands, (val) -> val.getName().equals(name));
     }
 
     private void parseArguments(final @Nullable List<@NonNull Argument<?>> arguments)

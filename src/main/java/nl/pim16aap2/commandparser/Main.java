@@ -37,6 +37,10 @@ import java.util.List;
 // TODO: Add permissions to commands (and arguments?). Probably a setter via an interface.
 // TODO: Command/argument(name/value) completion.
 // TODO: Subcommand sorting + sorting options (alphabetical? Length? Creation order?).
+//       Currently, it's a List, but perhaps a LinkedHashMap would be better for this?
+//       https://docs.oracle.com/javase/10/docs/api/java/util/LinkedHashMap.html
+//       also, arguments should use this as well, though those should not be sortable; they should just be sorted based
+//       on insertion order.
 // TODO: Allow defining and supplying custom renderers.
 // TODO: For the argument renderers, allow specifying long/short name requirements and stuff. In some situations,
 //       having both might be nice, while in other, it's better to only have the short version. Right?
