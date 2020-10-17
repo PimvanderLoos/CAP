@@ -27,6 +27,13 @@ import java.util.List;
 // TODO: Allow using space as a separator of flag-value pairs.
 // TODO: Make a class somewhere where you can register ColorScheme objects. This class can then be used for caching
 //       stuff like finished TextComponents etc.
+// TODO: For the HelpCommand, just make it a boolean for the command (default true) to always look for it in the format
+//       "/whatever command help [arguments]". Provide a default HelpCommand thingy, but also make it a builder,
+//       to fully customize how the help command works. For example, hidden commands should probably display their help
+//       also when no arguments are provided at all? Also, make the default help command extend an IHelpCommand interface
+//       so you can just provide your own custom one if the options aren't sufficient.
+// TODO: Add permissions to commands (and arguments?). Probably a setter via an interface.
+// TODO: Command/argument(name/value) completion.
 public class Main
 {
     private static @NonNull String arrToString(final @NonNull String... args)
@@ -79,8 +86,7 @@ public class Main
         String[] a = {"bigdoors", "addowner", "addowner", "myDoor", "-p=pim16aap2", "-a"};
 //        String[] b = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
 //        String[] c = {"bigdoors", "help", "addowner"};
-//        String[] d = {"addowner", "myDoor", "-p=pim16aap2", "--admin"};
-//        String[] e = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "--admin"};
+//        String[] c = {"bigdoors", "help"};
 //        String[] f = {"help"};
 
         tryArgs(commandManager, a);
