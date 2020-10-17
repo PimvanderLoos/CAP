@@ -20,7 +20,7 @@ public class TextComponent
 
     private final @NonNull List<StyledSection> styledSections = new ArrayList<>();
 
-    private int totalSize = 0;
+    private int styledSize = 0;
 
     private static final @NonNull Pattern NEWLINE = Pattern.compile("\n");
 
@@ -35,7 +35,7 @@ public class TextComponent
     public TextComponent add(final @NonNull String text)
     {
         stringBuilder.append(text);
-        totalSize += text.length();
+        styledSize += text.length();
         return this;
     }
 
@@ -45,7 +45,7 @@ public class TextComponent
         {
             final @NonNull TextStyle style = colorScheme.getStyle(type);
             styledSections.add(new StyledSection(stringBuilder.length(), text.length(), style));
-            totalSize += style.getOn().length() + style.getOff().length();
+            styledSize += style.getOn().length() + style.getOff().length();
         }
         return add(text);
     }
@@ -54,11 +54,15 @@ public class TextComponent
     {
         if (other.stringBuilder.length() == 0)
             return this;
+
         final int currentLength = stringBuilder.length();
-        other.styledSections.forEach(styledSection -> styledSection.shift(currentLength));
-        styledSections.addAll(other.styledSections);
+        other.styledSections.forEach(
+            styledSection -> styledSections.add(new StyledSection(styledSection.startIndex + currentLength,
+                                                                  styledSection.length,
+                                                                  styledSection.style)));
+
         stringBuilder.append(other.stringBuilder);
-        this.totalSize += other.totalSize;
+        this.styledSize += other.styledSize;
         return this;
     }
 
@@ -67,8 +71,7 @@ public class TextComponent
         if (stringBuilder.length() == 0)
             return "";
 
-        final @NonNull StringBuilder sb = new StringBuilder(totalSize);
-
+        final @NonNull StringBuilder sb = new StringBuilder(styledSize);
         int lastIdx = 0;
         for (final StyledSection section : styledSections)
         {
@@ -103,11 +106,6 @@ public class TextComponent
             this.startIndex = other.startIndex;
             this.length = other.length;
             this.style = other.style;
-        }
-
-        void shift(final int distance)
-        {
-            startIndex += distance;
         }
 
         int getEnd()

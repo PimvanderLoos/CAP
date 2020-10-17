@@ -1,8 +1,5 @@
 package nl.pim16aap2.commandparser.command;
 
-//public TextComponent render(final @NonNull Command command, final int page, final int pageSize,
-//final int firstPageSize)
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -138,7 +135,9 @@ public class DefaultHelpCommand implements IHelpCommand
             for (final Argument<?> argument : command.getRepeatableArguments().values())
                 textComponent.add(" ").add(argumentRenderer.render(argument));
 
-            textComponent.add("\n" + summaryIndent).add(command.getSummary(), TextType.SUMMARY).add("\n");
+            if (!command.getSummary().equals(""))
+                textComponent.add("\n" + summaryIndent).add(command.getSummary(), TextType.SUMMARY);
+            textComponent.add("\n");
         }
 
         if (added == count)
@@ -153,9 +152,6 @@ public class DefaultHelpCommand implements IHelpCommand
             if (added >= count)
                 break;
         }
-
         return added;
     }
-
-
 }

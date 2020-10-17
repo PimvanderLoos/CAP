@@ -13,6 +13,7 @@ import nl.pim16aap2.commandparser.renderer.TextComponent;
 import nl.pim16aap2.commandparser.renderer.TextStyle;
 import nl.pim16aap2.commandparser.renderer.TextType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO: Consider using ByteBuddy to generate the commands? Might be completely overkill, though
@@ -35,7 +36,7 @@ import java.util.List;
 //       so you can just provide your own custom one if the options aren't sufficient.
 // TODO: Add permissions to commands (and arguments?). Probably a setter via an interface.
 // TODO: Command/argument(name/value) completion.
-// TODO: Subcommand sorting + sorting options (alphabetical? Length?).
+// TODO: Subcommand sorting + sorting options (alphabetical? Length? Creation order?).
 // TODO: Allow defining and supplying custom renderers.
 // TODO: For the argument renderers, allow specifying long/short name requirements and stuff. In some situations,
 //       having both might be nice, while in other, it's better to only have the short version. Right?
@@ -165,10 +166,25 @@ public class Main
             )
             .build();
 
+        final int subCommandCount = 20;
+        final List<Command> subcommands = new ArrayList<>(subCommandCount);
+        for (int idx = 0; idx < subCommandCount; ++idx)
+        {
+            final String command = "command" + idx;
+            final Command generic = Command
+                .builder().name(command)
+                .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
+                .commandExecutor(commandResult ->
+                                     new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
+                .build();
+            subcommands.add(generic);
+        }
+
         final Command bigdoors = Command
             .builder()
             .name("bigdoors")
             .subCommand(addOwner)
+            .subCommands(subcommands)
             .commandExecutor(commandResult ->
                                  System.out.print("PARSED A COMMAND: " + commandResult.getCommand().getName()))
             .hidden(true)
@@ -177,7 +193,7 @@ public class Main
 
         // TODO: Allow specifying the name instead of the subcommand instance?
         //       If the CommandManager becomes a builder, it can just retrieve the instances is the ctor.
-
+        subcommands.forEach(commandManager::addCommand);
         commandManager.addCommand(addOwner);
         commandManager.addCommand(bigdoors);
 
