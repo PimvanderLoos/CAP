@@ -25,6 +25,8 @@ import java.util.List;
 // TODO: Allow positional optional arguments. Perhaps Required and OptionalPositional can both extend a Positional interface?
 //       Maybe also extend a FlaggedArgument interface for stuff that does require flags?
 // TODO: Allow using space as a separator of flag-value pairs.
+// TODO: Make a class somewhere where you can register ColorScheme objects. This class can then be used for caching
+//       stuff like finished TextComponents etc.
 public class Main
 {
     private static @NonNull String arrToString(final @NonNull String... args)
@@ -74,15 +76,15 @@ public class Main
 
         CommandManager commandManager = initCommandManager();
 
-//        String[] a = {"bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a"};
-        String[] b = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
+        String[] a = {"bigdoors", "addowner", "addowner", "myDoor", "-p=pim16aap2", "-a"};
+//        String[] b = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
 //        String[] c = {"bigdoors", "help", "addowner"};
 //        String[] d = {"addowner", "myDoor", "-p=pim16aap2", "--admin"};
 //        String[] e = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "--admin"};
 //        String[] f = {"help"};
 
-//        tryArgs(commandManager, a);
-        tryArgs(commandManager, b);
+        tryArgs(commandManager, a);
+//        tryArgs(commandManager, b);
 //        tryArgs(commandManager, c);
 //        tryArgs(commandManager, d);
 //        tryArgs(commandManager, e);

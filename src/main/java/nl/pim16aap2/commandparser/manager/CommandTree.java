@@ -2,6 +2,7 @@ package nl.pim16aap2.commandparser.manager;
 
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.command.Command;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,8 +17,10 @@ class CommandTree
         commandMap.put(command.getName(), command);
     }
 
-    @NonNull Optional<Command> getCommand(final @NonNull String name)
+    @NonNull Optional<Command> getCommand(final @Nullable String name)
     {
+        if (name == null)
+            return Optional.empty();
         return Optional.ofNullable(commandMap.get(name));
     }
 }

@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static nl.pim16aap2.commandparser.argument.Argument.ParsedArgument;
@@ -43,12 +44,7 @@ class CommandParser
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException
 
     {
-        int idx = 0;
-        final String commandName = args[idx];
-        final Command baseCommand = commandTree.getCommand(commandName)
-                                               .orElseThrow(() -> new CommandNotFoundException(commandName));
-
-        final @NonNull Pair<Command, Integer> parsedCommand = getTopCommand(baseCommand, idx);
+        final @NonNull Pair<Command, Integer> parsedCommand = getLastCommand();
         System.out.print("Found parsedCommand: " + parsedCommand.first.getName() + " at idx: " + parsedCommand.second);
 
         return new CommandResult(parsedCommand.first, parseArguments(parsedCommand.first, parsedCommand.second));
@@ -149,18 +145,71 @@ class CommandParser
         }
     }
 
-    private @NonNull Pair<Command, Integer> getTopCommand(final @NonNull Command command, final int idx)
+    /**
+     * See {@link #getLastCommand(Command, int)}.
+     */
+    private @NonNull Pair<Command, Integer> getLastCommand()
+        throws CommandNotFoundException
     {
+        return getLastCommand(null, 0);
+    }
+
+    /**
+     * Recursively gets the last command in the {@link #args}.
+     * <p>
+     * For example, in "<b><u>supercommand</u> <u>subcommand</u> -opt=val</b>" with <u>supercommand</u> and
+     * <u>subcommand</u> being registered commands, it would return the {@link Command} object for <u>subcommand</u>.
+     * <p>
+     * Note that you can repeat a command more than once, e.g. "<b><u>supercommand</u> <u>subcommand</u>
+     * <u>subcommand</u> <u>subcommand</u> -opt=val</b>" without any effects, it'll still return the {@link Command}
+     * object for <u>subcommand</u>, just a little bit slower.
+     *
+     * @param command The latest {@link Command} that has been found so far.
+     * @param idx     The index of the latest command in {@link #args}.
+     * @return The last {@link Command} that can be parsed from the arguments in {@link #args}.
+     *
+     * @throws CommandNotFoundException If a command is found at an index that is not registered as subcommand of the
+     *                                  previous command or if the subcommand has not registered the supercommand as
+     *                                  such.
+     */
+    private @NonNull Pair<Command, Integer> getLastCommand(final @Nullable Command command, final int idx)
+        throws CommandNotFoundException
+    {
+        if (command == null)
+        {
+            if (idx != 0)
+                throw new CommandNotFoundException("Command at index " + idx);
+
+            final @Nullable String commandName = args.length > idx ? args[idx] : null;
+            final Command baseCommand = commandTree.getCommand(commandName)
+                                                   .orElseThrow(() -> new CommandNotFoundException(commandName));
+
+            // If the command has a super command, it cannot possible be right to be the first argument.
+            if (baseCommand.getSuperCommand().isPresent())
+                throw new CommandNotFoundException(baseCommand.getName());
+
+            return getLastCommand(baseCommand, 1);
+        }
+
         if (command.getSubCommands().isEmpty())
             return new Pair<>(command, idx);
 
         final int nextIdx = idx + 1;
         final @Nullable String nextArg = args.length > nextIdx ? args[nextIdx] : null;
+        // If there's no argument available after the current one, we've reached the end of the arguments.
+        // This means that the last command we found is the last argument (by definition), so return that.
         if (nextArg == null)
             return new Pair<>(command, idx);
 
-        return command.getSubCommand(nextArg)
-                      .map(subCommand -> getTopCommand(subCommand, nextIdx))
-                      .orElse(new Pair<>(command, idx));
+        final @NonNull Optional<Command> subCommandOpt = command.getSubCommand(nextArg);
+        if (!subCommandOpt.isPresent())
+            return new Pair<>(command, idx);
+
+        final @NonNull Command subCommand = subCommandOpt.get();
+
+        if (!subCommand.getSuperCommand().isPresent() || subCommand.getSuperCommand().get() != command)
+            throw new CommandNotFoundException("super command of: " + subCommand.getName() + "");
+
+        return new Pair<>(subCommand, nextIdx);
     }
 }

@@ -2,15 +2,16 @@ package nl.pim16aap2.commandparser.exception;
 
 import lombok.Getter;
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 public class CommandNotFoundException extends Exception
 {
     @Getter
-    private final String missingCommand;
+    private final @NonNull String missingCommand;
 
-    public CommandNotFoundException(final @NonNull String commandName)
+    public CommandNotFoundException(final @Nullable String commandName)
     {
         super();
-        this.missingCommand = commandName;
+        this.missingCommand = commandName == null ? "NULL" : commandName;
     }
 }

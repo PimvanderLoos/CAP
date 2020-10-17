@@ -41,6 +41,9 @@ public class Command
 
     protected final @NonNull Consumer<@NonNull CommandResult> commandExecutor;
 
+    @Getter
+    private Optional<Command> superCommand = Optional.empty();
+
     @Setter
     protected boolean hidden;
 
@@ -57,6 +60,7 @@ public class Command
         this.subCommands = generateSubCommandMap(subCommands);
         this.commandExecutor = commandExecutor;
         this.hidden = hidden;
+        this.subCommands.values().forEach(subCommand -> subCommand.superCommand = Optional.of(this));
         parseArguments(arguments);
     }
 
@@ -83,8 +87,10 @@ public class Command
         return Optional.ofNullable(arguments.get(name));
     }
 
-    public @NonNull Optional<Command> getSubCommand(final @NonNull String name)
+    public @NonNull Optional<Command> getSubCommand(final @Nullable String name)
     {
+        if (name == null)
+            return Optional.empty();
         return Optional.ofNullable(subCommands.get(name));
     }
 
