@@ -142,7 +142,7 @@ public class Main
 
     private static CommandManager initCommandManager()
     {
-        final CommandManager commandManager = new CommandManager();
+        final CommandManager commandManager = new CommandManager(System.out::println);
 
         final int subsubCommandCount = 5;
         final List<Command> subsubcommands = new ArrayList<>(subsubCommandCount);

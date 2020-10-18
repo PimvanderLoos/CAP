@@ -1,20 +1,28 @@
 package nl.pim16aap2.commandparser.manager;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
+import nl.pim16aap2.commandparser.renderer.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
+@RequiredArgsConstructor
 public class CommandManager
 {
     private final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
+
+    @Getter
+    private final @NonNull Consumer<Text> messageReceiver;
 
     public @NonNull CommandResult parseCommand(String... cmd)
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException
