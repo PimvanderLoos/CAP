@@ -222,20 +222,16 @@ public class Main
 
 
         {
-            DefaultHelpCommand helpCommand = DefaultHelpCommand.builder().firstPageSize(1)
+            DefaultHelpCommand helpCommand = DefaultHelpCommand.builder().firstPageSize(2)
                                                                .pageSize(3)
                                                                .colorScheme(getColorScheme())
                                                                .build();
             System.out.println("=============================");
-            tryHelpCommand(() -> helpCommand.render(bigdoors, 0));
-            tryHelpCommand(() -> helpCommand.render(bigdoors, 1));
-            tryHelpCommand(() -> helpCommand.render(bigdoors, 2));
-            tryHelpCommand(() -> helpCommand.render(bigdoors, 3));
-            tryHelpCommand(() -> helpCommand.render(bigdoors, 4));
-            tryHelpCommand(() -> helpCommand.render(bigdoors, 5));
-            tryHelpCommand(() -> helpCommand.render(bigdoors, 6));
-//            tryHelpCommand(() -> helpCommand.render(bigdoors, 22));
-//            tryHelpCommand(() -> helpCommand.render(bigdoors, 22));
+            for (int idx = 0; idx < 20; ++idx)
+            {
+                final int page = idx;
+                tryHelpCommand(() -> helpCommand.render(bigdoors, page));
+            }
         }
         System.exit(0);
 
@@ -251,16 +247,17 @@ public class Main
 
     private static void tryHelpCommand(CheckedSupplier<TextComponent, IllegalValueException> sup)
     {
+        System.out.println("==============================");
         try
         {
-            System.out.println(sup.get());
-            System.out.println("=============================");
+            System.out.print(sup.get());
         }
         catch (IllegalValueException e)
         {
             System.out.println(
                 "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" + e.getCommand().getName() + "\"");
         }
+        System.out.println("==============================\n");
     }
 
     static ColorScheme getClearColorScheme()

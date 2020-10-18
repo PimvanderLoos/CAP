@@ -9,6 +9,7 @@ import nl.pim16aap2.commandparser.renderer.ArgumentRenderer;
 import nl.pim16aap2.commandparser.renderer.ColorScheme;
 import nl.pim16aap2.commandparser.renderer.TextComponent;
 import nl.pim16aap2.commandparser.renderer.TextType;
+import nl.pim16aap2.commandparser.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -93,10 +94,7 @@ public class DefaultHelpCommand implements IHelpCommand
 
         // Get the number of pages that can be filled using the provided number of commands
         // and the provided page size, excluding the number of commands put on the first page.
-        // Then add 1, because of the first page.
-
-        // TODO: Consider the option of not having a first page at all.
-        return (int) Math.ceil((commandCount - firstPageSize) / (float) pageSize) + 1;
+        return (int) Math.ceil((commandCount - firstPageSize) / (float) pageSize);
     }
 
     protected void renderPageCount(final @NonNull TextComponent textComponent, final int page, final int pageCount)
@@ -194,14 +192,14 @@ public class DefaultHelpCommand implements IHelpCommand
      * @param count         The number of {@link Command}s to render.
      * @return The number of commands that were added to the {@link TextComponent}.
      */
-    // TODO: Add a number of (sub)commands to skip
-    protected int renderCommands(final @NonNull TextComponent textComponent, final @NonNull TextComponent superCommands,
-                                 final @NonNull Command command, final int count, final int skip)
+    protected Pair<Integer, Integer> renderCommands(final @NonNull TextComponent textComponent,
+                                                    final @NonNull TextComponent superCommands,
+                                                    final @NonNull Command command, final int count, final int skip)
     {
         // Added contains the number of commands added to the text.
         int added = 0;
         if (count < 1)
-            return added;
+            return new Pair<>(added, 0);
 
         // Skipped contains the number of commands that were not rendered because they fell into the skipped category.
         int skipped = 0;
@@ -220,23 +218,25 @@ public class DefaultHelpCommand implements IHelpCommand
         }
 
         if (added == count)
-            return added;
+            return new Pair<>(added, skipped);
 
+        // The current command has to be appended to the super commands, because the
+        // current command is the super command of all its sub commands (by definition).
         final TextComponent newSuperCommands =
             new TextComponent(superCommands).add(command.getName(), TextType.COMMAND).add(" ");
 
         for (final Command subCommand : command.getSubCommands())
         {
-            if (skip > skipped)
-            {
-                ++skipped;
-                continue;
-            }
-            added += renderCommands(textComponent, newSuperCommands, subCommand, count - added, skip - skipped);
+            final @NonNull Pair<Integer, Integer> renderResult =
+                renderCommands(textComponent, newSuperCommands, subCommand, count - added, skip - skipped);
+
+            added += renderResult.first;
+            skipped += renderResult.second;
+
             if (added >= count)
                 break;
         }
-        return added;
+        return new Pair<>(added, skipped);
     }
 
     /**
