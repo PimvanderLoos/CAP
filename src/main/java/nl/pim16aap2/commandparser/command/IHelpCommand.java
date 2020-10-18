@@ -1,6 +1,7 @@
 package nl.pim16aap2.commandparser.command;
 
 import lombok.NonNull;
+import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.renderer.TextComponent;
 
 public interface IHelpCommand
@@ -12,8 +13,10 @@ public interface IHelpCommand
      * @param page    The page number to display.
      * @return The {@link TextComponent} of the help message for the command.
      */
-    @NonNull TextComponent render(final @NonNull Command command, final int page);
+    @NonNull TextComponent render(final @NonNull Command command, final int page)
+        throws IllegalValueException;
 
 
-    @NonNull TextComponent render(final @NonNull Command command);
+    @NonNull TextComponent render(final @NonNull Command command)
+        throws IllegalValueException;
 }

@@ -5,6 +5,7 @@ import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.DefaultHelpCommand;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
+import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
@@ -29,6 +30,8 @@ import java.util.List;
 // TODO: Allow using space as a separator of flag-value pairs.
 // TODO: Make a class somewhere where you can register ColorScheme objects. This class can then be used for caching
 //       stuff like finished TextComponents etc.
+//       For this to work properly, there should be some mechanism to keep track of whether a command(system) was
+//       changed since it was last cached. For example, if subcommands are added, the cache will have to be invalidated.
 // TODO: For the HelpCommand, just make it a boolean for the command (default true) to always look for it in the format
 //       "/whatever command help [arguments]". Provide a default HelpCommand thingy, but also make it a builder,
 //       to fully customize how the help command works. For example, hidden commands should probably display their help
@@ -133,11 +136,27 @@ public class Main
     {
         final CommandManager commandManager = new CommandManager();
 
+        final int subsubCommandCount = 5;
+        final List<Command> subsubcommands = new ArrayList<>(subsubCommandCount);
+        for (int idx = 0; idx < subsubCommandCount; ++idx)
+        {
+            final String command = "subsubcommand_" + idx;
+            final Command generic = Command
+                .builder().name(command)
+                .summary("This is the summary for subsubcommand_" + idx)
+                .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
+                .commandExecutor(commandResult ->
+                                     new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
+                .build();
+            subsubcommands.add(generic);
+        }
+
         final Command addOwner = Command
             .builder()
             .name("addowner")
             .description("Add 1 or more players or groups of players as owners of a door.")
             .summary("Add another owner to a door.")
+            .subCommands(subsubcommands)
             .argument(Argument.StringArgument
                           .getRequired()
                           .name("doorID")
@@ -174,7 +193,7 @@ public class Main
         final List<Command> subcommands = new ArrayList<>(subCommandCount);
         for (int idx = 0; idx < subCommandCount; ++idx)
         {
-            final String command = "command" + idx;
+            final String command = "subcommand_" + idx;
             final Command generic = Command
                 .builder().name(command)
                 .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
@@ -203,15 +222,45 @@ public class Main
 
 
         {
-            DefaultHelpCommand helpCommand = DefaultHelpCommand.builder().firstPageSize(10)
+            DefaultHelpCommand helpCommand = DefaultHelpCommand.builder().firstPageSize(1)
+                                                               .pageSize(3)
                                                                .colorScheme(getColorScheme())
                                                                .build();
-            System.out.println(helpCommand.render(bigdoors));
+            System.out.println("=============================");
+            tryHelpCommand(() -> helpCommand.render(bigdoors, 0));
+            tryHelpCommand(() -> helpCommand.render(bigdoors, 1));
+            tryHelpCommand(() -> helpCommand.render(bigdoors, 2));
+            tryHelpCommand(() -> helpCommand.render(bigdoors, 3));
+            tryHelpCommand(() -> helpCommand.render(bigdoors, 4));
+            tryHelpCommand(() -> helpCommand.render(bigdoors, 5));
+            tryHelpCommand(() -> helpCommand.render(bigdoors, 6));
+//            tryHelpCommand(() -> helpCommand.render(bigdoors, 22));
+//            tryHelpCommand(() -> helpCommand.render(bigdoors, 22));
         }
         System.exit(0);
 
 
         return commandManager;
+    }
+
+    private interface CheckedSupplier<T, E extends Exception>
+    {
+        T get()
+            throws E;
+    }
+
+    private static void tryHelpCommand(CheckedSupplier<TextComponent, IllegalValueException> sup)
+    {
+        try
+        {
+            System.out.println(sup.get());
+            System.out.println("=============================");
+        }
+        catch (IllegalValueException e)
+        {
+            System.out.println(
+                "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" + e.getCommand().getName() + "\"");
+        }
     }
 
     static ColorScheme getClearColorScheme()
@@ -250,6 +299,12 @@ public class Main
     {
         final ColorScheme colorScheme = getColorScheme();
 
+        {
+            final TextComponent textComponent = new TextComponent(colorScheme);
+            textComponent.add("Unstyled text!");
+            System.out.println(textComponent);
+        }
+
         final TextComponent textComponent = new TextComponent(colorScheme);
         textComponent.add("This is a command", TextType.COMMAND).add("\n")
                      .add("This is an optional parameter", TextType.OPTIONAL_PARAMETER).add("\n")
@@ -258,6 +313,7 @@ public class Main
 
         final TextComponent textComponent2 = new TextComponent(colorScheme);
         textComponent2.add("This is the second TextComponent!", TextType.REQUIRED_PARAMETER).add("\n");
+        textComponent2.add("This is some unstyled text!").add("\n");
 
         System.out.println(textComponent.add(textComponent2).toString());
     }

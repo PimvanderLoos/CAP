@@ -4,11 +4,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.renderer.ArgumentRenderer;
 import nl.pim16aap2.commandparser.renderer.ColorScheme;
 import nl.pim16aap2.commandparser.renderer.TextComponent;
 import nl.pim16aap2.commandparser.renderer.TextType;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 /**
  * Represents the default {@link IHelpCommand}.
@@ -73,31 +76,110 @@ public class DefaultHelpCommand implements IHelpCommand
         this.summaryIndent = summaryIndent;
     }
 
+    protected final int getCommandCount(final @NonNull Command command)
+    {
+        // TODO: Store this in the Command itself. Just do it on creation, then ensure that
+        //       a) They cannot be modified after construction, or
+        //       b) They recalculate it when they are modified.
+        int count = command.isHidden() ? 0 : 1;
+        for (final Command subCommand : command.getSubCommands())
+            count += getCommandCount(subCommand);
+        return count;
+    }
+
+    protected int getPageCount(final @NonNull Command command)
+    {
+        final int commandCount = getCommandCount(command);
+
+        // Get the number of pages that can be filled using the provided number of commands
+        // and the provided page size, excluding the number of commands put on the first page.
+        // Then add 1, because of the first page.
+
+        // TODO: Consider the option of not having a first page at all.
+        return (int) Math.ceil((commandCount - firstPageSize) / (float) pageSize) + 1;
+    }
+
+    protected void renderPageCount(final @NonNull TextComponent textComponent, final int page, final int pageCount)
+    {
+        // TODO: Allow starting either at 0 or at 1.
+        textComponent.add(String.format("------- Page (%2d / %2d) -------\n", page, pageCount));
+    }
+
     @Override
     public @NonNull TextComponent render(final @NonNull Command command, final int page)
+        throws IllegalValueException
     {
-        if (page == 0)
-            return renderFirstPage(command);
+        final int pageCount = getPageCount(command);
+        if (page > pageCount)
+            throw new IllegalValueException(command, Integer.toString(page));
 
-        return new TextComponent(colorScheme);
+        TextComponent textComponent = new TextComponent(colorScheme);
+        renderPageCount(textComponent, page, pageCount);
+        if (page == 0)
+            return renderFirstPage(textComponent, command);
+
+        final int skip = firstPageSize + (page - 1) * pageSize;
+        renderCommands(textComponent, getBaseSuperCommand(command), command, this.pageSize, skip);
+
+        return textComponent;
     }
 
     @Override
     public @NonNull TextComponent render(@NonNull Command command)
+        throws IllegalValueException
     {
         // TODO: Why does this exist?
         return render(command, 0);
     }
 
-    protected @NonNull TextComponent renderFirstPage(final @NonNull Command command)
+    /**
+     * Recursively constructs the {@link TextComponent} containing the all super {@link Command}s of a {@link Command}.
+     * <p>
+     * Note that the {@link Command} that is provided inside the optional is also included if possible, so if this is
+     * not desired, use this method with {@link Command#getSuperCommand()}.
+     *
+     * @param textComponent The {@link TextComponent} to append the super {@link Command}s to. If this is null, a new
+     *                      {@link TextComponent} will be created starting with the {@link #COMMAND_PREFIX}.
+     * @param command       The {@link Optional} {@link Command} whose super commands to add to the text. If it has no
+     *                      super commands (or isn't {{@link Optional#isPresent()}}), it will only append the name of
+     *                      this command itself (if possible).
+     * @return The {@link TextComponent} with all the super {@link Command}s of the provided {@link Command}.
+     */
+    protected @NonNull TextComponent getBaseSuperCommand(@Nullable TextComponent textComponent,
+                                                         final @NonNull Optional<Command> command)
     {
-        final TextComponent textComponent = new TextComponent(colorScheme);
+        if (textComponent == null)
+            textComponent = new TextComponent(colorScheme).add(COMMAND_PREFIX, TextType.COMMAND);
+
+        // Base case
+        if (!command.isPresent())
+            return textComponent;
+
+        return textComponent.add(getBaseSuperCommand(textComponent, command.get().getSuperCommand()))
+                            .add(command.get().getName()).add(" ");
+    }
+
+    /**
+     * Recursively constructs the {@link TextComponent} containing the all super {@link Command}s of a {@link Command}.
+     * <p>
+     * Note that the {@link Command} that is provided will not be included.
+     *
+     * @param command The {@link Command} whose super commands to add to the text. If it has no super commands, it will
+     *                only append {@link #COMMAND_PREFIX}.
+     * @return The {@link TextComponent} with all the super {@link Command}s of the provided {@link Command}.
+     */
+    protected @NonNull TextComponent getBaseSuperCommand(final @NonNull Command command)
+    {
+        return getBaseSuperCommand(null, command.getSuperCommand());
+    }
+
+    protected @NonNull TextComponent renderFirstPage(final @NonNull TextComponent textComponent,
+                                                     final @NonNull Command command)
+    {
         if (displayHeader && !command.getHeader().equals(""))
             textComponent.add(command.getHeader(), TextType.HEADER).add("\n");
 
-        final TextComponent superCommands = new TextComponent(colorScheme).add(COMMAND_PREFIX, TextType.COMMAND);
-
-        renderCommands(textComponent, superCommands, command, this.firstPageSize);
+        renderCommands(textComponent, getBaseSuperCommand(command), command, this.firstPageSize, 0);
 
         return textComponent;
     }
@@ -114,30 +196,27 @@ public class DefaultHelpCommand implements IHelpCommand
      */
     // TODO: Add a number of (sub)commands to skip
     protected int renderCommands(final @NonNull TextComponent textComponent, final @NonNull TextComponent superCommands,
-                                 final @NonNull Command command, final int count)
+                                 final @NonNull Command command, final int count, final int skip)
     {
+        // Added contains the number of commands added to the text.
         int added = 0;
         if (count < 1)
             return added;
 
+        // Skipped contains the number of commands that were not rendered because they fell into the skipped category.
+        int skipped = 0;
+
+        // Don't render hidden commands, because they're... Well... hidden.
         if (!command.isHidden())
         {
-            ++added;
-            textComponent.add(superCommands).add(command.getName(), TextType.COMMAND);
-
-            // TODO: This should not be hardcoded like this.
-            for (final Argument<?> argument : command.getRequiredArguments().values())
-                textComponent.add(" ").add(argumentRenderer.render(argument));
-
-            for (final Argument<?> argument : command.getOptionalArguments().values())
-                textComponent.add(" ").add(argumentRenderer.render(argument));
-
-            for (final Argument<?> argument : command.getRepeatableArguments().values())
-                textComponent.add(" ").add(argumentRenderer.render(argument));
-
-            if (!command.getSummary().equals(""))
-                textComponent.add("\n" + summaryIndent).add(command.getSummary(), TextType.SUMMARY);
-            textComponent.add("\n");
+            // Only render the command if it doesn't have to be skipped.
+            if (skip > skipped)
+                ++skipped;
+            else
+            {
+                renderCommand(textComponent, command, superCommands);
+                ++added;
+            }
         }
 
         if (added == count)
@@ -148,10 +227,44 @@ public class DefaultHelpCommand implements IHelpCommand
 
         for (final Command subCommand : command.getSubCommands())
         {
-            added += renderCommands(textComponent, newSuperCommands, subCommand, count - added);
+            if (skip > skipped)
+            {
+                ++skipped;
+                continue;
+            }
+            added += renderCommands(textComponent, newSuperCommands, subCommand, count - added, skip - skipped);
             if (added >= count)
                 break;
         }
         return added;
+    }
+
+    /**
+     * Renders a command and appends it to the provided {@link TextComponent}.
+     *
+     * @param textComponent The {@link TextComponent} to append the rendered command to.
+     * @param command       The {@link Command} to render. Note that this method does not care about {@link
+     *                      Command#isHidden()}.
+     * @param superCommands A {@link TextComponent} with all the appended super commands of the current command. This
+     *                      will be prepended to the command.
+     */
+    protected void renderCommand(final @NonNull TextComponent textComponent, final @NonNull Command command,
+                                 final @NonNull TextComponent superCommands)
+    {
+        textComponent.add(superCommands).add(command.getName(), TextType.COMMAND);
+
+        // TODO: This should not be hardcoded like this.
+        for (final Argument<?> argument : command.getRequiredArguments().values())
+            textComponent.add(" ").add(argumentRenderer.render(argument));
+
+        for (final Argument<?> argument : command.getOptionalArguments().values())
+            textComponent.add(" ").add(argumentRenderer.render(argument));
+
+        for (final Argument<?> argument : command.getRepeatableArguments().values())
+            textComponent.add(" ").add(argumentRenderer.render(argument));
+
+        if (!command.getSummary().equals(""))
+            textComponent.add("\n" + summaryIndent).add(command.getSummary(), TextType.SUMMARY);
+        textComponent.add("\n");
     }
 }
