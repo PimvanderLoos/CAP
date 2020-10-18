@@ -52,6 +52,13 @@ import java.util.List;
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
+// TODO: Have some kind of system to accept messageble objects or something, to send them help menus etc.
+//       Alternatively, add a messageSender function or something to the CommandManager, which can be used to
+//       send stuff using a lambda thingy.
+// TODO: Right now the DefaultCommandHandler stores a ColorScheme which is then always used. It would probably be nice
+//       to be able to override this. Alternatively, don't store the enable/disable string of the styles in the
+//       TextComponents, but just the TextStyle. Then get the strings in the toString method. This would allow
+//       changing the scheme at any time.
 
 public class Main
 {
@@ -144,6 +151,7 @@ public class Main
             final String command = "subsubcommand_" + idx;
             final Command generic = Command
                 .builder().name(command)
+                .addDefaultHelpArgument(true)
                 .commandManager(commandManager)
                 .summary("This is the summary for subsubcommand_" + idx)
                 .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
@@ -157,6 +165,7 @@ public class Main
             .builder()
             .commandManager(commandManager)
             .name("addowner")
+            .addDefaultHelpArgument(true)
             .description("Add 1 or more players or groups of players as owners of a door.")
             .summary("Add another owner to a door.")
             .subCommands(subsubcommands)
@@ -199,6 +208,7 @@ public class Main
             final String command = "subcommand_" + idx;
             final Command generic = Command
                 .builder().name(command)
+                .addDefaultHelpArgument(true)
                 .commandManager(commandManager)
                 .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
@@ -210,6 +220,7 @@ public class Main
         final Command bigdoors = Command
             .builder()
             .commandManager(commandManager)
+            .addDefaultHelpArgument(true)
             .name("bigdoors")
             .subCommand(addOwner)
             .subCommands(subcommands)
@@ -229,19 +240,23 @@ public class Main
         {
             DefaultHelpCommand helpCommand = DefaultHelpCommand.builder().firstPageSize(2)
                                                                .pageSize(3)
-                                                               .colorScheme(getColorScheme())
-//                                                               .colorScheme(getClearColorScheme())
+//                                                               .colorScheme(getColorScheme())
+                                                               .colorScheme(getClearColorScheme())
                                                                .build();
+            System.out.println("==============================");
+            System.out.println("==============================");
             System.out.print(helpCommand.renderLongCommand(addOwner));
-            helpCommand.renderLongCommand(commandManager.getCommand("subsubcommand_2").get());
+            System.out.println("==============================");
+            System.out.print(helpCommand.renderLongCommand(commandManager.getCommand("subsubcommand_2").get()));
+            System.out.println("==============================");
+            System.out.println("==============================");
 
-            for (int idx = 0; idx < 20; ++idx)
+            for (int idx = 0; idx < 12; ++idx)
             {
                 final int page = idx;
                 tryHelpCommand(() -> helpCommand.render(bigdoors, page));
             }
         }
-        System.exit(0);
 
 
         return commandManager;

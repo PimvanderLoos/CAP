@@ -23,6 +23,9 @@ import java.util.function.Consumer;
 @Getter
 public class Command
 {
+    private static final @NonNull OptionalArgument<@NonNull Boolean> DEFAULT_HELP_ARGUMENT = Argument.FlagArgument
+        .getOptional(true).name("h").longName("help").summary("Displays the help menu for this command.").build();
+
     protected final @NonNull String name;
 
     protected @NonNull String description;
@@ -55,12 +58,16 @@ public class Command
     @Setter
     protected boolean hidden;
 
+    @Getter
+    protected boolean addDefaultHelpArgument;
+
     @Builder
     private Command(final @NonNull String name, final @Nullable String description, final @Nullable String summary,
                     final @Nullable @Singular List<Command> subCommands,
                     final @NonNull Consumer<@NonNull CommandResult> commandExecutor,
                     final @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
-                    final boolean hidden, final @Nullable String header, final @NonNull CommandManager commandManager)
+                    final boolean hidden, final @Nullable String header, final @NonNull CommandManager commandManager,
+                    final @Nullable Boolean addDefaultHelpArgument)
     {
         this.name = name;
         this.description = Util.valOrDefault(description, "");
@@ -71,6 +78,7 @@ public class Command
         this.hidden = hidden;
         this.subCommands.forEach(subCommand -> subCommand.superCommand = Optional.of(this));
         this.commandManager = commandManager;
+        this.addDefaultHelpArgument = Util.valOrDefault(addDefaultHelpArgument, false);
         parseArguments(arguments);
     }
 
@@ -106,6 +114,9 @@ public class Command
 
     private void parseArguments(final @Nullable List<@NonNull Argument<?>> arguments)
     {
+        if (this.addDefaultHelpArgument)
+            optionalArguments.put(DEFAULT_HELP_ARGUMENT.getName(), DEFAULT_HELP_ARGUMENT);
+
         if (arguments == null)
             return;
 
