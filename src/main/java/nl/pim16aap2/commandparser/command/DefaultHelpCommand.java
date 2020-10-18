@@ -120,8 +120,7 @@ public class DefaultHelpCommand implements IHelpCommand
         throws IllegalValueException
     {
         final int pageCount = getPageCount(command);
-        final int firstPage = startAt1 ? 1 : 0;
-        if (page > pageCount || page < firstPage)
+        if (page > pageCount || page < 0)
             throw new IllegalValueException(command, Integer.toString(page));
 
         Text text = new Text(colorScheme);
