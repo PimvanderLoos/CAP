@@ -8,10 +8,10 @@ import java.util.Map;
 
 public class ColorScheme
 {
-    private final Map<TextType, TextStyle> styleMap;
+    private final Map<TextType, TextComponent> styleMap;
     private @NonNull String disableAll = "";
 
-    private ColorScheme(final @NonNull Map<TextType, TextStyle> styleMap)
+    private ColorScheme(final @NonNull Map<TextType, TextComponent> styleMap)
     {
         this.styleMap = styleMap;
         styleMap.forEach((type, style) -> addStyleOff(style.getOff()));
@@ -23,14 +23,14 @@ public class ColorScheme
             disableAll += styleOff;
     }
 
-    public ColorScheme setStyle(final @NonNull TextType type, final @NonNull TextStyle style)
+    public ColorScheme setStyle(final @NonNull TextType type, final @NonNull TextComponent style)
     {
         styleMap.put(type, style);
         addStyleOff(style.getOff());
         return this;
     }
 
-    public @NonNull TextStyle getStyle(final @NonNull TextType type)
+    public @NonNull TextComponent getStyle(final @NonNull TextType type)
     {
         return styleMap.get(type);
     }
@@ -42,9 +42,9 @@ public class ColorScheme
 
     public static class ColorSchemeBuilder
     {
-        private Map<TextType, TextStyle> styleMap = new EnumMap(TextType.class);
+        private Map<TextType, TextComponent> styleMap = new EnumMap(TextType.class);
 
-        private static final @NonNull TextStyle EMPTY_STYLE = new TextStyle("", "");
+        private static final @NonNull TextComponent EMPTY_STYLE = new TextComponent("", "");
 
         private ColorSchemeBuilder()
         {
@@ -53,7 +53,7 @@ public class ColorScheme
         public ColorScheme build()
         {
             // If the optionalParameterStyle was set, put the defaults for the 2 'subtypes' if needed.
-            final @Nullable TextStyle optionalParameterStyle = styleMap.get(TextType.OPTIONAL_PARAMETER);
+            final @Nullable TextComponent optionalParameterStyle = styleMap.get(TextType.OPTIONAL_PARAMETER);
             if (optionalParameterStyle != null)
             {
                 styleMap.putIfAbsent(TextType.OPTIONAL_PARAMETER_FLAG, optionalParameterStyle);
@@ -69,7 +69,7 @@ public class ColorScheme
             return new ColorScheme(styleMap);
         }
 
-        public ColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull TextStyle style)
+        public ColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull TextComponent style)
         {
             styleMap.put(type, style);
             return this;
@@ -78,7 +78,7 @@ public class ColorScheme
         /**
          * See {@link TextType#COMMAND}.
          */
-        public ColorSchemeBuilder commandStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder commandStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.COMMAND, style);
             return this;
@@ -87,7 +87,7 @@ public class ColorScheme
         /**
          * See {@link TextType#OPTIONAL_PARAMETER}.
          */
-        public ColorSchemeBuilder optionalParameterStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder optionalParameterStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.OPTIONAL_PARAMETER, style);
             return this;
@@ -98,7 +98,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#OPTIONAL_PARAMETER}
          */
-        public ColorSchemeBuilder optionalParameterLabelStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder optionalParameterLabelStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.OPTIONAL_PARAMETER_LABEL, style);
             return this;
@@ -109,7 +109,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#OPTIONAL_PARAMETER}
          */
-        public ColorSchemeBuilder optionalParameterFlagStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder optionalParameterFlagStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.OPTIONAL_PARAMETER_FLAG, style);
             return this;
@@ -120,7 +120,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#OPTIONAL_PARAMETER}
          */
-        public ColorSchemeBuilder optionalParameterSeparatorStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder optionalParameterSeparatorStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.OPTIONAL_PARAMETER_SEPARATOR, style);
             return this;
@@ -129,7 +129,7 @@ public class ColorScheme
         /**
          * See {@link TextType#REQUIRED_PARAMETER}.
          */
-        public ColorSchemeBuilder requiredParameterStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder requiredParameterStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.REQUIRED_PARAMETER, style);
             return this;
@@ -138,7 +138,7 @@ public class ColorScheme
         /**
          * See {@link TextType#SUMMARY}.
          */
-        public ColorSchemeBuilder summaryStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder summaryStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.SUMMARY, style);
             return this;
@@ -147,7 +147,7 @@ public class ColorScheme
         /**
          * See {@link TextType#REGULAR_TEXT}.
          */
-        public ColorSchemeBuilder regularTextStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder regularTextStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.REGULAR_TEXT, style);
             return this;
@@ -156,7 +156,7 @@ public class ColorScheme
         /**
          * See {@link TextType#HEADER}.
          */
-        public ColorSchemeBuilder headerStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder headerStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.HEADER, style);
             return this;
@@ -165,7 +165,7 @@ public class ColorScheme
         /**
          * See {@link TextType#FOOTER}.
          */
-        public ColorSchemeBuilder footerStyle(final @NonNull TextStyle style)
+        public ColorSchemeBuilder footerStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.FOOTER, style);
             return this;

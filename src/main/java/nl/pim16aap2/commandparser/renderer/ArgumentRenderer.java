@@ -12,7 +12,7 @@ public class ArgumentRenderer
 {
     protected final @NonNull ColorScheme colorScheme;
 
-    public @NonNull TextComponent render(final @NonNull Argument<?> argument)
+    public @NonNull Text render(final @NonNull Argument<?> argument)
     {
         if (argument instanceof OptionalArgument)
             return renderOptional((OptionalArgument<?>) argument);
@@ -23,19 +23,19 @@ public class ArgumentRenderer
         throw new RuntimeException("Failed to determine type of argument: " + argument.getClass().getCanonicalName());
     }
 
-    public @NonNull TextComponent renderLong(final @NonNull Argument<?> argument, final @NonNull String summaryIndent)
+    public @NonNull Text renderLong(final @NonNull Argument<?> argument, final @NonNull String summaryIndent)
     {
-        final TextComponent textComponent = render(argument);
+        final Text text = render(argument);
         if (!argument.getSummary().equals(""))
-            textComponent.add("\n").add(summaryIndent).add(argument.getSummary(), TextType.SUMMARY);
-        return textComponent;
+            text.add("\n").add(summaryIndent).add(argument.getSummary(), TextType.SUMMARY);
+        return text;
     }
 
-    protected @NonNull TextComponent renderOptional(final @NonNull OptionalArgument<?> argument)
+    protected @NonNull Text renderOptional(final @NonNull OptionalArgument<?> argument)
     {
         final String suffix = argument instanceof RepeatableArgument ? "+" : "";
 
-        final TextComponent rendered = new TextComponent(colorScheme);
+        final Text rendered = new Text(colorScheme);
         rendered.add("[", TextType.OPTIONAL_PARAMETER)
                 .add("-" + argument.getName(), TextType.OPTIONAL_PARAMETER_FLAG);
 
@@ -48,8 +48,8 @@ public class ArgumentRenderer
         return rendered.add("]" + suffix, TextType.OPTIONAL_PARAMETER);
     }
 
-    protected @NonNull TextComponent renderRequired(final @NonNull RequiredArgument<?> argument)
+    protected @NonNull Text renderRequired(final @NonNull RequiredArgument<?> argument)
     {
-        return new TextComponent(colorScheme).add("<" + argument.getLabel() + ">", TextType.REQUIRED_PARAMETER);
+        return new Text(colorScheme).add("<" + argument.getLabel() + ">", TextType.REQUIRED_PARAMETER);
     }
 }

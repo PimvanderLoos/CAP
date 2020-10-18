@@ -4,7 +4,7 @@ import lombok.NonNull;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
-import nl.pim16aap2.commandparser.renderer.TextComponent;
+import nl.pim16aap2.commandparser.renderer.Text;
 
 public interface IHelpCommand
 {
@@ -13,9 +13,9 @@ public interface IHelpCommand
      *
      * @param command The {@link Command} to get the help menu for.
      * @param page    The page number to display.
-     * @return The {@link TextComponent} of the help message for the command.
+     * @return The {@link Text} of the help message for the command.
      */
-    @NonNull TextComponent render(final @NonNull Command command, final int page)
+    @NonNull Text render(final @NonNull Command command, final int page)
         throws IllegalValueException;
 
     /**
@@ -39,7 +39,7 @@ public interface IHelpCommand
      *                                  as name could be found.
      */
     // TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
-    @NonNull TextComponent render(final @NonNull Command command, final @NonNull String val)
+    @NonNull Text render(final @NonNull Command command, final @NonNull String val)
         throws IllegalValueException, CommandNotFoundException;
 
     /**
@@ -48,5 +48,5 @@ public interface IHelpCommand
      * @param command The {@link Command} for which to render the long help menu.
      * @return The rendered long help menu for the given command.
      */
-    @NonNull TextComponent renderLongCommand(final @NonNull Command command);
+    @NonNull Text renderLongCommand(final @NonNull Command command);
 }

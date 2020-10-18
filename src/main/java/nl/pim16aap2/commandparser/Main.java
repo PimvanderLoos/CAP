@@ -10,26 +10,24 @@ import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
 import nl.pim16aap2.commandparser.renderer.ColorScheme;
+import nl.pim16aap2.commandparser.renderer.Text;
 import nl.pim16aap2.commandparser.renderer.TextComponent;
-import nl.pim16aap2.commandparser.renderer.TextStyle;
 import nl.pim16aap2.commandparser.renderer.TextType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 // TODO: Consider using ByteBuddy to generate the commands? Might be completely overkill, though
-// TODO: Add some way to inject text into the TextComponent system. For example, when adding a piece of text with
+// TODO: Add some way to inject text into the Text system. For example, when adding a piece of text with
 //       a command, store which command it is and if it is listed as a subcommand or a supercommand.
 //       Allow registering event handlers or something when a new component is added.
 //       This is useful for stuff like clickable text. In Minecraft, this would be the ability to click on a command
 //       in a help menu to execute the help command for that command.
-// TODO: Rename TextComponent class. The StyledSection class should have this name, while the TextComponent should be
-//       something else; it's not a component after all, it's the whole thing.
 // TODO: Allow positional optional arguments. Perhaps Required and OptionalPositional can both extend a Positional interface?
 //       Maybe also extend a FlaggedArgument interface for stuff that does require flags?
 // TODO: Allow using space as a separator of flag-value pairs.
 // TODO: Make a class somewhere where you can register ColorScheme objects. This class can then be used for caching
-//       stuff like finished TextComponents etc.
+//       stuff like finished Texts etc.
 //       For this to work properly, there should be some mechanism to keep track of whether a command(system) was
 //       changed since it was last cached. For example, if subcommands are added, the cache will have to be invalidated.
 // TODO: For the HelpCommand, just make it a boolean for the command (default true) to always look for it in the format
@@ -256,7 +254,7 @@ public class Main
             throws E;
     }
 
-    private static void tryHelpCommand(CheckedSupplier<TextComponent, IllegalValueException> sup)
+    private static void tryHelpCommand(CheckedSupplier<Text, IllegalValueException> sup)
     {
         System.out.println("==============================");
         try
@@ -280,26 +278,26 @@ public class Main
     {
         return ColorScheme
             .builder()
-            .commandStyle(new TextStyle(MinecraftStyle.GOLD.getStringValue(),
-                                        MinecraftStyle.RESET.getStringValue()))
-            .optionalParameterStyle(new TextStyle(MinecraftStyle.BLUE.getStringValue(),
-                                                  MinecraftStyle.RESET.getStringValue()))
-            .optionalParameterFlagStyle(new TextStyle(MinecraftStyle.LIGHT_PURPLE.getStringValue(),
-                                                      MinecraftStyle.RESET.getStringValue()))
-            .optionalParameterSeparatorStyle(new TextStyle(MinecraftStyle.WHITE.getStringValue(),
-                                                           MinecraftStyle.RESET.getStringValue()))
-            .optionalParameterLabelStyle(new TextStyle(MinecraftStyle.GRAY.getStringValue(),
-                                                       MinecraftStyle.RESET.getStringValue()))
-            .requiredParameterStyle(new TextStyle(MinecraftStyle.RED.getStringValue(),
-                                                  MinecraftStyle.RESET.getStringValue()))
-            .summaryStyle(new TextStyle(MinecraftStyle.AQUA.getStringValue(),
-                                        MinecraftStyle.RESET.getStringValue()))
-            .regularTextStyle(new TextStyle(MinecraftStyle.GOLD.getStringValue(),
+            .commandStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue(),
                                             MinecraftStyle.RESET.getStringValue()))
-            .headerStyle(new TextStyle(MinecraftStyle.GREEN.getStringValue(),
-                                       MinecraftStyle.RESET.getStringValue()))
-            .footerStyle(new TextStyle(MinecraftStyle.DARK_RED.getStringValue(),
-                                       MinecraftStyle.RESET.getStringValue()))
+            .optionalParameterStyle(new TextComponent(MinecraftStyle.BLUE.getStringValue(),
+                                                      MinecraftStyle.RESET.getStringValue()))
+            .optionalParameterFlagStyle(new TextComponent(MinecraftStyle.LIGHT_PURPLE.getStringValue(),
+                                                          MinecraftStyle.RESET.getStringValue()))
+            .optionalParameterSeparatorStyle(new TextComponent(MinecraftStyle.WHITE.getStringValue(),
+                                                               MinecraftStyle.RESET.getStringValue()))
+            .optionalParameterLabelStyle(new TextComponent(MinecraftStyle.GRAY.getStringValue(),
+                                                           MinecraftStyle.RESET.getStringValue()))
+            .requiredParameterStyle(new TextComponent(MinecraftStyle.RED.getStringValue(),
+                                                      MinecraftStyle.RESET.getStringValue()))
+            .summaryStyle(new TextComponent(MinecraftStyle.AQUA.getStringValue(),
+                                            MinecraftStyle.RESET.getStringValue()))
+            .regularTextStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue(),
+                                                MinecraftStyle.RESET.getStringValue()))
+            .headerStyle(new TextComponent(MinecraftStyle.GREEN.getStringValue(),
+                                           MinecraftStyle.RESET.getStringValue()))
+            .footerStyle(new TextComponent(MinecraftStyle.DARK_RED.getStringValue(),
+                                           MinecraftStyle.RESET.getStringValue()))
             .build();
     }
 
@@ -308,22 +306,22 @@ public class Main
         final ColorScheme colorScheme = getColorScheme();
 
         {
-            final TextComponent textComponent = new TextComponent(colorScheme);
-            textComponent.add("Unstyled text!");
-            System.out.println(textComponent);
-            System.out.println(textComponent.add(textComponent));
+            final Text text = new Text(colorScheme);
+            text.add("Unstyled text!");
+            System.out.println(text);
+            System.out.println(text.add(text));
         }
 
-        final TextComponent textComponent = new TextComponent(colorScheme);
-        textComponent.add("This is a command", TextType.COMMAND).add("\n")
-                     .add("This is an optional parameter", TextType.OPTIONAL_PARAMETER).add("\n")
-                     .add("This is something else? I can't remember the types :(", TextType.HEADER).add("\n");
+        final Text text = new Text(colorScheme);
+        text.add("This is a command", TextType.COMMAND).add("\n")
+            .add("This is an optional parameter", TextType.OPTIONAL_PARAMETER).add("\n")
+            .add("This is something else? I can't remember the types :(", TextType.HEADER).add("\n");
 
 
-        final TextComponent textComponent2 = new TextComponent(colorScheme);
-        textComponent2.add("This is the second TextComponent!", TextType.REQUIRED_PARAMETER).add("\n");
-        textComponent2.add("This is some unstyled text!").add("\n");
+        final Text text2 = new Text(colorScheme);
+        text2.add("This is the second Text!", TextType.REQUIRED_PARAMETER).add("\n");
+        text2.add("This is some unstyled text!").add("\n");
 
-        System.out.println(textComponent.add(textComponent2).toString());
+        System.out.println(text.add(text2).toString());
     }
 }
