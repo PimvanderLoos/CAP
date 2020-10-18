@@ -85,6 +85,10 @@ public class TextComponent
             lastIdx = end;
         }
 
+        // Add any trailing text that doesn't have any styles.
+        if (lastIdx < stringBuilder.length())
+            sb.append(stringBuilder.substring(lastIdx, stringBuilder.length()));
+
         return sb.toString();
     }
 
