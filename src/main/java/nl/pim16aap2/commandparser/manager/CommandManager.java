@@ -6,20 +6,32 @@ import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class CommandManager
 {
-    private final CommandTree commandTree = new CommandTree();
-
-    public CommandManager addCommand(final @NonNull Command command)
-    {
-        commandTree.addCommand(command);
-        return this;
-    }
+    private final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
 
     public @NonNull CommandResult parseCommand(String... cmd)
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException
     {
-        return new CommandParser(commandTree, cmd).parse();
+        return new CommandParser(this, cmd).parse();
+    }
+
+    public @NonNull CommandManager addCommand(final @NonNull Command command)
+    {
+        commandMap.put(command.getName(), command);
+        return this;
+    }
+
+    public @NonNull Optional<Command> getCommand(final @Nullable String name)
+    {
+        if (name == null)
+            return Optional.empty();
+        return Optional.ofNullable(commandMap.get(name));
     }
 }

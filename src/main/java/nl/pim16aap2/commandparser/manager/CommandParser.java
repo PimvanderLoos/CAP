@@ -28,7 +28,7 @@ import static nl.pim16aap2.commandparser.argument.RepeatableArgument.ParsedRepea
 class CommandParser
 {
     private final @NonNull String[] args;
-    final @NonNull CommandTree commandTree;
+    final @NonNull CommandManager commandManager;
 
     private static final char ARGUMENT_PREFIX = '-';
 
@@ -36,10 +36,10 @@ class CommandParser
     private static final String SEPARATOR = "=";
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
 
-    public CommandParser(final @NonNull CommandTree commandTree, final @NonNull String[] args)
+    public CommandParser(final @NonNull CommandManager commandManager, final @NonNull String[] args)
     {
         this.args = args;
-        this.commandTree = commandTree;
+        this.commandManager = commandManager;
     }
 
     public @NonNull CommandResult parse()
@@ -185,8 +185,8 @@ class CommandParser
                 throw new CommandNotFoundException("Command at index " + idx);
 
             final @Nullable String commandName = args.length > idx ? args[idx] : null;
-            final Command baseCommand = commandTree.getCommand(commandName)
-                                                   .orElseThrow(() -> new CommandNotFoundException(commandName));
+            final Command baseCommand = commandManager.getCommand(commandName)
+                                                      .orElseThrow(() -> new CommandNotFoundException(commandName));
 
             // If the command has a super command, it cannot possible be right to be the first argument.
             if (baseCommand.getSuperCommand().isPresent())

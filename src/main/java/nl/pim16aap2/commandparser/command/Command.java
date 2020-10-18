@@ -9,6 +9,7 @@ import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.argument.OptionalArgument;
 import nl.pim16aap2.commandparser.argument.RepeatableArgument;
 import nl.pim16aap2.commandparser.argument.RequiredArgument;
+import nl.pim16aap2.commandparser.manager.CommandManager;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,6 +44,11 @@ public class Command
 
     protected final @NonNull String header;
 
+    /**
+     * The {@link CommandManager} that manages this command.
+     */
+    protected final @NonNull CommandManager commandManager;
+
     @Getter
     private Optional<Command> superCommand = Optional.empty();
 
@@ -54,7 +60,7 @@ public class Command
                     final @Nullable @Singular List<Command> subCommands,
                     final @NonNull Consumer<@NonNull CommandResult> commandExecutor,
                     final @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
-                    final boolean hidden, final @Nullable String header)
+                    final boolean hidden, final @Nullable String header, final @NonNull CommandManager commandManager)
     {
         this.name = name;
         this.description = Util.valOrDefault(description, "");
@@ -64,6 +70,7 @@ public class Command
         this.commandExecutor = commandExecutor;
         this.hidden = hidden;
         this.subCommands.forEach(subCommand -> subCommand.superCommand = Optional.of(this));
+        this.commandManager = commandManager;
         parseArguments(arguments);
     }
 
@@ -128,48 +135,4 @@ public class Command
                     "Unsupported type: " + argument.getClass().getCanonicalName());
         }
     }
-
-//    /**
-//     * Organizes {@link #requiredArguments}.
-//     * <p>
-//     * It makes sure that no two required arguments use the same index and that those with unassigned (i.e. negative)
-//     * indices are assigned a valid index.
-//     */
-//    private void organizeRequiredArguments()
-//    {
-//        for (final @NonNull RequiredArgument<?> requiredArgument : requiredArguments)
-//        {
-//
-//        }
-//    }
-//
-//    /**
-//     * Checks if the given index is not yet taken in the list of required arguments.
-//     *
-//     * @param idx     The index to check.
-//     * @param compare The {@link RequiredArgument} to compare the found required arguments to. This can be used to
-//     *                avoid
-//     * @return True if no other arguments use this index.
-//     */
-//    private boolean isIndexAvailable(final @NonNull Integer idx, final @Nullable RequiredArgument<?> compare)
-//    {
-//        for (final @NonNull RequiredArgument<?> requiredArgument : requiredArguments)
-//            if (requiredArgument.getPosition().equals(idx) && !requiredArgument.equals(compare))
-//                return false;
-//        return true;
-//    }
-//
-//    /**
-//     * Checks if the given index is not yet taken in the list of required arguments.
-//     *
-//     * @param idx The index to check.
-//     * @return True if no other arguments use this index.
-//     */
-//    private Integer getNextAvailableIndex()
-//    {
-//        for (final @NonNull RequiredArgument<?> requiredArgument : requiredArguments)
-//            if (requiredArgument.getPosition().equals(-1))
-//                return false;
-//        return true;
-//    }
 }

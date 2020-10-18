@@ -143,6 +143,7 @@ public class Main
             final String command = "subsubcommand_" + idx;
             final Command generic = Command
                 .builder().name(command)
+                .commandManager(commandManager)
                 .summary("This is the summary for subsubcommand_" + idx)
                 .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
@@ -153,6 +154,7 @@ public class Main
 
         final Command addOwner = Command
             .builder()
+            .commandManager(commandManager)
             .name("addowner")
             .description("Add 1 or more players or groups of players as owners of a door.")
             .summary("Add another owner to a door.")
@@ -196,6 +198,7 @@ public class Main
             final String command = "subcommand_" + idx;
             final Command generic = Command
                 .builder().name(command)
+                .commandManager(commandManager)
                 .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
@@ -205,6 +208,7 @@ public class Main
 
         final Command bigdoors = Command
             .builder()
+            .commandManager(commandManager)
             .name("bigdoors")
             .subCommand(addOwner)
             .subCommands(subcommands)
@@ -217,16 +221,19 @@ public class Main
         // TODO: Allow specifying the name instead of the subcommand instance?
         //       If the CommandManager becomes a builder, it can just retrieve the instances is the ctor.
         subcommands.forEach(commandManager::addCommand);
-        commandManager.addCommand(addOwner);
-        commandManager.addCommand(bigdoors);
+        subsubcommands.forEach(commandManager::addCommand);
+        commandManager.addCommand(addOwner).addCommand(bigdoors);
 
 
         {
             DefaultHelpCommand helpCommand = DefaultHelpCommand.builder().firstPageSize(2)
                                                                .pageSize(3)
                                                                .colorScheme(getColorScheme())
+//                                                               .colorScheme(getClearColorScheme())
                                                                .build();
-            System.out.println("=============================");
+//            helpCommand.renderLongCommand(addOwner);
+//            helpCommand.renderLongCommand(commandManager.getCommand("subsubcommand_2").get());
+
             for (int idx = 0; idx < 20; ++idx)
             {
                 final int page = idx;
@@ -239,6 +246,7 @@ public class Main
         return commandManager;
     }
 
+    @FunctionalInterface
     private interface CheckedSupplier<T, E extends Exception>
     {
         T get()
@@ -300,6 +308,7 @@ public class Main
             final TextComponent textComponent = new TextComponent(colorScheme);
             textComponent.add("Unstyled text!");
             System.out.println(textComponent);
+            System.out.println(textComponent.add(textComponent));
         }
 
         final TextComponent textComponent = new TextComponent(colorScheme);

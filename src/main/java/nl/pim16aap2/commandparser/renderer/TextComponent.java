@@ -30,6 +30,7 @@ public class TextComponent
         this.colorScheme = other.colorScheme;
         this.stringBuilder.append(other.stringBuilder);
         other.styledSections.forEach(section -> styledSections.add(new StyledSection(section)));
+        this.styledSize = other.styledSize;
     }
 
     public TextComponent add(final @NonNull String text)
@@ -56,10 +57,20 @@ public class TextComponent
             return this;
 
         final int currentLength = stringBuilder.length();
+
+        // Copy everything into an intermediate list to avoid ConcurrentModificationException
+        // when adding this text to itself. If it's not the same list, just add it directly.
+        final List<StyledSection> target = this.styledSections == other.styledSections ?
+                                           new ArrayList<>(styledSections.size()) : styledSections;
         other.styledSections.forEach(
-            styledSection -> styledSections.add(new StyledSection(styledSection.startIndex + currentLength,
-                                                                  styledSection.length,
-                                                                  styledSection.style)));
+            styledSection -> target.add(new StyledSection(styledSection.startIndex + currentLength,
+                                                          styledSection.length,
+                                                          styledSection.style)));
+
+        // If the lists are the same instance, the sections were put in a
+        // new map, so append that to the current list.
+        if (this.styledSections == other.styledSections)
+            styledSections.addAll(target);
 
         stringBuilder.append(other.stringBuilder);
         this.styledSize += other.styledSize;

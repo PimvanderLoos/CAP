@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -47,12 +48,33 @@ public class Util
      * @return The value in the {@link Iterable} object for which the search function returns true, otherwise {@link
      * Optional#empty()}.
      */
-    public static <T> Optional<T> searchIterable(final @NonNull Iterable<T> iterable,
-                                                 final @NonNull Function<T, Boolean> searchFun)
+    public @NonNull <T> Optional<T> searchIterable(final @NonNull Iterable<T> iterable,
+                                                   final @NonNull Function<T, Boolean> searchFun)
     {
         for (final T val : iterable)
             if (searchFun.apply(val))
                 return Optional.of(val);
         return Optional.empty();
+    }
+
+    /**
+     * Attempts to parse an integer from a String.
+     *
+     * @param str The String to parse.
+     * @return An {@link OptionalInt} containing the integer if the String was an integer, otherwise {@link
+     * OptionalInt#empty()}.
+     */
+    public @NonNull OptionalInt parseInt(final @Nullable String str)
+    {
+        if (str == null)
+            return OptionalInt.empty();
+        try
+        {
+            return OptionalInt.of(Integer.parseInt(str));
+        }
+        catch (NumberFormatException e)
+        {
+            return OptionalInt.empty();
+        }
     }
 }

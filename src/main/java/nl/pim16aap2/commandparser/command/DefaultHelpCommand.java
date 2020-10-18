@@ -4,15 +4,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.renderer.ArgumentRenderer;
 import nl.pim16aap2.commandparser.renderer.ColorScheme;
 import nl.pim16aap2.commandparser.renderer.TextComponent;
 import nl.pim16aap2.commandparser.renderer.TextType;
 import nl.pim16aap2.commandparser.util.Pair;
+import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * Represents the default {@link IHelpCommand}.
@@ -123,11 +126,31 @@ public class DefaultHelpCommand implements IHelpCommand
     }
 
     @Override
-    public @NonNull TextComponent render(@NonNull Command command)
-        throws IllegalValueException
+    public @NonNull TextComponent render(final @NonNull Command command, final @NonNull String val)
+        throws IllegalValueException, CommandNotFoundException
     {
-        // TODO: Why does this exist?
-        return render(command, 0);
+        final OptionalInt pageOpt = Util.parseInt(val);
+        if (pageOpt.isPresent())
+            return render(command, pageOpt.getAsInt());
+
+//        final @NonNull Optional<Command> subCommand = command.getSubCommand(val);
+        final @NonNull Optional<Command> subCommand = command.getCommandManager().getCommand(val);
+        if (!subCommand.isPresent())
+            throw new CommandNotFoundException(val);
+
+        return render(subCommand.get(), 0);
+    }
+
+    @Override
+    public @NonNull TextComponent renderLongCommand(final @NonNull Command command)
+    {
+        final TextComponent textComponent = new TextComponent(colorScheme);
+//        if (displayHeader && !command.getHeader().equals(""))
+//            textComponent.add(command.getHeader(), TextType.HEADER).add("\n");
+        final TextComponent basesuper = getBaseSuperCommand(command);
+        renderCommand(textComponent, command, getBaseSuperCommand(command));
+        renderArgumentsLong(textComponent, command);
+        return textComponent;
     }
 
     /**
@@ -136,25 +159,18 @@ public class DefaultHelpCommand implements IHelpCommand
      * Note that the {@link Command} that is provided inside the optional is also included if possible, so if this is
      * not desired, use this method with {@link Command#getSuperCommand()}.
      *
-     * @param textComponent The {@link TextComponent} to append the super {@link Command}s to. If this is null, a new
-     *                      {@link TextComponent} will be created starting with the {@link #COMMAND_PREFIX}.
-     * @param command       The {@link Optional} {@link Command} whose super commands to add to the text. If it has no
-     *                      super commands (or isn't {{@link Optional#isPresent()}}), it will only append the name of
-     *                      this command itself (if possible).
+     * @param command The {@link Optional} {@link Command} whose super commands to add to the text. If it has no super
+     *                commands (or isn't {{@link Optional#isPresent()}}), it will only append {@link #COMMAND_PREFIX}
+     *                and the name of this command itself (if possible).
      * @return The {@link TextComponent} with all the super {@link Command}s of the provided {@link Command}.
      */
-    protected @NonNull TextComponent getBaseSuperCommand(@Nullable TextComponent textComponent,
-                                                         final @NonNull Optional<Command> command)
+    protected @NonNull TextComponent getBaseSuperCommand(final @NonNull Optional<Command> command)
     {
-        if (textComponent == null)
-            textComponent = new TextComponent(colorScheme).add(COMMAND_PREFIX, TextType.COMMAND);
-
         // Base case
         if (!command.isPresent())
-            return textComponent;
+            return new TextComponent(colorScheme).add(COMMAND_PREFIX, TextType.COMMAND);
 
-        return textComponent.add(getBaseSuperCommand(textComponent, command.get().getSuperCommand()))
-                            .add(command.get().getName()).add(" ");
+        return getBaseSuperCommand(command.get().getSuperCommand()).add(command.get().getName()).add(" ");
     }
 
     /**
@@ -168,7 +184,7 @@ public class DefaultHelpCommand implements IHelpCommand
      */
     protected @NonNull TextComponent getBaseSuperCommand(final @NonNull Command command)
     {
-        return getBaseSuperCommand(null, command.getSuperCommand());
+        return getBaseSuperCommand(command.getSuperCommand());
     }
 
     protected @NonNull TextComponent renderFirstPage(final @NonNull TextComponent textComponent,
@@ -192,9 +208,10 @@ public class DefaultHelpCommand implements IHelpCommand
      * @param count         The number of {@link Command}s to render.
      * @return The number of commands that were added to the {@link TextComponent}.
      */
-    protected Pair<Integer, Integer> renderCommands(final @NonNull TextComponent textComponent,
-                                                    final @NonNull TextComponent superCommands,
-                                                    final @NonNull Command command, final int count, final int skip)
+    protected @NonNull Pair<Integer, Integer> renderCommands(final @NonNull TextComponent textComponent,
+                                                             final @NonNull TextComponent superCommands,
+                                                             final @NonNull Command command, final int count,
+                                                             final int skip)
     {
         // Added contains the number of commands added to the text.
         int added = 0;
@@ -252,7 +269,14 @@ public class DefaultHelpCommand implements IHelpCommand
                                  final @NonNull TextComponent superCommands)
     {
         textComponent.add(superCommands).add(command.getName(), TextType.COMMAND);
+        renderArgumentsShort(textComponent, command);
 
+        if (!command.getSummary().equals(""))
+            textComponent.add(summaryIndent).add(command.getSummary() + "\n", TextType.SUMMARY);
+    }
+
+    protected void renderArgumentsShort(final @NonNull TextComponent textComponent, final @NonNull Command command)
+    {
         // TODO: This should not be hardcoded like this.
         for (final Argument<?> argument : command.getRequiredArguments().values())
             textComponent.add(" ").add(argumentRenderer.render(argument));
@@ -262,9 +286,20 @@ public class DefaultHelpCommand implements IHelpCommand
 
         for (final Argument<?> argument : command.getRepeatableArguments().values())
             textComponent.add(" ").add(argumentRenderer.render(argument));
+        textComponent.add("\n");
+    }
 
-        if (!command.getSummary().equals(""))
-            textComponent.add("\n" + summaryIndent).add(command.getSummary(), TextType.SUMMARY);
+    protected void renderArgumentsLong(final @NonNull TextComponent textComponent, final @NonNull Command command)
+    {
+        // TODO: This should not be hardcoded like this.
+        for (final Argument<?> argument : command.getRequiredArguments().values())
+            textComponent.add(argumentRenderer.renderLong(argument, summaryIndent));
+
+        for (final Argument<?> argument : command.getOptionalArguments().values())
+            textComponent.add(argumentRenderer.renderLong(argument, summaryIndent));
+
+        for (final Argument<?> argument : command.getRepeatableArguments().values())
+            textComponent.add(argumentRenderer.renderLong(argument, summaryIndent));
         textComponent.add("\n");
     }
 }

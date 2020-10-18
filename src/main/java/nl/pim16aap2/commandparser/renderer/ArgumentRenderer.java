@@ -12,7 +12,7 @@ public class ArgumentRenderer
 {
     protected final @NonNull ColorScheme colorScheme;
 
-    public TextComponent render(final @NonNull Argument<?> argument)
+    public @NonNull TextComponent render(final @NonNull Argument<?> argument)
     {
         if (argument instanceof OptionalArgument)
             return renderOptional((OptionalArgument<?>) argument);
@@ -23,7 +23,12 @@ public class ArgumentRenderer
         throw new RuntimeException("Failed to determine type of argument: " + argument.getClass().getCanonicalName());
     }
 
-    protected TextComponent renderOptional(final @NonNull OptionalArgument<?> argument)
+    public @NonNull TextComponent renderLong(final @NonNull Argument<?> argument, final @NonNull String summaryIndent)
+    {
+        return render(argument).add("\n").add(summaryIndent).add(argument.getSummary(), TextType.SUMMARY);
+    }
+
+    protected @NonNull TextComponent renderOptional(final @NonNull OptionalArgument<?> argument)
     {
         final String suffix = argument instanceof RepeatableArgument ? "+" : "";
 
@@ -40,7 +45,7 @@ public class ArgumentRenderer
         return rendered.add("]" + suffix, TextType.OPTIONAL_PARAMETER);
     }
 
-    protected TextComponent renderRequired(final @NonNull RequiredArgument<?> argument)
+    protected @NonNull TextComponent renderRequired(final @NonNull RequiredArgument<?> argument)
     {
         return new TextComponent(colorScheme).add("<" + argument.getLabel() + ">", TextType.REQUIRED_PARAMETER);
     }
