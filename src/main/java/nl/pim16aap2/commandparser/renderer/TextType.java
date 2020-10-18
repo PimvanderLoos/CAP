@@ -40,6 +40,11 @@ public enum TextType
     SUMMARY,
 
     /**
+     * The {@link Command#getDescription()} of a {@link Command}.
+     */
+    DESCRIPTION,
+
+    /**
      * Regular text used for miscellaneous text.
      */
     REGULAR_TEXT,

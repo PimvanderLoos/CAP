@@ -50,8 +50,9 @@ class CommandParser
         System.out.print("Found parsedCommand: " + parsedCommand.getCommand().getName() +
                              " at idx: " + parsedCommand.getIndex());
 
-        return new CommandResult(parsedCommand.getCommand(), parseArguments(parsedCommand.getCommand(),
-                                                                            parsedCommand.getIndex()));
+        return new CommandResult(parsedCommand.getCommand(),
+                                 parseArguments(parsedCommand.getCommand(),
+                                                parsedCommand.getIndex()));
     }
 
     private @NonNull Map<@NonNull String, ParsedArgument<?>> prepareParsing(final @NonNull Command command)
@@ -192,7 +193,7 @@ class CommandParser
             if (baseCommand.getSuperCommand().isPresent())
                 throw new CommandNotFoundException(baseCommand.getName());
 
-            return getLastCommand(baseCommand, 1);
+            return getLastCommand(baseCommand, 0);
         }
 
         if (command.getSubCommands().isEmpty())

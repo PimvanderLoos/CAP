@@ -152,8 +152,11 @@ public class DefaultHelpCommand implements IHelpCommand
     @Override
     public @NonNull Text renderLongCommand(final @NonNull Command command)
     {
-        final Text text = new Text(colorScheme);
-        renderCommand(text, command, getBaseSuperCommand(command));
+        final Text text = getBaseSuperCommand(command).add(command.getName(), TextType.COMMAND);
+        renderArgumentsShort(text, command);
+
+        if (!command.getDescription().equals(""))
+            text.add("\n").add(summaryIndent).add(command.getDescription(), TextType.DESCRIPTION);
         renderArgumentsLong(text, command);
         return text;
     }

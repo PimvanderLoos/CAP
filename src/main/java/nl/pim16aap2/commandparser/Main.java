@@ -59,6 +59,7 @@ import java.util.List;
 //       to be able to override this. Alternatively, don't store the enable/disable string of the styles in the
 //       TextComponents, but just the TextStyle. Then get the strings in the toString method. This would allow
 //       changing the scheme at any time.
+// TODO: Support ResourceBundle.
 
 public class Main
 {
@@ -97,6 +98,12 @@ public class Main
                                    e.getCommand().getName() + "\"");
             e.printStackTrace();
         }
+        catch (IllegalValueException e)
+        {
+            System.out.println(
+                "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" + e.getCommand().getName() + "\"");
+            e.printStackTrace();
+        }
 
         System.out.println("=============\n");
     }
@@ -112,14 +119,15 @@ public class Main
         final ColorScheme colorScheme = getColorScheme();
         DefaultHelpCommand.builder().colorScheme(colorScheme).pageSize(16).firstPageSize(1).build();
 
-        String[] a = {"bigdoors", "addowner", "addowner", "myDoor", "-p=pim16aap2", "-a"};
+        String[] a = {"bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a"};
+        String[] b = {"bigdoors", "addowner", "-h"};
 //        String[] b = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
 //        String[] c = {"bigdoors", "help", "addowner"};
 //        String[] c = {"bigdoors", "help"};
 //        String[] f = {"help"};
 
         tryArgs(commandManager, a);
-//        tryArgs(commandManager, b);
+        tryArgs(commandManager, b);
 //        tryArgs(commandManager, c);
 //        tryArgs(commandManager, d);
 //        tryArgs(commandManager, e);
@@ -142,7 +150,9 @@ public class Main
 
     private static CommandManager initCommandManager()
     {
-        final CommandManager commandManager = new CommandManager(System.out::println);
+        final ColorScheme colorScheme = getColorScheme();
+
+        final CommandManager commandManager = new CommandManager(System.out::println, () -> colorScheme);
 
         final int subsubCommandCount = 5;
         final List<Command> subsubcommands = new ArrayList<>(subsubCommandCount);
@@ -226,7 +236,7 @@ public class Main
             .subCommands(subcommands)
             .commandExecutor(commandResult ->
                                  System.out.print("PARSED A COMMAND: " + commandResult.getCommand().getName()))
-            .hidden(true)
+//            .hidden(true)
             .build();
 
 

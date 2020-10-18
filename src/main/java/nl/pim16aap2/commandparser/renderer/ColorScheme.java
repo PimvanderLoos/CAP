@@ -145,6 +145,15 @@ public class ColorScheme
         }
 
         /**
+         * See {@link TextType#DESCRIPTION}.
+         */
+        public ColorSchemeBuilder descriptionStyle(final @NonNull TextComponent style)
+        {
+            styleMap.put(TextType.DESCRIPTION, style);
+            return this;
+        }
+
+        /**
          * See {@link TextType#REGULAR_TEXT}.
          */
         public ColorSchemeBuilder regularTextStyle(final @NonNull TextComponent style)
