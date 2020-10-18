@@ -230,6 +230,7 @@ public class DefaultHelpCommand implements IHelpCommand
             else
             {
                 renderCommand(textComponent, command, superCommands);
+                textComponent.add("\n");
                 ++added;
             }
         }
@@ -272,7 +273,7 @@ public class DefaultHelpCommand implements IHelpCommand
         renderArgumentsShort(textComponent, command);
 
         if (!command.getSummary().equals(""))
-            textComponent.add(summaryIndent).add(command.getSummary() + "\n", TextType.SUMMARY);
+            textComponent.add("\n").add(summaryIndent).add(command.getSummary(), TextType.SUMMARY);
     }
 
     protected void renderArgumentsShort(final @NonNull TextComponent textComponent, final @NonNull Command command)
@@ -286,20 +287,19 @@ public class DefaultHelpCommand implements IHelpCommand
 
         for (final Argument<?> argument : command.getRepeatableArguments().values())
             textComponent.add(" ").add(argumentRenderer.render(argument));
-        textComponent.add("\n");
     }
 
     protected void renderArgumentsLong(final @NonNull TextComponent textComponent, final @NonNull Command command)
     {
         // TODO: This should not be hardcoded like this.
         for (final Argument<?> argument : command.getRequiredArguments().values())
-            textComponent.add(argumentRenderer.renderLong(argument, summaryIndent));
+            textComponent.add("\n").add(argumentRenderer.renderLong(argument, summaryIndent));
 
         for (final Argument<?> argument : command.getOptionalArguments().values())
-            textComponent.add(argumentRenderer.renderLong(argument, summaryIndent));
+            textComponent.add("\n").add(argumentRenderer.renderLong(argument, summaryIndent));
 
         for (final Argument<?> argument : command.getRepeatableArguments().values())
-            textComponent.add(argumentRenderer.renderLong(argument, summaryIndent));
+            textComponent.add("\n").add(argumentRenderer.renderLong(argument, summaryIndent));
         textComponent.add("\n");
     }
 }

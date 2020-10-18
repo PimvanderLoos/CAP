@@ -231,8 +231,8 @@ public class Main
                                                                .colorScheme(getColorScheme())
 //                                                               .colorScheme(getClearColorScheme())
                                                                .build();
-//            helpCommand.renderLongCommand(addOwner);
-//            helpCommand.renderLongCommand(commandManager.getCommand("subsubcommand_2").get());
+            System.out.print(helpCommand.renderLongCommand(addOwner));
+            helpCommand.renderLongCommand(commandManager.getCommand("subsubcommand_2").get());
 
             for (int idx = 0; idx < 20; ++idx)
             {

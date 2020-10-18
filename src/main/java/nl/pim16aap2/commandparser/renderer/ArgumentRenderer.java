@@ -25,7 +25,10 @@ public class ArgumentRenderer
 
     public @NonNull TextComponent renderLong(final @NonNull Argument<?> argument, final @NonNull String summaryIndent)
     {
-        return render(argument).add("\n").add(summaryIndent).add(argument.getSummary(), TextType.SUMMARY);
+        final TextComponent textComponent = render(argument);
+        if (!argument.getSummary().equals(""))
+            textComponent.add("\n").add(summaryIndent).add(argument.getSummary(), TextType.SUMMARY);
+        return textComponent;
     }
 
     protected @NonNull TextComponent renderOptional(final @NonNull OptionalArgument<?> argument)
