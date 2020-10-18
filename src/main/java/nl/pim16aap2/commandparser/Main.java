@@ -51,6 +51,9 @@ import java.util.List;
 // TODO: Make is possible to have certain commands be server-only or player-only. These commands shouldn't show up in
 //       the help menus.
 // TODO: Maybe flag parameters (e.g. --admin), aka valueless parameters should have their own class?
+// TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
+//       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
+//       Perhaps this can be done via the color scheme?
 
 public class Main
 {

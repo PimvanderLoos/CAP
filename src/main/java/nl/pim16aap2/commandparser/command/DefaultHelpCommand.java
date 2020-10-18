@@ -66,10 +66,16 @@ public class DefaultHelpCommand implements IHelpCommand
 
     protected @NonNull ArgumentRenderer argumentRenderer;
 
+    /**
+     * Whether to start counting pages at 0 (<it>false</it>) or 1 (<it>true</it>). Default = true.
+     */
+    @Builder.Default
+    private boolean startAt1 = true;
+
     public DefaultHelpCommand(final @NonNull ColorScheme colorScheme, final int pageSize, final int firstPageSize,
                               final boolean displayHeader, final @NonNull String summaryIndent,
                               final boolean displayArgumentsForSimple,
-                              final @Nullable ArgumentRenderer argumentRenderer)
+                              final @Nullable ArgumentRenderer argumentRenderer, final boolean startAt1)
     {
         this.colorScheme = colorScheme;
         this.pageSize = pageSize;
@@ -78,6 +84,7 @@ public class DefaultHelpCommand implements IHelpCommand
         this.displayArgumentsForSimple = displayArgumentsForSimple;
         this.argumentRenderer = argumentRenderer == null ? new ArgumentRenderer(colorScheme) : argumentRenderer;
         this.summaryIndent = summaryIndent;
+        this.startAt1 = startAt1;
     }
 
     protected final int getCommandCount(final @NonNull Command command)
@@ -100,10 +107,12 @@ public class DefaultHelpCommand implements IHelpCommand
         return (int) Math.ceil((commandCount - firstPageSize) / (float) pageSize);
     }
 
-    protected void renderPageCount(final @NonNull TextComponent textComponent, final int page, final int pageCount)
+    protected void renderPageCountHeader(final @NonNull TextComponent textComponent,
+                                         final int page, final int pageCount)
     {
-        // TODO: Allow starting either at 0 or at 1.
-        textComponent.add(String.format("------- Page (%2d / %2d) -------\n", page, pageCount));
+        final int offset = startAt1 ? 1 : 0;
+        textComponent.add(String.format("------- Page (%2d / %2d) -------\n",
+                                        page + offset, pageCount + offset));
     }
 
     @Override
@@ -111,11 +120,12 @@ public class DefaultHelpCommand implements IHelpCommand
         throws IllegalValueException
     {
         final int pageCount = getPageCount(command);
-        if (page > pageCount)
+        final int firstPage = startAt1 ? 1 : 0;
+        if (page > pageCount || page < firstPage)
             throw new IllegalValueException(command, Integer.toString(page));
 
         TextComponent textComponent = new TextComponent(colorScheme);
-        renderPageCount(textComponent, page, pageCount);
+        renderPageCountHeader(textComponent, page, pageCount);
         if (page == 0)
             return renderFirstPage(textComponent, command);
 
@@ -131,9 +141,8 @@ public class DefaultHelpCommand implements IHelpCommand
     {
         final OptionalInt pageOpt = Util.parseInt(val);
         if (pageOpt.isPresent())
-            return render(command, pageOpt.getAsInt());
+            return render(command, pageOpt.getAsInt() - (startAt1 ? 1 : 0));
 
-//        final @NonNull Optional<Command> subCommand = command.getSubCommand(val);
         final @NonNull Optional<Command> subCommand = command.getCommandManager().getCommand(val);
         if (!subCommand.isPresent())
             throw new CommandNotFoundException(val);
