@@ -6,8 +6,9 @@ import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
-import nl.pim16aap2.commandparser.renderer.ArgumentRenderer;
 import nl.pim16aap2.commandparser.renderer.ColorScheme;
+import nl.pim16aap2.commandparser.renderer.DefaultArgumentRenderer;
+import nl.pim16aap2.commandparser.renderer.IArgumentRenderer;
 import nl.pim16aap2.commandparser.renderer.Text;
 import nl.pim16aap2.commandparser.renderer.TextType;
 import nl.pim16aap2.commandparser.util.Pair;
@@ -64,7 +65,7 @@ public class DefaultHelpCommand implements IHelpCommand
     @Builder.Default
     private boolean displayArgumentsForSimple = false;
 
-    protected @NonNull ArgumentRenderer argumentRenderer;
+    protected @NonNull IArgumentRenderer argumentRenderer;
 
     /**
      * Whether to start counting pages at 0 (<it>false</it>) or 1 (<it>true</it>). Default = true.
@@ -75,14 +76,14 @@ public class DefaultHelpCommand implements IHelpCommand
     public DefaultHelpCommand(final @NonNull ColorScheme colorScheme, final int pageSize, final int firstPageSize,
                               final boolean displayHeader, final @NonNull String summaryIndent,
                               final boolean displayArgumentsForSimple,
-                              final @Nullable ArgumentRenderer argumentRenderer, final boolean startAt1)
+                              final @Nullable IArgumentRenderer argumentRenderer, final boolean startAt1)
     {
         this.colorScheme = colorScheme;
         this.pageSize = pageSize;
         this.firstPageSize = firstPageSize;
         this.displayHeader = displayHeader;
         this.displayArgumentsForSimple = displayArgumentsForSimple;
-        this.argumentRenderer = argumentRenderer == null ? new ArgumentRenderer(colorScheme) : argumentRenderer;
+        this.argumentRenderer = argumentRenderer == null ? new DefaultArgumentRenderer(colorScheme) : argumentRenderer;
         this.summaryIndent = summaryIndent;
         this.startAt1 = startAt1;
     }

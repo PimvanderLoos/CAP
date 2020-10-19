@@ -8,10 +8,11 @@ import nl.pim16aap2.commandparser.argument.RepeatableArgument;
 import nl.pim16aap2.commandparser.argument.RequiredArgument;
 
 @RequiredArgsConstructor
-public class ArgumentRenderer
+public class DefaultArgumentRenderer implements IArgumentRenderer
 {
     protected final @NonNull ColorScheme colorScheme;
 
+    @Override
     public @NonNull Text render(final @NonNull Argument<?> argument)
     {
         if (argument instanceof OptionalArgument)
@@ -23,6 +24,7 @@ public class ArgumentRenderer
         throw new RuntimeException("Failed to determine type of argument: " + argument.getClass().getCanonicalName());
     }
 
+    @Override
     public @NonNull Text renderLong(final @NonNull Argument<?> argument, final @NonNull String summaryIndent)
     {
         final Text text = render(argument);
