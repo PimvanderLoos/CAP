@@ -4,7 +4,7 @@ import lombok.NonNull;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
-import nl.pim16aap2.commandparser.renderer.Text;
+import nl.pim16aap2.commandparser.text.Text;
 
 public interface IHelpCommand
 {

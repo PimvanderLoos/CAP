@@ -9,10 +9,10 @@ import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
-import nl.pim16aap2.commandparser.renderer.ColorScheme;
-import nl.pim16aap2.commandparser.renderer.Text;
-import nl.pim16aap2.commandparser.renderer.TextComponent;
-import nl.pim16aap2.commandparser.renderer.TextType;
+import nl.pim16aap2.commandparser.text.ColorScheme;
+import nl.pim16aap2.commandparser.text.Text;
+import nl.pim16aap2.commandparser.text.TextComponent;
+import nl.pim16aap2.commandparser.text.TextType;
 
 import java.util.ArrayList;
 import java.util.List;

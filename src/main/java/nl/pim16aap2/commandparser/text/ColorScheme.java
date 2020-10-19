@@ -1,4 +1,4 @@
-package nl.pim16aap2.commandparser.renderer;
+package nl.pim16aap2.commandparser.text;
 
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;

@@ -6,6 +6,9 @@ import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.argument.OptionalArgument;
 import nl.pim16aap2.commandparser.argument.RepeatableArgument;
 import nl.pim16aap2.commandparser.argument.RequiredArgument;
+import nl.pim16aap2.commandparser.text.ColorScheme;
+import nl.pim16aap2.commandparser.text.Text;
+import nl.pim16aap2.commandparser.text.TextType;
 
 @RequiredArgsConstructor
 public class DefaultArgumentRenderer implements IArgumentRenderer

@@ -2,6 +2,7 @@ package nl.pim16aap2.commandparser.renderer;
 
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.text.Text;
 
 /**
  * Represents a renderer for arguments.

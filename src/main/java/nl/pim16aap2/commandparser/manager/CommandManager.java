@@ -8,8 +8,8 @@ import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
-import nl.pim16aap2.commandparser.renderer.ColorScheme;
-import nl.pim16aap2.commandparser.renderer.Text;
+import nl.pim16aap2.commandparser.text.ColorScheme;
+import nl.pim16aap2.commandparser.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
