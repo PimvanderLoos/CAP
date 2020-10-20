@@ -3,12 +3,12 @@ package nl.pim16aap2.commandparser;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
-import nl.pim16aap2.commandparser.command.DefaultHelpCommand;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
+import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.text.TextComponent;
@@ -117,7 +117,7 @@ public class Main
         CommandManager commandManager = initCommandManager();
 
         final ColorScheme colorScheme = getColorScheme();
-        DefaultHelpCommand.builder().colorScheme(colorScheme).pageSize(16).firstPageSize(1).build();
+        DefaultHelpCommandRenderer.builder().colorScheme(colorScheme).pageSize(16).firstPageSize(1).build();
 
         String[] a = {"bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a"};
         String[] b = {"bigdoors", "addowner", "-h"};
@@ -248,11 +248,11 @@ public class Main
 
 
         {
-            DefaultHelpCommand helpCommand = DefaultHelpCommand.builder().firstPageSize(2)
-                                                               .pageSize(3)
+            DefaultHelpCommandRenderer helpCommand = DefaultHelpCommandRenderer.builder().firstPageSize(2)
+                                                                               .pageSize(3)
 //                                                               .colorScheme(getColorScheme())
-                                                               .colorScheme(getClearColorScheme())
-                                                               .build();
+                                                                               .colorScheme(getClearColorScheme())
+                                                                               .build();
             System.out.println("==============================");
             System.out.println("==============================");
             System.out.print(helpCommand.renderLongCommand(addOwner));

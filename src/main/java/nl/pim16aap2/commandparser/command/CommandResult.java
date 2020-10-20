@@ -5,6 +5,8 @@ import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
+import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
+import nl.pim16aap2.commandparser.renderer.IHelpCommandRenderer;
 
 import java.util.Map;
 import java.util.Optional;
@@ -54,7 +56,7 @@ public class CommandResult
         }
 
         // TODO: Request this from the command.
-        IHelpCommand helpCommand = DefaultHelpCommand.builder().colorScheme(
+        IHelpCommandRenderer helpCommand = DefaultHelpCommandRenderer.builder().colorScheme(
             getCommand().getCommandManager().getColorScheme().get()).build();
 
         if (helpType == HelpType.LONG_HELP)
@@ -78,7 +80,7 @@ public class CommandResult
          * <p>
          * If the value is both not empty and not an integer, it will work like {@link #LONG_HELP}.
          * <p>
-         * See {@link IHelpCommand#render(Command, String)}.
+         * See {@link IHelpCommandRenderer#render(Command, String)}.
          */
         SUBCOMMANDS,
 

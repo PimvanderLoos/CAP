@@ -117,7 +117,7 @@ public class Command
         if (this.addDefaultHelpArgument)
         {
             optionalArguments.put(DEFAULT_HELP_ARGUMENT.getName(), DEFAULT_HELP_ARGUMENT);
-            this.arguments.put(DEFAULT_HELP_ARGUMENT.getName(), DEFAULT_HELP_ARGUMENT); // TODO: This is dumb
+            this.arguments.put(DEFAULT_HELP_ARGUMENT.getName(), DEFAULT_HELP_ARGUMENT);
         }
 
         if (arguments == null)
