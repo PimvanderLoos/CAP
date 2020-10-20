@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CommandNotFoundException extends Exception
+public class CommandNotFoundException extends CommandParserException
 {
     @Getter
     private final @NonNull String missingCommand;

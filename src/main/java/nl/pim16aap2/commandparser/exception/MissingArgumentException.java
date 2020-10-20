@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.command.Command;
 
-public class MissingArgumentException extends Exception
+public class MissingArgumentException extends CommandParserException
 {
     @Getter
     private final String missingArgument;

@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.command.Command;
 
-public class IllegalValueException extends Exception
+public class IllegalValueException extends CommandParserException
 {
     @Getter
     private final String illegalValue;

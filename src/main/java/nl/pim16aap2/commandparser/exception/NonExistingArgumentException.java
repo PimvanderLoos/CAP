@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.command.Command;
 
-public class NonExistingArgumentException extends Exception
+public class NonExistingArgumentException extends CommandParserException
 {
     @Getter
     private final @NonNull String nonExistingArgument;
