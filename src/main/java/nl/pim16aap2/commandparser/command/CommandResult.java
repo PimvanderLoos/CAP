@@ -3,8 +3,7 @@ package nl.pim16aap2.commandparser.command;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
-import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
-import nl.pim16aap2.commandparser.exception.IllegalValueException;
+import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.renderer.IHelpCommandRenderer;
 
@@ -25,12 +24,14 @@ public class CommandResult
     {
         this.command = command;
         this.parsedArguments = parsedArguments;
-        if (helpRequested(parsedArguments))
+
+        // TODO: Clean this up.
+        if (command instanceof DefaultHelpCommand)
+            helpType = HelpType.NONE;
+        else if (helpRequested(parsedArguments))
             helpType = HelpType.LONG_HELP;
         else
             helpType = HelpType.NONE;
-        // TODO: The HelpCommand should be an actual command and its executor should take care of the third option.
-        //       This won't require any updates to the parser.
     }
 
     private boolean helpRequested(final @NonNull Map<@NonNull String, Argument.ParsedArgument<?>> parsedArguments)
@@ -56,7 +57,7 @@ public class CommandResult
     }
 
     public void run()
-        throws IllegalValueException, CommandNotFoundException
+        throws CommandParserException
     {
         if (helpType == HelpType.NONE)
         {

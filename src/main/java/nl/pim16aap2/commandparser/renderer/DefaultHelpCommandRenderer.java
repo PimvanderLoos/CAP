@@ -88,6 +88,11 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         this.startAt1 = startAt1;
     }
 
+    public static @NonNull DefaultHelpCommandRenderer getDefault()
+    {
+        return DefaultHelpCommandRenderer.builder().colorScheme(ColorScheme.builder().build()).build();
+    }
+
     protected final int getCommandCount(final @NonNull Command command)
     {
         // TODO: Store this in the Command itself. Just do it on creation, then ensure that
@@ -147,7 +152,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (!subCommand.isPresent())
             throw new CommandNotFoundException(val);
 
-        return render(subCommand.get(), 0);
+        return renderLongCommand(subCommand.get());
     }
 
     @Override

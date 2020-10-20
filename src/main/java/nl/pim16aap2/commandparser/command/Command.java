@@ -9,16 +9,17 @@ import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.argument.OptionalArgument;
 import nl.pim16aap2.commandparser.argument.RepeatableArgument;
 import nl.pim16aap2.commandparser.argument.RequiredArgument;
+import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
+import nl.pim16aap2.commandparser.util.CheckedConsumer;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Getter
 public class Command
@@ -28,8 +29,10 @@ public class Command
 
     protected final @NonNull String name;
 
+    @Setter
     protected @NonNull String description;
 
+    @Setter
     protected @NonNull String summary;
 
     protected final @NonNull List<@NonNull Command> subCommands;
@@ -43,39 +46,40 @@ public class Command
 
     protected final @NonNull Map<@NonNull String, @NonNull Argument<?>> arguments = new HashMap<>();
 
-    protected final @NonNull Consumer<@NonNull CommandResult> commandExecutor;
+    protected final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor;
 
-    protected final @NonNull String header;
+    @Setter
+    protected @NonNull String header;
 
     /**
      * The {@link CommandManager} that manages this command.
      */
     protected final @NonNull CommandManager commandManager;
 
-    @Getter
     private Optional<Command> superCommand = Optional.empty();
 
     @Setter
     protected boolean hidden;
 
-    @Getter
     protected boolean addDefaultHelpArgument;
 
-    @Builder
-    private Command(final @NonNull String name, final @Nullable String description, final @Nullable String summary,
-                    final @Nullable @Singular List<Command> subCommands,
-                    final @NonNull Consumer<@NonNull CommandResult> commandExecutor,
-                    final @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
-                    final boolean hidden, final @Nullable String header, final @NonNull CommandManager commandManager,
-                    final @Nullable Boolean addDefaultHelpArgument)
+    @Builder(builderMethodName = "commandBuilder")
+    protected Command(final @NonNull String name, final @Nullable String description, final @Nullable String summary,
+                      final @Nullable @Singular List<Command> subCommands,
+                      final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor,
+                      final @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
+                      final boolean hidden, final @Nullable String header, final @NonNull CommandManager commandManager,
+                      final @Nullable Boolean addDefaultHelpArgument, final @Nullable Boolean addDefaultHelpSubCommand)
     {
         this.name = name;
         this.description = Util.valOrDefault(description, "");
         this.summary = Util.valOrDefault(summary, "");
         this.header = Util.valOrDefault(header, "");
-        this.subCommands = Util.valOrDefault(subCommands, Collections.emptyList());
+        this.subCommands = new ArrayList<>(Util.valOrDefault(subCommands, new ArrayList<>(0)));
         this.commandExecutor = commandExecutor;
         this.hidden = hidden;
+        if (addDefaultHelpSubCommand != null && addDefaultHelpSubCommand)
+            this.subCommands.add(0, DefaultHelpCommand.getDefault(commandManager));
         this.subCommands.forEach(subCommand -> subCommand.superCommand = Optional.of(this));
         this.commandManager = commandManager;
         this.addDefaultHelpArgument = Util.valOrDefault(addDefaultHelpArgument, false);

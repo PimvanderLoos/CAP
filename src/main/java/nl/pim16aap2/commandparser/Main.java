@@ -4,6 +4,7 @@ import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
+import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
@@ -13,6 +14,7 @@ import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.text.TextComponent;
 import nl.pim16aap2.commandparser.text.TextType;
+import nl.pim16aap2.commandparser.util.CheckedSupplier;
 
 import java.io.EOFException;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import java.util.List;
 //       in a help menu to execute the help command for that command.
 // TODO: Allow positional optional arguments. Perhaps Required and OptionalPositional can both extend a Positional interface?
 //       Maybe also extend a FlaggedArgument interface for stuff that does require flags?
+//       This can be useful for stuff like "/bigdoors help addowner".
 // TODO: Allow using space as a separator of flag-value pairs.
 // TODO: Make a class somewhere where you can register ColorScheme objects. This class can then be used for caching
 //       stuff like finished Texts etc.
@@ -58,6 +61,8 @@ import java.util.List;
 //       TextComponents, but just the TextStyle. Then get the strings in the toString method. This would allow
 //       changing the scheme at any time.
 // TODO: Support ResourceBundle.
+// TODO: For the long help, maybe fall back to the summary if no description is available?
+// TODO: Should no-arg return help?
 
 public class Main
 {
@@ -107,6 +112,11 @@ public class Main
             System.out.println("EOFException!");
             e.printStackTrace();
         }
+        catch (CommandParserException e)
+        {
+            System.out.println("General CommandParserException!");
+            e.printStackTrace();
+        }
 
         System.out.println("=============\n");
     }
@@ -131,6 +141,8 @@ public class Main
 //        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
 //
 //        tryArgs(commandManager, "bigdoors", "help", "addowner");
+        tryArgs(commandManager, "bigdoors", "help", "-h=addowner");
+        tryArgs(commandManager, "bigdoors", "help", "-h=1");
 //        tryArgs(commandManager, "bigdoors", "help");
 //        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
     }
@@ -147,7 +159,7 @@ public class Main
         {
             final String command = "subsubcommand_" + idx;
             final Command generic = Command
-                .builder().name(command)
+                .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
                 .commandManager(commandManager)
                 .summary("This is the summary for subsubcommand_" + idx)
@@ -159,7 +171,7 @@ public class Main
         }
 
         final Command addOwner = Command
-            .builder()
+            .commandBuilder()
             .commandManager(commandManager)
             .name("addowner")
             .addDefaultHelpArgument(true)
@@ -204,7 +216,7 @@ public class Main
         {
             final String command = "subcommand_" + idx;
             final Command generic = Command
-                .builder().name(command)
+                .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
                 .commandManager(commandManager)
                 .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
@@ -215,9 +227,10 @@ public class Main
         }
 
         final Command bigdoors = Command
-            .builder()
+            .commandBuilder()
             .commandManager(commandManager)
             .addDefaultHelpArgument(true)
+            .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .subCommand(addOwner)
             .subCommands(subcommands)
@@ -263,13 +276,6 @@ public class Main
                 tryHelpCommand(() -> helpCommand.render(bigdoors, page));
             }
         }
-    }
-
-    @FunctionalInterface
-    private interface CheckedSupplier<T, E extends Exception>
-    {
-        T get()
-            throws E;
     }
 
     private static void tryHelpCommand(CheckedSupplier<Text, IllegalValueException> sup)
