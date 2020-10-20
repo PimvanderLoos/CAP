@@ -57,6 +57,9 @@ import java.util.List;
 //       TextComponents, but just the TextStyle. Then get the strings in the toString method. This would allow
 //       changing the scheme at any time.
 // TODO: Support ResourceBundle.
+// TODO: When parsing stuff, respect quotation marks. `"a b"` should return in 1 string: `a b`.
+//       Append stuff as well, `aaa" "b` should return a single string `aaa b`.
+//       This should work for both single and double quotation marks. Perhaps this can be done using a preprocessor.
 
 public class Main
 {
