@@ -58,7 +58,6 @@ import java.util.List;
 //       TextComponents, but just the TextStyle. Then get the strings in the toString method. This would allow
 //       changing the scheme at any time.
 // TODO: Support ResourceBundle.
-// TODO: Make sure that missing optional values are treated properly. E.g. "-p=".
 
 public class Main
 {
@@ -125,7 +124,7 @@ public class Main
 
 //        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
 //        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
 //        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
 //        tryArgs(commandManager, "bigdoors", "addowner", "-h");
 //        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
