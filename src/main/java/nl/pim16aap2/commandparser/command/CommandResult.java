@@ -25,13 +25,22 @@ public class CommandResult
     {
         this.command = command;
         this.parsedArguments = parsedArguments;
-        if (parsedArguments.get(DEFAULT_HELP_ARGUMENT.getName()) != null ||
-            parsedArguments.get(DEFAULT_HELP_ARGUMENT.getLongName()) != null)
+        if (helpRequested(parsedArguments))
             helpType = HelpType.LONG_HELP;
         else
             helpType = HelpType.NONE;
         // TODO: The HelpCommand should be an actual command and its executor should take care of the third option.
         //       This won't require any updates to the parser.
+    }
+
+    private boolean helpRequested(final @NonNull Map<@NonNull String, Argument.ParsedArgument<?>> parsedArguments)
+    {
+        Argument.ParsedArgument<?> help = parsedArguments.get(DEFAULT_HELP_ARGUMENT.getName());
+        if (help != null && help.getValue() != null)
+            return true;
+
+        Argument.ParsedArgument<?> longHelp = parsedArguments.get(DEFAULT_HELP_ARGUMENT.getLongName());
+        return longHelp != null && longHelp.getValue() != null;
     }
 
     public @NonNull Optional<Argument.ParsedArgument<?>> getParsedArgumentOpt(final @NonNull String name)
