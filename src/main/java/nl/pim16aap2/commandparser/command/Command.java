@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 @Getter
 public class Command
 {
-    static final @NonNull OptionalArgument<@NonNull Boolean> DEFAULT_HELP_ARGUMENT = Argument.FlagArgument
+    static final @NonNull OptionalArgument<Boolean> DEFAULT_HELP_ARGUMENT = Argument.FlagArgument
         .getOptional(true).name("h").longName("help").summary("Displays the help menu for this command.").build();
 
     protected final @NonNull String name;

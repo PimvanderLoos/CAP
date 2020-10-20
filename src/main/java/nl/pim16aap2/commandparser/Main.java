@@ -14,6 +14,7 @@ import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.text.TextComponent;
 import nl.pim16aap2.commandparser.text.TextType;
 
+import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,9 +58,7 @@ import java.util.List;
 //       TextComponents, but just the TextStyle. Then get the strings in the toString method. This would allow
 //       changing the scheme at any time.
 // TODO: Support ResourceBundle.
-// TODO: When parsing stuff, respect quotation marks. `"a b"` should return in 1 string: `a b`.
-//       Append stuff as well, `aaa" "b` should return a single string `aaa b`.
-//       This should work for both single and double quotation marks. Perhaps this can be done using a preprocessor.
+// TODO: Make sure that missing optional values are treated properly. E.g. "-p=".
 
 public class Main
 {
@@ -104,6 +103,11 @@ public class Main
                 "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" + e.getCommand().getName() + "\"");
             e.printStackTrace();
         }
+        catch (EOFException e)
+        {
+            System.out.println("EOFException!");
+            e.printStackTrace();
+        }
 
         System.out.println("=============\n");
     }
@@ -112,40 +116,24 @@ public class Main
     {
         String executor = "mip";
 
-        testTextComponents();
-
+//        testTextComponents();
         CommandManager commandManager = initCommandManager();
+//        testHelpRenderer(commandManager);
 
         final ColorScheme colorScheme = getColorScheme();
         DefaultHelpCommandRenderer.builder().colorScheme(colorScheme).pageSize(16).firstPageSize(1).build();
 
-        String[] a = {"bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a"};
-        String[] b = {"bigdoors", "addowner", "-h"};
-//        String[] b = {"addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a"};
-//        String[] c = {"bigdoors", "help", "addowner"};
-//        String[] c = {"bigdoors", "help"};
-//        String[] f = {"help"};
-
-        tryArgs(commandManager, a);
-        tryArgs(commandManager, b);
-//        tryArgs(commandManager, c);
-//        tryArgs(commandManager, d);
-//        tryArgs(commandManager, e);
-//        tryArgs(commandManager, f);
-
-
-//        String[] a = {"bigdoors", "addowner", "myDoor", "-p", "pim16aap2", "--admin"};
-//        String[] b = {"bigdoors", "help", "addowner"};
-//        String[] c = {"addowner", "myDoor", "-p ", "pim16aap2", "--admin"};
-//        String[] d = {"addowner", "myDoor", "-p ", "pim16aap2", "-p ", "pim16aap3", "--admin"};
-//        String[] e = {"help"};
-
-
-//        String[] a = {"bigdoors", "addowner", "myDoor", "-p", "pim16aap2", "--admin"};
-//        String[] b = {"bigdoors", "help", "addowner"};
-//        String[] c = {"addowner", "myDoor", "-p ", "pim16aap2", "--admin"};
-//        String[] d = {"addowner", "myDoor", "-p ", "pim16aap2", "-p ", "pim16aap3", "--admin"};
-//        String[] e = {"help"};
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "-h");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
+//        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
+//
+//        tryArgs(commandManager, "bigdoors", "help", "addowner");
+//        tryArgs(commandManager, "bigdoors", "help");
+//        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
     }
 
     private static CommandManager initCommandManager()
@@ -246,6 +234,15 @@ public class Main
         subsubcommands.forEach(commandManager::addCommand);
         commandManager.addCommand(addOwner).addCommand(bigdoors);
 
+        return commandManager;
+    }
+
+    private static void testHelpRenderer(final @NonNull CommandManager commandManager)
+    {
+        final @NonNull Command addOwner = commandManager.getCommand("addowner").orElseThrow(
+            () -> new NullPointerException("Could not find command addowner"));
+        final @NonNull Command bigdoors = commandManager.getCommand("bigdoors").orElseThrow(
+            () -> new NullPointerException("Could not find command bigdoors"));
 
         {
             DefaultHelpCommandRenderer helpCommand = DefaultHelpCommandRenderer.builder().firstPageSize(2)
@@ -267,9 +264,6 @@ public class Main
                 tryHelpCommand(() -> helpCommand.render(bigdoors, page));
             }
         }
-
-
-        return commandManager;
     }
 
     @FunctionalInterface

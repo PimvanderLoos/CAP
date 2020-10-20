@@ -15,11 +15,14 @@ import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.EOFException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static nl.pim16aap2.commandparser.argument.Argument.ParsedArgument;
@@ -27,7 +30,7 @@ import static nl.pim16aap2.commandparser.argument.RepeatableArgument.ParsedRepea
 
 class CommandParser
 {
-    private final @NonNull String[] args;
+    private final @NonNull List<String> args;
     final @NonNull CommandManager commandManager;
 
     private static final char ARGUMENT_PREFIX = '-';
@@ -35,11 +38,61 @@ class CommandParser
     // TODO: Allow space to be used as a separator
     private static final String SEPARATOR = "=";
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
+    private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
     public CommandParser(final @NonNull CommandManager commandManager, final @NonNull String[] args)
+        throws EOFException
     {
-        this.args = args;
+        this.args = preprocess(args);
         this.commandManager = commandManager;
+    }
+
+    private @NonNull List<String> preprocess(final @NonNull String[] rawArgs)
+        throws EOFException
+    {
+        final ArrayList<String> argsList = new ArrayList<>(rawArgs.length);
+
+        @Nullable String arg = null;
+        for (int idx = 0; idx < rawArgs.length; ++idx)
+        {
+            String entry = rawArgs[idx];
+            final Matcher matcher = NON_ESCAPED_QUOTATION_MARKS.matcher(entry);
+            int count = 0;
+            while (matcher.find())
+                ++count;
+
+            if (count > 0)
+                entry = matcher.replaceAll("");
+
+            // When there's an even number of (non-escaped) quotation marks, it means that there aren't any spaces
+            // between them and as such, we can ignore them.
+            if (count % 2 == 0)
+            {
+                // If arg is null, it means that we don't have to append the current block to another one
+                // As such, we can add it to the list directly. Otherwise, we can add it to the arg and look for the
+                // termination quotation mark in the next string.
+                if (arg == null)
+                    argsList.add(entry);
+                else
+                    arg += entry;
+            }
+            else
+            {
+                if (arg == null)
+                    arg = entry;
+                else
+                {
+                    argsList.add(arg + entry);
+                    arg = null;
+                }
+            }
+
+            if (arg != null && idx == (rawArgs.length - 1))
+                throw new EOFException();
+        }
+
+        argsList.trimToSize();
+        return argsList;
     }
 
     public @NonNull CommandResult parse()
@@ -80,9 +133,9 @@ class CommandParser
         final int requiredArgumentIdx = 0;
 
         System.out.println();
-        for (int pos = idx + 1; pos < args.length; ++pos)
+        for (int pos = idx + 1; pos < args.size(); ++pos)
         {
-            final @Nullable String nextArg = args[pos];
+            final @Nullable String nextArg = args.get(pos);
             System.out.println("nextArg: " + nextArg);
             if (nextArg.charAt(0) == ARGUMENT_PREFIX)
             {
@@ -185,7 +238,7 @@ class CommandParser
             if (idx != 0)
                 throw new CommandNotFoundException("Command at index " + idx);
 
-            final @Nullable String commandName = args.length > idx ? args[idx] : null;
+            final @Nullable String commandName = args.size() > idx ? args.get(idx) : null;
             final Command baseCommand = commandManager.getCommand(commandName)
                                                       .orElseThrow(() -> new CommandNotFoundException(commandName));
 
@@ -200,7 +253,7 @@ class CommandParser
             return new ParsedCommand(command, idx);
 
         final int nextIdx = idx + 1;
-        final @Nullable String nextArg = args.length > nextIdx ? args[nextIdx] : null;
+        final @Nullable String nextArg = args.size() > nextIdx ? args.get(nextIdx) : null;
         // If there's no argument available after the current one, we've reached the end of the arguments.
         // This means that the last command we found is the last argument (by definition), so return that.
         if (nextArg == null)

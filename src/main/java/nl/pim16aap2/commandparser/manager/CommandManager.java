@@ -12,6 +12,7 @@ import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.EOFException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,10 +30,39 @@ public class CommandManager
     @Getter
     private final @NonNull Supplier<ColorScheme> colorScheme;
 
-    public @NonNull CommandResult parseCommand(String... cmd)
-        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException
+    /**
+     * Parses a string containing multiple arguments delimited by spaces.
+     * <p>
+     * See {@link #parseCommand(String...)}.
+     *
+     * @param args A single String containing multiple arguments.
+     */
+    public @NonNull CommandResult parseCommand(String args)
+        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException
     {
-        return new CommandParser(this, cmd).parse();
+        return parseCommand(args.split(" "));
+    }
+
+    /**
+     * Parses an array of commandline arguments.
+     *
+     * @param args The commandline arguments to parse split by spaces.
+     *             <p>
+     *             If spaces are required in a value, use double quotation marks. Quotation marks that are not escaped
+     *             will be removed.
+     * @return The {@link CommandResult} containing the parsed arguments.
+     *
+     * @throws CommandNotFoundException     If a specified command could not be found.
+     * @throws NonExistingArgumentException If a specified argument could not be found. E.g. '-p=player' for a command
+     *                                      for which no argument named "p" was registered.
+     * @throws MissingArgumentException     If a required argument was not provided.
+     * @throws EOFException                 If there are unmatched quotation marks. E.g. '-p="player'. Note that the
+     *                                      matching quotation mark can be in another string further down the array.
+     */
+    public @NonNull CommandResult parseCommand(String... args)
+        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException
+    {
+        return new CommandParser(this, args).parse();
     }
 
     public @NonNull CommandManager addCommand(final @NonNull Command command)
