@@ -63,6 +63,14 @@ import java.util.List;
 // TODO: Support ResourceBundle.
 // TODO: For the long help, maybe fall back to the summary if no description is available?
 // TODO: Should no-arg return help?
+// TODO: Do not use 'helpful' messages in exceptions, but just variables. Whomever catches the exception
+//       Should be able to easily parse it themselves. If an exception requires additional text to explain it
+//       then it's time to create a new type or at the very least a new constructor.
+// TODO: For the ColorScheme, make the disableAll or whatever it's called optional. Just accept a nullable String
+//       to disable every style in its constructor. When not specified, the text should always terminate with the
+//       specific style's off (not with any disableAll), and when it is specified, it should just use that one variable.
+//       Furthermore, styles should have a second constructor that uses a default 'off' value that's just an empty
+//       String for cases like this.
 
 public class Main
 {
