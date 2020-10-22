@@ -57,17 +57,11 @@ import java.util.List;
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
-// TODO: Right now the DefaultCommandHandler stores a ColorScheme which is then always used. It would probably be nice
-//       to be able to override this. Alternatively, don't store the enable/disable string of the styles in the
-//       TextComponents, but just the TextStyle. Then get the strings in the toString method. This would allow
-//       changing the scheme at any time.
 // TODO: Support ResourceBundle.
 // TODO: For the long help, maybe fall back to the summary if no description is available?
-// TODO: Should no-arg return help?
 // TODO: Do not use 'helpful' messages in exceptions, but just variables. Whomever catches the exception
 //       Should be able to easily parse it themselves. If an exception requires additional text to explain it
 //       then it's time to create a new type or at the very least a new constructor.
-// TODO: Consider storing the help command in a special type or something. Then you could much more simply reference it.
 // TODO: Every command needs to be able to print its own help message. Maybe every command should have its own usage
 //       renderer? The help renderer can just use that to render the complete help command.
 // TODO: Make it possible to use functions to verify arguments. E.g. for IntArgument: Arg must be in [1, 10].
@@ -76,6 +70,12 @@ import java.util.List;
 //       For the BukkitChatColor, the builder can just accept ChatColors and take care of the default off value /
 //       instantiating TextComponents.
 // TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
+// TODO: For the exceptions, consider using some kind of variable to enable/disable stacktraces. While useful for
+//       debugging, it's entirely useless for regular use while it's still quite costly.
+//       Consider using this option:
+//       https://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html#:~:text=writableStackTrace
+// TODO: Store the HelpArgument in a command separately, so that we can
+//       actually figure out which argument is the help argument.
 
 public class Main
 {
@@ -93,7 +93,7 @@ public class Main
         final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
-        commandSender.setColorScheme(Main.getColorScheme());
+//        commandSender.setColorScheme(Main.getColorScheme());
 
         try
         {
@@ -140,25 +140,28 @@ public class Main
     {
         String executor = "mip";
 
-        testTextComponents();
+//        testTextComponents();
         CommandManager commandManager = initCommandManager();
 //        testHelpRenderer(commandManager);
 
-        DefaultHelpCommandRenderer.builder().pageSize(16).firstPageSize(1).build();
+//        DefaultHelpCommandRenderer.builder().pageSize(16).firstPageSize(1).build();
 
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "-h");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "-h");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
 //        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
 //
 //        tryArgs(commandManager, "bigdoors", "help", "addowner");
         tryArgs(commandManager, "bigdoors", "help", "-h=addowner");
         tryArgs(commandManager, "bigdoors");
-        tryArgs(commandManager, "bigdoors", "help", "-h=1");
+//        tryArgs(commandManager, "bigdoors", "help", "-h=1");
+//        tryArgs(commandManager, "bigdoors");
 //        tryArgs(commandManager, "bigdoors", "help");
+//        tryArgs(commandManager, "bigdoors", "help", "addowner");
+//        tryArgs(commandManager, "bigdoors", "addowner");
 //        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
     }
 

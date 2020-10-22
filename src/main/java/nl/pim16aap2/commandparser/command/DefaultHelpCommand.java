@@ -10,12 +10,14 @@ import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.renderer.IHelpCommandRenderer;
+import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @Getter
 public class DefaultHelpCommand extends Command
@@ -55,10 +57,26 @@ public class DefaultHelpCommand extends Command
         return Optional.empty();
     }
 
+    protected static @NonNull Text renderHelpText(final @NonNull ColorScheme colorScheme,
+                                                  final @NonNull Command superCommand,
+                                                  final @NonNull IHelpCommandRenderer helpCommandRenderer,
+                                                  final @Nullable String val)
+        throws IllegalValueException, CommandNotFoundException
+    {
+        if (val == null)
+            return helpCommandRenderer.render(colorScheme, superCommand, null);
+
+        final @NonNull OptionalInt intOpt = Util.parseInt(val);
+        if (intOpt.isPresent())
+            return helpCommandRenderer.render(colorScheme, superCommand, intOpt.getAsInt());
+
+        final @NonNull Command command = superCommand.getCommandManager().getCommand(val).orElse(superCommand);
+        return helpCommandRenderer.render(colorScheme, command, val);
+    }
+
     protected static void defaultHelpCommandExecutor(final @NonNull CommandResult commandResult)
         throws IllegalValueException, CommandNotFoundException
     {
-        final @NonNull CommandManager commandManager = commandResult.getCommand().commandManager;
         if (!(commandResult.getCommand() instanceof DefaultHelpCommand))
             throw new CommandNotFoundException(commandResult.getCommand().getName() + " is not a help command!");
 
@@ -68,9 +86,8 @@ public class DefaultHelpCommand extends Command
 
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 
-        final Text help = helpCommand.helpCommandRenderer
-            .render(commandSender.getColorScheme(), superCommand, commandResult.getParsedArgument("h"));
-
-        commandSender.sendMessage(help);
+        commandSender.sendMessage(renderHelpText(commandSender.getColorScheme(), superCommand,
+                                                 helpCommand.helpCommandRenderer,
+                                                 commandResult.getParsedArgument("h")));
     }
 }

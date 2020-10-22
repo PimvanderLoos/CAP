@@ -67,9 +67,9 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     @Builder.Default
     protected boolean startAt1 = true;
 
-    public DefaultHelpCommandRenderer(final int pageSize, final int firstPageSize, final boolean displayHeader,
-                                      final @NonNull String summaryIndent, final boolean displayArgumentsForSimple,
-                                      final @Nullable IArgumentRenderer argumentRenderer, final boolean startAt1)
+    protected DefaultHelpCommandRenderer(final int pageSize, final int firstPageSize, final boolean displayHeader,
+                                         final @NonNull String summaryIndent, final boolean displayArgumentsForSimple,
+                                         final @Nullable IArgumentRenderer argumentRenderer, final boolean startAt1)
     {
         this.pageSize = pageSize;
         this.firstPageSize = firstPageSize;
@@ -134,11 +134,16 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 
     @Override
     public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Command command,
-                                final @NonNull String val)
+                                final @Nullable String val)
         throws IllegalValueException, CommandNotFoundException
     {
+        if (val == null)
+            return render(colorScheme, command, 0);
+
         final OptionalInt pageOpt = Util.parseInt(val);
         if (pageOpt.isPresent())
+            // Subtract 1 from the desired page if counting starts at 1, because if the user specified page '1',
+            // They should receive page '0' instead.
             return render(colorScheme, command, pageOpt.getAsInt() - (startAt1 ? 1 : 0));
 
         final @NonNull Optional<Command> subCommand = command.getCommandManager().getCommand(val);

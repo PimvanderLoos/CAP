@@ -7,6 +7,7 @@ import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
 import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
+import org.jetbrains.annotations.Nullable;
 
 public interface IHelpCommandRenderer
 {
@@ -27,9 +28,9 @@ public interface IHelpCommandRenderer
      * <p>
      * If the input value is an int, the page represented by that int is rendered for the provided {@link Command}.
      * <p>
-     * If the input value is not an int, {@link #renderLongCommand(Command)} will be called for the {@link Command} with
-     * the name of the value if one exists and is registered in the {@link CommandManager} of the provided {@link
-     * Command}.
+     * If the input value is not an int, {@link #renderLongCommand(ColorScheme, Command)} will be called for the {@link
+     * Command} with the name of the value if one exists and is registered in the {@link CommandManager} of the provided
+     * {@link Command}.
      *
      * @param colorScheme The {@link ColorScheme} to use for rendering the help command.
      * @param command     The {@link Command} for which to render a help page or whose {@link CommandManager} to use to
@@ -44,7 +45,7 @@ public interface IHelpCommandRenderer
      */
     // TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
     @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Command command,
-                         final @NonNull String val)
+                         final @Nullable String val)
         throws IllegalValueException, CommandNotFoundException;
 
     /**

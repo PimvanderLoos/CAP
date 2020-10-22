@@ -1,13 +1,15 @@
 package nl.pim16aap2.commandparser.manager;
 
+import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
+import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
+import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
@@ -15,10 +17,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class CommandManager
 {
     private final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
+    @Getter
+    private final @NonNull DefaultHelpCommandRenderer helpCommandRenderer;
+
+    public CommandManager(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer)
+    {
+        this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer::getDefault);
+    }
+
+    public CommandManager()
+    {
+        this(null);
+    }
 
     /**
      * Parses a string containing multiple arguments delimited by spaces.

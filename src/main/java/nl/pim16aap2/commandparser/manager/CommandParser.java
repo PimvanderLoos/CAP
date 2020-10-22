@@ -51,6 +51,9 @@ class CommandParser
         this.commandManager = commandManager;
     }
 
+    // TODO: Also take care of any "-key=val" or --longkey=val" or "-key val" here. Just store them separately.
+    //       So the output becomes a list of strings for the positional arguments and a list of key/value pairs for
+    //       free arguments.
     private @NonNull List<String> preprocess(final @NonNull String[] rawArgs)
         throws EOFException
     {
@@ -104,8 +107,12 @@ class CommandParser
 
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
-        System.out.print("Found parsedCommand: " + parsedCommand.getCommand().getName() +
-                             " at idx: " + parsedCommand.getIndex());
+        System.out.println("Found parsedCommand: " + parsedCommand.getCommand().getName() +
+                               " at idx: " + parsedCommand.getIndex());
+
+        if (parsedCommand.getIndex() == (args.size() - 1) &&
+            parsedCommand.getCommand().getRequiredArguments().size() > 0)
+            return new CommandResult(commandSender, parsedCommand.getCommand());
 
         return new CommandResult(commandSender, parsedCommand.getCommand(),
                                  parseArguments(parsedCommand.getCommand(),
@@ -287,19 +294,5 @@ class CommandParser
     {
         Command command;
         Integer index;
-
-        /**
-         * The value of the help command that was requested.
-         * <p>
-         * When no arguments are provided, this String will be empty.
-         * <p>
-         * If this is null, no help was requested.
-         */
-        @Nullable String helpString;
-
-        public ParsedCommand(final @NonNull Command command, final @NonNull Integer index)
-        {
-            this(command, index, null);
-        }
     }
 }
