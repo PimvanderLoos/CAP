@@ -75,8 +75,6 @@ import java.util.List;
 // TODO: Consider storing the help command in a special type or something. Then you could much more simply reference it.
 // TODO: Every command needs to be able to print its own help message. Maybe every command should have its own usage
 //       renderer? The help renderer can just use that to render the complete help command.
-// TODO: Consider requesting an ICommandSender or something for running commands. This object can be used for
-//       permissions/colorscheme/whatever. This would replace both the textConsumer and the ColorScheme supplier.
 // TODO: Make it possible to use functions to verify arguments. E.g. for IntArgument: Arg must be in [1, 10].
 // TODO: Make a module specific for Spigot and/or Paper. This should contain all the stuff needed for thost platforms.
 //       E.g. BukkitCommandSender, ChatColor, Player/World Arguments, etc.
