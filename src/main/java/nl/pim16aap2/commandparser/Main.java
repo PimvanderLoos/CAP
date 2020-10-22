@@ -3,6 +3,7 @@ package nl.pim16aap2.commandparser;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
+import nl.pim16aap2.commandparser.commandsender.DefaultCommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
@@ -76,6 +77,9 @@ import java.util.List;
 //       renderer? The help renderer can just use that to render the complete help command.
 // TODO: Consider requesting an ICommandSender or something for running commands. This object can be used for
 //       permissions/colorscheme/whatever. This would replace both the textConsumer and the ColorScheme supplier.
+// TODO: Make it possible to use functions to verify arguments. E.g. for IntArgument: Arg must be in [1, 10].
+// TODO: Make a module specific for Spigot and/or Paper. This should contain all the stuff needed for thost platforms.
+//       E.g. BukkitCommandSender, ChatColor, Player/World Arguments, etc.
 
 
 public class Main
@@ -93,10 +97,12 @@ public class Main
     {
         final String command = arrToString(args);
         System.out.println(command + ":\n");
+        final DefaultCommandSender commandSender = new DefaultCommandSender();
+        commandSender.setColorScheme(Main.getColorScheme());
 
         try
         {
-            commandManager.parseCommand(args).run();
+            commandManager.parseCommand(commandSender, args).run();
         }
         catch (CommandNotFoundException e)
         {
@@ -163,10 +169,7 @@ public class Main
 
     private static CommandManager initCommandManager()
     {
-        final ColorScheme colorScheme = getColorScheme();
-        final ColorScheme colorScheme1 = getClearColorScheme();
-
-        final CommandManager commandManager = new CommandManager(System.out::println, () -> colorScheme);
+        final CommandManager commandManager = new CommandManager();
 
         final int subsubCommandCount = 5;
         final List<Command> subsubcommands = new ArrayList<>(subsubCommandCount);
@@ -284,16 +287,17 @@ public class Main
                                                                                .build();
             System.out.println("==============================");
             System.out.println("==============================");
-            System.out.print(helpCommand.renderLongCommand(addOwner));
+            System.out.print(helpCommand.renderLongCommand(ColorScheme.builder().build(), addOwner));
             System.out.println("==============================");
-            System.out.print(helpCommand.renderLongCommand(commandManager.getCommand("subsubcommand_2").get()));
+            System.out.print(helpCommand.renderLongCommand(ColorScheme.builder().build(),
+                                                           commandManager.getCommand("subsubcommand_2").get()));
             System.out.println("==============================");
             System.out.println("==============================");
 
             for (int idx = 0; idx < 12; ++idx)
             {
                 final int page = idx;
-                tryHelpCommand(() -> helpCommand.render(bigdoors, page));
+                tryHelpCommand(() -> helpCommand.render(ColorScheme.builder().build(), bigdoors, page));
             }
         }
     }

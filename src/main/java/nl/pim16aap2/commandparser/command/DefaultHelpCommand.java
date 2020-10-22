@@ -4,12 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.renderer.IHelpCommandRenderer;
-import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
@@ -66,11 +66,11 @@ public class DefaultHelpCommand extends Command
         final @NonNull Command superCommand = helpCommand.getSuperCommand().orElseThrow(
             () -> new CommandNotFoundException("Super command of: " + helpCommand.getName()));
 
-        final @NonNull ColorScheme colorScheme = commandManager.getColorScheme();
+        final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 
         final Text help = helpCommand.helpCommandRenderer
-            .render(colorScheme, superCommand, commandResult.getParsedArgument("h"));
+            .render(commandSender.getColorScheme(), superCommand, commandResult.getParsedArgument("h"));
 
-        commandManager.getTextConsumer().accept(help);
+        commandSender.sendMessage(help);
     }
 }

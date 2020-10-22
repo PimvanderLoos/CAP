@@ -114,13 +114,6 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     }
 
     @Override
-    public @NonNull Text render(final @NonNull Command command, final int page)
-        throws IllegalValueException
-    {
-        return render(command.getCommandManager().getColorScheme(), command, page);
-    }
-
-    @Override
     public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Command command, final int page)
         throws IllegalValueException
     {
@@ -140,13 +133,6 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     }
 
     @Override
-    public @NonNull Text render(final @NonNull Command command, final @NonNull String val)
-        throws IllegalValueException, CommandNotFoundException
-    {
-        return render(command.getCommandManager().getColorScheme(), command, val);
-    }
-
-    @Override
     public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Command command,
                                 final @NonNull String val)
         throws IllegalValueException, CommandNotFoundException
@@ -160,12 +146,6 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
             throw new CommandNotFoundException(val);
 
         return renderLongCommand(colorScheme, subCommand.get());
-    }
-
-    @Override
-    public @NonNull Text renderLongCommand(final @NonNull Command command)
-    {
-        return renderLongCommand(command.getCommandManager().getColorScheme(), command);
     }
 
     @Override

@@ -3,6 +3,7 @@ package nl.pim16aap2.commandparser.command;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.renderer.IHelpCommandRenderer;
@@ -17,11 +18,13 @@ public class CommandResult
 {
     private final @NonNull Command command;
     private final @NonNull Map<@NonNull String, Argument.ParsedArgument<?>> parsedArguments;
-    private HelpType helpType;
+    private final HelpType helpType;
+    private final @NonNull ICommandSender commandSender;
 
-    public CommandResult(final @NonNull Command command,
+    public CommandResult(final @NonNull ICommandSender commandSender, final @NonNull Command command,
                          final @NonNull Map<@NonNull String, Argument.ParsedArgument<?>> parsedArguments)
     {
+        this.commandSender = commandSender;
         this.command = command;
         this.parsedArguments = parsedArguments;
 
@@ -69,8 +72,7 @@ public class CommandResult
 
         if (helpType == HelpType.LONG_HELP)
         {
-            command.getCommandManager().getTextConsumer()
-                   .accept(helpCommand.renderLongCommand(command.getCommandManager().getColorScheme(), command));
+            commandSender.sendMessage(helpCommand.renderLongCommand(commandSender.getColorScheme(), command));
             return;
         }
     }

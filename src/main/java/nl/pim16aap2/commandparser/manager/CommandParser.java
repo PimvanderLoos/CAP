@@ -10,6 +10,7 @@ import nl.pim16aap2.commandparser.argument.RepeatableArgument;
 import nl.pim16aap2.commandparser.argument.RequiredArgument;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
+import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
@@ -32,6 +33,7 @@ class CommandParser
 {
     private final @NonNull List<String> args;
     final @NonNull CommandManager commandManager;
+    private final @NonNull ICommandSender commandSender;
 
     private static final char ARGUMENT_PREFIX = '-';
 
@@ -40,10 +42,12 @@ class CommandParser
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
     private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
-    public CommandParser(final @NonNull CommandManager commandManager, final @NonNull String[] args)
+    public CommandParser(final @NonNull CommandManager commandManager, final @NonNull ICommandSender commandSender,
+                         final @NonNull String[] args)
         throws EOFException
     {
         this.args = preprocess(args);
+        this.commandSender = commandSender;
         this.commandManager = commandManager;
     }
 
@@ -103,7 +107,7 @@ class CommandParser
         System.out.print("Found parsedCommand: " + parsedCommand.getCommand().getName() +
                              " at idx: " + parsedCommand.getIndex());
 
-        return new CommandResult(parsedCommand.getCommand(),
+        return new CommandResult(commandSender, parsedCommand.getCommand(),
                                  parseArguments(parsedCommand.getCommand(),
                                                 parsedCommand.getIndex()));
     }
