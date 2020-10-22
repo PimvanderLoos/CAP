@@ -23,15 +23,15 @@ public class CommandManager
     /**
      * Parses a string containing multiple arguments delimited by spaces.
      * <p>
-     * See {@link #parseCommand(ICommandSender, String...)}.
+     * See {@link #parseInput(ICommandSender, String...)}.
      *
      * @param commandSender The {@link ICommandSender} that issued a command.
      * @param args          A single String containing multiple arguments.
      */
-    public @NonNull CommandResult parseCommand(final @NonNull ICommandSender commandSender, String args)
+    public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String args)
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException
     {
-        return parseCommand(commandSender, args.split(" "));
+        return parseInput(commandSender, args.split(" "));
     }
 
     /**
@@ -51,7 +51,7 @@ public class CommandManager
      * @throws EOFException                 If there are unmatched quotation marks. E.g. '-p="player'. Note that the
      *                                      matching quotation mark can be in another string further down the array.
      */
-    public @NonNull CommandResult parseCommand(final @NonNull ICommandSender commandSender, String... args)
+    public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String... args)
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException
     {
         return new CommandParser(this, commandSender, args).parse();

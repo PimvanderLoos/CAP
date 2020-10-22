@@ -102,7 +102,7 @@ public class Main
 
         try
         {
-            commandManager.parseCommand(commandSender, args).run();
+            commandManager.parseInput(commandSender, args).run();
         }
         catch (CommandNotFoundException e)
         {
