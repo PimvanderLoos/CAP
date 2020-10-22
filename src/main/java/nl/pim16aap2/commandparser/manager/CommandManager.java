@@ -27,8 +27,7 @@ public class CommandManager
     @Getter
     private final @NonNull Consumer<Text> textConsumer;
 
-    @Getter
-    private final @NonNull Supplier<ColorScheme> colorScheme;
+    private final @NonNull Supplier<@NonNull ColorScheme> colorScheme;
 
     /**
      * Parses a string containing multiple arguments delimited by spaces.
@@ -41,6 +40,16 @@ public class CommandManager
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException
     {
         return parseCommand(args.split(" "));
+    }
+
+    /**
+     * Gets the {@link ColorScheme} registered for this {@link CommandManager} using {@link #colorScheme}.
+     *
+     * @return The {@link ColorScheme} obtained from the provided consumer.
+     */
+    public @NonNull ColorScheme getColorScheme()
+    {
+        return this.colorScheme.get();
     }
 
     /**

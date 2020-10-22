@@ -65,13 +65,12 @@ public class CommandResult
             return;
         }
 
-        // TODO: Request this from the command.
-        IHelpCommandRenderer helpCommand = DefaultHelpCommandRenderer.builder().colorScheme(
-            getCommand().getCommandManager().getColorScheme().get()).build();
+        final IHelpCommandRenderer helpCommand = DefaultHelpCommandRenderer.builder().build();
 
         if (helpType == HelpType.LONG_HELP)
         {
-            command.getCommandManager().getTextConsumer().accept(helpCommand.renderLongCommand(command));
+            command.getCommandManager().getTextConsumer()
+                   .accept(helpCommand.renderLongCommand(command.getCommandManager().getColorScheme(), command));
             return;
         }
     }

@@ -13,30 +13,30 @@ import nl.pim16aap2.commandparser.text.TextType;
 @RequiredArgsConstructor
 public class DefaultArgumentRenderer implements IArgumentRenderer
 {
-    protected final @NonNull ColorScheme colorScheme;
-
     @Override
-    public @NonNull Text render(final @NonNull Argument<?> argument)
+    public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument)
     {
         if (argument instanceof OptionalArgument)
-            return renderOptional((OptionalArgument<?>) argument);
+            return renderOptional(colorScheme, (OptionalArgument<?>) argument);
         else if (argument instanceof RequiredArgument)
-            return renderRequired((RequiredArgument<?>) argument);
+            return renderRequired(colorScheme, (RequiredArgument<?>) argument);
         // TODO: Ideally, this would go through the argument itself. Just store a function or something.
         //       Then apply the selected ArgumentRenderer (implements an interface).
         throw new RuntimeException("Failed to determine type of argument: " + argument.getClass().getCanonicalName());
     }
 
     @Override
-    public @NonNull Text renderLong(final @NonNull Argument<?> argument, final @NonNull String summaryIndent)
+    public @NonNull Text renderLong(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
+                                    final @NonNull String summaryIndent)
     {
-        final Text text = render(argument);
+        final Text text = render(colorScheme, argument);
         if (!argument.getSummary().equals(""))
             text.add("\n").add(summaryIndent).add(argument.getSummary(), TextType.SUMMARY);
         return text;
     }
 
-    protected @NonNull Text renderOptional(final @NonNull OptionalArgument<?> argument)
+    protected @NonNull Text renderOptional(final @NonNull ColorScheme colorScheme,
+                                           final @NonNull OptionalArgument<?> argument)
     {
         final String suffix = argument instanceof RepeatableArgument ? "+" : "";
 
@@ -53,7 +53,8 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
         return rendered.add("]" + suffix, TextType.OPTIONAL_PARAMETER);
     }
 
-    protected @NonNull Text renderRequired(final @NonNull RequiredArgument<?> argument)
+    protected @NonNull Text renderRequired(final @NonNull ColorScheme colorScheme,
+                                           final @NonNull RequiredArgument<?> argument)
     {
         return new Text(colorScheme).add("<" + argument.getLabel() + ">", TextType.REQUIRED_PARAMETER);
     }

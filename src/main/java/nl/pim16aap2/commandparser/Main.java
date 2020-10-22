@@ -71,6 +71,12 @@ import java.util.List;
 //       specific style's off (not with any disableAll), and when it is specified, it should just use that one variable.
 //       Furthermore, styles should have a second constructor that uses a default 'off' value that's just an empty
 //       String for cases like this.
+// TODO: Consider storing the help command in a special type or something. Then you could much more simply reference it.
+// TODO: Every command needs to be able to print its own help message. Maybe every command should have its own usage
+//       renderer? The help renderer can just use that to render the complete help command.
+// TODO: Consider requesting an ICommandSender or something for running commands. This object can be used for
+//       permissions/colorscheme/whatever. This would replace both the textConsumer and the ColorScheme supplier.
+
 
 public class Main
 {
@@ -137,19 +143,19 @@ public class Main
         CommandManager commandManager = initCommandManager();
 //        testHelpRenderer(commandManager);
 
-        final ColorScheme colorScheme = getColorScheme();
-        DefaultHelpCommandRenderer.builder().colorScheme(colorScheme).pageSize(16).firstPageSize(1).build();
+        DefaultHelpCommandRenderer.builder().pageSize(16).firstPageSize(1).build();
 
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "-h");
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "-h");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
 //        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
 //
 //        tryArgs(commandManager, "bigdoors", "help", "addowner");
         tryArgs(commandManager, "bigdoors", "help", "-h=addowner");
+        tryArgs(commandManager, "bigdoors");
         tryArgs(commandManager, "bigdoors", "help", "-h=1");
 //        tryArgs(commandManager, "bigdoors", "help");
 //        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
@@ -158,6 +164,7 @@ public class Main
     private static CommandManager initCommandManager()
     {
         final ColorScheme colorScheme = getColorScheme();
+        final ColorScheme colorScheme1 = getClearColorScheme();
 
         final CommandManager commandManager = new CommandManager(System.out::println, () -> colorScheme);
 
@@ -242,8 +249,15 @@ public class Main
             .name("bigdoors")
             .subCommand(addOwner)
             .subCommands(subcommands)
-            .commandExecutor(commandResult ->
-                                 System.out.print("PARSED A COMMAND: " + commandResult.getCommand().getName()))
+            .commandExecutor(
+                commandResult ->
+                {
+//                    final @NonNull Optional<Command> helpOpt = commandResult.getCommand()
+//                                                                            .getSubCommand(DefaultHelpCommand.class);
+//                    if (helpOpt.isPresent())
+//                        ((DefaultHelpCommand) helpOpt.get()).
+
+                })
 //            .hidden(true)
             .build();
 
@@ -267,8 +281,6 @@ public class Main
         {
             DefaultHelpCommandRenderer helpCommand = DefaultHelpCommandRenderer.builder().firstPageSize(2)
                                                                                .pageSize(3)
-//                                                               .colorScheme(getColorScheme())
-                                                                               .colorScheme(getClearColorScheme())
                                                                                .build();
             System.out.println("==============================");
             System.out.println("==============================");

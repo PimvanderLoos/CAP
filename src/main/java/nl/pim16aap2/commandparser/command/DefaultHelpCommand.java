@@ -9,6 +9,7 @@ import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.renderer.IHelpCommandRenderer;
+import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +54,7 @@ public class DefaultHelpCommand extends Command
     {
         return Optional.empty();
     }
-    
+
     protected static void defaultHelpCommandExecutor(final @NonNull CommandResult commandResult)
         throws IllegalValueException, CommandNotFoundException
     {
@@ -65,8 +66,10 @@ public class DefaultHelpCommand extends Command
         final @NonNull Command superCommand = helpCommand.getSuperCommand().orElseThrow(
             () -> new CommandNotFoundException("Super command of: " + helpCommand.getName()));
 
+        final @NonNull ColorScheme colorScheme = commandManager.getColorScheme();
+
         final Text help = helpCommand.helpCommandRenderer
-            .render(superCommand, commandResult.getParsedArgument("h"));
+            .render(colorScheme, superCommand, commandResult.getParsedArgument("h"));
 
         commandManager.getTextConsumer().accept(help);
     }

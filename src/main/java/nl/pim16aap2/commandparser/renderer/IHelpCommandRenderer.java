@@ -5,19 +5,38 @@ import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
+import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 
 public interface IHelpCommandRenderer
 {
     /**
-     * Renders the help text for a {@link Command}. This
-     *
-     * @param command The {@link Command} to get the help menu for.
-     * @param page    The page number to display.
-     * @return The {@link Text} of the help message for the command.
+     * Renders the help command using the default {@link ColorScheme}.
+     * <p>
+     * See {@link #render(ColorScheme, Command, int)}.
      */
     @NonNull Text render(final @NonNull Command command, final int page)
         throws IllegalValueException;
+
+    /**
+     * Renders the help text for a {@link Command}.
+     *
+     * @param colorScheme The {@link ColorScheme} to use for rendering the help command.
+     * @param command     The {@link Command} to get the help menu for.
+     * @param page        The page number to display.
+     * @return The {@link Text} of the help message for the command.
+     */
+    @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Command command, final int page)
+        throws IllegalValueException;
+
+    /**
+     * Renders the help command using the default {@link ColorScheme}.
+     * <p>
+     * See {@link #render(ColorScheme, Command, String)}.
+     */
+    // TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
+    @NonNull Text render(final @NonNull Command command, final @NonNull String val)
+        throws IllegalValueException, CommandNotFoundException;
 
     /**
      * Either renders the help menu for a sub{@link Command} or a page of the help menu for the provided {@link
@@ -29,9 +48,10 @@ public interface IHelpCommandRenderer
      * the name of the value if one exists and is registered in the {@link CommandManager} of the provided {@link
      * Command}.
      *
-     * @param command The {@link Command} for which to render a help page or whose {@link CommandManager} to use to look
-     *                up the (sub){@link Command} for which to print the long help menu.
-     * @param val     The value representing either a help page (integer) or the name of a {@link Command}/
+     * @param colorScheme The {@link ColorScheme} to use for rendering the help command.
+     * @param command     The {@link Command} for which to render a help page or whose {@link CommandManager} to use to
+     *                    look up the (sub){@link Command} for which to print the long help menu.
+     * @param val         The value representing either a help page (integer) or the name of a {@link Command}.
      * @return The rendered help menu.
      *
      * @throws IllegalValueException    If the provided value is an integer that is out of bounds for the provided
@@ -39,15 +59,23 @@ public interface IHelpCommandRenderer
      * @throws CommandNotFoundException If the provided value is not an integer and no {@link Command} with that String
      *                                  as name could be found.
      */
-    // TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
-    @NonNull Text render(final @NonNull Command command, final @NonNull String val)
+    @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Command command,
+                         final @NonNull String val)
         throws IllegalValueException, CommandNotFoundException;
+
+    /**
+     * Renders the long help command using the default {@link ColorScheme}.
+     * <p>
+     * See {@link #renderLongCommand(ColorScheme, Command)}.
+     */
+    @NonNull Text renderLongCommand(final @NonNull Command command);
 
     /**
      * Renders the long help menu for a {@link Command}.
      *
-     * @param command The {@link Command} for which to render the long help menu.
+     * @param colorScheme The {@link ColorScheme} to use for rendering the help command.
+     * @param command     The {@link Command} for which to render the long help menu.
      * @return The rendered long help menu for the given command.
      */
-    @NonNull Text renderLongCommand(final @NonNull Command command);
+    @NonNull Text renderLongCommand(final @NonNull ColorScheme colorScheme, final @NonNull Command command);
 }

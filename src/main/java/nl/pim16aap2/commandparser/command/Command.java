@@ -109,6 +109,18 @@ public class Command
         return Optional.ofNullable(arguments.get(name));
     }
 
+    /**
+     * Searches for a sub{@link Command} of a given types.
+     *
+     * @param clazz The {@link Class} to search for.
+     * @param <T>   The Type of the sub{@link Command} to find.
+     * @return An {@link Optional} containing the sub{@link Command}.
+     */
+    public @NonNull <T> Optional<Command> getSubCommand(final @NonNull Class<T> clazz)
+    {
+        return Util.searchIterable(subCommands, (val) -> clazz.isAssignableFrom(val.getClass()));
+    }
+
     public @NonNull Optional<Command> getSubCommand(final @Nullable String name)
     {
         if (name == null)
