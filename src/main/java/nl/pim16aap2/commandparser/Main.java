@@ -74,8 +74,8 @@ import java.util.List;
 // TODO: Make a module specific for Spigot and/or Paper. This should contain all the stuff needed for thost platforms.
 //       E.g. BukkitCommandSender, ChatColor, Player/World Arguments, etc.
 //       For the BukkitChatColor, the builder can just accept ChatColors and take care of the default off value /
-//       instantiating
-
+//       instantiating TextComponents.
+// TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
 
 public class Main
 {
