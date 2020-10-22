@@ -27,37 +27,37 @@ import java.util.OptionalInt;
 public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 {
     // TODO: Make this configurable
-    private static final String COMMAND_PREFIX = "/";
+    protected static final String COMMAND_PREFIX = "/";
 
     /**
      * The number of subcommands to display per page. Default = 5.
      */
     @Builder.Default
-    private int pageSize = 5;
+    protected int pageSize = 5;
 
     /**
      * The number of subcommands on the first page. Default = 1.
      */
     @Builder.Default
-    private int firstPageSize = 1;
+    protected int firstPageSize = 1;
 
     /**
      * Whether or not to display the header of the command on the first page. Default = true.
      */
     @Builder.Default
-    private boolean displayHeader = true;
+    protected boolean displayHeader = true;
 
     /**
      * The string to prepend before every summary. Default = "  ".
      */
     @Builder.Default
-    private String summaryIndent = "  ";
+    protected String summaryIndent = "  ";
 
     /**
      * Whether or not to display the arguments of each command on the list page.
      */
     @Builder.Default
-    private boolean displayArgumentsForSimple = false;
+    protected boolean displayArgumentsForSimple = false;
 
     protected @NonNull IArgumentRenderer argumentRenderer;
 
@@ -65,7 +65,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * Whether to start counting pages at 0 (<it>false</it>) or 1 (<it>true</it>). Default = true.
      */
     @Builder.Default
-    private boolean startAt1 = true;
+    protected boolean startAt1 = true;
 
     public DefaultHelpCommandRenderer(final int pageSize, final int firstPageSize, final boolean displayHeader,
                                       final @NonNull String summaryIndent, final boolean displayArgumentsForSimple,

@@ -139,7 +139,7 @@ class CommandParser
         System.out.println();
         for (int pos = idx + 1; pos < args.size(); ++pos)
         {
-            final @Nullable String nextArg = args.get(pos);
+            final String nextArg = args.get(pos);
             System.out.println("nextArg: " + nextArg);
             if (nextArg.charAt(0) == ARGUMENT_PREFIX)
             {

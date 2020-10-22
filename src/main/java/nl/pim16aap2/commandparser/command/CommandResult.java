@@ -7,6 +7,7 @@ import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.renderer.IHelpCommandRenderer;
+import nl.pim16aap2.commandparser.text.ColorScheme;
 
 import java.util.Map;
 import java.util.Optional;
@@ -91,7 +92,7 @@ public class CommandResult
          * <p>
          * If the value is both not empty and not an integer, it will work like {@link #LONG_HELP}.
          * <p>
-         * See {@link IHelpCommandRenderer#render(Command, String)}.
+         * See {@link IHelpCommandRenderer#render(ColorScheme, Command, String)}.
          */
         SUBCOMMANDS,
 
