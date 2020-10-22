@@ -20,4 +20,15 @@ public class TextComponent
         this.on = on;
         this.off = off;
     }
+
+    /**
+     * Creates a new text style without any 'off' value. This is useful when using {@link
+     * ColorScheme.ColorSchemeBuilder#setDisableAll(String)} as that will set the default value.
+     *
+     * @param on The String to enable this Style.
+     */
+    public TextComponent(final @NonNull String on)
+    {
+        this(on, "");
+    }
 }

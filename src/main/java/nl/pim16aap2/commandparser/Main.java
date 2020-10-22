@@ -67,17 +67,14 @@ import java.util.List;
 // TODO: Do not use 'helpful' messages in exceptions, but just variables. Whomever catches the exception
 //       Should be able to easily parse it themselves. If an exception requires additional text to explain it
 //       then it's time to create a new type or at the very least a new constructor.
-// TODO: For the ColorScheme, make the disableAll or whatever it's called optional. Just accept a nullable String
-//       to disable every style in its constructor. When not specified, the text should always terminate with the
-//       specific style's off (not with any disableAll), and when it is specified, it should just use that one variable.
-//       Furthermore, styles should have a second constructor that uses a default 'off' value that's just an empty
-//       String for cases like this.
 // TODO: Consider storing the help command in a special type or something. Then you could much more simply reference it.
 // TODO: Every command needs to be able to print its own help message. Maybe every command should have its own usage
 //       renderer? The help renderer can just use that to render the complete help command.
 // TODO: Make it possible to use functions to verify arguments. E.g. for IntArgument: Arg must be in [1, 10].
 // TODO: Make a module specific for Spigot and/or Paper. This should contain all the stuff needed for thost platforms.
 //       E.g. BukkitCommandSender, ChatColor, Player/World Arguments, etc.
+//       For the BukkitChatColor, the builder can just accept ChatColors and take care of the default off value /
+//       instantiating
 
 
 public class Main
@@ -143,7 +140,7 @@ public class Main
     {
         String executor = "mip";
 
-//        testTextComponents();
+        testTextComponents();
         CommandManager commandManager = initCommandManager();
 //        testHelpRenderer(commandManager);
 
@@ -324,26 +321,17 @@ public class Main
     {
         return ColorScheme
             .builder()
-            .commandStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue(),
-                                            MinecraftStyle.RESET.getStringValue()))
-            .optionalParameterStyle(new TextComponent(MinecraftStyle.BLUE.getStringValue(),
-                                                      MinecraftStyle.RESET.getStringValue()))
-            .optionalParameterFlagStyle(new TextComponent(MinecraftStyle.LIGHT_PURPLE.getStringValue(),
-                                                          MinecraftStyle.RESET.getStringValue()))
-            .optionalParameterSeparatorStyle(new TextComponent(MinecraftStyle.WHITE.getStringValue(),
-                                                               MinecraftStyle.RESET.getStringValue()))
-            .optionalParameterLabelStyle(new TextComponent(MinecraftStyle.GRAY.getStringValue(),
-                                                           MinecraftStyle.RESET.getStringValue()))
-            .requiredParameterStyle(new TextComponent(MinecraftStyle.RED.getStringValue(),
-                                                      MinecraftStyle.RESET.getStringValue()))
-            .summaryStyle(new TextComponent(MinecraftStyle.AQUA.getStringValue(),
-                                            MinecraftStyle.RESET.getStringValue()))
-            .regularTextStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue(),
-                                                MinecraftStyle.RESET.getStringValue()))
-            .headerStyle(new TextComponent(MinecraftStyle.GREEN.getStringValue(),
-                                           MinecraftStyle.RESET.getStringValue()))
-            .footerStyle(new TextComponent(MinecraftStyle.DARK_RED.getStringValue(),
-                                           MinecraftStyle.RESET.getStringValue()))
+            .setDisableAll(MinecraftStyle.RESET.getStringValue())
+            .commandStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue()))
+            .optionalParameterStyle(new TextComponent(MinecraftStyle.BLUE.getStringValue()))
+            .optionalParameterFlagStyle(new TextComponent(MinecraftStyle.LIGHT_PURPLE.getStringValue()))
+            .optionalParameterSeparatorStyle(new TextComponent(MinecraftStyle.WHITE.getStringValue()))
+            .optionalParameterLabelStyle(new TextComponent(MinecraftStyle.GRAY.getStringValue()))
+            .requiredParameterStyle(new TextComponent(MinecraftStyle.RED.getStringValue()))
+            .summaryStyle(new TextComponent(MinecraftStyle.AQUA.getStringValue()))
+            .regularTextStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue()))
+            .headerStyle(new TextComponent(MinecraftStyle.GREEN.getStringValue()))
+            .footerStyle(new TextComponent(MinecraftStyle.DARK_RED.getStringValue()))
             .build();
     }
 

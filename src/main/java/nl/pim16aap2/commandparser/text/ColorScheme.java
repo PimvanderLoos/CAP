@@ -9,24 +9,19 @@ import java.util.Map;
 public class ColorScheme
 {
     private final Map<TextType, TextComponent> styleMap;
-    private @NonNull String disableAll = "";
+    private final @Nullable String disableAll;
 
-    private ColorScheme(final @NonNull Map<TextType, TextComponent> styleMap)
+    protected ColorScheme(final @NonNull Map<TextType, TextComponent> styleMap, final @Nullable String disableAll)
     {
         this.styleMap = styleMap;
-        styleMap.forEach((type, style) -> addStyleOff(style.getOff()));
+        this.disableAll = disableAll;
     }
 
-    private void addStyleOff(final @NonNull String styleOff)
+    public ColorScheme setStyle(final @NonNull TextType type, @NonNull TextComponent style)
     {
-        if (!styleOff.equals("") && !disableAll.contains(styleOff))
-            disableAll += styleOff;
-    }
-
-    public ColorScheme setStyle(final @NonNull TextType type, final @NonNull TextComponent style)
-    {
+        if (disableAll != null && !style.getOn().equals("") && style.getOff().equals(""))
+            style = new TextComponent(style.getOn(), disableAll);
         styleMap.put(type, style);
-        addStyleOff(style.getOff());
         return this;
     }
 
@@ -42,9 +37,12 @@ public class ColorScheme
 
     public static class ColorSchemeBuilder
     {
-        private Map<TextType, TextComponent> styleMap = new EnumMap(TextType.class);
+        private final Map<TextType, TextComponent> styleMap = new EnumMap<>(TextType.class);
+
+        private @Nullable String disableAll = null;
 
         private static final @NonNull TextComponent EMPTY_STYLE = new TextComponent("", "");
+
 
         private ColorSchemeBuilder()
         {
@@ -52,6 +50,18 @@ public class ColorScheme
 
         public ColorScheme build()
         {
+            // If disableAll was set, apply this default value to any components
+            // that do not have an 'off' value yet.
+            if (disableAll != null)
+                for (final Map.Entry<TextType, TextComponent> entry : styleMap.entrySet())
+                {
+                    final TextComponent component = entry.getValue();
+                    // If 'on' is set, but off isn't,
+                    if ((!component.getOn().equals("")) &&
+                        component.getOff().equals(""))
+                        styleMap.put(entry.getKey(), new TextComponent(component.getOn(), disableAll));
+                }
+
             // If the optionalParameterStyle was set, put the defaults for the 2 'subtypes' if needed.
             final @Nullable TextComponent optionalParameterStyle = styleMap.get(TextType.OPTIONAL_PARAMETER);
             if (optionalParameterStyle != null)
@@ -66,7 +76,22 @@ public class ColorScheme
                 for (final @NonNull TextType type : TextType.values())
                     styleMap.putIfAbsent(type, EMPTY_STYLE);
 
-            return new ColorScheme(styleMap);
+            return new ColorScheme(styleMap, disableAll);
+        }
+
+        /**
+         * Sets the String that disables all active styles in one go.
+         * <p>
+         * When set to anything other than null, this will be used as the default value for all {@link TextComponent}s
+         * when the on value is not empty and the off value is an empty string.
+         *
+         * @param str The string that disables all active styles.
+         * @return This {@link ColorSchemeBuilder} instance.
+         */
+        public ColorSchemeBuilder setDisableAll(final @Nullable String str)
+        {
+            this.disableAll = str;
+            return this;
         }
 
         public ColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull TextComponent style)
@@ -180,6 +205,7 @@ public class ColorScheme
             return this;
         }
 
+        // TODO: Update this.
         public String toString()
         {
             return "ColorScheme.ColorSchemeBuilder()";
