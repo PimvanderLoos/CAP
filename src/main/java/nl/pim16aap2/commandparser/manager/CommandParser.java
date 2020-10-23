@@ -5,9 +5,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import nl.pim16aap2.commandparser.argument.Argument;
-import nl.pim16aap2.commandparser.argument.OptionalArgument;
-import nl.pim16aap2.commandparser.argument.RepeatableArgument;
-import nl.pim16aap2.commandparser.argument.RequiredArgument;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
@@ -21,13 +18,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static nl.pim16aap2.commandparser.argument.Argument.ParsedArgument;
-import static nl.pim16aap2.commandparser.argument.RepeatableArgument.ParsedRepeatableArgument;
 
 class CommandParser
 {
@@ -107,11 +100,8 @@ class CommandParser
 
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
-        System.out.println("Found parsedCommand: " + parsedCommand.getCommand().getName() +
-                               " at idx: " + parsedCommand.getIndex());
-
         if (parsedCommand.getIndex() == (args.size() - 1) &&
-            parsedCommand.getCommand().getRequiredArguments().size() > 0)
+            parsedCommand.getCommand().getArgumentManager().getRequiredArguments().size() > 0)
             return new CommandResult(commandSender, parsedCommand.getCommand());
 
         return new CommandResult(commandSender, parsedCommand.getCommand(),
@@ -119,100 +109,78 @@ class CommandParser
                                                 parsedCommand.getIndex()));
     }
 
-    private @NonNull Map<@NonNull String, ParsedArgument<?>> prepareParsing(final @NonNull Command command)
+    private void parseArgument(final @NonNull Argument<?> argument, final @NonNull String value,
+                               final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results)
     {
-        final @NonNull Map<@NonNull String, ParsedArgument<?>> results = new HashMap<>();
-
-        for (final @NonNull RepeatableArgument<? extends List<?>, ?> repeatableArgument : command
-            .getRepeatableArguments().values())
-            results.put(repeatableArgument.getName(), new ParsedRepeatableArgument<>());
-
-        return results;
+        final Argument.IParsedArgument<?> parsedArgument = argument.parseArgument(value);
+        final Argument.IParsedArgument<?> result = results.putIfAbsent(argument.getName(), parsedArgument);
+        if (result != null)
+            result.updateValue(parsedArgument.getValue());
     }
 
-    private @NonNull ParsedArgument<?> parseArgument(final @NonNull Argument<?> argument, final @NonNull String value)
-    {
-        return new ParsedArgument<>(argument.getParser().parseArgument(value));
-    }
-
-    private @NonNull Map<@NonNull String, ParsedArgument<?>> parseArguments(final @NonNull Command command,
-                                                                            final int idx)
+    @Nullable
+    private Map<@NonNull String, Argument.IParsedArgument<?>> parseArguments(final @NonNull Command command,
+                                                                             final int idx)
         throws NonExistingArgumentException, MissingArgumentException
     {
-        final @NonNull Map<@NonNull String, ParsedArgument<?>> results = prepareParsing(command);
+        final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results = new HashMap<>();
 
-        final int requiredArgumentIdx = 0;
-
-        System.out.println();
+        int requiredArgumentIdx = 0;
         for (int pos = idx + 1; pos < args.size(); ++pos)
         {
             final String nextArg = args.get(pos);
-            System.out.println("nextArg: " + nextArg);
+            final @NonNull Argument<?> argument;
+            final @NonNull String value;
             if (nextArg.charAt(0) == ARGUMENT_PREFIX)
             {
-                final String[] parts = SEPARATOR_PATTERN.split(nextArg);
-                final String argumentName = parts[0].substring(1);
-                final @NonNull Argument<?> argument = command.getArgument(argumentName).orElseThrow(
-                    () -> new NonExistingArgumentException(command, argumentName, commandManager.isDebug()));
+                // If the second character is also an ARGUMENT_PREFIX, then the long name is used
+                // If this is the case, then we simply have to start reading the argument name
+                // 1 position later than for the short name (i.e. '-a' vs '--admin'.
+                final int argNameStartIdx = nextArg.charAt(1) == ARGUMENT_PREFIX ? 2 : 1;
+                final String[] parts = SEPARATOR_PATTERN.split(nextArg, 2);
 
-                if (argument instanceof RepeatableArgument) // TODO: The argument type should do this on its own.
-                    parseRepeatableArgument(command, results, (RepeatableArgument<? extends List<?>, ?>) argument,
-                                            argumentName, parts);
-                else if (argument instanceof OptionalArgument)
-                    parseOptionalArgument(command, results, (OptionalArgument<?>) argument, argumentName, parts);
+                final @NonNull String argumentName = parts[0].substring(argNameStartIdx);
+                argument = command.getArgumentManager().getArgument(argumentName)
+                                  .orElseThrow(
+                                      () -> new NonExistingArgumentException(command, argumentName,
+                                                                             commandManager.isDebug()));
+                value = argument.isValuesLess() ? "" : parts[1];
             }
             else
             {
-                // TODO: Better Exception.
-                final @NonNull RequiredArgument<?> argument =
-                    command.getRequiredArgumentFromIdx(requiredArgumentIdx)
-                           .orElseThrow(() -> new MissingArgumentException(command,
-                                                                           "Missing required argument at pos: " +
-                                                                               requiredArgumentIdx,
-                                                                           commandManager.isDebug()));
-                results.put(argument.getName(), parseArgument(argument, nextArg));
+                final int currentRequiredArgumentIdx = requiredArgumentIdx;
+                argument = command.getArgumentManager().getPositionalArgumentAtIdx(currentRequiredArgumentIdx)
+                                  .orElseThrow(
+                                      () -> new NonExistingArgumentException(command,
+                                                                             "Missing required argument at pos: " +
+                                                                                 currentRequiredArgumentIdx,
+                                                                             commandManager.isDebug()));
+                ++requiredArgumentIdx;
+                value = nextArg;
             }
+
+            parseArgument(argument, value, results);
         }
 
-        for (final @NonNull OptionalArgument<?> optionalArgument : command.getOptionalArguments().values())
-            results.putIfAbsent(optionalArgument.getName(),
-                                new ParsedArgument<>(optionalArgument.getDefaultValue()));
+        // If the help argument was specified, simply return null, because none of the other argument matter.
+        if (command.getHelpArgument() != null)
+            if (results.containsKey(command.getHelpArgument().getName()) ||
+                results.containsKey(command.getHelpArgument().getLongName()))
+                return null;
 
-        return results;
-    }
-
-    private void parseRepeatableArgument(final @NonNull Command command,
-                                         final @NonNull Map<String, ParsedArgument<?>> results,
-                                         final @NonNull RepeatableArgument<? extends List<?>, ?> argument,
-                                         final @NonNull String argumentName, final @NonNull String[] parts)
-        throws MissingArgumentException
-    {
-        // TODO: Reduce code duplication with optional argument
-        final @Nullable String valStr = parts.length == 2 ? parts[1] : null;
-        if (valStr == null)
-            throw new MissingArgumentException(command, argumentName, commandManager.isDebug());
-
-        final @Nullable ParsedRepeatableArgument<? extends List<?>, ?> parsed =
-            (ParsedRepeatableArgument<? extends List<?>, ?>) results.get(argumentName);
-        Objects.requireNonNull(parsed).addValue(argument, valStr);
-    }
-
-    private void parseOptionalArgument(final @NonNull Command command,
-                                       final @NonNull Map<String, ParsedArgument<?>> results,
-                                       final @NonNull OptionalArgument<?> argument, final @NonNull String argumentName,
-                                       final @NonNull String[] parts)
-        throws MissingArgumentException
-    {
-        if (argument.getFlag())
-            results.put(argumentName, parseArgument(argument, argumentName));
-        else
+        for (final @NonNull Argument<?> argument : command.getArgumentManager().getArguments())
         {
-            // TODO: Merge all subsequent parts? Or only split on the first?
-            final @Nullable String valStr = parts.length == 2 ? parts[1] : null;
-            if (valStr == null)
-                throw new MissingArgumentException(command, argumentName, commandManager.isDebug());
-            results.put(argumentName, parseArgument(argument, valStr));
+            final boolean missing = !results.containsKey(argument.getName());
+
+            // Ensure every required argument is present.
+            if (argument.isRequired() && missing)
+                throw new MissingArgumentException(command, argument, commandManager.isDebug());
+
+            // Add default values for missing optional parameters.
+            if (missing)
+                results.put(argument.getName(), argument.getDefault());
         }
+        return results;
     }
 
     /**

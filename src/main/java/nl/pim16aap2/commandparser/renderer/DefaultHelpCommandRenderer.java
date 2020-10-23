@@ -80,6 +80,12 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         this.startAt1 = startAt1;
     }
 
+    @Override
+    public int getPageOffset()
+    {
+        return startAt1 ? 1 : 0;
+    }
+
     public static @NonNull DefaultHelpCommandRenderer getDefault()
     {
         return DefaultHelpCommandRenderer.builder().build();
@@ -108,9 +114,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected void renderPageCountHeader(final @NonNull Text text,
                                          final int page, final int pageCount)
     {
-        final int offset = startAt1 ? 1 : 0;
         text.add(String.format("------- Page (%2d / %2d) -------\n",
-                               page + offset, pageCount + offset));
+                               page + getPageOffset(), pageCount + getPageOffset()));
     }
 
     @Override
@@ -142,9 +147,13 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 
         final OptionalInt pageOpt = Util.parseInt(val);
         if (pageOpt.isPresent())
-            // Subtract 1 from the desired page if counting starts at 1, because if the user specified page '1',
-            // They should receive page '0' instead.
-            return render(colorScheme, command, pageOpt.getAsInt() - (startAt1 ? 1 : 0));
+        // Subtract 1 from the desired page if counting starts at 1, because if the user specified page '1',
+        // They should receive page '0' instead.
+        {
+            System.out.println("Selected page: " + pageOpt.getAsInt() + ", startAt1: " + startAt1 + ", final page: " +
+                                   (pageOpt.getAsInt() - getPageOffset()));
+            return render(colorScheme, command, pageOpt.getAsInt() - getPageOffset());
+        }
 
         final @NonNull Optional<Command> subCommand = command.getCommandManager().getCommand(val);
         if (!subCommand.isPresent())
@@ -200,6 +209,12 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected @NonNull Text getBaseSuperCommand(final @NonNull ColorScheme colorScheme, final @NonNull Command command)
     {
         return getBaseSuperCommand(colorScheme, command.getSuperCommand());
+    }
+
+    @Override
+    public @NonNull Text renderFirstPage(final @NonNull ColorScheme colorScheme, final @NonNull Command command)
+    {
+        return renderFirstPage(colorScheme, new Text(colorScheme), command);
     }
 
     protected @NonNull Text renderFirstPage(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
@@ -295,29 +310,14 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected void renderArgumentsShort(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                         final @NonNull Command command)
     {
-        // TODO: This should not be hardcoded like this.
-        for (final Argument<?> argument : command.getRequiredArguments().values())
-            text.add(" ").add(argumentRenderer.render(colorScheme, argument));
-
-        for (final Argument<?> argument : command.getOptionalArguments().values())
-            text.add(" ").add(argumentRenderer.render(colorScheme, argument));
-
-        for (final Argument<?> argument : command.getRepeatableArguments().values())
+        for (final Argument<?> argument : command.getArgumentManager().getArguments())
             text.add(" ").add(argumentRenderer.render(colorScheme, argument));
     }
 
     protected void renderArgumentsLong(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                        final @NonNull Command command)
     {
-        // TODO: This should not be hardcoded like this.
-        for (final Argument<?> argument : command.getRequiredArguments().values())
+        for (final Argument<?> argument : command.getArgumentManager().getArguments())
             text.add("\n").add(argumentRenderer.renderLong(colorScheme, argument, summaryIndent));
-
-        for (final Argument<?> argument : command.getOptionalArguments().values())
-            text.add("\n").add(argumentRenderer.renderLong(colorScheme, argument, summaryIndent));
-
-        for (final Argument<?> argument : command.getRepeatableArguments().values())
-            text.add("\n").add(argumentRenderer.renderLong(colorScheme, argument, summaryIndent));
-        text.add("\n");
     }
 }

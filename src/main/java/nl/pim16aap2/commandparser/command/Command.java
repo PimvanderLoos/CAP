@@ -6,11 +6,9 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.Singular;
 import nl.pim16aap2.commandparser.argument.Argument;
-import nl.pim16aap2.commandparser.argument.OptionalArgument;
-import nl.pim16aap2.commandparser.argument.RepeatableArgument;
-import nl.pim16aap2.commandparser.argument.RequiredArgument;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandParserException;
+import nl.pim16aap2.commandparser.manager.ArgumentManager;
 import nl.pim16aap2.commandparser.manager.CommandManager;
 import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
@@ -19,16 +17,15 @@ import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Getter
 public class Command
 {
-    static final @NonNull OptionalArgument<Boolean> DEFAULT_HELP_ARGUMENT = Argument.FlagArgument
-        .getOptional(true).name("h").longName("help").summary("Displays the help menu for this command.").build();
+    static final @NonNull Argument<Boolean> DEFAULT_HELP_ARGUMENT =
+        Argument.valuesLessBuilder().name("h").longName("help")
+                .summary("Displays the help menu for this command.").build();
 
     protected final @NonNull String name;
 
@@ -40,14 +37,8 @@ public class Command
 
     protected final @NonNull List<@NonNull Command> subCommands;
 
-    // TODO: Create classes for these.
-    protected final @NonNull Map<@NonNull String, @NonNull OptionalArgument<?>> optionalArguments = new HashMap<>();
-
-    protected final @NonNull Map<@NonNull String, @NonNull RepeatableArgument<? extends List<?>, ?>> repeatableArguments = new HashMap<>();
-
-    protected final @NonNull Map<@NonNull String, @NonNull RequiredArgument<?>> requiredArguments = new HashMap<>();
-
-    protected final @NonNull Map<@NonNull String, @NonNull Argument<?>> arguments = new HashMap<>();
+    @Getter
+    protected final @NonNull ArgumentManager argumentManager;
 
     protected final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor;
 
@@ -61,6 +52,10 @@ public class Command
 
     private Optional<Command> superCommand = Optional.empty();
 
+    private Command helpCommand;
+
+    private Argument<?> helpArgument;
+
     @Setter
     protected boolean hidden;
 
@@ -68,25 +63,43 @@ public class Command
 
     @Builder(builderMethodName = "commandBuilder")
     protected Command(final @NonNull String name, final @Nullable String description, final @Nullable String summary,
-                      final @Nullable @Singular List<Command> subCommands,
+                      final @Nullable @Singular List<Command> subCommands, final @Nullable Command helpCommand,
                       final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor,
-                      final @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
-                      final boolean hidden, final @Nullable String header, final @NonNull CommandManager commandManager,
-                      final @Nullable Boolean addDefaultHelpArgument, final @Nullable Boolean addDefaultHelpSubCommand)
+                      @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
+                      @Nullable Argument<?> helpArgument, final boolean hidden, final @Nullable String header,
+                      final @NonNull CommandManager commandManager, final @Nullable Boolean addDefaultHelpArgument,
+                      final @Nullable Boolean addDefaultHelpSubCommand)
     {
         this.name = name;
         this.description = Util.valOrDefault(description, "");
         this.summary = Util.valOrDefault(summary, "");
         this.header = Util.valOrDefault(header, "");
-        this.subCommands = new ArrayList<>(Util.valOrDefault(subCommands, new ArrayList<>(0)));
+        // If there are no subcommands, make an empty list. If there are subcommands, put them in a modifiable list.
+        this.subCommands = subCommands == null ? new ArrayList<>(0) : new ArrayList<>(subCommands);
         this.commandExecutor = commandExecutor;
         this.hidden = hidden;
-        if (addDefaultHelpSubCommand != null && addDefaultHelpSubCommand)
-            this.subCommands.add(0, DefaultHelpCommand.getDefault(commandManager));
+
+        this.helpCommand = helpCommand;
+        if (helpCommand == null && Util.valOrDefault(addDefaultHelpSubCommand, false))
+            this.helpCommand = DefaultHelpCommand.getDefault(commandManager);
+        if (this.helpCommand != null)
+            this.subCommands.add(0, this.helpCommand);
+
         this.subCommands.forEach(subCommand -> subCommand.superCommand = Optional.of(this));
         this.commandManager = commandManager;
         this.addDefaultHelpArgument = Util.valOrDefault(addDefaultHelpArgument, false);
-        parseArguments(arguments);
+
+        this.helpArgument = helpArgument;
+        if (helpArgument == null && Util.valOrDefault(addDefaultHelpArgument, false))
+            this.helpArgument = DEFAULT_HELP_ARGUMENT;
+
+        // If there are no arguments, make an empty list. If there are arguments, put them in a modifiable list.
+        arguments = arguments == null ? new ArrayList<>(0) : new ArrayList<>(arguments);
+        // Add the help argument to the list.
+        if (this.helpArgument != null)
+            arguments.add(this.helpArgument);
+
+        this.argumentManager = new ArgumentManager(arguments);
     }
 
     /**
@@ -112,29 +125,6 @@ public class Command
         commandSender.sendMessage(getHelp(commandSender));
     }
 
-    public @NonNull Optional<RequiredArgument<?>> getRequiredArgument(final @NonNull String name)
-    {
-        return Optional.ofNullable(requiredArguments.get(name));
-    }
-
-    public @NonNull Optional<RequiredArgument<?>> getRequiredArgumentFromIdx(final @NonNull Integer idx)
-    {
-        for (final @NonNull RequiredArgument<?> requiredArgument : requiredArguments.values())
-            if (requiredArgument.getPosition().equals(idx))
-                return Optional.of(requiredArgument);
-        return Optional.empty();
-    }
-
-    public @NonNull Optional<OptionalArgument<?>> getOptionalArgument(final @NonNull String name)
-    {
-        return Optional.ofNullable(optionalArguments.get(name));
-    }
-
-    public @NonNull Optional<Argument<?>> getArgument(final @NonNull String name)
-    {
-        return Optional.ofNullable(arguments.get(name));
-    }
-
     /**
      * Searches for a sub{@link Command} of a given types.
      *
@@ -152,43 +142,5 @@ public class Command
         if (name == null)
             return Optional.empty();
         return Util.searchIterable(subCommands, (val) -> val.getName().equals(name));
-    }
-
-    private void parseArguments(final @Nullable List<@NonNull Argument<?>> arguments)
-    {
-        if (this.addDefaultHelpArgument)
-        {
-            optionalArguments.put(DEFAULT_HELP_ARGUMENT.getName(), DEFAULT_HELP_ARGUMENT);
-            this.arguments.put(DEFAULT_HELP_ARGUMENT.getName(), DEFAULT_HELP_ARGUMENT);
-        }
-
-        if (arguments == null)
-            return;
-
-        int requiredIndex = 0;
-        for (Argument<?> argument : arguments)
-        {
-            if (argument instanceof RepeatableArgument)
-            {
-                repeatableArguments.put(argument.getName(), (RepeatableArgument<? extends List<?>, ?>) argument);
-                this.arguments.put(argument.getName(), argument); // TODO: This is dumb
-            }
-            else if (argument instanceof OptionalArgument)
-            {
-                optionalArguments.put(argument.getName(), (OptionalArgument<?>) argument);
-                this.arguments.put(argument.getName(), argument); // TODO: This is dumb
-            }
-            else if (argument instanceof RequiredArgument)
-            {
-                final RequiredArgument<?> requiredArgument = (RequiredArgument<?>) argument;
-                requiredArguments.put(argument.getName(), requiredArgument);
-                this.arguments.put(argument.getName(), argument); // TODO: This is dumb
-                requiredArgument.setPosition(requiredIndex);
-                requiredIndex++;
-            }
-            else
-                throw new RuntimeException(
-                    "Unsupported type: " + argument.getClass().getCanonicalName());
-        }
     }
 }

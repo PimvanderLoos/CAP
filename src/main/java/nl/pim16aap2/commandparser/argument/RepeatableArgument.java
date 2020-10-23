@@ -4,60 +4,59 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.argumentparser.ArgumentParser;
-import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
-@Getter
-public class RepeatableArgument<T extends List<U>, U> extends OptionalArgument<U>
+public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
 {
-    /**
-     * Whether or not this is a flag argument. A flag argument doesn't take any values. Just their presence/absence is
-     * the value.
-     */
-    private final Boolean flag;
-
     @Builder(builderMethodName = "repeatableBuilder")
-    public RepeatableArgument(final @NonNull String name, final @Nullable String longName,
-                              final @Nullable String summary, final @Nullable Boolean flag,
-                              final @NonNull ArgumentParser<U> parser, final @NonNull String label)
+    private RepeatableArgument(final @NonNull String name, final @Nullable String longName,
+                               final @NonNull String summary, final @NonNull ArgumentParser<U> parser,
+                               final @NonNull String label, final boolean required)
     {
-        super(name, longName, summary, null, false, parser, label);
-        this.flag = Util.valOrDefault(flag, Boolean.FALSE);
+        super(name, longName, summary, parser, null, label, false, true, -1, required);
     }
 
-
-    // TODO: These should implement an interface or something. Inheritance doesn't make any sense.
-    @Getter
-    public static class ParsedRepeatableArgument<T extends List<U>, U> extends ParsedArgument<T>
+    @Override
+    public @NonNull IParsedArgument<?> parseArgument(final @Nullable String value)
     {
-        public ParsedRepeatableArgument(final @NonNull T value)
-        {
-            super(value);
-        }
+        final ParsedRepeatableArgument<T, U> ret = new ParsedRepeatableArgument<>();
+        if (value != null)
+            ret.addValue(parser.parseArgument(value));
+        return ret;
+    }
+
+    @Override
+    public @NonNull IParsedArgument<?> getDefault()
+    {
+        return new ParsedRepeatableArgument<T, U>();
+    }
+
+    public static class ParsedRepeatableArgument<T extends List<U>, U> implements IParsedArgument<T>
+    {
+        @Getter(onMethod = @__({@Override}))
+        protected @NonNull T value;
 
         @SuppressWarnings("unchecked")
-        public ParsedRepeatableArgument()
+        private ParsedRepeatableArgument()
         {
-            this((T) new ArrayList<U>(0));
+            this.value = ((T) new ArrayList<U>(0));
+        }
+
+        public void addValue(final @NonNull U newValue)
+        {
+            value.add(newValue);
         }
 
         @Override
         @SuppressWarnings("unchecked")
-        public @NonNull T getValue()
+        public <V> void updateValue(final @Nullable V newValue)
         {
-            return value == null ? (T) Collections.emptyList() : value;
-        }
-
-        @SuppressWarnings("unchecked")
-        public void addValue(final RepeatableArgument<? extends List<?>, ?> repeatableArgument,
-                             final @NonNull String value)
-        {
-            Objects.requireNonNull(super.value).add((U) repeatableArgument.parser.parseArgument(value));
+            if (newValue == null)
+                return;
+            this.value.addAll((T) newValue);
         }
     }
 }

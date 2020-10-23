@@ -3,6 +3,7 @@ package nl.pim16aap2.commandparser;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
+import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.DefaultCommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.CommandParserException;
@@ -72,16 +73,27 @@ import java.util.List;
 // TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
 // TODO: Store the HelpArgument in a command separately, so that we can
 //       actually figure out which argument is the help argument.
+// TODO: Unit tests.
+// TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
+//       (there are probably going to be some casting issues).
+// TODO: ChatColors for required labels/separators/etc, now that free required arguments are possible.
+// TODO: Maybe store the arguments by their label inside the CommandResult? That would avoid confusion of name vs longName.
+// TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
+//       and the command's list of subcommands. Maybe help text and help menu?
 
 public class Main
 {
     private static @NonNull String arrToString(final @NonNull String... args)
     {
         StringBuilder sb = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
         sb.append("=============\n").append("Arguments:");
         for (String arg : args)
+        {
             sb.append(" \"").append(arg).append("\"");
-        return sb.toString();
+            sb2.append(" ").append(arg);
+        }
+        return sb.append(", total: \"/").toString() + sb2.append("\"").substring(1);
     }
 
     private static void tryArgs(final @NonNull CommandManager commandManager, final @NonNull String... args)
@@ -108,8 +120,9 @@ public class Main
         }
         catch (MissingArgumentException e)
         {
-            System.out.println("Failed to find value for argument: \"" + e.getMissingArgument() + "\" for command: \"" +
-                                   e.getCommand().getName() + "\"");
+            System.out.println(
+                "Failed to find value for argument: \"" + e.getMissingArgument().getName() + "\" for command: \"" +
+                    e.getCommand().getName() + "\"");
             e.printStackTrace();
         }
         catch (IllegalValueException e)
@@ -134,36 +147,36 @@ public class Main
 
     public static void main(final String... args)
     {
-        String executor = "mip";
-
 //        testTextComponents();
-        CommandManager commandManager = initCommandManager();
+        final CommandManager commandManager = initCommandManager();
 //        testHelpRenderer(commandManager);
 
-//        DefaultHelpCommandRenderer.builder().pageSize(16).firstPageSize(1).build();
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "-h");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
 
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "-h");
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
-//        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
-//
         tryArgs(commandManager, "bigdoors", "help", "addowner");
-        tryArgs(commandManager, "bigdoors", "help", "-h=addowner");
         tryArgs(commandManager, "bigdoors");
-//        tryArgs(commandManager, "bigdoors", "help", "-h=1");
-//        tryArgs(commandManager, "bigdoors");
-//        tryArgs(commandManager, "bigdoors", "help");
-//        tryArgs(commandManager, "bigdoors", "help", "addowner");
-//        tryArgs(commandManager, "bigdoors", "addowner");
-//        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
+        tryArgs(commandManager, "bigdoors", "help", "1");
+        tryArgs(commandManager, "bigdoors", "help");
+        tryArgs(commandManager, "bigdoors", "addowner");
     }
 
     private static CommandManager initCommandManager()
     {
-        final CommandManager commandManager = CommandManager.builder().debug(true).build();
+        final CommandManager commandManager = CommandManager
+            .builder()
+            .debug(true)
+            .helpCommandRenderer(DefaultHelpCommandRenderer
+                                     .builder()
+                                     .firstPageSize(1)
+                                     .build())
+            .build();
 
         final int subsubCommandCount = 5;
         final List<Command> subsubcommands = new ArrayList<>(subsubCommandCount);
@@ -195,12 +208,12 @@ public class Main
                           .name("doorID")
                           .summary("The name or UID of the door")
                           .build())
-            .argument(Argument.FlagArgument
-                          .getOptional(true)
-                          .name("a")
-                          .longName("admin")
-                          .summary("Make the user an admin for the given door. Only applies to players.")
-                          .build())
+            .argument(Argument.valuesLessBuilder()
+                              .value(true)
+                              .name("a")
+                              .longName("admin")
+                              .summary("Make the user an admin for the given door. Only applies to players.")
+                              .build())
             .argument(Argument.StringArgument
                           .getRepeatable()
                           .name("p")
@@ -218,8 +231,7 @@ public class Main
                     new AddOwner(commandResult.getParsedArgument("doorID"),
                                  commandResult.getParsedArgument("p"),
                                  commandResult.<List<String>>getParsedArgument("g"),
-                                 commandResult.getParsedArgument("a")).runCommand()
-            )
+                                 commandResult.getParsedArgument("a")).runCommand())
             .build();
 
         final int subCommandCount = 20;
@@ -241,23 +253,13 @@ public class Main
         final Command bigdoors = Command
             .commandBuilder()
             .commandManager(commandManager)
-            .addDefaultHelpArgument(true)
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .subCommand(addOwner)
             .subCommands(subcommands)
-            .commandExecutor(
-                commandResult ->
-                {
-//                    final @NonNull Optional<Command> helpOpt = commandResult.getCommand()
-//                                                                            .getSubCommand(DefaultHelpCommand.class);
-//                    if (helpOpt.isPresent())
-//                        ((DefaultHelpCommand) helpOpt.get()).
-
-                })
-//            .hidden(true)
+            .commandExecutor(CommandResult::sendHelpMenu)
+            .hidden(true)
             .build();
-
 
         // TODO: Allow specifying the name instead of the subcommand instance?
         //       If the CommandManager becomes a builder, it can just retrieve the instances is the ctor.
@@ -266,34 +268,6 @@ public class Main
         commandManager.addCommand(addOwner).addCommand(bigdoors);
 
         return commandManager;
-    }
-
-    private static void testHelpRenderer(final @NonNull CommandManager commandManager)
-    {
-        final @NonNull Command addOwner = commandManager.getCommand("addowner").orElseThrow(
-            () -> new NullPointerException("Could not find command addowner"));
-        final @NonNull Command bigdoors = commandManager.getCommand("bigdoors").orElseThrow(
-            () -> new NullPointerException("Could not find command bigdoors"));
-
-        {
-            DefaultHelpCommandRenderer helpCommand = DefaultHelpCommandRenderer.builder().firstPageSize(2)
-                                                                               .pageSize(3)
-                                                                               .build();
-            System.out.println("==============================");
-            System.out.println("==============================");
-            System.out.print(helpCommand.renderLongCommand(ColorScheme.builder().build(), addOwner));
-            System.out.println("==============================");
-            System.out.print(helpCommand.renderLongCommand(ColorScheme.builder().build(),
-                                                           commandManager.getCommand("subsubcommand_2").get()));
-            System.out.println("==============================");
-            System.out.println("==============================");
-
-            for (int idx = 0; idx < 12; ++idx)
-            {
-                final int page = idx;
-                tryHelpCommand(() -> helpCommand.render(ColorScheme.builder().build(), bigdoors, page));
-            }
-        }
     }
 
     private static void tryHelpCommand(CheckedSupplier<Text, IllegalValueException> sup)

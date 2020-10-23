@@ -30,11 +30,11 @@ public class DefaultHelpCommand extends Command
                               final @NonNull CommandManager commandManager,
                               final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
-        super(Util.valOrDefault(name, "help"), description, summary, null,
+        super(Util.valOrDefault(name, "help"), description, summary, null, null,
               DefaultHelpCommand::defaultHelpCommandExecutor,
-              Collections.singletonList(Argument.StringArgument.getOptional().name("h").label("help")
+              Collections.singletonList(Argument.StringArgument.getOptionalPositional().name("page/command")
                                                                .summary("A page number of the name of a command.")
-                                                               .longName("help").build()),
+                                                               .longName("help").build()), null,
               false, header, commandManager, false, false);
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
@@ -68,11 +68,13 @@ public class DefaultHelpCommand extends Command
 
         final @NonNull OptionalInt intOpt = Util.parseInt(val);
         if (intOpt.isPresent())
-            return helpCommandRenderer.render(colorScheme, superCommand, intOpt.getAsInt());
+            return helpCommandRenderer
+                .render(colorScheme, superCommand, intOpt.getAsInt() - helpCommandRenderer.getPageOffset());
 
         final @NonNull Command command = superCommand.getCommandManager().getCommand(val).orElse(superCommand);
         return helpCommandRenderer.render(colorScheme, command, val);
     }
+
 
     protected static void defaultHelpCommandExecutor(final @NonNull CommandResult commandResult)
         throws IllegalValueException, CommandNotFoundException
@@ -91,6 +93,6 @@ public class DefaultHelpCommand extends Command
 
         commandSender.sendMessage(renderHelpText(commandSender.getColorScheme(), superCommand,
                                                  helpCommand.helpCommandRenderer,
-                                                 commandResult.getParsedArgument("h")));
+                                                 commandResult.getParsedArgument("page/command")));
     }
 }

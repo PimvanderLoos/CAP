@@ -3,9 +3,6 @@ package nl.pim16aap2.commandparser.renderer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import nl.pim16aap2.commandparser.argument.Argument;
-import nl.pim16aap2.commandparser.argument.OptionalArgument;
-import nl.pim16aap2.commandparser.argument.RepeatableArgument;
-import nl.pim16aap2.commandparser.argument.RequiredArgument;
 import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.text.TextType;
@@ -16,13 +13,7 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
     @Override
     public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument)
     {
-        if (argument instanceof OptionalArgument)
-            return renderOptional(colorScheme, (OptionalArgument<?>) argument);
-        else if (argument instanceof RequiredArgument)
-            return renderRequired(colorScheme, (RequiredArgument<?>) argument);
-        // TODO: Ideally, this would go through the argument itself. Just store a function or something.
-        //       Then apply the selected ArgumentRenderer (implements an interface).
-        throw new RuntimeException("Failed to determine type of argument: " + argument.getClass().getCanonicalName());
+        return argument.isRequired() ? renderRequired(colorScheme, argument) : renderOptional(colorScheme, argument);
     }
 
     @Override
@@ -36,26 +27,57 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
     }
 
     protected @NonNull Text renderOptional(final @NonNull ColorScheme colorScheme,
-                                           final @NonNull OptionalArgument<?> argument)
+                                           final @NonNull Argument<?> argument)
     {
-        final String suffix = argument instanceof RepeatableArgument ? "+" : "";
-
-        final Text rendered = new Text(colorScheme);
-        rendered.add("[", TextType.OPTIONAL_PARAMETER)
-                .add("-" + argument.getName(), TextType.OPTIONAL_PARAMETER_FLAG);
-
-        if (!argument.getFlag())
-        {
-            rendered
-                .add("=", TextType.OPTIONAL_PARAMETER_SEPARATOR) // FIXME: This should be configurable!
-                .add(argument.getLabel(), TextType.OPTIONAL_PARAMETER_LABEL);
-        }
-        return rendered.add("]" + suffix, TextType.OPTIONAL_PARAMETER);
+        final String suffix = argument.isRepeatable() ? "+" : "";
+        return new Text(colorScheme).add("[", TextType.OPTIONAL_PARAMETER)
+                                    .add(renderArgument(colorScheme, argument))
+                                    .add("]" + suffix, TextType.OPTIONAL_PARAMETER);
     }
 
     protected @NonNull Text renderRequired(final @NonNull ColorScheme colorScheme,
-                                           final @NonNull RequiredArgument<?> argument)
+                                           final @NonNull Argument<?> argument)
     {
-        return new Text(colorScheme).add("<" + argument.getLabel() + ">", TextType.REQUIRED_PARAMETER);
+        final String suffix = argument.isRepeatable() ? "+" : "";
+        return new Text(colorScheme).add("<", TextType.REQUIRED_PARAMETER)
+                                    .add(renderArgument(colorScheme, argument))
+                                    .add(">" + suffix, TextType.REQUIRED_PARAMETER);
+    }
+
+    protected @NonNull Text renderArgument(final @NonNull ColorScheme colorScheme,
+                                           final @NonNull Argument<?> argument)
+    {
+        final Text text = new Text(colorScheme);
+        final String argLabel = argument.getLabel().equals("") ? argument.getName() : argument.getLabel();
+
+        if (argument.isPositional())
+            return text.add(argLabel, (argument.isRequired() ?
+                                       TextType.REQUIRED_PARAMETER :
+                                       TextType.OPTIONAL_PARAMETER_LABEL));
+
+        final TextType name, label, separator;
+        if (argument.isRequired())
+        {
+            // TODO: Make sure these types also exist for required params.
+            name = TextType.OPTIONAL_PARAMETER_FLAG;
+            label = TextType.OPTIONAL_PARAMETER_LABEL;
+            separator = TextType.OPTIONAL_PARAMETER_SEPARATOR;
+        }
+        else
+        {
+            name = TextType.OPTIONAL_PARAMETER_FLAG;
+            label = TextType.OPTIONAL_PARAMETER_LABEL;
+            separator = TextType.OPTIONAL_PARAMETER_SEPARATOR;
+        }
+
+        // TODO: The '-' should be configurable, right?
+        text.add("-" + argument.getName(), name);
+
+        if (argument.isValuesLess())
+            return text;
+
+        return text
+            .add("=", separator) // FIXME: This should be configurable!
+            .add(argLabel, label);
     }
 }

@@ -23,6 +23,13 @@ public interface IHelpCommandRenderer
         throws IllegalValueException;
 
     /**
+     * Gets the page offset (caused by starting on a non-zero index, e.g. 1).
+     *
+     * @return The page offset.
+     */
+    int getPageOffset();
+
+    /**
      * Either renders the help menu for a sub{@link Command} or a page of the help menu for the provided {@link
      * Command}, depending on the input value.
      * <p>
@@ -32,7 +39,7 @@ public interface IHelpCommandRenderer
      * Command} with the name of the value if one exists and is registered in the {@link CommandManager} of the provided
      * {@link Command}.
      *
-     * @param colorScheme The {@link ColorScheme} to use for rendering the help command.
+     * @param colorScheme The {@link ColorScheme} to use for rendering the help text.
      * @param command     The {@link Command} for which to render a help page or whose {@link CommandManager} to use to
      *                    look up the (sub){@link Command} for which to print the long help menu.
      * @param val         The value representing either a help page (integer) or the name of a {@link Command}.
@@ -56,4 +63,14 @@ public interface IHelpCommandRenderer
      * @return The rendered long help menu for the given command.
      */
     @NonNull Text renderLongCommand(final @NonNull ColorScheme colorScheme, final @NonNull Command command);
+
+    /**
+     * Renders the first page of the help menu for the given {@link Command} with all its sub{@link Command}s.
+     *
+     * @param colorScheme The {@link ColorScheme} to use for rendering the help text.
+     * @param command     The {@link Command} for which to render a help page or whose {@link CommandManager} to use to
+     *                    look up the (sub){@link Command} for which to print the long help menu.
+     * @return The rendered help menu.
+     */
+    @NonNull Text renderFirstPage(final @NonNull ColorScheme colorScheme, final @NonNull Command command);
 }
