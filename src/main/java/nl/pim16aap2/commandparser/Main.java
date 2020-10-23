@@ -152,6 +152,8 @@ public class Main
 //        testHelpRenderer(commandManager);
 
         tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2", "--admin");
         tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
         tryArgs(commandManager, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
         tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
@@ -217,12 +219,14 @@ public class Main
             .argument(Argument.StringArgument
                           .getRepeatable()
                           .name("p")
+                          .longName("player")
                           .label("player")
                           .summary("The name of the player to add as owner")
                           .build())
             .argument(Argument.StringArgument
                           .getRepeatable()
                           .name("g")
+                          .longName("group")
                           .label("group")
                           .summary("The name of the group to add as owner")
                           .build())
