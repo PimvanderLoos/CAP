@@ -1,11 +1,14 @@
 package nl.pim16aap2.commandparser.manager;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
+import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
@@ -20,17 +23,28 @@ import java.util.Optional;
 public class CommandManager
 {
     private final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
+
     @Getter
     private final @NonNull DefaultHelpCommandRenderer helpCommandRenderer;
 
-    public CommandManager(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer)
+    /**
+     * Whether or not to enable debug mode. In debug mode, {@link CommandParserException}s will generate stacktraces,
+     * when it is disable, they won't (this is much faster).
+     */
+    @Getter
+    @Setter
+    protected boolean debug;
+
+    @Builder
+    private CommandManager(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug)
     {
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer::getDefault);
+        this.debug = debug;
     }
 
-    public CommandManager()
+    public static @NonNull CommandManager getDefault()
     {
-        this(null);
+        return CommandManager.builder().build();
     }
 
     /**

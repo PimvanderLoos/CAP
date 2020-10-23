@@ -78,11 +78,14 @@ public class DefaultHelpCommand extends Command
         throws IllegalValueException, CommandNotFoundException
     {
         if (!(commandResult.getCommand() instanceof DefaultHelpCommand))
-            throw new CommandNotFoundException(commandResult.getCommand().getName() + " is not a help command!");
+            throw new CommandNotFoundException(commandResult.getCommand().getName(),
+                                               commandResult.getCommand().getName() + " is not a help command!",
+                                               commandResult.getCommand().getCommandManager().isDebug());
 
         final @NonNull DefaultHelpCommand helpCommand = (DefaultHelpCommand) commandResult.getCommand();
         final @NonNull Command superCommand = helpCommand.getSuperCommand().orElseThrow(
-            () -> new CommandNotFoundException("Super command of: " + helpCommand.getName()));
+            () -> new CommandNotFoundException("Super command of: " + helpCommand.getName(),
+                                               commandResult.getCommand().getCommandManager().isDebug()));
 
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 

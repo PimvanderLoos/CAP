@@ -119,7 +119,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     {
         final int pageCount = getPageCount(command);
         if (page > pageCount || page < 0)
-            throw new IllegalValueException(command, Integer.toString(page));
+            throw new IllegalValueException(command, Integer.toString(page), command.getCommandManager().isDebug());
 
         Text text = new Text(colorScheme);
         renderPageCountHeader(text, page, pageCount);
@@ -148,7 +148,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 
         final @NonNull Optional<Command> subCommand = command.getCommandManager().getCommand(val);
         if (!subCommand.isPresent())
-            throw new CommandNotFoundException(val);
+            throw new CommandNotFoundException(val, command.getCommandManager().isDebug());
 
         return renderLongCommand(colorScheme, subCommand.get());
     }

@@ -9,9 +9,22 @@ public class CommandNotFoundException extends CommandParserException
     @Getter
     private final @NonNull String missingCommand;
 
-    public CommandNotFoundException(final @Nullable String commandName)
+    public CommandNotFoundException(final @Nullable String commandName, final boolean stacktrace)
     {
-        super();
-        this.missingCommand = commandName == null ? "NULL" : commandName;
+        super("Could not find command: \"" + getCommandName(commandName) + "\"", stacktrace);
+        this.missingCommand = getCommandName(commandName);
     }
+
+    public CommandNotFoundException(final @Nullable String commandName, final @NonNull String message,
+                                    final boolean stacktrace)
+    {
+        super(message, stacktrace);
+        this.missingCommand = getCommandName(commandName);
+    }
+
+    private static @NonNull String getCommandName(final @Nullable String commandName)
+    {
+        return commandName == null ? "NULL" : commandName;
+    }
+
 }

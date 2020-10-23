@@ -153,7 +153,7 @@ class CommandParser
                 final String[] parts = SEPARATOR_PATTERN.split(nextArg);
                 final String argumentName = parts[0].substring(1);
                 final @NonNull Argument<?> argument = command.getArgument(argumentName).orElseThrow(
-                    () -> new NonExistingArgumentException(command, argumentName));
+                    () -> new NonExistingArgumentException(command, argumentName, commandManager.isDebug()));
 
                 if (argument instanceof RepeatableArgument) // TODO: The argument type should do this on its own.
                     parseRepeatableArgument(command, results, (RepeatableArgument<? extends List<?>, ?>) argument,
@@ -168,7 +168,8 @@ class CommandParser
                     command.getRequiredArgumentFromIdx(requiredArgumentIdx)
                            .orElseThrow(() -> new MissingArgumentException(command,
                                                                            "Missing required argument at pos: " +
-                                                                               requiredArgumentIdx));
+                                                                               requiredArgumentIdx,
+                                                                           commandManager.isDebug()));
                 results.put(argument.getName(), parseArgument(argument, nextArg));
             }
         }
@@ -189,7 +190,7 @@ class CommandParser
         // TODO: Reduce code duplication with optional argument
         final @Nullable String valStr = parts.length == 2 ? parts[1] : null;
         if (valStr == null)
-            throw new MissingArgumentException(command, argumentName);
+            throw new MissingArgumentException(command, argumentName, commandManager.isDebug());
 
         final @Nullable ParsedRepeatableArgument<? extends List<?>, ?> parsed =
             (ParsedRepeatableArgument<? extends List<?>, ?>) results.get(argumentName);
@@ -209,7 +210,7 @@ class CommandParser
             // TODO: Merge all subsequent parts? Or only split on the first?
             final @Nullable String valStr = parts.length == 2 ? parts[1] : null;
             if (valStr == null)
-                throw new MissingArgumentException(command, argumentName);
+                throw new MissingArgumentException(command, argumentName, commandManager.isDebug());
             results.put(argumentName, parseArgument(argument, valStr));
         }
     }
@@ -246,16 +247,17 @@ class CommandParser
     {
         if (command == null)
         {
-            if (idx != 0)
-                throw new CommandNotFoundException("Command at index " + idx);
+            if (idx != 0) // TODO:
+                throw new CommandNotFoundException(null, commandManager.isDebug());
 
             final @Nullable String commandName = args.size() > idx ? args.get(idx) : null;
-            final Command baseCommand = commandManager.getCommand(commandName)
-                                                      .orElseThrow(() -> new CommandNotFoundException(commandName));
+            final Command baseCommand =
+                commandManager.getCommand(commandName)
+                              .orElseThrow(() -> new CommandNotFoundException(commandName, commandManager.isDebug()));
 
             // If the command has a super command, it cannot possible be right to be the first argument.
             if (baseCommand.getSuperCommand().isPresent())
-                throw new CommandNotFoundException(baseCommand.getName());
+                throw new CommandNotFoundException(baseCommand.getName(), commandManager.isDebug());
 
             return getLastCommand(baseCommand, 0);
         }
@@ -277,7 +279,8 @@ class CommandParser
         final @NonNull Command subCommand = subCommandOpt.get();
 
         if (!subCommand.getSuperCommand().isPresent() || subCommand.getSuperCommand().get() != command)
-            throw new CommandNotFoundException("super command of: " + subCommand.getName() + "");
+            // TODO: More specific exception.
+            throw new CommandNotFoundException("super( command of: )" + subCommand.getName(), commandManager.isDebug());
 
         return new ParsedCommand(subCommand, nextIdx);
     }

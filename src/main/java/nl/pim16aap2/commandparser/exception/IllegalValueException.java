@@ -12,9 +12,10 @@ public class IllegalValueException extends CommandParserException
     @Getter
     private final @NonNull Command command;
 
-    public IllegalValueException(final @NonNull Command command, final @NonNull String illegalValue)
+    public IllegalValueException(final @NonNull Command command, final @NonNull String illegalValue,
+                                 final boolean stacktrace)
     {
-        super();
+        super("Received illegal value \"" + illegalValue + "\" for command: " + command.getName(), stacktrace);
         this.illegalValue = illegalValue;
         this.command = command;
     }

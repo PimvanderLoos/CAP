@@ -70,10 +70,6 @@ import java.util.List;
 //       For the BukkitChatColor, the builder can just accept ChatColors and take care of the default off value /
 //       instantiating TextComponents.
 // TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
-// TODO: For the exceptions, consider using some kind of variable to enable/disable stacktraces. While useful for
-//       debugging, it's entirely useless for regular use while it's still quite costly.
-//       Consider using this option:
-//       https://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html#:~:text=writableStackTrace
 // TODO: Store the HelpArgument in a command separately, so that we can
 //       actually figure out which argument is the help argument.
 
@@ -154,7 +150,7 @@ public class Main
 //        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
 //        tryArgs(commandManager, "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4", "-a");
 //
-//        tryArgs(commandManager, "bigdoors", "help", "addowner");
+        tryArgs(commandManager, "bigdoors", "help", "addowner");
         tryArgs(commandManager, "bigdoors", "help", "-h=addowner");
         tryArgs(commandManager, "bigdoors");
 //        tryArgs(commandManager, "bigdoors", "help", "-h=1");
@@ -167,7 +163,7 @@ public class Main
 
     private static CommandManager initCommandManager()
     {
-        final CommandManager commandManager = new CommandManager();
+        final CommandManager commandManager = CommandManager.builder().debug(true).build();
 
         final int subsubCommandCount = 5;
         final List<Command> subsubcommands = new ArrayList<>(subsubCommandCount);

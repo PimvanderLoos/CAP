@@ -12,9 +12,10 @@ public class NonExistingArgumentException extends CommandParserException
     @Getter
     private final @NonNull Command command;
 
-    public NonExistingArgumentException(final @NonNull Command command, final @NonNull String nonExistingArgument)
+    public NonExistingArgumentException(final @NonNull Command command, final @NonNull String nonExistingArgument,
+                                        final boolean stacktrace)
     {
-        super();
+        super("Argument \"" + nonExistingArgument + "\" does not exist for command: " + command.getName(), stacktrace);
         this.nonExistingArgument = nonExistingArgument;
         this.command = command;
     }
