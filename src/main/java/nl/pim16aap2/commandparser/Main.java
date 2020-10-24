@@ -9,6 +9,7 @@ import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
+import nl.pim16aap2.commandparser.exception.NoPermissionException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.manager.CommandManager;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
@@ -34,7 +35,8 @@ import java.util.List;
 //       changed since it was last cached. For example, if subcommands are added, the cache will have to be invalidated.
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Add permissions to commands (and arguments?). Probably a setter via an interface.
-// TODO: Command/argument(name/value) completion.
+// TODO: Command/argument completion.
+// TODO: Argument value suggestions (e.g. (online/nearby) player names, door names).
 // TODO: Allow defining and supplying custom renderers.
 // TODO: For the argument renderers, allow specifying long/short name requirements and stuff. In some situations,
 //       having both might be nice, while in other, it's better to only have the short version. Right?
@@ -45,6 +47,7 @@ import java.util.List;
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
 // TODO: Support ResourceBundle.
+// TODO: Currently, the commands are kinda stored in a tree shape (1 super, n subs). Perhaps store it in an actual tree?
 // TODO: For the long help, maybe fall back to the summary if no description is available?
 // TODO: Do not use 'helpful' messages in exceptions, but just variables. Whomever catches the exception
 //       Should be able to easily parse it themselves. If an exception requires additional text to explain it
@@ -117,6 +120,11 @@ public class Main
             System.out.println("EOFException!");
             e.printStackTrace();
         }
+        catch (NoPermissionException e)
+        {
+            System.out.println("No permission!");
+            e.printStackTrace();
+        }
         catch (CommandParserException e)
         {
             System.out.println("General CommandParserException!");
@@ -186,6 +194,7 @@ public class Main
             .description("Add 1 or more players or groups of players as owners of a door.")
             .summary("Add another owner to a door.")
             .subCommands(subsubcommands)
+            .permission("bigdoors.user.addowner")
             .argument(Argument.StringArgument
                           .getRequired()
                           .name("doorID")

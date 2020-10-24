@@ -10,6 +10,7 @@ import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
+import nl.pim16aap2.commandparser.exception.NoPermissionException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.util.Util;
@@ -56,7 +57,8 @@ public class CommandManager
      * @param args          A single String containing multiple arguments.
      */
     public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String args)
-        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException
+        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
+               NoPermissionException
     {
         return parseInput(commandSender, args.split(" "));
     }
@@ -79,7 +81,8 @@ public class CommandManager
      *                                      matching quotation mark can be in another string further down the array.
      */
     public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String... args)
-        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException
+        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
+               NoPermissionException
     {
         return new CommandParser(this, commandSender, args).parse();
     }

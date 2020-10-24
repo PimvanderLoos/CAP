@@ -35,8 +35,8 @@ public class CommandResult
     }
 
     /**
-     * Sends the text rendered by {@link IHelpCommandRenderer#renderLongCommand(ColorScheme, Command)} to the {@link
-     * #commandSender} for the {@link #command}.
+     * Sends the text rendered by {@link IHelpCommandRenderer#renderLongCommand(ICommandSender, ColorScheme, Command)}
+     * to the {@link #commandSender} for the {@link #command}.
      * <p>
      * See {@link Command#sendHelp(ICommandSender)}.
      */
@@ -48,22 +48,23 @@ public class CommandResult
     /**
      * Sends the first page of the help menu (with all the sub{@link Command}s) to the {@link #commandSender}.
      * <p>
-     * See {@link IHelpCommandRenderer#renderFirstPage(ColorScheme, Command)}.
+     * See {@link IHelpCommandRenderer#renderFirstPage(ICommandSender, ColorScheme, Command)}.
      */
     public void sendHelpMenu()
     {
         commandSender.sendMessage(command.getCommandManager().getHelpCommandRenderer()
-                                         .renderFirstPage(commandSender.getColorScheme(), command));
+                                         .renderFirstPage(commandSender, commandSender.getColorScheme(), command));
     }
 
     /**
-     * Sends the text rendered by {@link IHelpCommandRenderer#render(ColorScheme, Command, int)} (ColorScheme, Command)}
-     * to the {@link #commandSender} for the {@link #command}. It will send the first page.
+     * Sends the text rendered by {@link IHelpCommandRenderer#render(ICommandSender, ColorScheme, Command, int)}
+     * (ColorScheme, Command)} to the {@link #commandSender} for the {@link #command}. It will send the first page.
      */
     public void sendSubcommandHelp()
         throws IllegalValueException, CommandNotFoundException
     {
-        command.getCommandManager().getHelpCommandRenderer().render(commandSender.getColorScheme(), command, null);
+        command.getCommandManager().getHelpCommandRenderer()
+               .render(commandSender, commandSender.getColorScheme(), command, null);
     }
 
     /**
@@ -75,10 +76,6 @@ public class CommandResult
     public boolean helpRequired()
     {
         return this.parsedArguments == null;
-//        if (this.parsedArguments == null)
-//            return true;
-//        final @NonNull Optional<Argument.IParsedArgument<Boolean>> helpArg = getParsedArgumentOpt("h");
-//        return helpArg.isPresent() && helpArg.get().getValue() != null;
     }
 
     @SuppressWarnings("unchecked")

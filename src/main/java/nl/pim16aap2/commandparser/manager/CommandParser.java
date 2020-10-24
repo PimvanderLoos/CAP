@@ -8,6 +8,7 @@ import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
+import nl.pim16aap2.commandparser.exception.NoPermissionException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
 import org.jetbrains.annotations.Nullable;
 
@@ -94,10 +95,12 @@ class CommandParser
     }
 
     public @NonNull CommandResult parse()
-        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException
-
+        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, NoPermissionException
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
+        if (!commandSender.hasPermission(parsedCommand.getCommand()))
+            throw new NoPermissionException(commandSender, parsedCommand.getCommand(), commandManager.isDebug());
+
         if (parsedCommand.getIndex() == (args.size() - 1) &&
             parsedCommand.getCommand().getArgumentManager().getRequiredArguments().size() > 0)
             return new CommandResult(commandSender, parsedCommand.getCommand());

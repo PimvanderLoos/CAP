@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
+import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.text.ColorScheme;
@@ -119,7 +120,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     }
 
     @Override
-    public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Command command, final int page)
+    public @NonNull Text render(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
+                                final @NonNull Command command, final int page)
         throws IllegalValueException
     {
         final int pageCount = getPageCount(command);
@@ -129,21 +131,21 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         Text text = new Text(colorScheme);
         renderPageCountHeader(text, page, pageCount);
         if (page == 0)
-            return renderFirstPage(colorScheme, text, command);
+            return renderFirstPage(commandSender, colorScheme, text, command);
 
         final int skip = firstPageSize + (page - 1) * pageSize;
-        renderCommands(colorScheme, text, getBaseSuperCommand(colorScheme, command), command, this.pageSize, skip);
-
+        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(colorScheme, command),
+                       command, this.pageSize, skip);
         return text;
     }
 
     @Override
-    public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Command command,
-                                final @Nullable String val)
+    public @NonNull Text render(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
+                                final @NonNull Command command, final @Nullable String val)
         throws IllegalValueException, CommandNotFoundException
     {
         if (val == null)
-            return render(colorScheme, command, 0);
+            return render(commandSender, colorScheme, command, 0);
 
         final OptionalInt pageOpt = Util.parseInt(val);
         if (pageOpt.isPresent())
@@ -152,19 +154,23 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         {
             System.out.println("Selected page: " + pageOpt.getAsInt() + ", startAt1: " + startAt1 + ", final page: " +
                                    (pageOpt.getAsInt() - getPageOffset()));
-            return render(colorScheme, command, pageOpt.getAsInt() - getPageOffset());
+            return render(commandSender, colorScheme, command, pageOpt.getAsInt() - getPageOffset());
         }
 
         final @NonNull Optional<Command> subCommand = command.getCommandManager().getCommand(val);
         if (!subCommand.isPresent())
             throw new CommandNotFoundException(val, command.getCommandManager().isDebug());
 
-        return renderLongCommand(colorScheme, subCommand.get());
+        return renderLongCommand(commandSender, colorScheme, subCommand.get());
     }
 
     @Override
-    public @NonNull Text renderLongCommand(final @NonNull ColorScheme colorScheme, final @NonNull Command command)
+    public @NonNull Text renderLongCommand(final @NonNull ICommandSender commandSender,
+                                           final @NonNull ColorScheme colorScheme, final @NonNull Command command)
     {
+        if (!commandSender.hasPermission(command))
+            return new Text(colorScheme);
+
         final Text text = getBaseSuperCommand(colorScheme, command).add(command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
@@ -212,18 +218,24 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     }
 
     @Override
-    public @NonNull Text renderFirstPage(final @NonNull ColorScheme colorScheme, final @NonNull Command command)
+    public @NonNull Text renderFirstPage(final @NonNull ICommandSender commandSender,
+                                         final @NonNull ColorScheme colorScheme, final @NonNull Command command)
     {
-        return renderFirstPage(colorScheme, new Text(colorScheme), command);
+        return renderFirstPage(commandSender, colorScheme, new Text(colorScheme), command);
     }
 
-    protected @NonNull Text renderFirstPage(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
+    protected @NonNull Text renderFirstPage(final @NonNull ICommandSender commandSender,
+                                            final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                             final @NonNull Command command)
     {
+        if (!commandSender.hasPermission(command))
+            return new Text(colorScheme);
+
         if (displayHeader && !command.getHeader(colorScheme).equals(""))
             text.add(command.getHeader(colorScheme), TextType.HEADER).add("\n");
 
-        renderCommands(colorScheme, text, getBaseSuperCommand(colorScheme, command), command, this.firstPageSize, 0);
+        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(colorScheme, command),
+                       command, this.firstPageSize, 0);
 
         return text;
     }
@@ -231,14 +243,18 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     /**
      * Recursively renders the given command as well as all its subcommands.
      *
+     * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
+     *                      they do not have access to are not included. See {@link ICommandSender#hasPermission(Command)}.
      * @param text          The {@link Text} to append the help to.
      * @param superCommands A {@link Text} with all the appended super commands of the current command. This will be
      *                      prepended to the command.
      * @param command       The {@link Command} and {@link Command#getSubCommands()} to render (recursively).
      * @param count         The number of {@link Command}s to render.
+     * @param skip          The number of items to skip.
      * @return The number of commands that were added to the {@link Text}.
      */
-    protected @NonNull Pair<Integer, Integer> renderCommands(final @NonNull ColorScheme colorScheme,
+    protected @NonNull Pair<Integer, Integer> renderCommands(final @NonNull ICommandSender commandSender,
+                                                             final @NonNull ColorScheme colorScheme,
                                                              final @NonNull Text text,
                                                              final @NonNull Text superCommands,
                                                              final @NonNull Command command, final int count,
@@ -253,7 +269,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         int skipped = 0;
 
         // Don't render hidden commands, because they're... Well... hidden.
-        if (!command.isHidden())
+        if (!command.isHidden() || !commandSender.hasPermission(command))
         {
             // Only render the command if it doesn't have to be skipped.
             if (skip > skipped)
@@ -277,7 +293,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         for (final Command subCommand : command.getSubCommands())
         {
             final @NonNull Pair<Integer, Integer> renderResult =
-                renderCommands(colorScheme, text, newSuperCommands, subCommand, count - added, skip - skipped);
+                renderCommands(commandSender, colorScheme, text, newSuperCommands, subCommand,
+                               count - added, skip - skipped);
 
             added += renderResult.first;
             skipped += renderResult.second;

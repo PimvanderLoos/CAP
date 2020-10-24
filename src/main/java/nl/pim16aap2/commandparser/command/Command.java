@@ -73,6 +73,8 @@ public class Command
 
     protected boolean addDefaultHelpArgument;
 
+    private @Nullable String permission;
+
     @Builder(builderMethodName = "commandBuilder")
     protected Command(final @NonNull String name,
                       final @Nullable String description,
@@ -84,7 +86,7 @@ public class Command
                       @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
                       @Nullable Argument<?> helpArgument, final boolean hidden,
                       final @NonNull CommandManager commandManager, final @Nullable Boolean addDefaultHelpArgument,
-                      final @Nullable Boolean addDefaultHelpSubCommand)
+                      final @Nullable Boolean addDefaultHelpSubCommand, final @Nullable String permission)
     {
         this.name = name;
 
@@ -102,6 +104,7 @@ public class Command
         this.commandExecutor = commandExecutor;
         this.hidden = hidden;
 
+        this.permission = permission;
 
         this.helpCommand = helpCommand;
         if (helpCommand == null && Util.valOrDefault(addDefaultHelpSubCommand, false))
@@ -190,7 +193,8 @@ public class Command
      */
     public @NonNull Text getHelp(final @NonNull ICommandSender commandSender)
     {
-        return commandManager.getHelpCommandRenderer().renderLongCommand(commandSender.getColorScheme(), this);
+        return commandManager.getHelpCommandRenderer()
+                             .renderLongCommand(commandSender, commandSender.getColorScheme(), this);
     }
 
     /**

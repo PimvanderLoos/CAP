@@ -40,7 +40,7 @@ public class DefaultHelpCommand extends Command
               Collections.singletonList(Argument.StringArgument.getOptionalPositional().name("page/command")
                                                                .summary("A page number of the name of a command.")
                                                                .longName("help").build()), null,
-              false, commandManager, false, false);
+              false, commandManager, false, false, null);
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
     }
@@ -62,22 +62,23 @@ public class DefaultHelpCommand extends Command
         return Optional.empty();
     }
 
-    protected static @NonNull Text renderHelpText(final @NonNull ColorScheme colorScheme,
+    protected static @NonNull Text renderHelpText(final @NonNull ICommandSender commandSender,
+                                                  final @NonNull ColorScheme colorScheme,
                                                   final @NonNull Command superCommand,
                                                   final @NonNull IHelpCommandRenderer helpCommandRenderer,
                                                   final @Nullable String val)
         throws IllegalValueException, CommandNotFoundException
     {
         if (val == null)
-            return helpCommandRenderer.render(colorScheme, superCommand, null);
+            return helpCommandRenderer.render(commandSender, colorScheme, superCommand, null);
 
         final @NonNull OptionalInt intOpt = Util.parseInt(val);
         if (intOpt.isPresent())
-            return helpCommandRenderer
-                .render(colorScheme, superCommand, intOpt.getAsInt() - helpCommandRenderer.getPageOffset());
+            return helpCommandRenderer.render(commandSender, colorScheme, superCommand,
+                                              intOpt.getAsInt() - helpCommandRenderer.getPageOffset());
 
         final @NonNull Command command = superCommand.getCommandManager().getCommand(val).orElse(superCommand);
-        return helpCommandRenderer.render(colorScheme, command, val);
+        return helpCommandRenderer.render(commandSender, colorScheme, command, val);
     }
 
 
@@ -96,7 +97,7 @@ public class DefaultHelpCommand extends Command
 
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 
-        commandSender.sendMessage(renderHelpText(commandSender.getColorScheme(), superCommand,
+        commandSender.sendMessage(renderHelpText(commandSender, commandSender.getColorScheme(), superCommand,
                                                  helpCommand.helpCommandRenderer,
                                                  commandResult.getParsedArgument("page/command")));
     }
