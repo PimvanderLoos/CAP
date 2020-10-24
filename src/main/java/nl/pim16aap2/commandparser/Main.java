@@ -65,6 +65,8 @@ import java.util.List;
 // TODO: Maybe store the arguments by their label inside the CommandResult? That would avoid confusion of name vs longName.
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
+// TODO: The Supplier<List<String>> in the Arguments should really be a function and it should have access to some basic
+//       stuff, like ICommandSender and Command.
 
 public class Main
 {

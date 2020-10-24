@@ -8,15 +8,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
 {
     @Builder(builderMethodName = "repeatableBuilder")
     private RepeatableArgument(final @NonNull String name, final @Nullable String longName,
                                final @NonNull String summary, final @NonNull ArgumentParser<U> parser,
-                               final @NonNull String label, final boolean required)
+                               final @NonNull String label, final boolean required,
+                               final @Nullable Supplier<List<String>> tabcompleteFunction)
     {
-        super(name, longName, summary, parser, null, label, false, true, -1, required);
+        super(name, longName, summary, parser, null, label, false, true, -1, required, tabcompleteFunction);
     }
 
     @Override
@@ -42,7 +44,7 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
         @SuppressWarnings("unchecked")
         private ParsedRepeatableArgument()
         {
-            this.value = ((T) new ArrayList<U>(0));
+            value = ((T) new ArrayList<U>(0));
         }
 
         public void addValue(final @NonNull U newValue)
@@ -56,7 +58,7 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
         {
             if (newValue == null)
                 return;
-            this.value.addAll((T) newValue);
+            value.addAll((T) newValue);
         }
     }
 }

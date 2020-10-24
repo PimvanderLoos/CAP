@@ -12,6 +12,7 @@ import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @Getter
 public class Argument<T>
@@ -37,10 +38,13 @@ public class Argument<T>
 
     protected final boolean required;
 
+    protected final @Nullable Supplier<List<String>> tabcompleteFunction;
+
     protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final boolean valuesLess, final boolean repeatable,
-                       final int position, final boolean required)
+                       final int position, final boolean required,
+                       final @Nullable Supplier<List<String>> tabcompleteFunction)
     {
         this.name = name;
         this.longName = longName;
@@ -52,28 +56,32 @@ public class Argument<T>
         this.repeatable = repeatable;
         this.position = position;
         this.required = required;
+        this.tabcompleteFunction = tabcompleteFunction;
     }
 
     @Builder(builderMethodName = "requiredBuilder", builderClassName = "RequiredBuilder")
     protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
-                       final @NonNull ArgumentParser<T> parser, final int position)
+                       final @NonNull ArgumentParser<T> parser, final int position,
+                       final @Nullable Supplier<List<String>> tabcompleteFunction)
     {
-        this(name, longName, summary, parser, null, "", false, false, position, true);
+        this(name, longName, summary, parser, null, "", false, false, position, true, tabcompleteFunction);
     }
 
     @Builder(builderMethodName = "optionalPositionalBuilder", builderClassName = "OptionalPositionalBuilder")
     protected Argument(final @NonNull String name, final @NonNull String longName, final @NonNull String summary,
-                       final int position, final @NonNull ArgumentParser<T> parser)
+                       final int position, final @NonNull ArgumentParser<T> parser,
+                       final @Nullable Supplier<List<String>> tabcompleteFunction)
     {
-        this(name, longName, summary, parser, null, "", false, false, position, false);
+        this(name, longName, summary, parser, null, "", false, false, position, false, tabcompleteFunction);
     }
 
     @Builder(builderMethodName = "optionalBuilder", builderClassName = "OptionalBuilder")
     protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
-                       final @NonNull String label)
+                       final @NonNull String label,
+                       final @Nullable Supplier<List<String>> tabcompleteFunction)
     {
-        this(name, longName, summary, parser, defaultValue, label, false, false, -1, false);
+        this(name, longName, summary, parser, defaultValue, label, false, false, -1, false, tabcompleteFunction);
     }
 
     @SuppressWarnings("unchecked")
@@ -83,7 +91,7 @@ public class Argument<T>
     {
         this(name, longName, summary,
              (ArgumentParser<T>) FlagParser.create(Util.valOrDefault(value, Boolean.TRUE)),
-             (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), "", true, false, -1, false);
+             (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), "", true, false, -1, false, null);
     }
 
     private static <T> ValuesLessBuilder<T> privateValuesLessBuilder()
@@ -141,7 +149,7 @@ public class Argument<T>
         @SuppressWarnings("unchecked")
         public <U> void updateValue(final @Nullable U newValue)
         {
-            this.value = (T) newValue;
+            value = (T) newValue;
         }
     }
 

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -79,6 +80,47 @@ class CommandParser
     }
 
     /**
+     * Gets the tab complete suggestions if there is no value at all. I.e. the last value in args is a (sub){@link
+     * Command}.
+     * <p>
+     * If the {@link Command} has any positional {@link Argument}s, {@link #getTabCompleteFromArgumentFunction(Optional,
+     * String)} will be used for the first one (and an empty String as value, so every entry will be accepted).
+     * <p>
+     * If the {@link Command} only has free {@link Argument}s, a list of those will be returned instead.
+     * <p>
+     * If the {@link Command} has any sub{@link Command}s, then those will be added to the result as well.
+     *
+     * @param command The {@link Command} for which to get the tab complete suggestions.
+     * @return The list of tab complete suggestions.
+     */
+    private @NonNull List<String> getTabCompleteWithoutValue(final @NonNull Command command)
+    {
+        final List<String> ret = new ArrayList<>(0);
+
+        command.getSubCommands().forEach(
+            subCommand ->
+            {
+                if (commandSender.hasPermission(subCommand))
+                    ret.add(subCommand.getName());
+            });
+
+        if (command.getArgumentManager().positionalArguments.isEmpty())
+        {
+            command.getArgumentManager().getArguments().forEach(
+                argument ->
+                {
+                    ret.add(argument.getName());
+                    if (argument.getLongName() != null)
+                        ret.add(argument.getLongName());
+                });
+        }
+        else
+            return getTabCompleteFromArgumentFunction(command.getArgumentManager().getPositionalArgumentAtIdx(0), "");
+
+        return ret;
+    }
+
+    /**
      * Strips up to two leading {@link #ARGUMENT_PREFIX}es from a String if any could be found.
      * <p>
      * For example, when provided with '-a', it will return 'a' and for '--admin-' it would be 'admin-'. '---admin',
@@ -97,21 +139,76 @@ class CommandParser
         return Optional.of(LEADING_PREFIX_PATTERN.matcher(argument).replaceFirst(""));
     }
 
-    private @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command)
+    /**
+     * Gets the tab complete suggestions from {@link Argument#getTabcompleteFunction()}.
+     *
+     * @param argument The {@link Argument} that will be used to get the tab complete suggestions.
+     * @param value    The current value to compare the results against.
+     * @return The list of tab complete suggestions.
+     */
+    private @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Optional<Argument<?>> argument,
+                                                                     final @NonNull String value)
     {
         final List<String> options = new ArrayList<>(0);
+        final @Nullable Supplier<List<String>> argumentValueCompletion = argument.map(Argument::getTabcompleteFunction)
+                                                                                 .orElse(null);
+        if (argumentValueCompletion == null)
+            return options;
+
+        argumentValueCompletion.get().forEach(
+            entry ->
+            {
+                if (entry.startsWith(value))
+                    options.add(entry);
+            });
+
+        return options;
+    }
+
+    /**
+     * Gets the tab complete options for the {@link Argument}s of a {@link Command}.
+     *
+     * @param command The {@link Command} to get the tab complete options for.
+     * @return The list of Strings suggested for the next parameter.
+     */
+    private @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command)
+    {
         final String lastVal = args.get(args.size() - 1);
         System.out.println("lastVal = " + lastVal);
 
+        final @NonNull Optional<Argument<?>> argument;
+        final String value;
+
         final @NonNull Optional<String> freeArgumentOpt = lstripArgumentPrefix(lastVal);
+        // If the argument is a free argument (i.e. '--player=playerName'), try to complete the name of
+        // the argument (in this case 'player') if there is no separator ('=' in this case) in the string.
+        //
+        // If the separator does exist, find the argument from the name and treat everything after the
+        // separator as the value.
         if (freeArgumentOpt.isPresent())
         {
             final String freeArgument = freeArgumentOpt.get();
             if (!lastVal.contains(SEPARATOR))
                 return getTabCompleteArgumentNames(command.getCommand(), freeArgument);
+
+            final String[] parts = SEPARATOR_PATTERN.split(freeArgument, 2);
+            final String argumentName = parts[0];
+            value = parts[1];
+            argument = command.getCommand().getArgumentManager().getArgument(argumentName);
+        }
+        // If the argument is a positional argument (i.e. it doesn't start with the prefix and you don't have to
+        // specify the name to use it), simply get the positional argument based on the position in the string.
+        // As value, use the string that was found.
+        else
+        {
+            // Subtract the command's index from the total size because the command and its supercommands don't count
+            // towards positional indices.
+            final int positionalArgumentIdx = args.size() - command.index - 2;
+            argument = command.getCommand().getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIdx);
+            value = lastVal;
         }
 
-        return options;
+        return getTabCompleteFromArgumentFunction(argument, value);
     }
 
     public @NonNull List<String> getTabCompleteOptions()
@@ -119,11 +216,8 @@ class CommandParser
         try
         {
             final @NonNull ParsedCommand parsedCommand = getLastCommand();
-            // If the last parsed command is the last index, there are no half-finished command names left.
-            // Therefore, we cannot supply any suggestions for command names.
-            // TODO: Give parameter / parameter value options here.
             if (parsedCommand.getIndex() >= (args.size() - 1))
-                return new ArrayList<>(0);
+                return getTabCompleteWithoutValue(parsedCommand.getCommand());
 
             final List<String> suggestions = new ArrayList<>();
             // Check if the found index is the before-last argument.
