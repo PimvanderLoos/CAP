@@ -1,9 +1,7 @@
 package nl.pim16aap2.commandparser.manager;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
+import lombok.Value;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
@@ -258,9 +256,7 @@ class CommandParser
      *
      * @author Pim
      */
-    @AllArgsConstructor
-    @Getter
-    @Setter
+    @Value
     private static class ParsedCommand
     {
         Command command;
