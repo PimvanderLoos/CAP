@@ -102,7 +102,7 @@ public class Main
         final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
-//        commandSender.setColorScheme(Main.getColorScheme());
+        commandSender.setColorScheme(Main.getColorScheme());
 
         try
         {
@@ -166,22 +166,23 @@ public class Main
         tabComplete(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
         tabComplete(commandManager, "bigdoors", "addowner", "myDoor", "--play");
 
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2", "--admin");
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
-//        tryArgs(commandManager, "bigdoors", "addowner", "-h");
-//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
-//
-//        tryArgs(commandManager, "bigdoors", "help", "addowner");
-//        tryArgs(commandManager, "bigdoors");
-//        tryArgs(commandManager, "bigdoors", "help", "1");
-//        tryArgs(commandManager, "bigdoors", "help");
-//        tryArgs(commandManager, "bigdoors", "addowner");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2", "--admin");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "-h");
+        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
+
+        tryArgs(commandManager, "bigdoors", "help", "addowner");
+        tryArgs(commandManager, "bigdoors");
+        tryArgs(commandManager, "bigdoors", "help", "1");
+        tryArgs(commandManager, "bigdoors", "help");
+        tryArgs(commandManager, "bigdoors", "addowner");
     }
 
     private static CommandManager initCommandManager()
@@ -276,19 +277,19 @@ public class Main
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .headerSupplier(colorScheme -> new Text(colorScheme)
-                .add("Parameters in angled brackets are required: ", TextType.REGULAR_TEXT)
+                .add("Parameters in angled brackets are required: ", TextType.HEADER)
                 .add("<", TextType.REQUIRED_PARAMETER)
                 .add("parameter", TextType.REQUIRED_PARAMETER_LABEL)
                 .add(">", TextType.REQUIRED_PARAMETER).add("\n")
 
-                .add("Parameters in square brackets are optional: ", TextType.REGULAR_TEXT)
+                .add("Parameters in square brackets are optional: ", TextType.HEADER)
                 .add("[", TextType.OPTIONAL_PARAMETER)
                 .add("parameter", TextType.OPTIONAL_PARAMETER_LABEL)
                 .add("]", TextType.OPTIONAL_PARAMETER).add("\n")
 
                 .add("If an argument is followed by a \"+\" symbol, it can be\n" +
                          "repeated as many times as you want. For example, for a\n" +
-                         "hypothetical command \"", TextType.REGULAR_TEXT)
+                         "hypothetical command \"", TextType.HEADER)
                 .add("/command ", TextType.COMMAND)
                 .add("[", TextType.OPTIONAL_PARAMETER)
                 .add("p", TextType.OPTIONAL_PARAMETER_FLAG)
@@ -296,7 +297,10 @@ public class Main
                 .add("player", TextType.OPTIONAL_PARAMETER_LABEL)
                 .add("]+", TextType.OPTIONAL_PARAMETER)
 
-                .add("\", you can do: \n\"/command -p=playerA -p=playerB\"\n", TextType.REGULAR_TEXT)
+                .add("\", you can do: \n\"", TextType.HEADER)
+                .add("/command -p=playerA -p=playerB", TextType.REGULAR_TEXT)
+                .add("\".\n", TextType.HEADER)
+                .add(" ", TextType.REGULAR_TEXT)
                 .toString())
 
             .subCommand(addOwner)
