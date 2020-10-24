@@ -58,10 +58,9 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
         final TextType name, label, separator;
         if (argument.isRequired())
         {
-            // TODO: Make sure these types also exist for required params.
-            name = TextType.OPTIONAL_PARAMETER_FLAG;
-            label = TextType.OPTIONAL_PARAMETER_LABEL;
-            separator = TextType.OPTIONAL_PARAMETER_SEPARATOR;
+            name = TextType.REQUIRED_PARAMETER_FLAG;
+            label = TextType.REQUIRED_PARAMETER_LABEL;
+            separator = TextType.REQUIRED_PARAMETER_SEPARATOR;
         }
         else
         {

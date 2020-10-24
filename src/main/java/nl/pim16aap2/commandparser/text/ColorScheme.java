@@ -48,6 +48,24 @@ public class ColorScheme
         {
         }
 
+        /**
+         * Copies the style of a base type to a number of target types for every target type that does not have a style
+         * yet. Target types that do have a style are left as-is.
+         * <p>
+         * If the base style has not been defined, nothing happens.
+         *
+         * @param base    The base type whose defined
+         * @param targets The target types to copy the base style to for those that do not have a style yet.
+         */
+        private void copyDefaults(final @NonNull TextType base, final @NonNull TextType... targets)
+        {
+            final @Nullable TextComponent baseStyle = styleMap.get(base);
+            if (baseStyle == null)
+                return;
+            for (TextType target : targets)
+                styleMap.putIfAbsent(target, baseStyle);
+        }
+
         public ColorScheme build()
         {
             // If disableAll was set, apply this default value to any components
@@ -62,14 +80,11 @@ public class ColorScheme
                         styleMap.put(entry.getKey(), new TextComponent(component.getOn(), disableAll));
                 }
 
-            // If the optionalParameterStyle was set, put the defaults for the 2 'subtypes' if needed.
-            final @Nullable TextComponent optionalParameterStyle = styleMap.get(TextType.OPTIONAL_PARAMETER);
-            if (optionalParameterStyle != null)
-            {
-                styleMap.putIfAbsent(TextType.OPTIONAL_PARAMETER_FLAG, optionalParameterStyle);
-                styleMap.putIfAbsent(TextType.OPTIONAL_PARAMETER_LABEL, optionalParameterStyle);
-                styleMap.putIfAbsent(TextType.OPTIONAL_PARAMETER_SEPARATOR, optionalParameterStyle);
-            }
+            copyDefaults(TextType.OPTIONAL_PARAMETER, TextType.OPTIONAL_PARAMETER_FLAG,
+                         TextType.OPTIONAL_PARAMETER_LABEL, TextType.OPTIONAL_PARAMETER_SEPARATOR);
+
+            copyDefaults(TextType.REQUIRED_PARAMETER, TextType.REQUIRED_PARAMETER_FLAG,
+                         TextType.REQUIRED_PARAMETER_LABEL, TextType.REQUIRED_PARAMETER_SEPARATOR);
 
             // If any values are still missing, just add the empty style for those.
             if (styleMap.size() != TextType.class.getEnumConstants().length)
@@ -157,6 +172,39 @@ public class ColorScheme
         public ColorSchemeBuilder requiredParameterStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.REQUIRED_PARAMETER, style);
+            return this;
+        }
+
+        /**
+         * See {@link TextType#REQUIRED_PARAMETER_LABEL}.
+         * <p>
+         * Defaults to the same value used for {@link TextType#REQUIRED_PARAMETER}
+         */
+        public ColorSchemeBuilder requiredParameterLabelStyle(final @NonNull TextComponent style)
+        {
+            styleMap.put(TextType.REQUIRED_PARAMETER_LABEL, style);
+            return this;
+        }
+
+        /**
+         * See {@link TextType#REQUIRED_PARAMETER_FLAG}.
+         * <p>
+         * Defaults to the same value used for {@link TextType#REQUIRED_PARAMETER}
+         */
+        public ColorSchemeBuilder requiredParameterFlagStyle(final @NonNull TextComponent style)
+        {
+            styleMap.put(TextType.REQUIRED_PARAMETER_FLAG, style);
+            return this;
+        }
+
+        /**
+         * See {@link TextType#REQUIRED_PARAMETER_SEPARATOR}.
+         * <p>
+         * Defaults to the same value used for {@link TextType#REQUIRED_PARAMETER}
+         */
+        public ColorSchemeBuilder requiredParameterSeparatorStyle(final @NonNull TextComponent style)
+        {
+            styleMap.put(TextType.REQUIRED_PARAMETER_SEPARATOR, style);
             return this;
         }
 

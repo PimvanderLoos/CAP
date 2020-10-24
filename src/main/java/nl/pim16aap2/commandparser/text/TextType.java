@@ -35,6 +35,21 @@ public enum TextType
     REQUIRED_PARAMETER,
 
     /**
+     * The name of the value of a required parameter. E.g. For <-p=player> this would be the 'player' part.
+     */
+    REQUIRED_PARAMETER_LABEL,
+
+    /**
+     * The name/flag of a required parameter. E.g. For <-p=player> this would be the '-p' part.
+     */
+    REQUIRED_PARAMETER_FLAG,
+
+    /**
+     * The separator of a required parameter. E.g. For <-p=player> this would be the '=' part.
+     */
+    REQUIRED_PARAMETER_SEPARATOR,
+
+    /**
      * The {@link Command#getSummary()} of a {@link Command}.
      */
     SUMMARY,
