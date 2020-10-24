@@ -1,5 +1,6 @@
 package nl.pim16aap2.commandparser.command;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Getter
 public class Command
@@ -29,21 +31,31 @@ public class Command
 
     protected final @NonNull String name;
 
-    @Setter
-    protected @NonNull String description;
-
-    @Setter
-    protected @NonNull String summary;
 
     protected final @NonNull List<@NonNull Command> subCommands;
 
-    @Getter
     protected final @NonNull ArgumentManager argumentManager;
 
     protected final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor;
 
     @Setter
-    protected @NonNull String header;
+    @Getter(AccessLevel.PROTECTED)
+    protected @Nullable String description;
+    @Setter
+    @Getter(AccessLevel.PROTECTED)
+    protected @Nullable String summary;
+    @Setter
+    @Getter(AccessLevel.PROTECTED)
+    protected @Nullable String header;
+    @Setter
+    @Getter(AccessLevel.PROTECTED)
+    protected @Nullable Function<ColorScheme, String> descriptionSupplier;
+    @Setter
+    @Getter(AccessLevel.PROTECTED)
+    protected @Nullable Function<ColorScheme, String> summarySupplier;
+    @Setter
+    @Getter(AccessLevel.PROTECTED)
+    protected @Nullable Function<ColorScheme, String> headerSupplier;
 
     /**
      * The {@link CommandManager} that manages this command.
@@ -62,22 +74,34 @@ public class Command
     protected boolean addDefaultHelpArgument;
 
     @Builder(builderMethodName = "commandBuilder")
-    protected Command(final @NonNull String name, final @Nullable String description, final @Nullable String summary,
+    protected Command(final @NonNull String name,
+                      final @Nullable String description,
+                      final @Nullable Function<ColorScheme, String> descriptionSupplier,
+                      final @Nullable String summary, final @Nullable Function<ColorScheme, String> summarySupplier,
+                      final @Nullable String header, final @Nullable Function<ColorScheme, String> headerSupplier,
                       final @Nullable @Singular List<Command> subCommands, final @Nullable Command helpCommand,
                       final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor,
                       @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
-                      @Nullable Argument<?> helpArgument, final boolean hidden, final @Nullable String header,
+                      @Nullable Argument<?> helpArgument, final boolean hidden,
                       final @NonNull CommandManager commandManager, final @Nullable Boolean addDefaultHelpArgument,
                       final @Nullable Boolean addDefaultHelpSubCommand)
     {
         this.name = name;
-        this.description = Util.valOrDefault(description, "");
-        this.summary = Util.valOrDefault(summary, "");
-        this.header = Util.valOrDefault(header, "");
+
+        this.description = description;
+        this.descriptionSupplier = descriptionSupplier;
+
+        this.summary = summary;
+        this.summarySupplier = summarySupplier;
+
+        this.header = header;
+        this.headerSupplier = headerSupplier;
+
         // If there are no subcommands, make an empty list. If there are subcommands, put them in a modifiable list.
         this.subCommands = subCommands == null ? new ArrayList<>(0) : new ArrayList<>(subCommands);
         this.commandExecutor = commandExecutor;
         this.hidden = hidden;
+
 
         this.helpCommand = helpCommand;
         if (helpCommand == null && Util.valOrDefault(addDefaultHelpSubCommand, false))
@@ -100,6 +124,60 @@ public class Command
             arguments.add(this.helpArgument);
 
         this.argumentManager = new ArgumentManager(arguments);
+    }
+
+    /**
+     * Gets the description for this command.
+     * <p>
+     * First, it tries to return {@link #description}. If that is null, {@link #descriptionSupplier} is used instead. If
+     * that is null as well, an empty String is returned.
+     *
+     * @param colorScheme The {@link ColorScheme} to use in case {@link #descriptionSupplier} is needed.
+     * @return The description for this command if it could be found/generated, otherwise an empty String.
+     */
+    public @NonNull String getDescription(final @NonNull ColorScheme colorScheme)
+    {
+        if (description != null)
+            return description;
+        if (descriptionSupplier != null)
+            return descriptionSupplier.apply(colorScheme);
+        return "";
+    }
+
+    /**
+     * Gets the summary for this command.
+     * <p>
+     * First, it tries to return {@link #summary}. If that is null, {@link #summarySupplier} is used instead. If that is
+     * null as well, an empty String is returned.
+     *
+     * @param colorScheme The {@link ColorScheme} to use in case {@link #summarySupplier} is needed.
+     * @return The summary for this command if it could be found/generated, otherwise an empty String.
+     */
+    public @NonNull String getSummary(final @NonNull ColorScheme colorScheme)
+    {
+        if (summary != null)
+            return summary;
+        if (summarySupplier != null)
+            return summarySupplier.apply(colorScheme);
+        return "";
+    }
+
+    /**
+     * Gets the header for this command.
+     * <p>
+     * First, it tries to return {@link #header}. If that is null, {@link #headerSupplier} is used instead. If that is
+     * null as well, an empty String is returned.
+     *
+     * @param colorScheme The {@link ColorScheme} to use in case {@link #summarySupplier} is needed.
+     * @return The header for this command if it could be found/generated, otherwise an empty String.
+     */
+    public @NonNull String getHeader(final @NonNull ColorScheme colorScheme)
+    {
+        if (header != null)
+            return header;
+        if (headerSupplier != null)
+            return headerSupplier.apply(colorScheme);
+        return "";
     }
 
     /**

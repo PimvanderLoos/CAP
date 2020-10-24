@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.Function;
 
 @Getter
 public class DefaultHelpCommand extends Command
@@ -26,16 +27,20 @@ public class DefaultHelpCommand extends Command
 
     @Builder(builderMethodName = "helpCommandBuilder", toBuilder = true)
     public DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
-                              final @Nullable String summary, final @Nullable String header,
+                              final @Nullable Function<ColorScheme, String> descriptionSupplier,
+                              final @Nullable String summary,
+                              final @Nullable Function<ColorScheme, String> summarySupplier,
+                              final @Nullable String header,
+                              final @Nullable Function<ColorScheme, String> headerSupplier,
                               final @NonNull CommandManager commandManager,
                               final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
-        super(Util.valOrDefault(name, "help"), description, summary, null, null,
-              DefaultHelpCommand::defaultHelpCommandExecutor,
+        super(Util.valOrDefault(name, "help"), description, descriptionSupplier, summary, summarySupplier, header,
+              headerSupplier, null, null, DefaultHelpCommand::defaultHelpCommandExecutor,
               Collections.singletonList(Argument.StringArgument.getOptionalPositional().name("page/command")
                                                                .summary("A page number of the name of a command.")
                                                                .longName("help").build()), null,
-              false, header, commandManager, false, false);
+              false, commandManager, false, false);
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
     }

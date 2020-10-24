@@ -168,8 +168,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         final Text text = getBaseSuperCommand(colorScheme, command).add(command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
-        if (!command.getDescription().equals(""))
-            text.add("\n").add(summaryIndent).add(command.getDescription(), TextType.DESCRIPTION);
+        if (!command.getDescription(colorScheme).equals(""))
+            text.add("\n").add(summaryIndent).add(command.getDescription(colorScheme), TextType.DESCRIPTION);
         renderArgumentsLong(colorScheme, text, command);
         return text;
     }
@@ -220,8 +220,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected @NonNull Text renderFirstPage(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                             final @NonNull Command command)
     {
-        if (displayHeader && !command.getHeader().equals(""))
-            text.add(command.getHeader(), TextType.HEADER).add("\n");
+        if (displayHeader && !command.getHeader(colorScheme).equals(""))
+            text.add(command.getHeader(colorScheme), TextType.HEADER).add("\n");
 
         renderCommands(colorScheme, text, getBaseSuperCommand(colorScheme, command), command, this.firstPageSize, 0);
 
@@ -303,8 +303,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         text.add(superCommands).add(command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
-        if (!command.getSummary().equals(""))
-            text.add("\n").add(summaryIndent).add(command.getSummary(), TextType.SUMMARY);
+        if (!command.getSummary(colorScheme).equals(""))
+            text.add("\n").add(summaryIndent).add(command.getSummary(colorScheme), TextType.SUMMARY);
     }
 
     protected void renderArgumentsShort(final @NonNull ColorScheme colorScheme, final @NonNull Text text,

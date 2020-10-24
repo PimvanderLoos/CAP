@@ -101,7 +101,7 @@ public class Main
         final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
-//        commandSender.setColorScheme(Main.getColorScheme());
+        commandSender.setColorScheme(Main.getColorScheme());
 
         try
         {
@@ -254,47 +254,34 @@ public class Main
             subcommands.add(generic);
         }
 
-//        Text text = colorScheme
-//            .plainText("Parameters in angled brackets are required:")
-//            .concat(colorScheme.parameterText("<parameter>"))
-//            .concat(colorScheme.plainText("\nParameters in square brackets are optional: "))
-//            .concat(colorScheme.optionParamText("[parameter]"))
-//            .concat(colorScheme.plainText("\nIf an argument is followed by a \"+\" symbol, it can be " +
-//                                              "repeated as many times as you want. For example, for a " +
-//                                              "hypothetical command \""))
-//            .concat(colorScheme.commandText("/command "))
-//            .concat(colorScheme.optionParamText("[-p=player]+"))
-//            .concat(colorScheme.plainText("\", you can do: \n\"/command -p=playerA -p=playerB\"\n"));
-
         final Command bigdoors = Command
             .commandBuilder()
             .commandManager(commandManager)
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
-            // TODO: Use supplier for values? Would be nice to be able to access the color scheme for messages.
-            .header(new Text(ColorScheme.builder().build())
-                        .add("Parameters in angled brackets are required:", TextType.REGULAR_TEXT)
-                        .add("<", TextType.REQUIRED_PARAMETER)
-                        .add("parameter", TextType.REQUIRED_PARAMETER_LABEL)
-                        .add(">", TextType.REQUIRED_PARAMETER).add("\n")
+            .headerSupplier(colorScheme -> new Text(colorScheme)
+                .add("Parameters in angled brackets are required: ", TextType.REGULAR_TEXT)
+                .add("<", TextType.REQUIRED_PARAMETER)
+                .add("parameter", TextType.REQUIRED_PARAMETER_LABEL)
+                .add(">", TextType.REQUIRED_PARAMETER).add("\n")
 
-                        .add("Parameters in square brackets are optional: ", TextType.REGULAR_TEXT)
-                        .add("[", TextType.OPTIONAL_PARAMETER)
-                        .add("parameter", TextType.OPTIONAL_PARAMETER_LABEL)
-                        .add("]", TextType.OPTIONAL_PARAMETER).add("\n")
+                .add("Parameters in square brackets are optional: ", TextType.REGULAR_TEXT)
+                .add("[", TextType.OPTIONAL_PARAMETER)
+                .add("parameter", TextType.OPTIONAL_PARAMETER_LABEL)
+                .add("]", TextType.OPTIONAL_PARAMETER).add("\n")
 
-                        .add("If an argument is followed by a \"+\" symbol, it can be\n" +
-                                 "repeated as many times as you want. For example, for a\n" +
-                                 "hypothetical command \"", TextType.REGULAR_TEXT)
-                        .add("/command ", TextType.COMMAND)
-                        .add("[", TextType.OPTIONAL_PARAMETER)
-                        .add("p", TextType.OPTIONAL_PARAMETER_FLAG)
-                        .add("=", TextType.OPTIONAL_PARAMETER_SEPARATOR)
-                        .add("player", TextType.OPTIONAL_PARAMETER_LABEL)
-                        .add("]+", TextType.OPTIONAL_PARAMETER)
+                .add("If an argument is followed by a \"+\" symbol, it can be\n" +
+                         "repeated as many times as you want. For example, for a\n" +
+                         "hypothetical command \"", TextType.REGULAR_TEXT)
+                .add("/command ", TextType.COMMAND)
+                .add("[", TextType.OPTIONAL_PARAMETER)
+                .add("p", TextType.OPTIONAL_PARAMETER_FLAG)
+                .add("=", TextType.OPTIONAL_PARAMETER_SEPARATOR)
+                .add("player", TextType.OPTIONAL_PARAMETER_LABEL)
+                .add("]+", TextType.OPTIONAL_PARAMETER)
 
-                        .add("\", you can do: \n\"/command -p=playerA -p=playerB\"\n", TextType.REGULAR_TEXT)
-                        .toString())
+                .add("\", you can do: \n\"/command -p=playerA -p=playerB\"\n", TextType.REGULAR_TEXT)
+                .toString())
 
             .subCommand(addOwner)
             .subCommands(subcommands)
@@ -337,13 +324,18 @@ public class Main
             .builder()
             .setDisableAll(MinecraftStyle.RESET.getStringValue())
             .commandStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue()))
-            .optionalParameterStyle(new TextComponent(MinecraftStyle.BLUE.getStringValue()))
+            .optionalParameterStyle(new TextComponent(MinecraftStyle.BLUE.getStringValue() +
+                                                          MinecraftStyle.BOLD.getStringValue()))
             .optionalParameterFlagStyle(new TextComponent(MinecraftStyle.LIGHT_PURPLE.getStringValue()))
-            .optionalParameterSeparatorStyle(new TextComponent(MinecraftStyle.WHITE.getStringValue()))
-            .optionalParameterLabelStyle(new TextComponent(MinecraftStyle.GRAY.getStringValue()))
-            .requiredParameterStyle(new TextComponent(MinecraftStyle.RED.getStringValue()))
+            .optionalParameterSeparatorStyle(new TextComponent(MinecraftStyle.DARK_RED.getStringValue()))
+            .optionalParameterLabelStyle(new TextComponent(MinecraftStyle.DARK_AQUA.getStringValue()))
+            .requiredParameterStyle(new TextComponent(MinecraftStyle.RED.getStringValue() +
+                                                          MinecraftStyle.BOLD.getStringValue()))
+            .requiredParameterFlagStyle(new TextComponent(MinecraftStyle.DARK_BLUE.getStringValue()))
+            .requiredParameterSeparatorStyle(new TextComponent(MinecraftStyle.BLACK.getStringValue()))
+            .requiredParameterLabelStyle(new TextComponent(MinecraftStyle.WHITE.getStringValue()))
             .summaryStyle(new TextComponent(MinecraftStyle.AQUA.getStringValue()))
-            .regularTextStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue()))
+            .regularTextStyle(new TextComponent(MinecraftStyle.DARK_PURPLE.getStringValue()))
             .headerStyle(new TextComponent(MinecraftStyle.GREEN.getStringValue()))
             .footerStyle(new TextComponent(MinecraftStyle.DARK_RED.getStringValue()))
             .build();
