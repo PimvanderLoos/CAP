@@ -108,6 +108,11 @@ public class CommandManager
         return commandMap.values();
     }
 
+    public List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender, final @NonNull String args)
+    {
+        return getTabCompleteOptions(commandSender, args.split(" "));
+    }
+
     public List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender, final @NonNull String[] args)
     {
         try

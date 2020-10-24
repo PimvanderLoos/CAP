@@ -30,6 +30,7 @@ class CommandParser
     private final @NonNull ICommandSender commandSender;
 
     private static final char ARGUMENT_PREFIX = '-';
+    private static final Pattern LEADING_PREFIX_PATTERN = Pattern.compile("^[-]{1,2}");
 
     // TODO: Allow space to be used as a separator
     private static final String SEPARATOR = "=";
@@ -52,26 +53,91 @@ class CommandParser
         commands.forEach(
             subCommand ->
             {
+                if (!commandSender.hasPermission(subCommand))
+                    return;
+
                 if (subCommand.getName().startsWith(partialName))
                     ret.add(subCommand.getName());
             });
         return ret;
     }
 
+    private @NonNull List<String> getTabCompleteArgumentNames(final @NonNull Command command,
+                                                              final @NonNull String lastArg)
+    {
+        final List<String> ret = new ArrayList<>(0);
+        command.getArgumentManager().getArguments().forEach(
+            argument ->
+            {
+                if (argument.getName().startsWith(lastArg))
+                    ret.add(argument.getName());
+
+                if (argument.getLongName() != null && argument.getLongName().startsWith(lastArg))
+                    ret.add(argument.getLongName());
+            });
+        return ret;
+    }
+
+    /**
+     * Strips up to two leading {@link #ARGUMENT_PREFIX}es from a String if any could be found.
+     * <p>
+     * For example, when provided with '-a', it will return 'a' and for '--admin-' it would be 'admin-'. '---admin',
+     * however, would return '-admin'.
+     * <p>
+     * If the argument does not have at least 1 leading {@link #ARGUMENT_PREFIX}, {@link Optional#empty()} is returned.
+     *
+     * @param argument The name of the argument with one or more {@link #ARGUMENT_PREFIX}es.
+     * @return The argument without the first 1 or 2 leading {@link #ARGUMENT_PREFIX}es if the argument contained any.
+     */
+    static @NonNull Optional<String> lstripArgumentPrefix(final @NonNull String argument)
+    {
+        if (argument.length() > 0 && argument.charAt(0) != ARGUMENT_PREFIX)
+            return Optional.empty();
+
+        return Optional.of(LEADING_PREFIX_PATTERN.matcher(argument).replaceFirst(""));
+    }
+
+    private @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command)
+    {
+        final List<String> options = new ArrayList<>(0);
+        final String lastVal = args.get(args.size() - 1);
+        System.out.println("lastVal = " + lastVal);
+
+        final @NonNull Optional<String> freeArgumentOpt = lstripArgumentPrefix(lastVal);
+        if (freeArgumentOpt.isPresent())
+        {
+            final String freeArgument = freeArgumentOpt.get();
+            if (!lastVal.contains(SEPARATOR))
+                return getTabCompleteArgumentNames(command.getCommand(), freeArgument);
+        }
+
+        return options;
+    }
+
     public @NonNull List<String> getTabCompleteOptions()
     {
         try
         {
-            final List<String> options = new ArrayList<>(0);
             final @NonNull ParsedCommand parsedCommand = getLastCommand();
             // If the last parsed command is the last index, there are no half-finished command names left.
             // Therefore, we cannot supply any suggestions for command names.
             // TODO: Give parameter / parameter value options here.
             if (parsedCommand.getIndex() >= (args.size() - 1))
-                return options;
+                return new ArrayList<>(0);
 
-            return selectCommandsPartialMatch(args.get(parsedCommand.getIndex() + 1),
-                                              parsedCommand.getCommand().getSubCommands());
+            final List<String> suggestions = new ArrayList<>();
+            // Check if the found index is the before-last argument.
+            // If it's further back than that, we know it cannot be subcommand,
+            // and it has to be an argument.
+            if (parsedCommand.getIndex() == (args.size() - 2) &&
+                parsedCommand.getCommand().getSubCommands().size() > 0)
+                suggestions.addAll(selectCommandsPartialMatch(args.get(args.size() - 1),
+                                                              parsedCommand.getCommand().getSubCommands()));
+
+            if (parsedCommand.getCommand().getArgumentManager().getArguments().size() > 0)
+                suggestions.addAll(getTabCompleteArguments(parsedCommand));
+
+            return suggestions;
         }
         catch (CommandNotFoundException e)
         {

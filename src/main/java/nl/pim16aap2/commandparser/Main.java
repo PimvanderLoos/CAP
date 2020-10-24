@@ -162,6 +162,7 @@ public class Main
         tabComplete(commandManager, "bigdoors", "h");
         tabComplete(commandManager, "bigdoors", "subcomma");
         tabComplete(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
+        tabComplete(commandManager, "bigdoors", "addowner", "myDoor", "--play");
 
 //        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
 //        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
@@ -302,8 +303,6 @@ public class Main
             .hidden(true)
             .build();
 
-        // TODO: Allow specifying the name instead of the subcommand instance?
-        //       If the CommandManager becomes a builder, it can just retrieve the instances is the ctor.
         subcommands.forEach(commandManager::addCommand);
         subsubcommands.forEach(commandManager::addCommand);
         commandManager.addCommand(addOwner).addCommand(bigdoors);
