@@ -24,7 +24,7 @@ public class DefaultHelpCommand extends Command
 {
     protected @NonNull IHelpCommandRenderer helpCommandRenderer;
 
-    @Builder(builderMethodName = "helpCommandBuilder")
+    @Builder(builderMethodName = "helpCommandBuilder", toBuilder = true)
     public DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
                               final @Nullable String summary, final @Nullable String header,
                               final @NonNull CommandManager commandManager,

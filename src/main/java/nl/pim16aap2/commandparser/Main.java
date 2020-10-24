@@ -254,11 +254,48 @@ public class Main
             subcommands.add(generic);
         }
 
+//        Text text = colorScheme
+//            .plainText("Parameters in angled brackets are required:")
+//            .concat(colorScheme.parameterText("<parameter>"))
+//            .concat(colorScheme.plainText("\nParameters in square brackets are optional: "))
+//            .concat(colorScheme.optionParamText("[parameter]"))
+//            .concat(colorScheme.plainText("\nIf an argument is followed by a \"+\" symbol, it can be " +
+//                                              "repeated as many times as you want. For example, for a " +
+//                                              "hypothetical command \""))
+//            .concat(colorScheme.commandText("/command "))
+//            .concat(colorScheme.optionParamText("[-p=player]+"))
+//            .concat(colorScheme.plainText("\", you can do: \n\"/command -p=playerA -p=playerB\"\n"));
+
         final Command bigdoors = Command
             .commandBuilder()
             .commandManager(commandManager)
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
+            // TODO: Use supplier for values? Would be nice to be able to access the color scheme for messages.
+            .header(new Text(ColorScheme.builder().build())
+                        .add("Parameters in angled brackets are required:", TextType.REGULAR_TEXT)
+                        .add("<", TextType.REQUIRED_PARAMETER)
+                        .add("parameter", TextType.REQUIRED_PARAMETER_LABEL)
+                        .add(">", TextType.REQUIRED_PARAMETER).add("\n")
+
+                        .add("Parameters in square brackets are optional: ", TextType.REGULAR_TEXT)
+                        .add("[", TextType.OPTIONAL_PARAMETER)
+                        .add("parameter", TextType.OPTIONAL_PARAMETER_LABEL)
+                        .add("]", TextType.OPTIONAL_PARAMETER).add("\n")
+
+                        .add("If an argument is followed by a \"+\" symbol, it can be\n" +
+                                 "repeated as many times as you want. For example, for a\n" +
+                                 "hypothetical command \"", TextType.REGULAR_TEXT)
+                        .add("/command ", TextType.COMMAND)
+                        .add("[", TextType.OPTIONAL_PARAMETER)
+                        .add("p", TextType.OPTIONAL_PARAMETER_FLAG)
+                        .add("=", TextType.OPTIONAL_PARAMETER_SEPARATOR)
+                        .add("player", TextType.OPTIONAL_PARAMETER_LABEL)
+                        .add("]+", TextType.OPTIONAL_PARAMETER)
+
+                        .add("\", you can do: \n\"/command -p=playerA -p=playerB\"\n", TextType.REGULAR_TEXT)
+                        .toString())
+
             .subCommand(addOwner)
             .subCommands(subcommands)
             .commandExecutor(CommandResult::sendHelpMenu)
