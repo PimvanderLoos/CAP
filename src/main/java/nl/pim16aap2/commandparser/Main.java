@@ -34,6 +34,7 @@ import java.util.List;
 //       For this to work properly, there should be some mechanism to keep track of whether a command(system) was
 //       changed since it was last cached. For example, if subcommands are added, the cache will have to be invalidated.
 // TODO: Hidden commands should have a default executor that just displays the help menu.
+// TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 // TODO: Add permissions to commands (and arguments?). Probably a setter via an interface.
 // TODO: Command/argument completion.
 // TODO: Argument value suggestions (e.g. (online/nearby) player names, door names).
@@ -78,6 +79,20 @@ public class Main
             sb2.append(" ").append(arg);
         }
         return sb.append(", total: \"/").toString() + sb2.append("\"").substring(1);
+    }
+
+    private static void tabComplete(final @NonNull CommandManager commandManager, final @NonNull String... args)
+    {
+        final String command = arrToString(args);
+        System.out.println(command + ":\n");
+        final DefaultCommandSender commandSender = new DefaultCommandSender();
+
+        final @NonNull List<String> tabOptions = commandManager.getTabCompleteOptions(commandSender, args);
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Tab complete options:\n");
+        tabOptions.forEach(opt -> sb.append(opt).append("\n"));
+        System.out.println(sb.toString());
+        System.out.println("=============\n");
     }
 
     private static void tryArgs(final @NonNull CommandManager commandManager, final @NonNull String... args)
@@ -140,22 +155,30 @@ public class Main
         final CommandManager commandManager = initCommandManager();
 //        testHelpRenderer(commandManager);
 
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2", "--admin");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "-h");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
+        tabComplete(commandManager, "big");
+        tabComplete(commandManager, "add");
+        tabComplete(commandManager, "bigdoors", "a");
+        tabComplete(commandManager, "bigdoors", "\"a");
+        tabComplete(commandManager, "bigdoors", "h");
+        tabComplete(commandManager, "bigdoors", "subcomma");
+        tabComplete(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
 
-        tryArgs(commandManager, "bigdoors", "help", "addowner");
-        tryArgs(commandManager, "bigdoors");
-        tryArgs(commandManager, "bigdoors", "help", "1");
-        tryArgs(commandManager, "bigdoors", "help");
-        tryArgs(commandManager, "bigdoors", "addowner");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2", "--admin");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
+//        tryArgs(commandManager, "bigdoors", "addowner", "-h");
+//        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
+//
+//        tryArgs(commandManager, "bigdoors", "help", "addowner");
+//        tryArgs(commandManager, "bigdoors");
+//        tryArgs(commandManager, "bigdoors", "help", "1");
+//        tryArgs(commandManager, "bigdoors", "help");
+//        tryArgs(commandManager, "bigdoors", "addowner");
     }
 
     private static CommandManager initCommandManager()

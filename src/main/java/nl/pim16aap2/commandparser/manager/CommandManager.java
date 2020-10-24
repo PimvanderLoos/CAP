@@ -17,7 +17,10 @@ import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -98,5 +101,22 @@ public class CommandManager
         if (name == null)
             return Optional.empty();
         return Optional.ofNullable(commandMap.get(name));
+    }
+
+    public @NonNull Collection<@NonNull Command> getCommands()
+    {
+        return commandMap.values();
+    }
+
+    public List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender, final @NonNull String[] args)
+    {
+        try
+        {
+            return new CommandParser(this, commandSender, args).getTabCompleteOptions();
+        }
+        catch (EOFException e)
+        {
+            return new ArrayList<>(0);
+        }
     }
 }

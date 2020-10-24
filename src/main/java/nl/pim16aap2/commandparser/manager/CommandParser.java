@@ -14,12 +14,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 class CommandParser
 {
@@ -41,6 +43,43 @@ class CommandParser
         this.args = preprocess(args);
         this.commandSender = commandSender;
         this.commandManager = commandManager;
+    }
+
+    private @NonNull List<String> selectCommandsPartialMatch(final @NonNull String partialName,
+                                                             final @NonNull Collection<Command> commands)
+    {
+        final List<String> ret = new ArrayList<>(0);
+        commands.forEach(
+            subCommand ->
+            {
+                if (subCommand.getName().startsWith(partialName))
+                    ret.add(subCommand.getName());
+            });
+        return ret;
+    }
+
+    public @NonNull List<String> getTabCompleteOptions()
+    {
+        try
+        {
+            final List<String> options = new ArrayList<>(0);
+            final @NonNull ParsedCommand parsedCommand = getLastCommand();
+            // If the last parsed command is the last index, there are no half-finished command names left.
+            // Therefore, we cannot supply any suggestions for command names.
+            // TODO: Give parameter / parameter value options here.
+            if (parsedCommand.getIndex() >= (args.size() - 1))
+                return options;
+
+            return selectCommandsPartialMatch(args.get(parsedCommand.getIndex() + 1),
+                                              parsedCommand.getCommand().getSubCommands());
+        }
+        catch (CommandNotFoundException e)
+        {
+            return selectCommandsPartialMatch(args.get(0),
+                                              commandManager.getCommands().stream().filter(
+                                                  command -> !command.getSuperCommand().isPresent())
+                                                            .collect(Collectors.toList()));
+        }
     }
 
     // TODO: Also take care of any "-key=val" or --longkey=val" or "-key val" here. Just store them separately.
