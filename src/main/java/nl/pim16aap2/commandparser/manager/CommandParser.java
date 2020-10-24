@@ -246,7 +246,7 @@ class CommandParser
 
         if (!subCommand.getSuperCommand().isPresent() || subCommand.getSuperCommand().get() != command)
             // TODO: More specific exception.
-            throw new CommandNotFoundException("super( command of: )" + subCommand.getName(), commandManager.isDebug());
+            throw new CommandNotFoundException("super command of: " + subCommand.getName(), commandManager.isDebug());
 
         return new ParsedCommand(subCommand, nextIdx);
     }
