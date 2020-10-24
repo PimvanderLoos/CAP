@@ -22,7 +22,7 @@ import java.util.OptionalInt;
  *
  * @author Pim
  */
-@Builder
+@Builder(toBuilder = true)
 @Getter
 public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 {

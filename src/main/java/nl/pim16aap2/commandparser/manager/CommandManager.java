@@ -35,7 +35,7 @@ public class CommandManager
     @Setter
     protected boolean debug;
 
-    @Builder
+    @Builder(toBuilder = true)
     private CommandManager(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug)
     {
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer::getDefault);
