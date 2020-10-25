@@ -32,6 +32,6 @@ public interface IArgumentRenderer
      * @param argument    The {@link Argument} to render.
      * @return The {@link Text} representing the {@link Argument}.
      */
-    @NonNull Text renderLong(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
-                             final @NonNull String summaryIndent);
+    @NonNull Text renderLongFormat(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
+                                   final @NonNull String summaryIndent);
 }

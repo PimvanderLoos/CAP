@@ -135,7 +135,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 
         final int skip = firstPageSize + (page - 1) * pageSize;
         renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(colorScheme, command),
-                       command, this.pageSize, skip);
+                       command, pageSize, skip);
         return text;
     }
 
@@ -235,7 +235,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
             text.add(command.getHeader(colorScheme), TextType.HEADER).add("\n");
 
         renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(colorScheme, command),
-                       command, this.firstPageSize, 0);
+                       command, firstPageSize, 0);
 
         return text;
     }
@@ -335,6 +335,6 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
                                        final @NonNull Command command)
     {
         for (final Argument<?> argument : command.getArgumentManager().getArguments())
-            text.add("\n").add(argumentRenderer.renderLong(colorScheme, argument, summaryIndent));
+            text.add("\n").add(argumentRenderer.renderLongFormat(colorScheme, argument, summaryIndent));
     }
 }

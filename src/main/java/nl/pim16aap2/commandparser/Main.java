@@ -100,7 +100,7 @@ public class Main
         final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
-        commandSender.setColorScheme(Main.getColorScheme());
+//        commandSender.setColorScheme(Main.getColorScheme());
 
         try
         {
@@ -229,21 +229,22 @@ public class Main
                               .value(true)
                               .name("a")
                               .longName("admin")
-                              .summary("Make the user an admin for the given door. Only applies to players.")
+                              .summary("Makes all the supplied users admins for the given door. " +
+                                           "Only applies to players.")
                               .build())
             .argument(Argument.StringArgument
                           .getRepeatable()
                           .name("p")
                           .longName("player")
                           .label("player")
-                          .summary("The name of the player to add as owner")
+                          .summary("The name of the player(s) to add as owner")
                           .build())
             .argument(Argument.StringArgument
                           .getRepeatable()
                           .name("g")
                           .longName("group")
                           .label("group")
-                          .summary("The name of the group to add as owner")
+                          .summary("The name of the group(s) to add as owner")
                           .build())
             .commandExecutor(
                 commandResult ->
