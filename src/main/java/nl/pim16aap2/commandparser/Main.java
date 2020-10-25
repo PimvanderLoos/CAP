@@ -41,6 +41,8 @@ import java.util.List;
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
+// TODO: Remove the position value from the Argument class. It can just be a boolean.
+// TODO: For repeatable arguments, consider dropping the 'T'. It's always a list anyway.
 // TODO: Support ResourceBundle.
 // TODO: Currently, the commands are kinda stored in a tree shape (1 super, n subs). Perhaps store it in an actual tree?
 // TODO: For the long help, maybe fall back to the summary if no description is available?

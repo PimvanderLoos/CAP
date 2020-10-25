@@ -10,6 +10,7 @@ import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NoPermissionException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
+import nl.pim16aap2.commandparser.exception.ValidationFailureException;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
@@ -294,7 +295,8 @@ class CommandParser
     }
 
     public @NonNull CommandResult parse()
-        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, NoPermissionException
+        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, NoPermissionException,
+               ValidationFailureException
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
         if (!commandSender.hasPermission(parsedCommand.getCommand()))
@@ -311,8 +313,9 @@ class CommandParser
 
     private void parseArgument(final @NonNull Argument<?> argument, final @NonNull String value,
                                final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results)
+        throws ValidationFailureException
     {
-        final Argument.IParsedArgument<?> parsedArgument = argument.parseArgument(value);
+        final Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, commandManager);
         final Argument.IParsedArgument<?> result = results.putIfAbsent(argument.getName(), parsedArgument);
         if (result != null)
             result.updateValue(parsedArgument.getValue());
@@ -321,7 +324,7 @@ class CommandParser
     @Nullable
     private Map<@NonNull String, Argument.IParsedArgument<?>> parseArguments(final @NonNull Command command,
                                                                              final int idx)
-        throws NonExistingArgumentException, MissingArgumentException
+        throws NonExistingArgumentException, MissingArgumentException, ValidationFailureException
     {
         final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results = new HashMap<>();
 

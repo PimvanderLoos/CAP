@@ -12,6 +12,7 @@ import nl.pim16aap2.commandparser.exception.CommandParserException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NoPermissionException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
+import nl.pim16aap2.commandparser.exception.ValidationFailureException;
 import nl.pim16aap2.commandparser.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
@@ -68,7 +69,7 @@ public class CommandManager
      */
     public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String args)
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
-               NoPermissionException
+               NoPermissionException, ValidationFailureException
     {
         return parseInput(commandSender, args.split(" "));
     }
@@ -92,7 +93,7 @@ public class CommandManager
      */
     public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String... args)
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
-               NoPermissionException
+               NoPermissionException, ValidationFailureException
     {
         return new CommandParser(this, commandSender, args).parse();
     }
