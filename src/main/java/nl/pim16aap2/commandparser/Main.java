@@ -2,6 +2,7 @@ package nl.pim16aap2.commandparser;
 
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.argument.specialized.StringArgument;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.DefaultCommandSender;
@@ -49,7 +50,6 @@ import java.util.List;
 // TODO: Do not use 'helpful' messages in exceptions, but just variables. Whomever catches the exception
 //       Should be able to easily parse it themselves. If an exception requires additional text to explain it
 //       then it's time to create a new type or at the very least a new constructor.
-// TODO: Make it possible to use functions to verify arguments. E.g. for IntArgument: Arg must be in [1, 10].
 // TODO: Make a module specific for Spigot and/or Paper. This should contain all the stuff needed for thost platforms.
 //       E.g. BukkitCommandSender, ChatColor, Player/World Arguments, etc.
 //       For the BukkitChatColor, the builder can just accept ChatColors and take care of the default off value /
@@ -203,7 +203,7 @@ public class Main
                 .addDefaultHelpArgument(true)
                 .commandManager(commandManager)
                 .summary("This is the summary for subsubcommand_" + idx)
-                .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
+                .argument(StringArgument.getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
@@ -219,7 +219,7 @@ public class Main
             .summary("Add another owner to a door.")
             .subCommands(subsubcommands)
             .permission("bigdoors.user.addowner")
-            .argument(Argument.StringArgument
+            .argument(StringArgument
                           .getRequired()
                           .name("doorID")
                           .summary("The name or UID of the door")
@@ -231,14 +231,14 @@ public class Main
                               .summary("Makes all the supplied users admins for the given door. " +
                                            "Only applies to players.")
                               .build())
-            .argument(Argument.StringArgument
+            .argument(StringArgument
                           .getRepeatable()
                           .name("p")
                           .longName("player")
                           .label("player")
                           .summary("The name of the player(s) to add as owner")
                           .build())
-            .argument(Argument.StringArgument
+            .argument(StringArgument
                           .getRepeatable()
                           .name("g")
                           .longName("group")
@@ -262,7 +262,7 @@ public class Main
                 .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
                 .commandManager(commandManager)
-                .argument(Argument.StringArgument.getRequired().name("value").summary("random value").build())
+                .argument(StringArgument.getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();

@@ -3,7 +3,7 @@ package nl.pim16aap2.commandparser.command;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.argument.specialized.StringArgument;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.IllegalValueException;
@@ -37,9 +37,9 @@ public class DefaultHelpCommand extends Command
     {
         super(Util.valOrDefault(name, "help"), description, descriptionSupplier, summary, summarySupplier, header,
               headerSupplier, null, null, DefaultHelpCommand::defaultHelpCommandExecutor,
-              Collections.singletonList(Argument.StringArgument.getOptionalPositional().name("page/command")
-                                                               .summary("A page number of the name of a command.")
-                                                               .longName("help").build()), null,
+              Collections.singletonList(StringArgument.getOptionalPositional().name("page/command")
+                                                      .summary("A page number of the name of a command.")
+                                                      .longName("help").build()), null,
               false, commandManager, false, false, null);
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());

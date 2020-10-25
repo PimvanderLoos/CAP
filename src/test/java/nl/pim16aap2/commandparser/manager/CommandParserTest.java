@@ -1,11 +1,20 @@
 package nl.pim16aap2.commandparser.manager;
 
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import nl.pim16aap2.commandparser.GenericCommand;
 import nl.pim16aap2.commandparser.argument.Argument;
+import nl.pim16aap2.commandparser.argument.specialized.DoubleArgument;
+import nl.pim16aap2.commandparser.argument.specialized.IntegerArgument;
+import nl.pim16aap2.commandparser.argument.specialized.StringArgument;
+import nl.pim16aap2.commandparser.argument.validator.number.MaximumValidator;
+import nl.pim16aap2.commandparser.argument.validator.number.MinimumValidator;
+import nl.pim16aap2.commandparser.argument.validator.number.RangeValidator;
 import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.DefaultCommandSender;
+import nl.pim16aap2.commandparser.exception.IllegalValueException;
+import nl.pim16aap2.commandparser.exception.ValidationFailureException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,13 +45,34 @@ class CommandParserTest
             final Command generic = Command
                 .commandBuilder().name(command)
                 .commandManager(commandManager)
-                .argument(Argument.StringArgument.getOptional()
-                                                 .name("value").label("val").summary("random value").build())
+                .argument(StringArgument.getOptional()
+                                        .name("value").label("val").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
             subcommands.add(generic);
         }
+
+        final Command numerical = Command
+            .commandBuilder().name("numerical")
+            .commandManager(commandManager)
+            .argument(StringArgument.getOptional()
+                                    .name("value").label("val").summary("random value").build())
+            .argument(IntegerArgument.getOptional()
+                                     .name("min").label("min").summary("Must be more than 10!")
+                                     .argumentValidator(MinimumValidator.integerMinimumValidator(10)).build())
+            .argument(IntegerArgument.getOptional()
+                                     .name("max").label("max").summary("Must be less than 10!")
+                                     .argumentValidator(MaximumValidator.integerMaximumValidator(10)).build())
+            .argument(DoubleArgument.getOptional()
+                                    .name("maxd").label("maxd").summary("Must be less than 10.0!")
+                                    .argumentValidator(MaximumValidator.doubleMaximumValidator(10.0)).build())
+            .argument(DoubleArgument.getOptional()
+                                    .name("range").label("range").summary("Must be between 10 and 20!")
+                                    .argumentValidator(RangeValidator.doubleRangeValidator(10, 20)).build())
+            .commandExecutor(commandResult ->
+                                 new GenericCommand("numerical", commandResult.getParsedArgument("value")).runCommand())
+            .build();
 
         final Command addOwner = Command
             .commandBuilder()
@@ -51,7 +81,7 @@ class CommandParserTest
             .addDefaultHelpArgument(true)
             .description("Add 1 or more players or groups of players as owners of a door.")
             .summary("Add another owner to a door.")
-            .argument(Argument.StringArgument
+            .argument(StringArgument
                           .getRequired()
                           .name("doorID")
                           .tabcompleteFunction(() -> doorIDs)
@@ -63,7 +93,7 @@ class CommandParserTest
                               .longName("admin")
                               .summary("Make the user an admin for the given door. Only applies to players.")
                               .build())
-            .argument(Argument.StringArgument
+            .argument(StringArgument
                           .getRepeatable()
                           .name("p")
                           .longName("player")
@@ -71,7 +101,7 @@ class CommandParserTest
                           .tabcompleteFunction(() -> playerNames)
                           .summary("The name of the player to add as owner")
                           .build())
-            .argument(Argument.StringArgument
+            .argument(StringArgument
                           .getRepeatable()
                           .name("g")
                           .longName("group")
@@ -87,13 +117,14 @@ class CommandParserTest
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .subCommand(addOwner)
+            .subCommand(numerical)
             .subCommands(subcommands)
             .commandExecutor(CommandResult::sendHelpMenu)
             .hidden(true)
             .build();
 
         subcommands.forEach(commandManager::addCommand);
-        commandManager.addCommand(addOwner).addCommand(bigdoors);
+        commandManager.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical);
     }
 
     @Test
@@ -101,7 +132,7 @@ class CommandParserTest
     {
         Assertions.assertEquals(20, commandManager.getTabCompleteOptions(commandSender, "bigdoors sub").size());
 
-        Assertions.assertEquals(22, commandManager.getTabCompleteOptions(commandSender, "bigdoors").size());
+        Assertions.assertEquals(23, commandManager.getTabCompleteOptions(commandSender, "bigdoors").size());
 
         Assertions.assertEquals("bigdoors", commandManager.getTabCompleteOptions(commandSender, "big").get(0));
 
@@ -182,5 +213,42 @@ class CommandParserTest
         Assertions.assertTrue(CommandParser.lstripArgumentPrefix("--admin").isPresent());
 
         Assertions.assertEquals("-admin", CommandParser.lstripArgumentPrefix("---admin").get());
+    }
+
+    @SneakyThrows
+    @Test
+    void testNumericalInput()
+    {
+        // My name is not numerical.
+        Assertions.assertThrows(IllegalValueException.class,
+                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -max=pim16aap2"));
+        // The max value is set to 10, so 10 will be illegal.
+        Assertions.assertThrows(ValidationFailureException.class,
+                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -max=10"));
+        // With a max value of 10, 9 is perfect!
+        Assertions.assertDoesNotThrow(() -> commandManager.parseInput(commandSender, "bigdoors numerical -max=9"));
+
+
+        // The maxd value is set to 10.0, so 10.0 will be illegal.
+        Assertions.assertThrows(ValidationFailureException.class,
+                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -maxd=10.0"));
+        // With a maxd value of 10.0, 9.9 is perfect!
+        Assertions.assertDoesNotThrow(() -> commandManager.parseInput(commandSender, "bigdoors numerical -maxd=9.9"));
+
+
+        // The min value is set to 10, so 10 will be illegal.
+        Assertions.assertThrows(ValidationFailureException.class,
+                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -min=10"));
+        // With a min value of 10, 11 is perfect!
+        Assertions.assertDoesNotThrow(() -> commandManager.parseInput(commandSender, "bigdoors numerical -min=11"));
+
+        // The range is set to [10, 20], so 10 will be illegal.
+        Assertions.assertThrows(ValidationFailureException.class,
+                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -range=10"));
+        // The range is set to [10, 20], so 20 will be illegal.
+        Assertions.assertThrows(ValidationFailureException.class,
+                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -range=20"));
+        // With a range of [10, 20], 11 is perfect!
+        Assertions.assertDoesNotThrow(() -> commandManager.parseInput(commandSender, "bigdoors numerical -range=11"));
     }
 }

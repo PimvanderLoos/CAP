@@ -9,6 +9,7 @@ import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
 import nl.pim16aap2.commandparser.exception.CommandParserException;
+import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NoPermissionException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
@@ -69,7 +70,7 @@ public class CommandManager
      */
     public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String args)
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
-               NoPermissionException, ValidationFailureException
+               NoPermissionException, ValidationFailureException, IllegalValueException
     {
         return parseInput(commandSender, args.split(" "));
     }
@@ -93,7 +94,7 @@ public class CommandManager
      */
     public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String... args)
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
-               NoPermissionException, ValidationFailureException
+               NoPermissionException, ValidationFailureException, IllegalValueException
     {
         return new CommandParser(this, commandSender, args).parse();
     }

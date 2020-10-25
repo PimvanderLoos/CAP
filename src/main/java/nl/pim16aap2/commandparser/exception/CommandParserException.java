@@ -7,35 +7,36 @@ public abstract class CommandParserException extends Exception
     protected CommandParserException(final boolean stacktraceEnabled)
     {
         this.stacktraceEnabled = stacktraceEnabled;
-        this.fillInOptionalStackTrace();
+        fillInOptionalStackTrace();
     }
 
     public CommandParserException(String message, final boolean stacktraceEnabled)
     {
         super(message);
         this.stacktraceEnabled = stacktraceEnabled;
-        this.fillInOptionalStackTrace();
+        fillInOptionalStackTrace();
     }
 
-    public CommandParserException(String var1, Throwable var2, final boolean stacktraceEnabled)
+    public CommandParserException(String message, Throwable cause, final boolean stacktraceEnabled)
     {
-        super(var1, var2);
+        super(message, cause);
         this.stacktraceEnabled = stacktraceEnabled;
-        this.fillInOptionalStackTrace();
+        fillInOptionalStackTrace();
     }
 
-    public CommandParserException(Throwable var1, final boolean stacktraceEnabled)
+    public CommandParserException(Throwable cause, final boolean stacktraceEnabled)
     {
-        super(var1);
+        super(cause);
         this.stacktraceEnabled = stacktraceEnabled;
-        this.fillInOptionalStackTrace();
+        fillInOptionalStackTrace();
     }
 
-    protected CommandParserException(String var1, Throwable var2, boolean var3, boolean var4)
+    protected CommandParserException(String message, Throwable cause, boolean enableSuppression,
+                                     boolean writableStackTrace)
     {
-        super(var1, var2, var3, var4);
-        stacktraceEnabled = var4;
-        this.fillInOptionalStackTrace();
+        super(message, cause, enableSuppression, writableStackTrace);
+        stacktraceEnabled = writableStackTrace;
+        fillInOptionalStackTrace();
     }
 
     private void fillInOptionalStackTrace()

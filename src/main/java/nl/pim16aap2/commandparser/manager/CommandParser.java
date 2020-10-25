@@ -7,6 +7,7 @@ import nl.pim16aap2.commandparser.command.Command;
 import nl.pim16aap2.commandparser.command.CommandResult;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
+import nl.pim16aap2.commandparser.exception.IllegalValueException;
 import nl.pim16aap2.commandparser.exception.MissingArgumentException;
 import nl.pim16aap2.commandparser.exception.NoPermissionException;
 import nl.pim16aap2.commandparser.exception.NonExistingArgumentException;
@@ -296,7 +297,7 @@ class CommandParser
 
     public @NonNull CommandResult parse()
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, NoPermissionException,
-               ValidationFailureException
+               ValidationFailureException, IllegalValueException
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
         if (!commandSender.hasPermission(parsedCommand.getCommand()))
@@ -324,7 +325,7 @@ class CommandParser
     @Nullable
     private Map<@NonNull String, Argument.IParsedArgument<?>> parseArguments(final @NonNull Command command,
                                                                              final int idx)
-        throws NonExistingArgumentException, MissingArgumentException, ValidationFailureException
+        throws NonExistingArgumentException, MissingArgumentException, ValidationFailureException, IllegalValueException
     {
         final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results = new HashMap<>();
 
@@ -362,7 +363,14 @@ class CommandParser
                 value = nextArg;
             }
 
-            parseArgument(argument, value, results);
+            try
+            {
+                parseArgument(argument, value, results);
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw new IllegalValueException(command, value, e, commandManager.isDebug());
+            }
         }
 
         // If the help argument was specified, simply return null, because none of the other argument matter.

@@ -5,18 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class StringParser<T extends String> extends ArgumentParser<T>
+public class StringParser extends ArgumentParser<String>
 {
     @Override
-    @SuppressWarnings("unchecked")
-    public @NonNull T parseArgument(final @NonNull String value)
+    public @NonNull String parseArgument(final @NonNull String value)
     {
-        // TODO: Try/catch this stuff.
-        return (T) value;
+        return value;
     }
 
-    public static StringParser<String> create()
+    public static StringParser create()
     {
-        return new StringParser<>();
+        return new StringParser();
     }
 }

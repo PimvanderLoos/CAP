@@ -4,5 +4,6 @@ import lombok.NonNull;
 
 public abstract class ArgumentParser<T>
 {
-    public abstract @NonNull T parseArgument(final @NonNull String value);
+    public abstract @NonNull T parseArgument(final @NonNull String value)
+        throws IllegalArgumentException;
 }
