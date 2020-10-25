@@ -76,7 +76,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         this.firstPageSize = firstPageSize;
         this.displayHeader = displayHeader;
         this.displayArgumentsForSimple = displayArgumentsForSimple;
-        this.argumentRenderer = argumentRenderer == null ? new DefaultArgumentRenderer() : argumentRenderer;
+        this.argumentRenderer = argumentRenderer == null ? DefaultArgumentRenderer.getDefault() : argumentRenderer;
         this.summaryIndent = summaryIndent;
         this.startAt1 = startAt1;
     }
@@ -87,6 +87,13 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         return startAt1 ? 1 : 0;
     }
 
+    /**
+     * Gets a new instance of this {@link DefaultHelpCommandRenderer} using the default values.
+     * <p>
+     * Use {@link DefaultHelpCommandRenderer#toBuilder()} if you wish to customize it.
+     *
+     * @return A new instance of this {@link DefaultHelpCommandRenderer}.
+     */
     public static @NonNull DefaultHelpCommandRenderer getDefault()
     {
         return DefaultHelpCommandRenderer.builder().build();

@@ -46,6 +46,13 @@ public class CommandManager
         this.debug = debug;
     }
 
+    /**
+     * Gets a new instance of this {@link CommandManager} using the default values.
+     * <p>
+     * Use {@link CommandManager#toBuilder()} if you wish to customize it.
+     *
+     * @return A new instance of this {@link CommandManager}.
+     */
     public static @NonNull CommandManager getDefault()
     {
         return CommandManager.builder().build();

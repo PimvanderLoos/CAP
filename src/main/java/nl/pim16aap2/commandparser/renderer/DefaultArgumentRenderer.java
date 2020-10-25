@@ -1,10 +1,14 @@
 package nl.pim16aap2.commandparser.renderer;
 
+import lombok.Builder;
 import lombok.NonNull;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.text.TextType;
+import nl.pim16aap2.commandparser.util.Pair;
+import nl.pim16aap2.commandparser.util.Util;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Implements the default implementation of the {@link IArgumentRenderer}.
@@ -13,6 +17,40 @@ import nl.pim16aap2.commandparser.text.TextType;
  */
 public class DefaultArgumentRenderer implements IArgumentRenderer
 {
+    /**
+     * A pair containing the open and close strings for optional brackets.
+     * <p>
+     * By default this is a pair of {"[", "]"}, resulting in the following format: "[-p=player]"
+     */
+    protected @NonNull Pair<@NonNull String, @NonNull String> optionalBrackets;
+
+    /**
+     * A pair containing the open and close strings for required brackets.
+     * <p>
+     * By default this is a pair of {"<", ">"}, resulting in the following format: "<-p=player>"
+     */
+    protected @NonNull Pair<@NonNull String, @NonNull String> requiredBrackets;
+
+    @Builder(toBuilder = true)
+    protected DefaultArgumentRenderer(final @Nullable Pair<@NonNull String, @NonNull String> optionalBrackets,
+                                      final @Nullable Pair<@NonNull String, @NonNull String> requiredBrackets)
+    {
+        this.optionalBrackets = Util.valOrDefault(optionalBrackets, new Pair<>("[", "]"));
+        this.requiredBrackets = Util.valOrDefault(requiredBrackets, new Pair<>("<", ">"));
+    }
+
+    /**
+     * Gets a new instance of this {@link DefaultArgumentRenderer} using the default values.
+     * <p>
+     * Use {@link DefaultArgumentRenderer#toBuilder()} if you wish to customize it.
+     *
+     * @return A new instance of this {@link DefaultArgumentRenderer}.
+     */
+    public static @NonNull DefaultArgumentRenderer getDefault()
+    {
+        return DefaultArgumentRenderer.builder().build();
+    }
+
     @Override
     public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument)
     {
@@ -63,9 +101,9 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
                                            final boolean useLongName)
     {
         final String suffix = argument.isRepeatable() ? "+" : "";
-        return new Text(colorScheme).add("[", TextType.OPTIONAL_PARAMETER)
+        return new Text(colorScheme).add(optionalBrackets.first, TextType.OPTIONAL_PARAMETER)
                                     .add(renderArgument(colorScheme, argument, useLongName))
-                                    .add("]" + suffix, TextType.OPTIONAL_PARAMETER);
+                                    .add(optionalBrackets.second + suffix, TextType.OPTIONAL_PARAMETER);
     }
 
     /**
@@ -82,9 +120,9 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
                                            final boolean useLongName)
     {
         final String suffix = argument.isRepeatable() ? "+" : "";
-        return new Text(colorScheme).add("<", TextType.REQUIRED_PARAMETER)
+        return new Text(colorScheme).add(requiredBrackets.first, TextType.REQUIRED_PARAMETER)
                                     .add(renderArgument(colorScheme, argument, useLongName))
-                                    .add(">" + suffix, TextType.REQUIRED_PARAMETER);
+                                    .add(requiredBrackets.second + suffix, TextType.REQUIRED_PARAMETER);
     }
 
     /**

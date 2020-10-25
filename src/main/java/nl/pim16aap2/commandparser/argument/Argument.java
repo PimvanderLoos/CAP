@@ -110,7 +110,7 @@ public class Argument<T>
             return new ParsedArgument<>(defaultValue);
         return new ParsedArgument<>(parser.parseArgument(value));
     }
-
+    
     public @NonNull IParsedArgument<?> getDefault()
     {
         return new ParsedArgument<>(defaultValue);
