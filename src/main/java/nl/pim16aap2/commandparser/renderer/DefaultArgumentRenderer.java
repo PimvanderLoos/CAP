@@ -1,13 +1,16 @@
 package nl.pim16aap2.commandparser.renderer;
 
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.text.ColorScheme;
 import nl.pim16aap2.commandparser.text.Text;
 import nl.pim16aap2.commandparser.text.TextType;
 
-@RequiredArgsConstructor
+/**
+ * Implements the default implementation of the {@link IArgumentRenderer}.
+ *
+ * @author Pim
+ */
 public class DefaultArgumentRenderer implements IArgumentRenderer
 {
     @Override
@@ -29,14 +32,32 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
         return text;
     }
 
-    private @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
-                                 final boolean useLongName)
+    /**
+     * Renders an argument. See {@link #render(ColorScheme, Argument)}.
+     *
+     * @param colorScheme The {@link ColorScheme} to use to render the argument.
+     * @param argument    The {@link Argument} to render.
+     * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
+     *                    long name before using this! When this value is false, {@link Argument#getName()} is used.
+     * @return The {@link Text} representing the {@link Argument}.
+     */
+    protected @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
+                                   final boolean useLongName)
     {
         return argument.isRequired() ?
                renderRequired(colorScheme, argument, useLongName) :
                renderOptional(colorScheme, argument, useLongName);
     }
 
+    /**
+     * Renders an {@link Argument} in the optional style.
+     *
+     * @param colorScheme The {@link ColorScheme} to use to render the argument.
+     * @param argument    The {@link Argument} to render.
+     * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
+     *                    long name before using this! When this value is false, {@link Argument#getName()} is used.
+     * @return The {@link Text} representing an optional {@link Argument}.
+     */
     protected @NonNull Text renderOptional(final @NonNull ColorScheme colorScheme,
                                            final @NonNull Argument<?> argument,
                                            final boolean useLongName)
@@ -47,6 +68,15 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
                                     .add("]" + suffix, TextType.OPTIONAL_PARAMETER);
     }
 
+    /**
+     * Renders an {@link Argument} in the required style.
+     *
+     * @param colorScheme The {@link ColorScheme} to use to render the argument.
+     * @param argument    The {@link Argument} to render.
+     * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
+     *                    long name before using this! When this value is false, {@link Argument#getName()} is used.
+     * @return The {@link Text} representing a required {@link Argument}.
+     */
     protected @NonNull Text renderRequired(final @NonNull ColorScheme colorScheme,
                                            final @NonNull Argument<?> argument,
                                            final boolean useLongName)
@@ -57,6 +87,16 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
                                     .add(">" + suffix, TextType.REQUIRED_PARAMETER);
     }
 
+    /**
+     * Renders an argument's name and label (if present). I.e. the part between the optional/required brackets (and as
+     * such can be used by both).
+     *
+     * @param colorScheme The {@link ColorScheme} to use to render the argument.
+     * @param argument    The {@link Argument} to render.
+     * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
+     *                    long name before using this! When this value is false, {@link Argument#getName()} is used.
+     * @return The {@link Text} representing the {@link Argument}.
+     */
     protected @NonNull Text renderArgument(final @NonNull ColorScheme colorScheme,
                                            final @NonNull Argument<?> argument,
                                            final boolean useLongName)
