@@ -243,7 +243,7 @@ public class Command
     }
 
     /**
-     * Searches for a sub{@link Command} of a given types.
+     * Searches for a sub{@link Command} of a given type.
      *
      * @param clazz The {@link Class} to search for.
      * @param <T>   The Type of the sub{@link Command} to find.
@@ -254,6 +254,13 @@ public class Command
         return Util.searchIterable(subCommands, (val) -> clazz.isAssignableFrom(val.getClass()));
     }
 
+    /**
+     * Searches for a sub{@link Command} with a given name.
+     *
+     * @param name The name of the sub{@link Command} to look for.
+     * @return An optional containing the sub{@link Command} with the given name, if it exists, otherwise {@link
+     * Optional#empty()}.
+     */
     public @NonNull Optional<Command> getSubCommand(final @Nullable String name)
     {
         if (name == null)
