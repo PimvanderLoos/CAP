@@ -5,8 +5,6 @@ import nl.pim16aap2.commandparser.argument.RepeatableArgument;
 import nl.pim16aap2.commandparser.argument.argumentparser.DoubleParser;
 import nl.pim16aap2.commandparser.command.Command;
 
-import java.util.List;
-
 /**
  * Represents an argument that is parsed into a double.
  *
@@ -59,8 +57,8 @@ public class DoubleArgument
      *
      * @return A builder for a repeatable {@link DoubleArgument}.
      */
-    public static RepeatableArgument.RepeatableArgumentBuilder<List<Double>, Double> getRepeatable()
+    public static RepeatableArgument.RepeatableArgumentBuilder<Double> getRepeatable()
     {
-        return RepeatableArgument.<List<Double>, Double>repeatableBuilder().parser(DoubleParser.create());
+        return RepeatableArgument.<Double>repeatableBuilder().parser(DoubleParser.create());
     }
 }

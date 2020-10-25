@@ -13,17 +13,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
+public class RepeatableArgument<T> extends Argument<T>
 {
+    private static final boolean VALUE_LESS = false;
+    private static final boolean REPEATABLE = true;
+    private static final int POSITION = -1;
+
     @Builder(builderMethodName = "repeatableBuilder")
     private RepeatableArgument(final @NonNull String name, final @Nullable String longName,
-                               final @NonNull String summary, final @NonNull ArgumentParser<U> parser,
+                               final @NonNull String summary, final @NonNull ArgumentParser<T> parser,
                                final @NonNull String label, final boolean required,
                                final @Nullable Supplier<List<String>> tabcompleteFunction,
-                               final @Nullable IArgumentValidator<U> argumentValidator)
+                               final @Nullable IArgumentValidator<T> argumentValidator)
     {
-        super(name, longName, summary, parser, null, label, false, true, -1, required, tabcompleteFunction,
-              argumentValidator);
+        super(name, longName, summary, parser, null, label, VALUE_LESS, REPEATABLE,
+              POSITION, required, tabcompleteFunction, argumentValidator);
     }
 
     @Override
@@ -31,10 +35,10 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
                                                          final @NonNull CommandManager commandManager)
         throws ValidationFailureException
     {
-        final ParsedRepeatableArgument<T, U> ret = new ParsedRepeatableArgument<>();
+        final ParsedRepeatableArgument<T> ret = new ParsedRepeatableArgument<>();
         if (value != null)
         {
-            final @Nullable U parsed = parseArgument(value, commandManager);
+            final @Nullable T parsed = parseArgument(value, commandManager);
             if (parsed == null)
                 throw new ValidationFailureException(this, value, commandManager.isDebug());
             ret.addValue(parsed);
@@ -45,39 +49,42 @@ public class RepeatableArgument<T extends List<U>, U> extends Argument<U>
     @Override
     public @NonNull IParsedArgument<?> getDefault()
     {
-        return new ParsedRepeatableArgument<T, U>();
+        return new ParsedRepeatableArgument<T>();
     }
 
     /**
      * Represents an {@link IParsedArgument} for {@link RepeatableArgument}s. Unlike a regular {@link ParsedArgument},
      * this one stores the results in a list.
      *
-     * @param <T> The list that the results are stored in.
-     * @param <U> The type of the parsed arguments.
+     * @param <T> The type of the parsed arguments.
      */
-    public static class ParsedRepeatableArgument<T extends List<U>, U> implements IParsedArgument<T>
+    public static class ParsedRepeatableArgument<T> implements IParsedArgument<List<T>>
     {
         @Getter(onMethod = @__({@Override}))
-        protected @NonNull T value;
+        protected @NonNull List<T> value;
 
-        @SuppressWarnings("unchecked")
         private ParsedRepeatableArgument()
         {
-            value = ((T) new ArrayList<U>(0));
+            value = new ArrayList<>(0);
         }
 
-        public void addValue(final @NonNull U newValue)
+        /**
+         * Adds a value to the {@link List}.
+         *
+         * @param newValue The new value to add.
+         */
+        public void addValue(final @NonNull T newValue)
         {
             value.add(newValue);
         }
 
         @Override
         @SuppressWarnings("unchecked")
-        public <V> void updateValue(final @Nullable V newValue)
+        public <U> void updateValue(final @Nullable U newValue)
         {
             if (newValue == null)
                 return;
-            value.addAll((T) newValue);
+            value.addAll((List<T>) newValue);
         }
     }
 }

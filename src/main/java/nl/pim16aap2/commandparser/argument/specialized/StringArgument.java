@@ -6,8 +6,6 @@ import nl.pim16aap2.commandparser.argument.RepeatableArgument;
 import nl.pim16aap2.commandparser.argument.argumentparser.StringParser;
 import nl.pim16aap2.commandparser.command.Command;
 
-import java.util.List;
-
 /**
  * Represents an argument that is parsed into a String.
  *
@@ -60,8 +58,8 @@ public class StringArgument
      *
      * @return A builder for a repeatable {@link StringArgument}.
      */
-    public static RepeatableArgument.RepeatableArgumentBuilder<List<String>, String> getRepeatable()
+    public static RepeatableArgument.RepeatableArgumentBuilder<String> getRepeatable()
     {
-        return RepeatableArgument.<List<String>, String>repeatableBuilder().parser(StringParser.create());
+        return RepeatableArgument.<String>repeatableBuilder().parser(StringParser.create());
     }
 }
