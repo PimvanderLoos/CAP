@@ -57,6 +57,10 @@ import java.util.List;
 // TODO: Unit tests.
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
 //       (there are probably going to be some casting issues).
+//       Also, be more strict in the positional argument parsing. All positional arguments must come before any free ones.
+//       Currently, the positional arguments are counted separately, but this breaks the tab completion.
+// TODO: Make sure that autocomplete works if all the current string is empty and all positional arguments
+//       have already been filled (just return args list).
 // TODO: Maybe store the arguments by their label inside the CommandResult? That would avoid confusion of name vs longName.
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
