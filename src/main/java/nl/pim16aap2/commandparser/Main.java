@@ -36,8 +36,6 @@ import java.util.List;
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 // TODO: Add permissions to commands (and arguments?). Probably a setter via an interface.
-// TODO: Command/argument completion.
-// TODO: Argument value suggestions (e.g. (online/nearby) player names, door names).
 // TODO: Allow defining and supplying custom renderers.
 // TODO: For the argument renderers, allow specifying long/short name requirements and stuff. In some situations,
 //       having both might be nice, while in other, it's better to only have the short version. Right?
