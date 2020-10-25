@@ -3,6 +3,7 @@ package nl.pim16aap2.commandparser.command;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import nl.pim16aap2.commandparser.argument.Argument;
 import nl.pim16aap2.commandparser.argument.specialized.StringArgument;
 import nl.pim16aap2.commandparser.commandsender.ICommandSender;
 import nl.pim16aap2.commandparser.exception.CommandNotFoundException;
@@ -16,6 +17,7 @@ import nl.pim16aap2.commandparser.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
@@ -24,6 +26,14 @@ import java.util.function.Function;
 public class DefaultHelpCommand extends Command
 {
     protected @NonNull IHelpCommandRenderer helpCommandRenderer;
+    
+    private static final List<Command> SUB_COMMANDS = Collections.emptyList();
+    private static final Command HELP_COMMAND = null;
+    private static final Argument<?> HELP_ARGUMENT = null;
+    private static final boolean HIDDEN = false;
+    private static final boolean ADD_DEFAULT_HELP_ARGUMENT = false;
+    private static final boolean ADD_DEFAULT_HELP_SUB_COMMAND = false;
+    private static final String PERMISSION = null;
 
     @Builder(builderMethodName = "helpCommandBuilder", toBuilder = true)
     public DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
@@ -36,11 +46,11 @@ public class DefaultHelpCommand extends Command
                               final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
         super(Util.valOrDefault(name, "help"), description, descriptionSupplier, summary, summarySupplier, header,
-              headerSupplier, null, null, DefaultHelpCommand::defaultHelpCommandExecutor,
+              headerSupplier, SUB_COMMANDS, HELP_COMMAND, DefaultHelpCommand::defaultHelpCommandExecutor,
               Collections.singletonList(StringArgument.getOptionalPositional().name("page/command")
                                                       .summary("A page number of the name of a command.")
-                                                      .longName("help").build()), null,
-              false, commandManager, false, false, null);
+                                                      .longName("help").build()), HELP_ARGUMENT,
+              HIDDEN, commandManager, ADD_DEFAULT_HELP_ARGUMENT, ADD_DEFAULT_HELP_SUB_COMMAND, PERMISSION);
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
     }
