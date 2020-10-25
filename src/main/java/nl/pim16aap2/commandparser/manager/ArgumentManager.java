@@ -33,17 +33,17 @@ public class ArgumentManager
 
         for (final @NonNull Argument<?> argument : argumentsList)
         {
-            this.argumentsMap.put(argument.getName(), argument);
+            argumentsMap.put(argument.getName(), argument);
             if (argument.getLongName() != null)
-                this.argumentsMap.put(argument.getLongName(), argument);
+                argumentsMap.put(argument.getLongName(), argument);
 
             if (argument.isRequired())
-                this.requiredArguments.add(argument);
+                requiredArguments.add(argument);
             else
-                this.optionalArguments.add(argument);
+                optionalArguments.add(argument);
 
             if (argument.isPositional())
-                this.positionalArguments.add(argument);
+                positionalArguments.add(argument);
         }
     }
 
@@ -71,14 +71,14 @@ public class ArgumentManager
 
     private static final Comparator<Argument<?>> COMPARATOR = (argument, t1) ->
     {
-        if (argument.isPositional() && !t1.isPositional())
-            return -1;
-        if (argument.isRequired() && !t1.isRequired())
-            return -1;
-        if (argument.isValuesLess() && !t1.isValuesLess())
-            return 1;
-        if (argument.isRepeatable() && !t1.isRepeatable())
-            return 1;
+        if (argument.isPositional() != t1.isPositional())
+            return argument.isPositional() ? -1 : 1;
+        if (argument.isRequired() != t1.isRequired())
+            return argument.isRequired() ? -1 : 1;
+        if (argument.isValuesLess() != t1.isValuesLess())
+            return argument.isValuesLess() ? -1 : 1;
+        if (argument.isRepeatable() != t1.isRepeatable())
+            return argument.isRepeatable() ? 1 : -1;
         return 0;
     };
 }
