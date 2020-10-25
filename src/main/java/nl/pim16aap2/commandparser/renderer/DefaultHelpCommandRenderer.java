@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
- * Represents the default {@link IHelpCommandRenderer}.
+ * Represents the default implementation of {@link IHelpCommandRenderer}.
  *
  * @author Pim
  */
@@ -99,29 +99,54 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         return DefaultHelpCommandRenderer.builder().build();
     }
 
-    protected final int getCommandCount(final @NonNull Command command)
+    /**
+     * Recursively calculates the total number of (sub){@link Command}s to put on the help menu.
+     *
+     * @param command       The {@link Command} for which to count the number of sub{@link Command}s (including
+     *                      itself).
+     * @param commandSender The {@link ICommandSender} used for permission checking. See {@link
+     *                      ICommandSender#hasPermission(Command)}.
+     * @return The total number of {@link Command}s that can be put in a help menu for the given {@link ICommandSender}.
+     */
+    protected final int getCommandCount(final @NonNull Command command, final @NonNull ICommandSender commandSender)
     {
-        // TODO: Store this in the Command itself. Just do it on creation, then ensure that
-        //       a) They cannot be modified after construction, or
-        //       b) They recalculate it when they are modified.
-        int count = command.isHidden() ? 0 : 1;
-        for (final Command subCommand : command.getSubCommands())
-            count += getCommandCount(subCommand);
+        int count = 0;
+        if (!command.isHidden() && commandSender.hasPermission(command))
+            ++count;
+
+        for (final @NonNull Command subCommand : command.getSubCommands())
+            count += getCommandCount(subCommand, commandSender);
         return count;
     }
 
-    protected int getPageCount(final @NonNull Command command)
+    /**
+     * Gets the total number of help pages available for a given {@link Command}.
+     *
+     * @param command       The {@link Command} for which to check the number of help pages.
+     * @param commandSender The {@link ICommandSender} used for permission checking. See {@link
+     *                      ICommandSender#hasPermission(Command)}.
+     * @return The total number of help pages available for the {@link Command}.
+     */
+    protected int getPageCount(final @NonNull Command command, final @NonNull ICommandSender commandSender)
     {
-        final int commandCount = getCommandCount(command);
+        final int commandCount = getCommandCount(command, commandSender);
 
         // Get the number of pages that can be filled using the provided number of commands
         // and the provided page size, excluding the number of commands put on the first page.
         return (int) Math.ceil((commandCount - firstPageSize) / (float) pageSize);
     }
 
-    protected void renderPageCountHeader(final @NonNull Text text,
-                                         final int page, final int pageCount)
+    /**
+     * Renders the page count header that shows the current page you're viewing and the total number of available
+     * pages.
+     *
+     * @param text      The {@link Text} instance to add the page count header to.
+     * @param page      The current page number.
+     * @param pageCount The total number of available pages.
+     */
+    protected void renderPageCountHeader(final @NonNull Text text, final int page, final int pageCount)
     {
+        // TODO: Make this prettier. It needs nice colors and clickable text.
         text.add(String.format("------- Page (%2d / %2d) -------\n",
                                page + getPageOffset(), pageCount + getPageOffset()));
     }
@@ -131,7 +156,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
                                 final @NonNull Command command, final int page)
         throws IllegalValueException
     {
-        final int pageCount = getPageCount(command);
+        final int pageCount = getPageCount(command, commandSender);
         if (page > pageCount || page < 0)
             throw new IllegalValueException(command, Integer.toString(page), command.getCommandManager().isDebug());
 
@@ -231,12 +256,23 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         return renderFirstPage(commandSender, colorScheme, new Text(colorScheme), command);
     }
 
+    /**
+     * Renders the first page of the help menu.
+     *
+     * @param commandSender The {@link ICommandSender} used for permission checking. See {@link
+     *                      ICommandSender#hasPermission(Command)}.
+     * @param colorScheme   The {@link ColorScheme} to use to render the {@link Text}.
+     * @param text          The {@link Text} instance to add the page count header to.
+     * @param command       The {@link Command} for which to render the first help page.
+     * @return The same {@link Text} instance provided as a parameter, but with the first page appended to it (if
+     * possible).
+     */
     protected @NonNull Text renderFirstPage(final @NonNull ICommandSender commandSender,
                                             final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                             final @NonNull Command command)
     {
         if (!commandSender.hasPermission(command))
-            return new Text(colorScheme);
+            return text;
 
         if (displayHeader && !command.getHeader(colorScheme).equals(""))
             text.add(command.getHeader(colorScheme), TextType.HEADER).add("\n");
@@ -315,11 +351,11 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     /**
      * Renders a command and appends it to the provided {@link Text}.
      *
-     * @param text          The {@link Text} to append the rendered command to.
+     * @param text          The {@link Text} to append the rendered {@link Command} to.
      * @param command       The {@link Command} to render. Note that this method does not care about {@link
      *                      Command#isHidden()}.
-     * @param superCommands A {@link Text} with all the appended super commands of the current command. This will be
-     *                      prepended to the command.
+     * @param superCommands A {@link Text} with all the appended super commands of the current {@link Command}. This
+     *                      will be prepended to the {@link Command}.
      */
     protected void renderCommand(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                  final @NonNull Command command, final @NonNull Text superCommands)
@@ -331,6 +367,15 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
             text.add("\n").add(summaryIndent).add(command.getSummary(colorScheme), TextType.SUMMARY);
     }
 
+    /**
+     * Renders the arguments in short format, see {@link IArgumentRenderer#render(ColorScheme, Argument)}.
+     * <p>
+     * The arguments are separated by spaces.
+     *
+     * @param colorScheme The {@link ColorScheme} to use to render the {@link Text}.
+     * @param text        The {@link Text} to append the rendered {@link Argument}s to.
+     * @param command     The {@link Command} for which to render the {@link Argument}s.
+     */
     protected void renderArgumentsShort(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                         final @NonNull Command command)
     {
@@ -338,6 +383,16 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
             text.add(" ").add(argumentRenderer.render(colorScheme, argument));
     }
 
+    /**
+     * Renders the arguments in short format, see {@link IArgumentRenderer#renderLongFormat(ColorScheme, Argument,
+     * String)}.
+     * <p>
+     * The arguments (and their summaries) are separated by newlines.
+     *
+     * @param colorScheme The {@link ColorScheme} to use to render the {@link Text}.
+     * @param text        The {@link Text} to append the rendered {@link Argument}s to.
+     * @param command     The {@link Command} for which to render the {@link Argument}s.
+     */
     protected void renderArgumentsLong(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                        final @NonNull Command command)
     {

@@ -31,6 +31,7 @@ public class Command
 
     protected final @NonNull String name;
 
+    private @Nullable Integer subCommandCount = null;
 
     protected final @NonNull List<@NonNull Command> subCommands;
 
@@ -126,7 +127,41 @@ public class Command
         if (this.helpArgument != null)
             arguments.add(this.helpArgument);
 
-        this.argumentManager = new ArgumentManager(arguments);
+        argumentManager = new ArgumentManager(arguments);
+    }
+
+    /**
+     * Gets the total number of sub{@link Command}s this {@link Command} has, including the number of sub{@link
+     * Command}s for ever sub{@link Command}.
+     *
+     * @return The total number of sub{@link Command}s this {@link Command} has.
+     */
+    public final int getSubCommandCount()
+    {
+        return subCommandCount == null ? subCommandCount = calculateSubCommandCount() : subCommandCount;
+    }
+
+    /**
+     * Recursively counts the number of sub{@link Command}s this {@link Command} has.
+     *
+     * @return The number of sub{@link Command}s this {@link Command} has.
+     */
+    private int calculateSubCommandCount()
+    {
+        int count = 0;
+        for (final @NonNull Command command : subCommands)
+            count += command.getSubCommandCount() + 1;
+        return count;
+    }
+
+    /**
+     * Invalidates the {@link #subCommandCount} for this {@link Command} as well as its super {@link Command}s
+     * (recursively).
+     */
+    private void invalidateSubCommandCount()
+    {
+        subCommandCount = null;
+        getSuperCommand().ifPresent(Command::invalidateSubCommandCount);
     }
 
     /**

@@ -35,11 +35,7 @@ import java.util.List;
 //       changed since it was last cached. For example, if subcommands are added, the cache will have to be invalidated.
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
-// TODO: Add permissions to commands (and arguments?). Probably a setter via an interface.
-// TODO: Allow defining and supplying custom renderers.
-// TODO: For the argument renderers, allow specifying long/short name requirements and stuff. In some situations,
-//       having both might be nice, while in other, it's better to only have the short version. Right?
-// TODO: Customizable bracket types for optional/required arguments.
+// TODO: Customizable command prefix?
 // TODO: Make is possible to have certain commands be server-only or player-only. These commands shouldn't show up in
 //       the help menus.
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
@@ -63,6 +59,7 @@ import java.util.List;
 // TODO: Maybe store the arguments by their label inside the CommandResult? That would avoid confusion of name vs longName.
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
+//       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
 // TODO: The Supplier<List<String>> in the Arguments should really be a function and it should have access to some basic
 //       stuff, like ICommandSender and Command.
 
