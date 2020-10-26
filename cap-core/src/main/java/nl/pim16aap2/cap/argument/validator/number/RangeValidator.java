@@ -40,7 +40,7 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
      * @param upperLimit The upper limit (not inclusive!)
      * @return A new {@link RangeValidator} for integer values.
      */
-    public static RangeValidator<Integer> integerRangeValidator(final int lowerLimit, final int upperLimit)
+    public static @NonNull RangeValidator<Integer> integerRangeValidator(final int lowerLimit, final int upperLimit)
     {
         return new RangeValidator<>((t1, t2) -> t1 < t2,
                                     (t1, t2) -> t1 > t2,
@@ -54,7 +54,7 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
      * @param upperLimit The upper limit (not inclusive!)
      * @return A new {@link RangeValidator} for double values.
      */
-    public static RangeValidator<Double> doubleRangeValidator(final double lowerLimit, final double upperLimit)
+    public static @NonNull RangeValidator<Double> doubleRangeValidator(final double lowerLimit, final double upperLimit)
     {
         return new RangeValidator<>((t1, t2) -> t1 < t2,
                                     (t1, t2) -> t1 > t2,
