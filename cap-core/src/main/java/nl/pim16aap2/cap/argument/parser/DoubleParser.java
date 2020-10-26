@@ -4,6 +4,11 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
+/**
+ * Represents an argument parser for double values.
+ *
+ * @author Pim
+ */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class DoubleParser extends ArgumentParser<Double>
 {

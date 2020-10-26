@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -75,6 +76,26 @@ public class Util
         catch (NumberFormatException e)
         {
             return OptionalInt.empty();
+        }
+    }
+
+    /**
+     * Attempts to parse a UUID from a String.
+     *
+     * @param str The string to parse.
+     * @return The UUID if the String represents one.
+     */
+    public @NonNull Optional<UUID> parseUUID(final @Nullable String str)
+    {
+        if (str == null)
+            return Optional.empty();
+        try
+        {
+            return Optional.of(UUID.fromString(str));
+        }
+        catch (NumberFormatException e)
+        {
+            return Optional.empty();
         }
     }
 }

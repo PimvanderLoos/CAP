@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
-import nl.pim16aap2.cap.argument.parser.FlagParser;
+import nl.pim16aap2.cap.argument.parser.ValuelessParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.manager.CommandManager;
@@ -101,7 +101,7 @@ public class Argument<T>
                        final @Nullable Boolean value)
     {
         this(name, longName, summary,
-             (ArgumentParser<T>) FlagParser.create(Util.valOrDefault(value, Boolean.TRUE)),
+             (ArgumentParser<T>) ValuelessParser.create(Util.valOrDefault(value, Boolean.TRUE)),
              (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), "", true, false, -1, false, null, null);
     }
 

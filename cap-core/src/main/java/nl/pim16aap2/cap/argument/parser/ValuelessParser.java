@@ -4,8 +4,13 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
+/**
+ * Represents an argument parser for valueless parameters.
+ *
+ * @author Pim
+ */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class FlagParser<T extends Boolean> extends ArgumentParser<T>
+public class ValuelessParser<T extends Boolean> extends ArgumentParser<T>
 {
     /**
      * Whether the presence of this argument flag should return true or false.
@@ -21,6 +26,6 @@ public class FlagParser<T extends Boolean> extends ArgumentParser<T>
 
     public static ArgumentParser<Boolean> create(final @NonNull Boolean value)
     {
-        return new FlagParser<>(value);
+        return new ValuelessParser<>(value);
     }
 }
