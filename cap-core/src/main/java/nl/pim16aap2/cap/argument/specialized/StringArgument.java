@@ -2,7 +2,7 @@ package nl.pim16aap2.cap.argument.specialized;
 
 
 import lombok.NonNull;
-import nl.pim16aap2.cap.argument.argumentparser.StringParser;
+import nl.pim16aap2.cap.argument.parser.StringParser;
 
 /**
  * Represents an argument that is parsed into a String.

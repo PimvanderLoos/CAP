@@ -1,7 +1,7 @@
 package nl.pim16aap2.cap.argument.specialized;
 
 import lombok.NonNull;
-import nl.pim16aap2.cap.argument.argumentparser.DoubleParser;
+import nl.pim16aap2.cap.argument.parser.DoubleParser;
 
 /**
  * Represents an argument that is parsed into a double.

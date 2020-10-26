@@ -3,7 +3,7 @@ package nl.pim16aap2.cap.argument;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import nl.pim16aap2.cap.argument.argumentparser.ArgumentParser;
+import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.manager.CommandManager;

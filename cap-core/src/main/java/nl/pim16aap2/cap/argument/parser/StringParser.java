@@ -1,4 +1,4 @@
-package nl.pim16aap2.cap.argument.argumentparser;
+package nl.pim16aap2.cap.argument.parser;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

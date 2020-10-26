@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.RepeatableArgument;
-import nl.pim16aap2.cap.argument.argumentparser.ArgumentParser;
+import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.command.Command;
 
 @RequiredArgsConstructor

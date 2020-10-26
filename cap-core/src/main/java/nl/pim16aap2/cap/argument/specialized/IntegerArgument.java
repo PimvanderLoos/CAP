@@ -1,7 +1,7 @@
 package nl.pim16aap2.cap.argument.specialized;
 
 import lombok.NonNull;
-import nl.pim16aap2.cap.argument.argumentparser.IntegerParser;
+import nl.pim16aap2.cap.argument.parser.IntegerParser;
 
 /**
  * Represents an argument that is parsed into an integer.
