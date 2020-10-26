@@ -174,8 +174,8 @@ public class Main
         tryArgs(commandManager, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
         tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
         tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\'myDoor\'", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "'myDoor'", "-p=pim16aap2", "-a");
+        tryArgs(commandManager, "bigdoors", "addowner", "'myDoor'", "-p=pim16aap2", "-a");
         tryArgs(commandManager, "bigdoors", "addowner", "-h");
         tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
 
