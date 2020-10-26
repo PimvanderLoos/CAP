@@ -45,8 +45,8 @@ class CommandParserTest
             final Command generic = Command
                 .commandBuilder().name(command)
                 .commandManager(commandManager)
-                .argument(StringArgument.getOptional()
-                                        .name("value").label("val").summary("random value").build())
+                .argument(new StringArgument().getOptional()
+                                              .name("value").label("val").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
@@ -56,20 +56,20 @@ class CommandParserTest
         final Command numerical = Command
             .commandBuilder().name("numerical")
             .commandManager(commandManager)
-            .argument(StringArgument.getOptional()
-                                    .name("value").label("val").summary("random value").build())
-            .argument(IntegerArgument.getOptional()
-                                     .name("min").label("min").summary("Must be more than 10!")
-                                     .argumentValidator(MinimumValidator.integerMinimumValidator(10)).build())
-            .argument(IntegerArgument.getOptional()
-                                     .name("max").label("max").summary("Must be less than 10!")
-                                     .argumentValidator(MaximumValidator.integerMaximumValidator(10)).build())
-            .argument(DoubleArgument.getOptional()
-                                    .name("maxd").label("maxd").summary("Must be less than 10.0!")
-                                    .argumentValidator(MaximumValidator.doubleMaximumValidator(10.0)).build())
-            .argument(DoubleArgument.getOptional()
-                                    .name("range").label("range").summary("Must be between 10 and 20!")
-                                    .argumentValidator(RangeValidator.doubleRangeValidator(10, 20)).build())
+            .argument(new StringArgument().getOptional()
+                                          .name("value").label("val").summary("random value").build())
+            .argument(new IntegerArgument().getOptional()
+                                           .name("min").label("min").summary("Must be more than 10!")
+                                           .argumentValidator(MinimumValidator.integerMinimumValidator(10)).build())
+            .argument(new IntegerArgument().getOptional()
+                                           .name("max").label("max").summary("Must be less than 10!")
+                                           .argumentValidator(MaximumValidator.integerMaximumValidator(10)).build())
+            .argument(new DoubleArgument().getOptional()
+                                          .name("maxd").label("maxd").summary("Must be less than 10.0!")
+                                          .argumentValidator(MaximumValidator.doubleMaximumValidator(10.0)).build())
+            .argument(new DoubleArgument().getOptional()
+                                          .name("range").label("range").summary("Must be between 10 and 20!")
+                                          .argumentValidator(RangeValidator.doubleRangeValidator(10, 20)).build())
             .commandExecutor(commandResult ->
                                  new GenericCommand("numerical", commandResult.getParsedArgument("value")).runCommand())
             .build();
@@ -81,7 +81,7 @@ class CommandParserTest
             .addDefaultHelpArgument(true)
             .description("Add 1 or more players or groups of players as owners of a door.")
             .summary("Add another owner to a door.")
-            .argument(StringArgument
+            .argument(new StringArgument()
                           .getRequired()
                           .name("doorID")
                           .tabcompleteFunction(() -> doorIDs)
@@ -93,7 +93,7 @@ class CommandParserTest
                               .longName("admin")
                               .summary("Make the user an admin for the given door. Only applies to players.")
                               .build())
-            .argument(StringArgument
+            .argument(new StringArgument()
                           .getRepeatable()
                           .name("p")
                           .longName("player")
@@ -101,7 +101,7 @@ class CommandParserTest
                           .tabcompleteFunction(() -> playerNames)
                           .summary("The name of the player to add as owner")
                           .build())
-            .argument(StringArgument
+            .argument(new StringArgument()
                           .getRepeatable()
                           .name("g")
                           .longName("group")

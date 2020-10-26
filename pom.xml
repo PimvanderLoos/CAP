@@ -13,6 +13,7 @@
     <modules>
         <module>cap-core</module>
         <module>cap-examples</module>
+        <module>cap-spigot</module>
     </modules>
 
     <properties>

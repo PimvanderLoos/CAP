@@ -207,7 +207,7 @@ public class Main
                 .addDefaultHelpArgument(true)
                 .commandManager(commandManager)
                 .summary("This is the summary for subsubcommand_" + idx)
-                .argument(StringArgument.getRequired().name("value").summary("random value").build())
+                .argument(new StringArgument().getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
@@ -223,7 +223,7 @@ public class Main
             .summary("Add another owner to a door.")
             .subCommands(subsubcommands)
             .permission("bigdoors.user.addowner")
-            .argument(StringArgument
+            .argument(new StringArgument()
                           .getRequired()
                           .name("doorID")
                           .summary("The name or UID of the door")
@@ -235,14 +235,14 @@ public class Main
                               .summary("Makes all the supplied users admins for the given door. " +
                                            "Only applies to players.")
                               .build())
-            .argument(StringArgument
+            .argument(new StringArgument()
                           .getRepeatable()
                           .name("p")
                           .longName("player")
                           .label("player")
                           .summary("The name of the player(s) to add as owner")
                           .build())
-            .argument(StringArgument
+            .argument(new StringArgument()
                           .getRepeatable()
                           .name("g")
                           .longName("group")
@@ -266,7 +266,7 @@ public class Main
                 .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
                 .commandManager(commandManager)
-                .argument(StringArgument.getRequired().name("value").summary("random value").build())
+                .argument(new StringArgument().getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
