@@ -54,16 +54,33 @@ public class ColorScheme
          * <p>
          * If the base style has not been defined, nothing happens.
          *
-         * @param base    The base type whose defined
-         * @param targets The target types to copy the base style to for those that do not have a style yet.
+         * @param styleMap The {@link #styleMap} to add the defaults to.
+         * @param base     The base type whose defined
+         * @param targets  The target types to copy the base style to for those that do not have a style yet.
          */
-        private void copyDefaults(final @NonNull TextType base, final @NonNull TextType... targets)
+        public static void copyDefaults(final @NonNull Map<TextType, TextComponent> styleMap,
+                                        final @NonNull TextType base, final @NonNull TextType... targets)
         {
             final @Nullable TextComponent baseStyle = styleMap.get(base);
             if (baseStyle == null)
                 return;
             for (TextType target : targets)
                 styleMap.putIfAbsent(target, baseStyle);
+        }
+
+        /**
+         * Copies the default values for the designated subtypes. See {@link #copyDefaults(Map, TextType,
+         * TextType...)}.
+         *
+         * @param styleMap The {@link #styleMap} to append the default values to if needed.
+         */
+        public static void copyDefaults(final @NonNull Map<TextType, TextComponent> styleMap)
+        {
+            copyDefaults(styleMap, TextType.OPTIONAL_PARAMETER, TextType.OPTIONAL_PARAMETER_FLAG,
+                         TextType.OPTIONAL_PARAMETER_LABEL, TextType.OPTIONAL_PARAMETER_SEPARATOR);
+
+            copyDefaults(styleMap, TextType.REQUIRED_PARAMETER, TextType.REQUIRED_PARAMETER_FLAG,
+                         TextType.REQUIRED_PARAMETER_LABEL, TextType.REQUIRED_PARAMETER_SEPARATOR);
         }
 
         public ColorScheme build()
@@ -80,11 +97,7 @@ public class ColorScheme
                         styleMap.put(entry.getKey(), new TextComponent(component.getOn(), disableAll));
                 }
 
-            copyDefaults(TextType.OPTIONAL_PARAMETER, TextType.OPTIONAL_PARAMETER_FLAG,
-                         TextType.OPTIONAL_PARAMETER_LABEL, TextType.OPTIONAL_PARAMETER_SEPARATOR);
-
-            copyDefaults(TextType.REQUIRED_PARAMETER, TextType.REQUIRED_PARAMETER_FLAG,
-                         TextType.REQUIRED_PARAMETER_LABEL, TextType.REQUIRED_PARAMETER_SEPARATOR);
+            copyDefaults(styleMap);
 
             // If any values are still missing, just add the empty style for those.
             if (styleMap.size() != TextType.class.getEnumConstants().length)

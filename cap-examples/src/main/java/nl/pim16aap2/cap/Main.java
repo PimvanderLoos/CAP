@@ -67,6 +67,8 @@ import java.util.List;
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
 // TODO: The Supplier<List<String>> in the Arguments should really be a function and it should have access to some basic
 //       stuff, like ICommandSender and Command.
+// TODO: The CommandManager should probably accept a factory or something for ICommandSenders. That would make it
+//       easier to hook in to it.
 
 public class Main
 {
