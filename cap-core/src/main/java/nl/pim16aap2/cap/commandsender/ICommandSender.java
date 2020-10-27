@@ -5,6 +5,11 @@ import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 
+/**
+ * Represents an object that sent a command and can be interacted with.
+ *
+ * @author Pim
+ */
 public interface ICommandSender
 {
     /**

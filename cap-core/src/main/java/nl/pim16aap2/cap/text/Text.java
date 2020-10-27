@@ -13,15 +13,33 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class Text
 {
+    /**
+     * The {@link ColorScheme} used to add styles to sections of this text.
+     */
     @Getter
     private final @NonNull ColorScheme colorScheme;
 
+    /**
+     * The {@link StringBuilder} backing this {@link Text} object. All strings appended to this {@link Text} will be
+     * stored here.
+     */
     private final @NonNull StringBuilder stringBuilder = new StringBuilder();
 
+    /**
+     * The list of {@link StyledSection}s.
+     */
     private final @NonNull List<StyledSection> styledSections = new ArrayList<>();
 
+    /**
+     * The total size of the string held by this object. This is used by {@link #toString()} to instantiate a {@link
+     * StringBuilder} of the right size.
+     * <p>
+     * This value includes both the size of {@link #stringBuilder} as well as the total size of all the {@link
+     * #styledSections}.
+     */
     private int styledSize = 0;
 
+    @Deprecated
     private static final @NonNull Pattern NEWLINE = Pattern.compile("\n");
 
     // CopyConstructor
@@ -33,6 +51,12 @@ public class Text
         styledSize = other.styledSize;
     }
 
+    /**
+     * Appends some unstyled text to the current text.
+     *
+     * @param text The unstyled text to add.
+     * @return The current {@link Text} instance.
+     */
     public Text add(final @NonNull String text)
     {
         stringBuilder.append(text);
@@ -40,6 +64,14 @@ public class Text
         return this;
     }
 
+    /**
+     * Appends some styled text to the current text.
+     *
+     * @param text The text to add.
+     * @param type The {@link TextType} of the text to add. The {@link #colorScheme} will be used to look up the style
+     *             associated with the type. See {@link ColorScheme#getStyle(TextType)}.
+     * @return The current {@link Text} instance.
+     */
     public Text add(final @NonNull String text, final @Nullable TextType type)
     {
         if (type != null)
@@ -51,6 +83,14 @@ public class Text
         return add(text);
     }
 
+    /**
+     * Appends another {@link Text} object to this one.
+     * <p>
+     * The other {@link Text} object will not be modified.
+     *
+     * @param other The other {@link Text} instance to append to the current one.
+     * @return The current {@link Text} instance.
+     */
     public Text add(final @NonNull Text other)
     {
         if (other.stringBuilder.length() == 0)
@@ -104,16 +144,23 @@ public class Text
         return sb.toString();
     }
 
+    @Deprecated
     public static @NonNull String[] split(final @NonNull String str)
     {
         return NEWLINE.split(str);
     }
 
+    /**
+     * Represents a section in a text that is associated with a certain style.
+     *
+     * @author Pim
+     */
     @AllArgsConstructor
     @Getter
     private static class StyledSection
     {
-        private int startIndex, length;
+        private final int startIndex;
+        private final int length;
         private final @NonNull TextComponent style;
 
         // Copy constructor

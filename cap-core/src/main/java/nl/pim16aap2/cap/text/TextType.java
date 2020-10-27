@@ -2,6 +2,12 @@ package nl.pim16aap2.cap.text;
 
 import nl.pim16aap2.cap.command.Command;
 
+/**
+ * Represents the different types of {@link Text} used by CAP. Every type of text can have its own {@link
+ * TextComponent}.
+ *
+ * @author Pim
+ */
 public enum TextType
 {
     /**

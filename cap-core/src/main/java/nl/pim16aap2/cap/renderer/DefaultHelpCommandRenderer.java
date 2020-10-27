@@ -49,17 +49,20 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected boolean displayHeader = true;
 
     /**
-     * The string to prepend before every summary. Default = "  ".
+     * The string to prepend before every description. Default = "  ".
      */
     @Builder.Default
-    protected String summaryIndent = "  ";
+    protected String descriptionIndent = "  ";
 
     /**
-     * Whether or not to display the arguments of each command on the list page.
+     * Whether or not to display the arguments of each command on the list page. Default = False.
      */
     @Builder.Default
     protected boolean displayArgumentsForSimple = false;
 
+    /**
+     * The {@link IArgumentRenderer} renderer that will be used to render arguments.
+     */
     protected @NonNull IArgumentRenderer argumentRenderer;
 
     /**
@@ -68,8 +71,22 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     @Builder.Default
     protected boolean startAt1 = true;
 
+    /**
+     * @param pageSize                  The number of subcommands on the first page. Default = 1.
+     * @param firstPageSize             The number of subcommands to display per page. Default = 5.
+     * @param displayHeader             Whether or not to display the header of the command on the first page. Default =
+     *                                  true.
+     * @param descriptionIndent         The string to prepend before every description. Default = "  ".
+     * @param displayArgumentsForSimple Whether or not to display the arguments of each command on the list page.
+     *                                  Default = False.
+     * @param argumentRenderer          The {@link IArgumentRenderer} renderer that will be used to render arguments.
+     *                                  When this value is not provided, {@link DefaultArgumentRenderer} will be used.
+     * @param startAt1                  Whether to start counting pages at 0 (<it>false</it>) or 1 (<it>true</it>).
+     *                                  Default = true.
+     */
     protected DefaultHelpCommandRenderer(final int pageSize, final int firstPageSize, final boolean displayHeader,
-                                         final @NonNull String summaryIndent, final boolean displayArgumentsForSimple,
+                                         final @NonNull String descriptionIndent,
+                                         final boolean displayArgumentsForSimple,
                                          final @Nullable IArgumentRenderer argumentRenderer, final boolean startAt1)
     {
         this.pageSize = pageSize;
@@ -77,7 +94,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         this.displayHeader = displayHeader;
         this.displayArgumentsForSimple = displayArgumentsForSimple;
         this.argumentRenderer = argumentRenderer == null ? DefaultArgumentRenderer.getDefault() : argumentRenderer;
-        this.summaryIndent = summaryIndent;
+        this.descriptionIndent = descriptionIndent;
         this.startAt1 = startAt1;
     }
 
@@ -207,7 +224,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         renderArgumentsShort(colorScheme, text, command);
 
         if (!command.getDescription(colorScheme).equals(""))
-            text.add("\n").add(summaryIndent).add(command.getDescription(colorScheme), TextType.DESCRIPTION);
+            text.add("\n").add(descriptionIndent).add(command.getDescription(colorScheme), TextType.DESCRIPTION);
         renderArgumentsLong(colorScheme, text, command);
         return text;
     }
@@ -364,7 +381,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         renderArgumentsShort(colorScheme, text, command);
 
         if (!command.getSummary(colorScheme).equals(""))
-            text.add("\n").add(summaryIndent).add(command.getSummary(colorScheme), TextType.SUMMARY);
+            text.add("\n").add(descriptionIndent).add(command.getSummary(colorScheme), TextType.SUMMARY);
     }
 
     /**
@@ -397,6 +414,6 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
                                        final @NonNull Command command)
     {
         for (final Argument<?> argument : command.getArgumentManager().getArguments())
-            text.add("\n").add(argumentRenderer.renderLongFormat(colorScheme, argument, summaryIndent));
+            text.add("\n").add(argumentRenderer.renderLongFormat(colorScheme, argument, descriptionIndent));
     }
 }

@@ -356,6 +356,22 @@ class CommandParser
                                                 parsedCommand.getIndex()));
     }
 
+    /**
+     * Parses all the {@link Argument}s for a given {@link Command}.
+     *
+     * @param command The {@link Command} to parse the {@link Argument}s for.
+     * @param idx     The index of the {@link Command} in {@link #args}. All values with a higher index than this will
+     *                be processed as {@link Argument}s.
+     * @return The map of {@link Argument.IParsedArgument}s resulting from parsing the input. Any missing optional
+     * {@link Argument}s with default values will be assigned their default value. {@link Argument#getName()} is used
+     * for the keys in the map.
+     *
+     * @throws NonExistingArgumentException If one of the specified arguments does not exist.
+     * @throws MissingArgumentException     If a required argument was not specified.
+     * @throws ValidationFailureException   If the value of an {@link Argument} could not be validated. See {@link
+     *                                      IArgumentValidator#validate(Object)}.
+     * @throws IllegalValueException        If the specified value of an {@link Argument} is illegal.
+     */
     @Nullable
     private Map<@NonNull String, Argument.IParsedArgument<?>> parseArguments(final @NonNull Command command,
                                                                              final int idx)

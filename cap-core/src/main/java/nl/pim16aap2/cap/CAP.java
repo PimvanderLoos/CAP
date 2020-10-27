@@ -26,21 +26,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * The main class of this library. All commands within a single command system should be registered here.
+ *
+ * @author Pim
+ */
 public class CAP
 {
+    /**
+     * The map containing all registered commands, with their names as key.
+     */
     private final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
 
+    /**
+     * The {@link DefaultHelpCommandRenderer} to use to render help messages.
+     */
     @Getter
     private final @NonNull DefaultHelpCommandRenderer helpCommandRenderer;
 
     /**
      * Whether or not to enable debug mode. In debug mode, {@link CommandParserException}s will generate stacktraces,
-     * when it is disable, they won't (this is much faster).
+     * when it is disabled, they won't (this is much faster).
      */
     @Getter
     @Setter
     protected boolean debug;
 
+    /**
+     * @param helpCommandRenderer The {@link DefaultHelpCommandRenderer} to use to render help messages. When null,
+     *                            {@link DefaultHelpCommandRenderer#getDefault()} will be used.
+     * @param debug               See {@link #debug}.
+     */
     @Builder(toBuilder = true)
     private CAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug)
     {
@@ -99,12 +115,24 @@ public class CAP
         return new CommandParser(this, commandSender, args).parse();
     }
 
+    /**
+     * Registers a {@link Command} with this {@link CAP}.
+     *
+     * @param command The {@link Command} to register.
+     * @return The current instance of this {@link CAP}.
+     */
     public @NonNull CAP addCommand(final @NonNull Command command)
     {
         commandMap.put(command.getName(), command);
         return this;
     }
 
+    /**
+     * Gets a {@link Command} from its name.
+     *
+     * @param name The name of the {@link Command}. See {@link Command#getName()}.
+     * @return The {@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
+     */
     public @NonNull Optional<Command> getCommand(final @Nullable String name)
     {
         if (name == null)
@@ -112,16 +140,35 @@ public class CAP
         return Optional.ofNullable(commandMap.get(name));
     }
 
+    /**
+     * Gets all the {@link Command}s registered in this {@link CAP}.
+     *
+     * @return All the {@link Command}s registered in this {@link CAP}.
+     */
     public @NonNull Collection<@NonNull Command> getCommands()
     {
         return commandMap.values();
     }
 
+    /**
+     * Gets a list of suggestions for tab complete based on the current set of arguments.
+     *
+     * @param commandSender The {@link ICommandSender} to get the suggestions for.
+     * @param args          The current set of (potentially incomplete) input arguments.
+     * @return The list of suggestions based on the current set of input arguments.
+     */
     public List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender, final @NonNull String args)
     {
         return getTabCompleteOptions(commandSender, args.split(" "));
     }
 
+    /**
+     * Gets a list of suggestions for tab complete based on the current set of arguments.
+     *
+     * @param commandSender The {@link ICommandSender} to get the suggestions for.
+     * @param args          The current set of (potentially incomplete) input arguments split on spaces.
+     * @return The list of suggestions based on the current set of input arguments.
+     */
     public List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender, final @NonNull String[] args)
     {
         try

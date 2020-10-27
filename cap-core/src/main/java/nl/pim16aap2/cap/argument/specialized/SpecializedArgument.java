@@ -7,9 +7,18 @@ import nl.pim16aap2.cap.argument.RepeatableArgument;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.command.Command;
 
+/**
+ * Represents a specialized type of {@link Argument}.
+ *
+ * @param <T> The specialized type.
+ * @author Pim+
+ */
 @RequiredArgsConstructor
 public abstract class SpecializedArgument<T>
 {
+    /**
+     * The {@link ArgumentParser} that is used to parse the input value (String) into the desired output value.
+     */
     protected final @NonNull ArgumentParser<T> parser;
 
     /**

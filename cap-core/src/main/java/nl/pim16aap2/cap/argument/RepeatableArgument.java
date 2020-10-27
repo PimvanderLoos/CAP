@@ -17,7 +17,7 @@ public class RepeatableArgument<T> extends Argument<T>
 {
     private static final boolean VALUE_LESS = false;
     private static final boolean REPEATABLE = true;
-    private static final int POSITION = -1;
+    private static final boolean POSITION = false;
 
     @Builder(builderMethodName = "repeatableBuilder")
     private RepeatableArgument(final @NonNull String name, final @Nullable String longName,
@@ -26,8 +26,8 @@ public class RepeatableArgument<T> extends Argument<T>
                                final @Nullable Supplier<List<String>> tabcompleteFunction,
                                final @Nullable IArgumentValidator<T> argumentValidator)
     {
-        super(name, longName, summary, parser, null, label, VALUE_LESS, REPEATABLE,
-              POSITION, required, tabcompleteFunction, argumentValidator);
+        super(name, longName, summary, parser, null, label, VALUE_LESS, REPEATABLE, POSITION, required,
+              tabcompleteFunction, argumentValidator);
     }
 
     @Override

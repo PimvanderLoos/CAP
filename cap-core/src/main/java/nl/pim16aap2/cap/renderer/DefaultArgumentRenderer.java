@@ -31,6 +31,10 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      */
     protected @NonNull Pair<@NonNull String, @NonNull String> requiredBrackets;
 
+    /**
+     * @param optionalBrackets See {@link #optionalBrackets}.
+     * @param requiredBrackets See {@link #requiredBrackets}.
+     */
     @Builder(toBuilder = true)
     protected DefaultArgumentRenderer(final @Nullable Pair<@NonNull String, @NonNull String> optionalBrackets,
                                       final @Nullable Pair<@NonNull String, @NonNull String> requiredBrackets)

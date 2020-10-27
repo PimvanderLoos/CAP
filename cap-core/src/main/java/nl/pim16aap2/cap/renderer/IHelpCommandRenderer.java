@@ -56,7 +56,6 @@ public interface IHelpCommandRenderer
      * @throws CommandNotFoundException If the provided value is not an integer and no {@link Command} with that String
      *                                  as name could be found.
      */
-    // TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
     @NonNull Text render(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
                          final @NonNull Command command, final @Nullable String val)
         throws IllegalValueException, CommandNotFoundException;

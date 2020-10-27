@@ -6,6 +6,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
 
+/**
+ * Represents a colorscheme that can be used to add styles to text.
+ *
+ * @author Pim
+ */
 public class ColorScheme
 {
     private final Map<TextType, TextComponent> styleMap;
@@ -17,6 +22,13 @@ public class ColorScheme
         this.disableAll = disableAll;
     }
 
+    /**
+     * Updates the style for a given {@link TextType}.
+     *
+     * @param type  The {@link TextType} for which to update its style.
+     * @param style The new style to use.
+     * @return The current {@link ColorScheme} instance.
+     */
     public ColorScheme setStyle(final @NonNull TextType type, @NonNull TextComponent style)
     {
         if (disableAll != null && !style.getOn().equals("") && style.getOff().equals(""))
@@ -25,11 +37,22 @@ public class ColorScheme
         return this;
     }
 
+    /**
+     * Gets the style associated with a certain {@link TextType}.
+     *
+     * @param type The {@link TextType} for which to find its style.
+     * @return The style associated with the given {@link TextType}.
+     */
     public @NonNull TextComponent getStyle(final @NonNull TextType type)
     {
         return styleMap.get(type);
     }
 
+    /**
+     * Builds a new {@link ColorScheme}.
+     *
+     * @return A new {@link ColorSchemeBuilder}.
+     */
     public static ColorSchemeBuilder builder()
     {
         return new ColorSchemeBuilder();
@@ -83,6 +106,11 @@ public class ColorScheme
                          TextType.REQUIRED_PARAMETER_LABEL, TextType.REQUIRED_PARAMETER_SEPARATOR);
         }
 
+        /**
+         * Constructs the new {@link ColorScheme}.
+         *
+         * @return The new {@link ColorScheme}.
+         */
         public ColorScheme build()
         {
             // If disableAll was set, apply this default value to any components
@@ -122,6 +150,13 @@ public class ColorScheme
             return this;
         }
 
+        /**
+         * Adds a style to a given {@link TextType}.
+         *
+         * @param type  The {@link TextType} to add a style for.
+         * @param style The style to add.
+         * @return This {@link ColorSchemeBuilder} instance.
+         */
         public ColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull TextComponent style)
         {
             styleMap.put(type, style);

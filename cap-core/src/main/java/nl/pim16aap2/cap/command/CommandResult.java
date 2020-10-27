@@ -9,18 +9,44 @@ import nl.pim16aap2.cap.exception.CommandParserException;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
+import nl.pim16aap2.cap.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.Optional;
 
+/**
+ * Represents the result of parsing user input.
+ *
+ * @author Pim
+ */
 @Getter
 public class CommandResult
 {
+    /**
+     * The {@link Command} that was used. In case of multiple subcommands, this is the last command.
+     * <p>
+     * E.g. In the case of: '/mytopcommand subcommmand0 subcommand1', this would be 'subcommand1'.
+     */
     private final @NonNull Command command;
+
+    /**
+     * The list of parsed {@link Argument}s.
+     * <p>
+     * The key for every entry is {@link Argument#getName()}.
+     */
     private final @Nullable Map<@NonNull String, Argument.IParsedArgument<?>> parsedArguments;
+
+    /**
+     * The {@link ICommandSender} that issued the command. This object will be used for sending messages and permission
+     * checking and its {@link ColorScheme} will be used to generate {@link Text} objects.
+     */
     private final @NonNull ICommandSender commandSender;
 
+    /**
+     * @param commandSender   See {@link #commandSender}.
+     * @param command         See {@link #command}.
+     * @param parsedArguments See {@link #parsedArguments}.
+     */
     public CommandResult(final @NonNull ICommandSender commandSender, final @NonNull Command command,
                          final @Nullable Map<@NonNull String, Argument.IParsedArgument<?>> parsedArguments)
     {
@@ -29,6 +55,12 @@ public class CommandResult
         this.parsedArguments = parsedArguments;
     }
 
+    /**
+     * Creates a new {@link CommandResult}, but without any {@link #parsedArguments}.
+     *
+     * @param commandSender See {@link #commandSender}.
+     * @param command       See {@link #command}.
+     */
     public CommandResult(final @NonNull ICommandSender commandSender, final @NonNull Command command)
     {
         this(commandSender, command, null);
@@ -78,14 +110,13 @@ public class CommandResult
         return parsedArguments == null;
     }
 
-    @SuppressWarnings("unchecked")
-    public @NonNull <T> Optional<Argument.IParsedArgument<T>> getParsedArgumentOpt(final @NonNull String name)
-    {
-        if (parsedArguments == null)
-            return Optional.empty();
-        return Optional.ofNullable((Argument.IParsedArgument<T>) parsedArguments.get(name));
-    }
-
+    /**
+     * Gets the parsed value associated with an {@link Argument}.
+     *
+     * @param name The name of the {@link Argument}. See {@link Argument#getName()}.
+     * @param <T>  The type of the parsed value of the {@link Argument}.
+     * @return The parsed value of the {@link Argument}.
+     */
     @SuppressWarnings("unchecked")
     public <T> T getParsedArgument(final @NonNull String name)
     {
@@ -97,6 +128,9 @@ public class CommandResult
         return result == null ? null : result.getValue();
     }
 
+    /**
+     * Executes {@link Command#commandExecutor}.
+     */
     public void run()
         throws CommandParserException
     {

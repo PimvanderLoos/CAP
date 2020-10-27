@@ -9,6 +9,8 @@ import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.parser.ValuelessParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
+import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
+import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
@@ -16,38 +18,111 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * Represents an argument that can be used by a {@link Command}.
+ *
+ * @param <T> The type of object the argument input is parsed into. This can be an integer, or a string, or anything
+ *            else that can be parsed from a String.
+ */
 @Getter
 public class Argument<T>
 {
+    /**
+     * The name of this {@link Argument}.
+     */
     protected final @NonNull String name;
 
+    /**
+     * The (optional) long name of this {@link Argument}. For example, a help command usually has the short name '-h'
+     * and the long name '--help'.
+     */
     protected final @Nullable String longName;
 
+    /**
+     * A short summary to describe what this argument does and/or how it is used.
+     */
     protected @NonNull String summary;
 
+    /**
+     * The {@link ArgumentParser} that is used to parse the argument into the desired type.
+     */
     @Getter(AccessLevel.PROTECTED)
     protected @NonNull ArgumentParser<T> parser;
 
+    /**
+     * The label of the this {@link Argument}. For example, in the case of '[-p=player]', "player" would be the label.
+     */
     protected final @NonNull String label;
 
+    /**
+     * The default value for this {@link Argument}.
+     * <p>
+     * If this {@link Argument} is required, this will not be used. If it is optional, this is the value that will be
+     * returned in case the argument input did not have a value for this {@link Argument}.
+     */
     protected final @Nullable T defaultValue;
 
+    /**
+     * Whether or not this {@link Argument} is repeatable.
+     *
+     * @see RepeatableArgument
+     */
     protected final boolean repeatable;
 
+    /**
+     * Whether or not this argument is valueless.
+     * <p>
+     * A valueless argument is one where its presence basically is the value.
+     * <p>
+     * An example of a valueless argument would be '--staged' in 'git diff --staged'
+     */
     protected final boolean valuesLess;
 
-    protected final int position;
+    /**
+     * Whether or not this {@link Argument} is positional.
+     * <p>
+     * The position is determined by the order in which the {@link Argument}s are added to the {@link Command}.
+     */
+    protected final boolean positional;
 
+    /**
+     * Whether or not this {@link Argument} is required.
+     */
     protected final boolean required;
 
+    /**
+     * The {@link Supplier} to use to provide completion suggestions.
+     * <p>
+     * For example, if this {@link Argument} requires a playername, it could provide a list of names of nearby players.
+     */
     protected final @Nullable Supplier<List<String>> tabcompleteFunction;
 
+    /**
+     * The {@link IArgumentValidator} to use to make sure that the input value meets certain constraints.
+     * <p>
+     * For example, this can be used to make sure some integer is in the range of [10, 20] (see {@link
+     * RangeValidator#integerRangeValidator(int, int)}).
+     */
     protected final @Nullable IArgumentValidator<T> argumentValidator;
 
+    /**
+     * @param name                {@link #name}.
+     * @param longName            {@link #longName}.
+     * @param summary             {@link #summary}.
+     * @param parser              {@link #parser}.
+     * @param defaultValue        {@link #defaultValue}.
+     * @param label               {@link #label}.
+     * @param valuesLess          {@link #valuesLess}.
+     * @param repeatable          {@link #repeatable}.
+     * @param positional          {@link #positional}.
+     * @param required            {@link #required}.
+     * @param tabcompleteFunction {@link #tabcompleteFunction}.
+     * @param argumentValidator   {@link #argumentValidator}.
+     */
     protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final boolean valuesLess, final boolean repeatable,
-                       final int position, final boolean required,
+                       final boolean positional, final boolean required,
                        final @Nullable Supplier<List<String>> tabcompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator)
     {
@@ -59,57 +134,109 @@ public class Argument<T>
         this.label = label;
         this.valuesLess = valuesLess;
         this.repeatable = repeatable;
-        this.position = position;
+        this.positional = positional;
         this.required = required;
         this.tabcompleteFunction = tabcompleteFunction;
         this.argumentValidator = argumentValidator;
     }
 
+    /**
+     * Creates a new required and positional {@link Argument}.
+     *
+     * @param name                {@link #name}.
+     * @param longName            {@link #longName}.
+     * @param summary             {@link #summary}.
+     * @param parser              {@link #parser}.
+     * @param tabcompleteFunction {@link #tabcompleteFunction}.
+     * @param argumentValidator   {@link #argumentValidator}.
+     */
     @Builder(builderMethodName = "requiredBuilder", builderClassName = "RequiredBuilder")
     protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
-                       final @NonNull ArgumentParser<T> parser, final int position,
+                       final @NonNull ArgumentParser<T> parser,
                        final @Nullable Supplier<List<String>> tabcompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator)
     {
-        this(name, longName, summary, parser, null, "", false, false, position, true, tabcompleteFunction,
+        this(name, longName, summary, parser, null, "", false, false, true, true, tabcompleteFunction,
              argumentValidator);
     }
 
+    /**
+     * Creates a new optional and positional {@link Argument}.
+     *
+     * @param name                {@link #name}.
+     * @param longName            {@link #longName}.
+     * @param summary             {@link #summary}.
+     * @param parser              {@link #parser}.
+     * @param tabcompleteFunction {@link #tabcompleteFunction}.
+     * @param argumentValidator   {@link #argumentValidator}.
+     */
     @Builder(builderMethodName = "optionalPositionalBuilder", builderClassName = "OptionalPositionalBuilder")
     protected Argument(final @NonNull String name, final @NonNull String longName, final @NonNull String summary,
-                       final int position, final @NonNull ArgumentParser<T> parser,
                        final @Nullable Supplier<List<String>> tabcompleteFunction,
+                       final @NonNull ArgumentParser<T> parser,
                        final @Nullable IArgumentValidator<T> argumentValidator)
     {
-        this(name, longName, summary, parser, null, "", false, false, position, false, tabcompleteFunction,
+        this(name, longName, summary, parser, null, "", false, false, true, false, tabcompleteFunction,
              argumentValidator);
     }
 
+    /**
+     * Creates a new optional {@link Argument}.
+     *
+     * @param name                {@link #name}.
+     * @param longName            {@link #longName}.
+     * @param summary             {@link #summary}.
+     * @param parser              {@link #parser}.
+     * @param defaultValue        {@link #defaultValue}.
+     * @param label               {@link #label}.
+     * @param tabcompleteFunction {@link #tabcompleteFunction}.
+     * @param argumentValidator   {@link #argumentValidator}.
+     */
     @Builder(builderMethodName = "optionalBuilder", builderClassName = "OptionalBuilder")
     protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final @Nullable Supplier<List<String>> tabcompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator)
     {
-        this(name, longName, summary, parser, defaultValue, label, false, false, -1, false, tabcompleteFunction,
+        this(name, longName, summary, parser, defaultValue, label, false, false, false, false, tabcompleteFunction,
              argumentValidator);
     }
 
+    /**
+     * Creates a new valueless {@link Argument}. See {@link #valuesLess}.
+     *
+     * @param name     {@link #name}.
+     * @param longName {@link #longName}.
+     * @param summary  {@link #summary}.
+     * @param value    Whether the presence of this flag means 'true' or 'false'. Default: True
+     */
     @SuppressWarnings("unchecked")
     @Builder(builderMethodName = "privateValuesLessBuilder", builderClassName = "ValuesLessBuilder")
-    protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
-                       final @Nullable Boolean value)
+    private Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
+                     final @Nullable Boolean value)
     {
         this(name, longName, summary,
              (ArgumentParser<T>) ValuelessParser.create(Util.valOrDefault(value, Boolean.TRUE)),
-             (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), "", true, false, -1, false, null, null);
+             (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), "", true, false, false, false, null, null);
     }
 
+    /**
+     * Valueless {@link Argument}s should always have {@link Boolean} as their type, so the generic builder is private
+     * and only the boolean builder can be used. See {@link #valuesLessBuilder()}.
+     *
+     * @param <T> Always a {@link Boolean}.
+     * @return A new builder for a valueless {@link Argument}.
+     */
     private static <T> ValuesLessBuilder<T> privateValuesLessBuilder()
     {
-        return new ValuesLessBuilder<T>();
+        return new ValuesLessBuilder<>();
     }
 
+    /**
+     * Creates a new builder for a valueless {@link Argument}. See {@link #valuesLess}.
+     *
+     * @return A new builder for a valueless {@link Argument}
+     */
     public static @NonNull ValuesLessBuilder<Boolean> valuesLessBuilder()
     {
         return Argument.privateValuesLessBuilder();
@@ -156,16 +283,6 @@ public class Argument<T>
     public @NonNull IParsedArgument<?> getDefault()
     {
         return new ParsedArgument<>(defaultValue);
-    }
-
-    /**
-     * Checks if this {@link Argument} is positional or not.
-     *
-     * @return True if this {@link Argument} is positional.
-     */
-    public boolean isPositional()
-    {
-        return position >= 0;
     }
 
     /**

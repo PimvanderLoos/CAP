@@ -35,13 +35,13 @@ import java.util.List;
 //       changed since it was last cached. For example, if subcommands are added, the cache will have to be invalidated.
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
+//       Also, virtual commands don't need executors, just a help command?
 // TODO: Customizable command prefix?
 // TODO: Make is possible to have certain commands be server-only or player-only. These commands shouldn't show up in
 //       the help menus.
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
-// TODO: Remove the position value from the Argument class. It can just be a boolean.
 // TODO: Support ResourceBundle.
 // TODO: Currently, the commands are kinda stored in a tree shape (1 super, n subs). Perhaps store it in an actual tree?
 // TODO: For the long help, maybe fall back to the summary if no description is available?
@@ -67,6 +67,14 @@ import java.util.List;
 // TODO: Add CommandExecutor class to the spigot module.
 // TODO: Create optional system to handle exceptions. It'd be nice to not have to catch them all manually
 //       (but just tell CAP to inform the ICommandSender on its own).
+// TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
+// TODO: Don't throw and EOFException when preprocessing input arguments for tab complete. It should be allowed to
+//       tab-complete values split by spaces as well.
+// TODO: Add some safeguards for required optional parameters. If it's '/command [pos0] [pos1] <pos2> [pos3]',
+//       you cannot know which arguments were provided from "/command val val". So if 1 optional positional argument is
+//       provided, no other positional arguments should be allowed.
+//       It is possible to have some way of mixing this stuff, but that would require too many rules and just get
+//       confusing and bug-prone very fast.
 
 public class Main
 {
