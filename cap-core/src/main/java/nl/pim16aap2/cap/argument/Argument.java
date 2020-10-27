@@ -11,11 +11,13 @@ import nl.pim16aap2.cap.argument.parser.ValuelessParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
@@ -95,7 +97,7 @@ public class Argument<T>
      * <p>
      * For example, if this {@link Argument} requires a playername, it could provide a list of names of nearby players.
      */
-    protected final @Nullable Supplier<List<String>> tabcompleteFunction;
+    protected final @Nullable ITabcompleteFunction tabcompleteFunction;
 
     /**
      * The {@link IArgumentValidator} to use to make sure that the input value meets certain constraints.
@@ -123,7 +125,7 @@ public class Argument<T>
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final boolean valuesLess, final boolean repeatable,
                        final boolean positional, final boolean required,
-                       final @Nullable Supplier<List<String>> tabcompleteFunction,
+                       final @Nullable ITabcompleteFunction tabcompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator)
     {
         this.name = name;
@@ -153,7 +155,7 @@ public class Argument<T>
     @Builder(builderMethodName = "requiredBuilder", builderClassName = "RequiredBuilder")
     protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser,
-                       final @Nullable Supplier<List<String>> tabcompleteFunction,
+                       final @Nullable ITabcompleteFunction tabcompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator)
     {
         this(name, longName, summary, parser, null, "", false, false, true, true, tabcompleteFunction,
@@ -172,7 +174,7 @@ public class Argument<T>
      */
     @Builder(builderMethodName = "optionalPositionalBuilder", builderClassName = "OptionalPositionalBuilder")
     protected Argument(final @NonNull String name, final @NonNull String longName, final @NonNull String summary,
-                       final @Nullable Supplier<List<String>> tabcompleteFunction,
+                       final @Nullable ITabcompleteFunction tabcompleteFunction,
                        final @NonNull ArgumentParser<T> parser,
                        final @Nullable IArgumentValidator<T> argumentValidator)
     {
@@ -195,7 +197,7 @@ public class Argument<T>
     @Builder(builderMethodName = "optionalBuilder", builderClassName = "OptionalBuilder")
     protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
-                       final @NonNull String label, final @Nullable Supplier<List<String>> tabcompleteFunction,
+                       final @NonNull String label, final @Nullable ITabcompleteFunction tabcompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator)
     {
         this(name, longName, summary, parser, defaultValue, label, false, false, false, false, tabcompleteFunction,
@@ -327,5 +329,18 @@ public class Argument<T>
         {
             value = (T) newValue;
         }
+    }
+
+    /**
+     * Represents a {@link BiFunction} that receives an {@link ICommandSender} and an {@link Argument}.
+     * <p>
+     * The function is supposed to return a list of suggestions to use as values for the {@link Argument} for the given
+     * {@link ICommandSender}.
+     */
+    //
+    @FunctionalInterface
+    public interface ITabcompleteFunction
+        extends BiFunction<@NonNull ICommandSender, @NonNull Argument<?>, @NonNull List<@NonNull String>>
+    {
     }
 }

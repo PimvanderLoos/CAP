@@ -22,10 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static nl.pim16aap2.cap.argument.Argument.ITabcompleteFunction;
 
 class CommandParser
 {
@@ -168,12 +169,12 @@ class CommandParser
                                                                      final @NonNull String value)
     {
         final List<String> options = new ArrayList<>(0);
-        final @Nullable Supplier<List<String>> argumentValueCompletion = argument.map(Argument::getTabcompleteFunction)
-                                                                                 .orElse(null);
+        final @Nullable ITabcompleteFunction argumentValueCompletion = argument.map(Argument::getTabcompleteFunction)
+                                                                               .orElse(null);
         if (argumentValueCompletion == null)
             return options;
 
-        argumentValueCompletion.get().forEach(
+        argumentValueCompletion.apply(commandSender, argument.get()).forEach(
             entry ->
             {
                 if (entry.startsWith(value))

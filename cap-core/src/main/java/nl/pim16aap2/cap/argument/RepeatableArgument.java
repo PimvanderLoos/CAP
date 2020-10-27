@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class RepeatableArgument<T> extends Argument<T>
 {
@@ -23,7 +22,7 @@ public class RepeatableArgument<T> extends Argument<T>
     private RepeatableArgument(final @NonNull String name, final @Nullable String longName,
                                final @NonNull String summary, final @NonNull ArgumentParser<T> parser,
                                final @NonNull String label, final boolean required,
-                               final @Nullable Supplier<List<String>> tabcompleteFunction,
+                               final @Nullable ITabcompleteFunction tabcompleteFunction,
                                final @Nullable IArgumentValidator<T> argumentValidator)
     {
         super(name, longName, summary, parser, null, label, VALUE_LESS, REPEATABLE, POSITION, required,

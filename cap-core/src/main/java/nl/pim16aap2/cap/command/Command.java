@@ -11,7 +11,7 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandParserException;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
-import nl.pim16aap2.cap.util.CheckedConsumer;
+import nl.pim16aap2.cap.util.Functional.CheckedConsumer;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 

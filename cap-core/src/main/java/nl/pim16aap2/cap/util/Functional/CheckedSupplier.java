@@ -1,4 +1,4 @@
-package nl.pim16aap2.cap.util;
+package nl.pim16aap2.cap.util.Functional;
 
 import java.util.function.Supplier;
 

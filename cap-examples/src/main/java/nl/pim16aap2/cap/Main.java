@@ -17,7 +17,7 @@ import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextComponent;
 import nl.pim16aap2.cap.text.TextType;
-import nl.pim16aap2.cap.util.CheckedSupplier;
+import nl.pim16aap2.cap.util.Functional.CheckedSupplier;
 
 import java.io.EOFException;
 import java.util.ArrayList;
@@ -50,6 +50,7 @@ import java.util.List;
 //       then it's time to create a new type or at the very least a new constructor.
 // TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
 // TODO: Unit tests.
+// TODO: Optional case sensitivity?
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
 //       (there are probably going to be some casting issues).
 //       Also, be more strict in the positional argument parsing. All positional arguments must come before any free ones.
@@ -60,8 +61,6 @@ import java.util.List;
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
-// TODO: The Supplier<List<String>> in the Arguments should really be a function and it should have access to some basic
-//       stuff, like ICommandSender and Command.
 // TODO: The CommandManager should probably accept a factory or something for ICommandSenders. That would make it
 //       easier to hook in to it.
 // TODO: Add CommandExecutor class to the spigot module.
