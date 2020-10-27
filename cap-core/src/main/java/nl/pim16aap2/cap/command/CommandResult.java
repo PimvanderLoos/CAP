@@ -52,7 +52,7 @@ public class CommandResult
      */
     public void sendHelpMenu()
     {
-        commandSender.sendMessage(command.getCommandManager().getHelpCommandRenderer()
+        commandSender.sendMessage(command.getCap().getHelpCommandRenderer()
                                          .renderFirstPage(commandSender, commandSender.getColorScheme(), command));
     }
 
@@ -63,7 +63,7 @@ public class CommandResult
     public void sendSubcommandHelp()
         throws IllegalValueException, CommandNotFoundException
     {
-        command.getCommandManager().getHelpCommandRenderer()
+        command.getCap().getHelpCommandRenderer()
                .render(commandSender, commandSender.getColorScheme(), command, null);
     }
 

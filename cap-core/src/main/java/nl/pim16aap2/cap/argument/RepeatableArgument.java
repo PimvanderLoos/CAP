@@ -3,10 +3,10 @@ package nl.pim16aap2.cap.argument;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
-import nl.pim16aap2.cap.manager.CommandManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -32,15 +32,15 @@ public class RepeatableArgument<T> extends Argument<T>
 
     @Override
     public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value,
-                                                         final @NonNull CommandManager commandManager)
+                                                         final @NonNull CAP cap)
         throws ValidationFailureException
     {
         final ParsedRepeatableArgument<T> ret = new ParsedRepeatableArgument<>();
         if (value != null)
         {
-            final @Nullable T parsed = parseArgument(value, commandManager);
+            final @Nullable T parsed = parseArgument(value, cap);
             if (parsed == null)
-                throw new ValidationFailureException(this, value, commandManager.isDebug());
+                throw new ValidationFailureException(this, value, cap.isDebug());
             ret.addValue(parsed);
         }
         return ret;

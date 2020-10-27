@@ -1,4 +1,4 @@
-package nl.pim16aap2.cap.manager;
+package nl.pim16aap2.cap;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class CommandManager
+public class CAP
 {
     private final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
 
@@ -42,22 +42,22 @@ public class CommandManager
     protected boolean debug;
 
     @Builder(toBuilder = true)
-    private CommandManager(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug)
+    private CAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug)
     {
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer::getDefault);
         this.debug = debug;
     }
 
     /**
-     * Gets a new instance of this {@link CommandManager} using the default values.
+     * Gets a new instance of this {@link CAP} using the default values.
      * <p>
-     * Use {@link CommandManager#toBuilder()} if you wish to customize it.
+     * Use {@link CAP#toBuilder()} if you wish to customize it.
      *
-     * @return A new instance of this {@link CommandManager}.
+     * @return A new instance of this {@link CAP}.
      */
-    public static @NonNull CommandManager getDefault()
+    public static @NonNull CAP getDefault()
     {
-        return CommandManager.builder().build();
+        return CAP.builder().build();
     }
 
     /**
@@ -99,7 +99,7 @@ public class CommandManager
         return new CommandParser(this, commandSender, args).parse();
     }
 
-    public @NonNull CommandManager addCommand(final @NonNull Command command)
+    public @NonNull CAP addCommand(final @NonNull Command command)
     {
         commandMap.put(command.getName(), command);
         return this;

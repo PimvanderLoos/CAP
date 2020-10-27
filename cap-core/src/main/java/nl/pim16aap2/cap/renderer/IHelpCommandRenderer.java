@@ -1,11 +1,11 @@
 package nl.pim16aap2.cap.renderer;
 
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
 import nl.pim16aap2.cap.exception.IllegalValueException;
-import nl.pim16aap2.cap.manager.CommandManager;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import org.jetbrains.annotations.Nullable;
@@ -40,14 +40,14 @@ public interface IHelpCommandRenderer
      * If the input value is an int, the page represented by that int is rendered for the provided {@link Command}.
      * <p>
      * If the input value is not an int, {@link #renderLongCommand(ICommandSender, ColorScheme, Command)} will be called
-     * for the {@link Command} with the name of the value if one exists and is registered in the {@link CommandManager}
-     * of the provided {@link Command}.
+     * for the {@link Command} with the name of the value if one exists and is registered in the {@link CAP} of the
+     * provided {@link Command}.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
      *                      they do not have access to are not included. See {@link ICommandSender#hasPermission(Command)}.
      * @param colorScheme   The {@link ColorScheme} to use for rendering the help text.
-     * @param command       The {@link Command} for which to render a help page or whose {@link CommandManager} to use
-     *                      to look up the (sub){@link Command} for which to print the long help menu.
+     * @param command       The {@link Command} for which to render a help page or whose {@link CAP} to use to look up
+     *                      the (sub){@link Command} for which to print the long help menu.
      * @param val           The value representing either a help page (integer) or the name of a {@link Command}.
      * @return The rendered help menu.
      *
@@ -79,8 +79,8 @@ public interface IHelpCommandRenderer
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
      *                      they do not have access to are not included. See {@link ICommandSender#hasPermission(Command)}.
      * @param colorScheme   The {@link ColorScheme} to use for rendering the help text.
-     * @param command       The {@link Command} for which to render a help page or whose {@link CommandManager} to use
-     *                      to look up the (sub){@link Command} for which to print the long help menu.
+     * @param command       The {@link Command} for which to render a help page or whose {@link CAP} to use to look up
+     *                      the (sub){@link Command} for which to print the long help menu.
      * @return The rendered help menu.
      */
     @NonNull Text renderFirstPage(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,

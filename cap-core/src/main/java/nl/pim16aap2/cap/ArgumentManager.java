@@ -1,4 +1,4 @@
-package nl.pim16aap2.cap.manager;
+package nl.pim16aap2.cap;
 
 import lombok.NonNull;
 import nl.pim16aap2.cap.argument.Argument;

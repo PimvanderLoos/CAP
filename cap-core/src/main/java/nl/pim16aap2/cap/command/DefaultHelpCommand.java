@@ -3,12 +3,12 @@ package nl.pim16aap2.cap.command;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
 import nl.pim16aap2.cap.exception.IllegalValueException;
-import nl.pim16aap2.cap.manager.CommandManager;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
@@ -42,7 +42,7 @@ public class DefaultHelpCommand extends Command
                               final @Nullable Function<ColorScheme, String> summarySupplier,
                               final @Nullable String header,
                               final @Nullable Function<ColorScheme, String> headerSupplier,
-                              final @NonNull CommandManager commandManager,
+                              final @NonNull CAP cap,
                               final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
         super(Util.valOrDefault(name, "help"), description, descriptionSupplier, summary, summarySupplier, header,
@@ -50,15 +50,15 @@ public class DefaultHelpCommand extends Command
               Collections.singletonList(new StringArgument().getOptionalPositional().name("page/command")
                                                             .summary("A page number of the name of a command.")
                                                             .longName("help").build()), HELP_ARGUMENT,
-              HIDDEN, commandManager, ADD_DEFAULT_HELP_ARGUMENT, ADD_DEFAULT_HELP_SUB_COMMAND, PERMISSION);
+              HIDDEN, cap, ADD_DEFAULT_HELP_ARGUMENT, ADD_DEFAULT_HELP_SUB_COMMAND, PERMISSION);
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
     }
 
-    public static @NonNull DefaultHelpCommand getDefault(final @NonNull CommandManager commandManager)
+    public static @NonNull DefaultHelpCommand getDefault(final @NonNull CAP cap)
     {
         return DefaultHelpCommand.helpCommandBuilder()
-                                 .commandManager(commandManager)
+                                 .cap(cap)
                                  .summary("Displays help information for this plugin and specific commands.")
                                  .header(
                                      "When no command or a page number is given, the usage help for the main command is displayed.\n" +
@@ -87,7 +87,7 @@ public class DefaultHelpCommand extends Command
             return helpCommandRenderer.render(commandSender, colorScheme, superCommand,
                                               intOpt.getAsInt() - helpCommandRenderer.getPageOffset());
 
-        final @NonNull Command command = superCommand.getCommandManager().getCommand(val).orElse(superCommand);
+        final @NonNull Command command = superCommand.getCap().getCommand(val).orElse(superCommand);
         return helpCommandRenderer.render(commandSender, colorScheme, command, val);
     }
 
@@ -98,12 +98,12 @@ public class DefaultHelpCommand extends Command
         if (!(commandResult.getCommand() instanceof DefaultHelpCommand))
             throw new CommandNotFoundException(commandResult.getCommand().getName(),
                                                commandResult.getCommand().getName() + " is not a help command!",
-                                               commandResult.getCommand().getCommandManager().isDebug());
+                                               commandResult.getCommand().getCap().isDebug());
 
         final @NonNull DefaultHelpCommand helpCommand = (DefaultHelpCommand) commandResult.getCommand();
         final @NonNull Command superCommand = helpCommand.getSuperCommand().orElseThrow(
             () -> new CommandNotFoundException("Super command of: " + helpCommand.getName(),
-                                               commandResult.getCommand().getCommandManager().isDebug()));
+                                               commandResult.getCommand().getCap().isDebug()));
 
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 

@@ -6,11 +6,11 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.Singular;
+import nl.pim16aap2.cap.ArgumentManager;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandParserException;
-import nl.pim16aap2.cap.manager.ArgumentManager;
-import nl.pim16aap2.cap.manager.CommandManager;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.util.CheckedConsumer;
@@ -59,9 +59,9 @@ public class Command
     protected @Nullable Function<ColorScheme, String> headerSupplier;
 
     /**
-     * The {@link CommandManager} that manages this command.
+     * The {@link CAP} that manages this command.
      */
-    protected final @NonNull CommandManager commandManager;
+    protected final @NonNull CAP cap;
 
     private Optional<Command> superCommand = Optional.empty();
 
@@ -86,7 +86,7 @@ public class Command
                       final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor,
                       @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
                       @Nullable Argument<?> helpArgument, final boolean hidden,
-                      final @NonNull CommandManager commandManager, final @Nullable Boolean addDefaultHelpArgument,
+                      final @NonNull CAP cap, final @Nullable Boolean addDefaultHelpArgument,
                       final @Nullable Boolean addDefaultHelpSubCommand, final @Nullable String permission)
     {
         this.name = name;
@@ -109,12 +109,12 @@ public class Command
 
         this.helpCommand = helpCommand;
         if (helpCommand == null && Util.valOrDefault(addDefaultHelpSubCommand, false))
-            this.helpCommand = DefaultHelpCommand.getDefault(commandManager);
+            this.helpCommand = DefaultHelpCommand.getDefault(cap);
         if (this.helpCommand != null)
             this.subCommands.add(0, this.helpCommand);
 
         this.subCommands.forEach(subCommand -> subCommand.superCommand = Optional.of(this));
-        this.commandManager = commandManager;
+        this.cap = cap;
         this.addDefaultHelpArgument = Util.valOrDefault(addDefaultHelpArgument, false);
 
         this.helpArgument = helpArgument;
@@ -220,7 +220,7 @@ public class Command
 
     /**
      * Generates the help message for this {@link Command} for the given {@link ICommandSender} using {@link
-     * CommandManager#getHelpCommandRenderer()}.
+     * CAP#getHelpCommandRenderer()}.
      *
      * @param commandSender The {@link ICommandSender} that is used to generate the help message (i.e. using their
      *                      {@link ColorScheme}).
@@ -228,8 +228,8 @@ public class Command
      */
     public @NonNull Text getHelp(final @NonNull ICommandSender commandSender)
     {
-        return commandManager.getHelpCommandRenderer()
-                             .renderLongCommand(commandSender, commandSender.getColorScheme(), this);
+        return cap.getHelpCommandRenderer()
+                  .renderLongCommand(commandSender, commandSender.getColorScheme(), this);
     }
 
     /**

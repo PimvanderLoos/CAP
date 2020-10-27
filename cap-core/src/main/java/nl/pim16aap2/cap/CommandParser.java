@@ -1,4 +1,4 @@
-package nl.pim16aap2.cap.manager;
+package nl.pim16aap2.cap;
 
 import lombok.NonNull;
 import lombok.Value;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 class CommandParser
 {
     private final @NonNull List<String> args;
-    final @NonNull CommandManager commandManager;
+    final @NonNull nl.pim16aap2.cap.CAP cap;
     private final @NonNull ICommandSender commandSender;
 
     private static final char ARGUMENT_PREFIX = '-';
@@ -40,13 +40,13 @@ class CommandParser
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
     private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
-    public CommandParser(final @NonNull CommandManager commandManager, final @NonNull ICommandSender commandSender,
+    public CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
                          final @NonNull String[] args)
         throws EOFException
     {
         this.args = preprocess(args);
         this.commandSender = commandSender;
-        this.commandManager = commandManager;
+        this.cap = cap;
     }
 
     private @NonNull List<String> selectCommandsPartialMatch(final @NonNull String partialName,
@@ -238,15 +238,12 @@ class CommandParser
         catch (CommandNotFoundException e)
         {
             return selectCommandsPartialMatch(args.get(0),
-                                              commandManager.getCommands().stream().filter(
+                                              cap.getCommands().stream().filter(
                                                   command -> !command.getSuperCommand().isPresent())
-                                                            .collect(Collectors.toList()));
+                                                 .collect(Collectors.toList()));
         }
     }
-
-    // TODO: Also take care of any "-key=val" or --longkey=val" or "-key val" here. Just store them separately.
-    //       So the output becomes a list of strings for the positional arguments and a list of key/value pairs for
-    //       free arguments.
+    
     private @NonNull List<String> preprocess(final @NonNull String[] rawArgs)
         throws EOFException
     {
@@ -301,7 +298,7 @@ class CommandParser
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
         if (!commandSender.hasPermission(parsedCommand.getCommand()))
-            throw new NoPermissionException(commandSender, parsedCommand.getCommand(), commandManager.isDebug());
+            throw new NoPermissionException(commandSender, parsedCommand.getCommand(), cap.isDebug());
 
         if (parsedCommand.getIndex() == (args.size() - 1) &&
             parsedCommand.getCommand().getArgumentManager().getRequiredArguments().size() > 0)
@@ -316,7 +313,7 @@ class CommandParser
                                final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results)
         throws ValidationFailureException
     {
-        final Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, commandManager);
+        final Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, cap);
         final Argument.IParsedArgument<?> result = results.putIfAbsent(argument.getName(), parsedArgument);
         if (result != null)
             result.updateValue(parsedArgument.getValue());
@@ -347,7 +344,7 @@ class CommandParser
                 argument = command.getArgumentManager().getArgument(argumentName)
                                   .orElseThrow(
                                       () -> new NonExistingArgumentException(command, argumentName,
-                                                                             commandManager.isDebug()));
+                                                                             cap.isDebug()));
                 value = argument.isValuesLess() ? "" : parts[1];
             }
             else
@@ -358,7 +355,7 @@ class CommandParser
                                       () -> new NonExistingArgumentException(command,
                                                                              "Missing required argument at pos: " +
                                                                                  currentRequiredArgumentIdx,
-                                                                             commandManager.isDebug()));
+                                                                             cap.isDebug()));
                 ++requiredArgumentIdx;
                 value = nextArg;
             }
@@ -369,7 +366,7 @@ class CommandParser
             }
             catch (IllegalArgumentException e)
             {
-                throw new IllegalValueException(command, value, e, commandManager.isDebug());
+                throw new IllegalValueException(command, value, e, cap.isDebug());
             }
         }
 
@@ -385,7 +382,7 @@ class CommandParser
 
             // Ensure every required argument is present.
             if (argument.isRequired() && missing)
-                throw new MissingArgumentException(command, argument, commandManager.isDebug());
+                throw new MissingArgumentException(command, argument, cap.isDebug());
 
             // Add default values for missing optional parameters.
             if (missing)
@@ -427,16 +424,16 @@ class CommandParser
         if (command == null)
         {
             if (idx != 0) // TODO:
-                throw new CommandNotFoundException(null, commandManager.isDebug());
+                throw new CommandNotFoundException(null, cap.isDebug());
 
             final @Nullable String commandName = args.size() > idx ? args.get(idx) : null;
             final Command baseCommand =
-                commandManager.getCommand(commandName)
-                              .orElseThrow(() -> new CommandNotFoundException(commandName, commandManager.isDebug()));
+                cap.getCommand(commandName)
+                   .orElseThrow(() -> new CommandNotFoundException(commandName, cap.isDebug()));
 
             // If the command has a super command, it cannot possible be right to be the first argument.
             if (baseCommand.getSuperCommand().isPresent())
-                throw new CommandNotFoundException(baseCommand.getName(), commandManager.isDebug());
+                throw new CommandNotFoundException(baseCommand.getName(), cap.isDebug());
 
             return getLastCommand(baseCommand, 0);
         }
@@ -459,7 +456,7 @@ class CommandParser
 
         if (!subCommand.getSuperCommand().isPresent() || subCommand.getSuperCommand().get() != command)
             // TODO: More specific exception.
-            throw new CommandNotFoundException("super command of: " + subCommand.getName(), commandManager.isDebug());
+            throw new CommandNotFoundException("super command of: " + subCommand.getName(), cap.isDebug());
 
         return new ParsedCommand(subCommand, nextIdx);
     }

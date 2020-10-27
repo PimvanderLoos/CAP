@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.parser.ValuelessParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
-import nl.pim16aap2.cap.manager.CommandManager;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -118,35 +118,34 @@ public class Argument<T>
     /**
      * Parses the input using {@link #parser} and validates it using the {@link #argumentValidator} if it is provided.
      *
-     * @param value          The value to parse and validate.
-     * @param commandManager The {@link CommandManager} that requested the argument to be parsed.
+     * @param value The value to parse and validate.
+     * @param cap   The {@link CAP} that requested the argument to be parsed.
      * @return The parsed value.
      *
      * @throws ValidationFailureException If the value was not valid. See {@link IArgumentValidator#validate(Object)}.
      */
     @Nullable
-    protected T parseArgument(final @NonNull String value, final @NonNull CommandManager commandManager)
+    protected T parseArgument(final @NonNull String value, final @NonNull CAP cap)
         throws ValidationFailureException
     {
         final T parsed = parser.parseArgument(value);
 
         if (argumentValidator != null && !argumentValidator.validate(parsed))
-            throw new ValidationFailureException(this, value, commandManager.isDebug());
+            throw new ValidationFailureException(this, value, cap.isDebug());
 
         return parsed;
     }
 
     /**
-     * Parses the input and stores the result in an {@link IParsedArgument}. See {@link #parseArgument(String,
-     * CommandManager)}.
+     * Parses the input and stores the result in an {@link IParsedArgument}. See {@link #parseArgument(String, CAP)}.
      */
     public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value,
-                                                         final @NonNull CommandManager commandManager)
+                                                         final @NonNull CAP cap)
         throws ValidationFailureException
     {
         if (value == null)
             return new ParsedArgument<>(defaultValue);
-        return new ParsedArgument<>(parseArgument(value, commandManager));
+        return new ParsedArgument<>(parseArgument(value, cap));
     }
 
     /**

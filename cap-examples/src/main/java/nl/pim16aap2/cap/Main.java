@@ -12,7 +12,6 @@ import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.MissingArgumentException;
 import nl.pim16aap2.cap.exception.NoPermissionException;
 import nl.pim16aap2.cap.exception.NonExistingArgumentException;
-import nl.pim16aap2.cap.manager.CommandManager;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
@@ -49,10 +48,6 @@ import java.util.List;
 // TODO: Do not use 'helpful' messages in exceptions, but just variables. Whomever catches the exception
 //       Should be able to easily parse it themselves. If an exception requires additional text to explain it
 //       then it's time to create a new type or at the very least a new constructor.
-// TODO: Make a module specific for Spigot and/or Paper. This should contain all the stuff needed for thost platforms.
-//       E.g. BukkitCommandSender, ChatColor, Player/World Arguments, etc.
-//       For the BukkitChatColor, the builder can just accept ChatColors and take care of the default off value /
-//       instantiating TextComponents.
 // TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
 // TODO: Unit tests.
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
@@ -69,6 +64,7 @@ import java.util.List;
 //       stuff, like ICommandSender and Command.
 // TODO: The CommandManager should probably accept a factory or something for ICommandSenders. That would make it
 //       easier to hook in to it.
+// TODO: Add CommandExecutor class to the spigot module.
 
 public class Main
 {
@@ -85,13 +81,13 @@ public class Main
         return sb.append(", total: \"/").toString() + sb2.append("\"").substring(1);
     }
 
-    private static void tabComplete(final @NonNull CommandManager commandManager, final @NonNull String... args)
+    private static void tabComplete(final @NonNull CAP cap, final @NonNull String... args)
     {
         final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
 
-        final @NonNull List<String> tabOptions = commandManager.getTabCompleteOptions(commandSender, args);
+        final @NonNull List<String> tabOptions = cap.getTabCompleteOptions(commandSender, args);
         final StringBuilder sb = new StringBuilder();
         sb.append("Tab complete options:\n");
         tabOptions.forEach(opt -> sb.append(opt).append("\n"));
@@ -99,7 +95,7 @@ public class Main
         System.out.println("=============\n");
     }
 
-    private static void tryArgs(final @NonNull CommandManager commandManager, final @NonNull String... args)
+    private static void tryArgs(final @NonNull CAP cap, final @NonNull String... args)
     {
         final String command = arrToString(args);
         System.out.println(command + ":\n");
@@ -108,7 +104,7 @@ public class Main
 
         try
         {
-            commandManager.parseInput(commandSender, args).run();
+            cap.parseInput(commandSender, args).run();
         }
         catch (CommandNotFoundException e)
         {
@@ -156,41 +152,41 @@ public class Main
     public static void main(final String... args)
     {
 //        testTextComponents();
-        final CommandManager commandManager = initCommandManager();
+        final CAP cap = initCommandManager();
 //        testHelpRenderer(commandManager);
 
-        tabComplete(commandManager, "big");
-        tabComplete(commandManager, "add");
-        tabComplete(commandManager, "bigdoors", "a");
-        tabComplete(commandManager, "bigdoors", "\"a");
-        tabComplete(commandManager, "bigdoors", "h");
-        tabComplete(commandManager, "bigdoors", "subcomma");
-        tabComplete(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
-        tabComplete(commandManager, "bigdoors", "addowner", "myDoor", "--play");
+        tabComplete(cap, "big");
+        tabComplete(cap, "add");
+        tabComplete(cap, "bigdoors", "a");
+        tabComplete(cap, "bigdoors", "\"a");
+        tabComplete(cap, "bigdoors", "h");
+        tabComplete(cap, "bigdoors", "subcomma");
+        tabComplete(cap, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
+        tabComplete(cap, "bigdoors", "addowner", "myDoor", "--play");
 
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "--player=pim16aap2", "--admin");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "'myDoor'", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "'myDoor'", "-p=pim16aap2", "-a");
-        tryArgs(commandManager, "bigdoors", "addowner", "-h");
-        tryArgs(commandManager, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
+        tryArgs(cap, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
+        tryArgs(cap, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4");
+        tryArgs(cap, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
+        tryArgs(cap, "bigdoors", "addowner", "myDoor", "--player=pim16aap2", "--admin");
+        tryArgs(cap, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
+        tryArgs(cap, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
+        tryArgs(cap, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
+        tryArgs(cap, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
+        tryArgs(cap, "bigdoors", "addowner", "'myDoor'", "-p=pim16aap2", "-a");
+        tryArgs(cap, "bigdoors", "addowner", "'myDoor'", "-p=pim16aap2", "-a");
+        tryArgs(cap, "bigdoors", "addowner", "-h");
+        tryArgs(cap, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
 
-        tryArgs(commandManager, "bigdoors", "help", "addowner");
-        tryArgs(commandManager, "bigdoors");
-        tryArgs(commandManager, "bigdoors", "help", "1");
-        tryArgs(commandManager, "bigdoors", "help");
-        tryArgs(commandManager, "bigdoors", "addowner");
+        tryArgs(cap, "bigdoors", "help", "addowner");
+        tryArgs(cap, "bigdoors");
+        tryArgs(cap, "bigdoors", "help", "1");
+        tryArgs(cap, "bigdoors", "help");
+        tryArgs(cap, "bigdoors", "addowner");
     }
 
-    private static CommandManager initCommandManager()
+    private static CAP initCommandManager()
     {
-        final CommandManager commandManager = CommandManager
+        final CAP cap = CAP
             .builder()
             .debug(true)
             .helpCommandRenderer(DefaultHelpCommandRenderer
@@ -207,7 +203,7 @@ public class Main
             final Command generic = Command
                 .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
-                .commandManager(commandManager)
+                .CAP(cap)
                 .summary("This is the summary for subsubcommand_" + idx)
                 .argument(new StringArgument().getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
@@ -218,7 +214,7 @@ public class Main
 
         final Command addOwner = Command
             .commandBuilder()
-            .commandManager(commandManager)
+            .CAP(cap)
             .name("addowner")
             .addDefaultHelpArgument(true)
             .description("Add 1 or more players or groups of players as owners of a door.")
@@ -267,7 +263,7 @@ public class Main
             final Command generic = Command
                 .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
-                .commandManager(commandManager)
+                .CAP(cap)
                 .argument(new StringArgument().getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
@@ -277,7 +273,7 @@ public class Main
 
         final Command bigdoors = Command
             .commandBuilder()
-            .commandManager(commandManager)
+            .CAP(cap)
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .headerSupplier(colorScheme -> new Text(colorScheme)
@@ -313,11 +309,11 @@ public class Main
             .hidden(true)
             .build();
 
-        subcommands.forEach(commandManager::addCommand);
-        subsubcommands.forEach(commandManager::addCommand);
-        commandManager.addCommand(addOwner).addCommand(bigdoors);
+        subcommands.forEach(cap::addCommand);
+        subsubcommands.forEach(cap::addCommand);
+        cap.addCommand(addOwner).addCommand(bigdoors);
 
-        return commandManager;
+        return cap;
     }
 
     private static void tryHelpCommand(CheckedSupplier<Text, IllegalValueException> sup)

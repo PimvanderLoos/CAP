@@ -1,4 +1,4 @@
-package nl.pim16aap2.cap.manager;
+package nl.pim16aap2.cap;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -26,7 +26,7 @@ import java.util.List;
 class CommandParserTest
 {
     final DefaultCommandSender commandSender = new DefaultCommandSender();
-    private @NonNull CommandManager commandManager;
+    private @NonNull nl.pim16aap2.cap.CAP cap;
 
     private static final List<String> playerNames = new ArrayList<>(
         Arrays.asList("pim16aap2", "pim16aap3", "mip16aap2", "pim"));
@@ -36,7 +36,7 @@ class CommandParserTest
     @BeforeEach
     void setUp()
     {
-        commandManager = CommandManager.getDefault();
+        cap = CAP.getDefault();
         final int subCommandCount = 20;
         final List<Command> subcommands = new ArrayList<>(subCommandCount);
         for (int idx = 0; idx < subCommandCount; ++idx)
@@ -44,7 +44,7 @@ class CommandParserTest
             final String command = "subcommand_" + idx;
             final Command generic = Command
                 .commandBuilder().name(command)
-                .commandManager(commandManager)
+                .CAP(cap)
                 .argument(new StringArgument().getOptional()
                                               .name("value").label("val").summary("random value").build())
                 .commandExecutor(commandResult ->
@@ -55,7 +55,7 @@ class CommandParserTest
 
         final Command numerical = Command
             .commandBuilder().name("numerical")
-            .commandManager(commandManager)
+            .CAP(cap)
             .argument(new StringArgument().getOptional()
                                           .name("value").label("val").summary("random value").build())
             .argument(new IntegerArgument().getOptional()
@@ -76,7 +76,7 @@ class CommandParserTest
 
         final Command addOwner = Command
             .commandBuilder()
-            .commandManager(commandManager)
+            .CAP(cap)
             .name("addowner")
             .addDefaultHelpArgument(true)
             .description("Add 1 or more players or groups of players as owners of a door.")
@@ -113,7 +113,7 @@ class CommandParserTest
 
         final Command bigdoors = Command
             .commandBuilder()
-            .commandManager(commandManager)
+            .CAP(cap)
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .subCommand(addOwner)
@@ -123,44 +123,44 @@ class CommandParserTest
             .hidden(true)
             .build();
 
-        subcommands.forEach(commandManager::addCommand);
-        commandManager.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical);
+        subcommands.forEach(cap::addCommand);
+        cap.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical);
     }
 
     @Test
     void getCommandTabCompleteOptions()
     {
-        Assertions.assertEquals(20, commandManager.getTabCompleteOptions(commandSender, "bigdoors sub").size());
+        Assertions.assertEquals(20, cap.getTabCompleteOptions(commandSender, "bigdoors sub").size());
 
-        Assertions.assertEquals(23, commandManager.getTabCompleteOptions(commandSender, "bigdoors").size());
+        Assertions.assertEquals(23, cap.getTabCompleteOptions(commandSender, "bigdoors").size());
 
-        Assertions.assertEquals("bigdoors", commandManager.getTabCompleteOptions(commandSender, "big").get(0));
+        Assertions.assertEquals("bigdoors", cap.getTabCompleteOptions(commandSender, "big").get(0));
 
-        Assertions.assertEquals(0, commandManager.getTabCompleteOptions(commandSender, "sub").size());
+        Assertions.assertEquals(0, cap.getTabCompleteOptions(commandSender, "sub").size());
     }
 
     @Test
     void getArgumentNameTabCompleteOptions()
     {
         final List<String> playerSuggestions =
-            commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner -p");
+            cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p");
         Assertions.assertEquals(2, playerSuggestions.size());
         Assertions.assertEquals("p", playerSuggestions.get(0));
         Assertions.assertEquals("player", playerSuggestions.get(1));
 
         final List<String> longPlayerSuggestions =
-            commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner --pla");
+            cap.getTabCompleteOptions(commandSender, "bigdoors addowner --pla");
         Assertions.assertEquals(1, longPlayerSuggestions.size());
         Assertions.assertEquals("player", longPlayerSuggestions.get(0));
 
         final List<String> adminSuggestions =
-            commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner --a");
+            cap.getTabCompleteOptions(commandSender, "bigdoors addowner --a");
         Assertions.assertEquals(2, adminSuggestions.size());
         Assertions.assertEquals("a", adminSuggestions.get(0));
         Assertions.assertEquals("admin", adminSuggestions.get(1));
 
         final List<String> suggestionsFromEmpty =
-            commandManager.getTabCompleteOptions(commandSender, "bigdoors subcommand_0");
+            cap.getTabCompleteOptions(commandSender, "bigdoors subcommand_0");
         Assertions.assertEquals(1, suggestionsFromEmpty.size());
         Assertions.assertEquals("value", suggestionsFromEmpty.get(0));
     }
@@ -169,14 +169,14 @@ class CommandParserTest
     void getFreeArgumentValueTabCompleteOptions()
     {
         List<String> playerNameSuggestions =
-            commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner -p=");
+            cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p=");
 
         Assertions.assertEquals(4, playerNameSuggestions.size());
 
-        playerNameSuggestions = commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner -p=pim");
+        playerNameSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p=pim");
         Assertions.assertEquals(3, playerNameSuggestions.size());
 
-        playerNameSuggestions = commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner -p=pim16");
+        playerNameSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p=pim16");
         Assertions.assertEquals(2, playerNameSuggestions.size());
         Assertions.assertEquals("pim16aap2", playerNameSuggestions.get(0));
         Assertions.assertEquals("pim16aap3", playerNameSuggestions.get(1));
@@ -186,17 +186,17 @@ class CommandParserTest
     void getPositionalValueTabCompleteOptions()
     {
         List<String> doorIDSuggestions =
-            commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner 4");
+            cap.getTabCompleteOptions(commandSender, "bigdoors addowner 4");
 
         Assertions.assertEquals(1, doorIDSuggestions.size());
         Assertions.assertEquals("42", doorIDSuggestions.get(0));
 
-        doorIDSuggestions = commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner my");
+        doorIDSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner my");
         Assertions.assertEquals(2, doorIDSuggestions.size());
         Assertions.assertEquals("myDoor", doorIDSuggestions.get(0));
         Assertions.assertEquals("myPortcullis", doorIDSuggestions.get(1));
 
-        doorIDSuggestions = commandManager.getTabCompleteOptions(commandSender, "bigdoors addowner");
+        doorIDSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner");
         Assertions.assertEquals(4, doorIDSuggestions.size());
         Assertions.assertEquals("myDoor", doorIDSuggestions.get(0));
         Assertions.assertEquals("42", doorIDSuggestions.get(1));
@@ -221,34 +221,34 @@ class CommandParserTest
     {
         // My name is not numerical.
         Assertions.assertThrows(IllegalValueException.class,
-                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -max=pim16aap2"));
+                                () -> cap.parseInput(commandSender, "bigdoors numerical -max=pim16aap2"));
         // The max value is set to 10, so 10 will be illegal.
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -max=10"));
+                                () -> cap.parseInput(commandSender, "bigdoors numerical -max=10"));
         // With a max value of 10, 9 is perfect!
-        Assertions.assertDoesNotThrow(() -> commandManager.parseInput(commandSender, "bigdoors numerical -max=9"));
+        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -max=9"));
 
 
         // The maxd value is set to 10.0, so 10.0 will be illegal.
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -maxd=10.0"));
+                                () -> cap.parseInput(commandSender, "bigdoors numerical -maxd=10.0"));
         // With a maxd value of 10.0, 9.9 is perfect!
-        Assertions.assertDoesNotThrow(() -> commandManager.parseInput(commandSender, "bigdoors numerical -maxd=9.9"));
+        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -maxd=9.9"));
 
 
         // The min value is set to 10, so 10 will be illegal.
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -min=10"));
+                                () -> cap.parseInput(commandSender, "bigdoors numerical -min=10"));
         // With a min value of 10, 11 is perfect!
-        Assertions.assertDoesNotThrow(() -> commandManager.parseInput(commandSender, "bigdoors numerical -min=11"));
+        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -min=11"));
 
         // The range is set to [10, 20], so 10 will be illegal.
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -range=10"));
+                                () -> cap.parseInput(commandSender, "bigdoors numerical -range=10"));
         // The range is set to [10, 20], so 20 will be illegal.
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> commandManager.parseInput(commandSender, "bigdoors numerical -range=20"));
+                                () -> cap.parseInput(commandSender, "bigdoors numerical -range=20"));
         // With a range of [10, 20], 11 is perfect!
-        Assertions.assertDoesNotThrow(() -> commandManager.parseInput(commandSender, "bigdoors numerical -range=11"));
+        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -range=11"));
     }
 }
