@@ -1,5 +1,7 @@
-package nl.pim16aap2.cap;
+package nl.pim16aap2.cap.command;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.argument.Argument;
 import org.jetbrains.annotations.Nullable;
@@ -11,10 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Getter
 public class ArgumentManager
 {
     protected final @NonNull Map<@NonNull String, @NonNull Argument<?>> argumentsMap;
 
+    @Getter(AccessLevel.PRIVATE)
     protected final @NonNull List<@NonNull Argument<?>> argumentsList;
 
     protected final @NonNull List<@NonNull Argument<?>> requiredArguments = new ArrayList<>(0);
@@ -23,7 +27,7 @@ public class ArgumentManager
 
     protected final @NonNull ArrayList<@NonNull Argument<?>> optionalArguments = new ArrayList<>(0);
 
-    public ArgumentManager(final @NonNull List<Argument<?>> arguments)
+    ArgumentManager(final @NonNull List<Argument<?>> arguments)
     {
         argumentsMap = new HashMap<>(arguments.size());
         argumentsList = new ArrayList<>(arguments);
@@ -45,11 +49,6 @@ public class ArgumentManager
             if (argument.isPositional())
                 positionalArguments.add(argument);
         }
-    }
-
-    public @NonNull List<@NonNull Argument<?>> getRequiredArguments()
-    {
-        return requiredArguments;
     }
 
     public @NonNull Optional<Argument<?>> getArgument(final @Nullable String argumentName)

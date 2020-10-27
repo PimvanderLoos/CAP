@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.Singular;
-import nl.pim16aap2.cap.ArgumentManager;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;

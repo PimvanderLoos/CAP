@@ -122,7 +122,7 @@ class CommandParser
                     ret.add(subCommand.getName());
             });
 
-        if (command.getArgumentManager().positionalArguments.isEmpty())
+        if (command.getArgumentManager().getPositionalArguments().isEmpty())
         {
             command.getArgumentManager().getArguments().forEach(
                 argument ->
