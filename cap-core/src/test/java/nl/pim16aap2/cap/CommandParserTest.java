@@ -44,7 +44,7 @@ class CommandParserTest
             final String command = "subcommand_" + idx;
             final Command generic = Command
                 .commandBuilder().name(command)
-                .CAP(cap)
+                .cap(cap)
                 .argument(new StringArgument().getOptional()
                                               .name("value").label("val").summary("random value").build())
                 .commandExecutor(commandResult ->
@@ -55,7 +55,7 @@ class CommandParserTest
 
         final Command numerical = Command
             .commandBuilder().name("numerical")
-            .CAP(cap)
+            .cap(cap)
             .argument(new StringArgument().getOptional()
                                           .name("value").label("val").summary("random value").build())
             .argument(new IntegerArgument().getOptional()
@@ -76,7 +76,7 @@ class CommandParserTest
 
         final Command addOwner = Command
             .commandBuilder()
-            .CAP(cap)
+            .cap(cap)
             .name("addowner")
             .addDefaultHelpArgument(true)
             .description("Add 1 or more players or groups of players as owners of a door.")
@@ -113,7 +113,7 @@ class CommandParserTest
 
         final Command bigdoors = Command
             .commandBuilder()
-            .CAP(cap)
+            .cap(cap)
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .subCommand(addOwner)

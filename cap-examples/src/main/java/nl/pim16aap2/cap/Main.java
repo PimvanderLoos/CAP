@@ -65,6 +65,8 @@ import java.util.List;
 // TODO: The CommandManager should probably accept a factory or something for ICommandSenders. That would make it
 //       easier to hook in to it.
 // TODO: Add CommandExecutor class to the spigot module.
+// TODO: Create optional system to handle exceptions. It'd be nice to not have to catch them all manually
+//       (but just tell CAP to inform the ICommandSender on its own).
 
 public class Main
 {
@@ -203,7 +205,7 @@ public class Main
             final Command generic = Command
                 .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
-                .CAP(cap)
+                .cap(cap)
                 .summary("This is the summary for subsubcommand_" + idx)
                 .argument(new StringArgument().getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
@@ -214,7 +216,7 @@ public class Main
 
         final Command addOwner = Command
             .commandBuilder()
-            .CAP(cap)
+            .cap(cap)
             .name("addowner")
             .addDefaultHelpArgument(true)
             .description("Add 1 or more players or groups of players as owners of a door.")
@@ -263,7 +265,7 @@ public class Main
             final Command generic = Command
                 .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
-                .CAP(cap)
+                .cap(cap)
                 .argument(new StringArgument().getRequired().name("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
@@ -273,7 +275,7 @@ public class Main
 
         final Command bigdoors = Command
             .commandBuilder()
-            .CAP(cap)
+            .cap(cap)
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .headerSupplier(colorScheme -> new Text(colorScheme)

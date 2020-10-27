@@ -3,6 +3,7 @@ package nl.pim16aap2.cap;
 import lombok.NonNull;
 import lombok.Value;
 import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -40,8 +41,7 @@ class CommandParser
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
     private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
-    public CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                         final @NonNull String[] args)
+    CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull String[] args)
         throws EOFException
     {
         this.args = preprocess(args);
@@ -49,6 +49,13 @@ class CommandParser
         this.cap = cap;
     }
 
+    /**
+     * Selects a list of {@link Command}s that start with a certain string from a superset of {@link Command}s.
+     *
+     * @param partialName The base of a {@link Command#getName()}. See {@link String#startsWith(String)}.
+     * @param commands    The {@link Command}s to choose from.
+     * @return The subset of {@link Command}s whose names start with the provided partial name.
+     */
     private @NonNull List<String> selectCommandsPartialMatch(final @NonNull String partialName,
                                                              final @NonNull Collection<Command> commands)
     {
@@ -65,6 +72,15 @@ class CommandParser
         return ret;
     }
 
+    /**
+     * Gets a list of {@link Argument#getName()} that can be used to complete the current {@link #args}.
+     *
+     * @param command The {@link Command} for which to check the {@link Argument}s.
+     * @param lastArg The last value in {@link #args} that will be used as a base for the auto suggestions. E.g. when
+     *                supplied "a", it will suggest "admin" but it won't suggest "player" (provided "admin" is a
+     *                registered {@link Argument} for the given {@link Command}.
+     * @return The list of {@link Argument#getName()} that can be used to complete the current {@link #args}.
+     */
     private @NonNull List<String> getTabCompleteArgumentNames(final @NonNull Command command,
                                                               final @NonNull String lastArg)
     {
@@ -213,6 +229,11 @@ class CommandParser
         return getTabCompleteFromArgumentFunction(argument, value);
     }
 
+    /**
+     * Gets a list of suggestions for tab complete based on the current {@link #args}.
+     *
+     * @return A list of tab completion suggestions.
+     */
     public @NonNull List<String> getTabCompleteOptions()
     {
         try
@@ -243,7 +264,18 @@ class CommandParser
                                                  .collect(Collectors.toList()));
         }
     }
-    
+
+    /**
+     * Preprocesses the arguments.
+     * <p>
+     * Any arguments that are split by spaces (and therefore in different entries) while they should be in a single
+     * entry (because of quotation marks, e.g. 'name="my name"') will be merged into single entries.
+     *
+     * @param rawArgs The raw array of arguments split by spaces.
+     * @return The list of preprocessed arguments.
+     *
+     * @throws EOFException When an unmatched quotation mark is encountered. E.g. 'name="my name'.
+     */
     private @NonNull List<String> preprocess(final @NonNull String[] rawArgs)
         throws EOFException
     {
@@ -292,6 +324,21 @@ class CommandParser
         return argsList;
     }
 
+    /**
+     * Parses the arguments.
+     *
+     * @return The result of parsing the argument.
+     *
+     * @throws CommandNotFoundException     If a specified command could not be found.
+     * @throws NonExistingArgumentException If one of the specified arguments does not exist.
+     * @throws MissingArgumentException     If a required argument was not specified.
+     * @throws NoPermissionException        If the {@link ICommandSender} does not have permission to use this command.
+     *                                      See {@link ICommandSender#hasPermission(Command)}.
+     * @throws ValidationFailureException   If the value of an {@link Argument} could not be validated. See {@link
+     *                                      IArgumentValidator#validate(Object)}.
+     * @throws IllegalValueException        If the specified value of an {@link Argument} is illegal.
+     */
+    // TODO: What's the difference between an IllegalValue and a ValidationFailure, exactly?
     public @NonNull CommandResult parse()
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, NoPermissionException,
                ValidationFailureException, IllegalValueException
@@ -307,16 +354,6 @@ class CommandParser
         return new CommandResult(commandSender, parsedCommand.getCommand(),
                                  parseArguments(parsedCommand.getCommand(),
                                                 parsedCommand.getIndex()));
-    }
-
-    private void parseArgument(final @NonNull Argument<?> argument, final @NonNull String value,
-                               final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results)
-        throws ValidationFailureException
-    {
-        final Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, cap);
-        final Argument.IParsedArgument<?> result = results.putIfAbsent(argument.getName(), parsedArgument);
-        if (result != null)
-            result.updateValue(parsedArgument.getValue());
     }
 
     @Nullable
@@ -362,7 +399,15 @@ class CommandParser
 
             try
             {
-                parseArgument(argument, value, results);
+                final @NonNull Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, cap);
+
+                // If the argument was already parsed before, update the value (in case of a repeatable argument,
+                // the value is added to the list).
+                final @Nullable Argument.IParsedArgument<?> result =
+                    results.putIfAbsent(argument.getName(), parsedArgument);
+
+                if (result != null)
+                    result.updateValue(parsedArgument.getValue());
             }
             catch (IllegalArgumentException e)
             {
