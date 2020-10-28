@@ -28,6 +28,18 @@ import java.util.List;
 //       Allow registering event handlers or something when a new component is added.
 //       This is useful for stuff like clickable text. In Minecraft, this would be the ability to click on a command
 //       in a help menu to execute the help command for that command.
+//       More info: https://gaming.stackexchange.com/questions/212474/how-to-make-clickable-text-in-minecraft
+//       https://github.com/SpigotMC/BungeeCord/blob/4199b0ca64a63c6e336ed7a9101b37241c7e0449/chat/src/main/java/net/md_5/bungee/api/chat/TextComponent.java#L30
+//       For Spigot, it's probably easiest like this. Just need to use a bit of reflection.
+/*
+Player player;
+final String msg = "{\"text\":\"Click this!\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/say Hello!\"}}";
+
+final IChatBaseComponent comp = IChatBaseComponent.ChatSerializer.a(msg);
+final PacketPlayOutChat packet = new PacketPlayOutChat(comp);
+((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+ */
+
 // TODO: Allow using space as a separator of flag-value pairs.
 // TODO: Make a class somewhere where you can register ColorScheme objects. This class can then be used for caching
 //       stuff like finished Texts etc.
@@ -74,6 +86,8 @@ import java.util.List;
 //       provided, no other positional arguments should be allowed.
 //       It is possible to have some way of mixing this stuff, but that would require too many rules and just get
 //       confusing and bug-prone very fast.
+// TODO: Multi-valued arguments? '/teleport x y z'?
+// TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 
 public class Main
 {
