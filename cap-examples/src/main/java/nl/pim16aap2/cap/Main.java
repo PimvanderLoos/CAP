@@ -88,6 +88,7 @@ final PacketPlayOutChat packet = new PacketPlayOutChat(comp);
 //       confusing and bug-prone very fast.
 // TODO: Multi-valued arguments? '/teleport x y z'?
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
+// TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 
 public class Main
 {
