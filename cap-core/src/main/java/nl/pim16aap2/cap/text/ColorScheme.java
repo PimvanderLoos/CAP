@@ -14,12 +14,12 @@ import java.util.Map;
 public class ColorScheme
 {
     private final Map<TextType, TextComponent> styleMap;
-    private final @Nullable String disableAll;
+    private final @Nullable String defaultDisable;
 
-    protected ColorScheme(final @NonNull Map<TextType, TextComponent> styleMap, final @Nullable String disableAll)
+    protected ColorScheme(final @NonNull Map<TextType, TextComponent> styleMap, final @Nullable String defaultDisable)
     {
         this.styleMap = styleMap;
-        this.disableAll = disableAll;
+        this.defaultDisable = defaultDisable;
     }
 
     /**
@@ -31,8 +31,8 @@ public class ColorScheme
      */
     public ColorScheme setStyle(final @NonNull TextType type, @NonNull TextComponent style)
     {
-        if (disableAll != null && !style.getOn().equals("") && style.getOff().equals(""))
-            style = new TextComponent(style.getOn(), disableAll);
+        if (defaultDisable != null && !style.getOn().equals("") && style.getOff().equals(""))
+            style = new TextComponent(style.getOn(), defaultDisable);
         styleMap.put(type, style);
         return this;
     }

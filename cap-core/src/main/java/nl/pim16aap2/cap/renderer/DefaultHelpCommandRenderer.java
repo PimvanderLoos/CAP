@@ -3,6 +3,7 @@ package nl.pim16aap2.cap.renderer;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.experimental.SuperBuilder;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -23,10 +24,12 @@ import java.util.OptionalInt;
  *
  * @author Pim
  */
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 @Getter
 public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 {
+    protected static final @NonNull IArgumentRenderer DEFAULT_ARGUMENT_RENDERER = DefaultArgumentRenderer.getDefault();
+
     // TODO: Make this configurable
     protected static final String COMMAND_PREFIX = "/";
 
@@ -63,7 +66,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     /**
      * The {@link IArgumentRenderer} renderer that will be used to render arguments.
      */
-    protected @NonNull IArgumentRenderer argumentRenderer;
+    @Builder.Default
+    protected @NonNull IArgumentRenderer argumentRenderer = DEFAULT_ARGUMENT_RENDERER;
 
     /**
      * Whether to start counting pages at 0 (<it>false</it>) or 1 (<it>true</it>). Default = true.
@@ -87,13 +91,13 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected DefaultHelpCommandRenderer(final int pageSize, final int firstPageSize, final boolean displayHeader,
                                          final @NonNull String descriptionIndent,
                                          final boolean displayArgumentsForSimple,
-                                         final @Nullable IArgumentRenderer argumentRenderer, final boolean startAt1)
+                                         final @NonNull IArgumentRenderer argumentRenderer, final boolean startAt1)
     {
         this.pageSize = pageSize;
         this.firstPageSize = firstPageSize;
         this.displayHeader = displayHeader;
         this.displayArgumentsForSimple = displayArgumentsForSimple;
-        this.argumentRenderer = argumentRenderer == null ? DefaultArgumentRenderer.getDefault() : argumentRenderer;
+        this.argumentRenderer = argumentRenderer;
         this.descriptionIndent = descriptionIndent;
         this.startAt1 = startAt1;
     }
@@ -183,8 +187,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
             return renderFirstPage(commandSender, colorScheme, text, command);
 
         final int skip = firstPageSize + (page - 1) * pageSize;
-        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(colorScheme, command),
-                       command, pageSize, skip);
+        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command), command, pageSize, skip);
         return text;
     }
 
@@ -220,7 +223,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (!commandSender.hasPermission(command))
             return new Text(colorScheme);
 
-        final Text text = getBaseSuperCommand(colorScheme, command).add(command.getName(), TextType.COMMAND);
+        final Text text = new Text(colorScheme).add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
         if (!command.getDescription(colorScheme).equals(""))
@@ -230,40 +233,34 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     }
 
     /**
-     * Recursively constructs the {@link Text} containing the all super {@link Command}s of a {@link Command}.
+     * Recursively constructs the String containing the all super {@link Command}s of a {@link Command}.
      * <p>
      * Note that the {@link Command} that is provided inside the optional is also included if possible, so if this is
      * not desired, use this method with {@link Command#getSuperCommand()}.
      *
-     * @param colorScheme The {@link ColorScheme} to use to render the {@link Text}.
-     * @param command     The {@link Optional} {@link Command} whose super commands to add to the text. If it has no
-     *                    super commands (or isn't {{@link Optional#isPresent()}}), it will only append {@link
-     *                    #COMMAND_PREFIX} and the name of this command itself (if possible).
-     * @return The {@link Text} with all the super {@link Command}s of the provided {@link Command}.
+     * @param command The {@link Optional} {@link Command} whose super commands to add to the text. If it has no super
+     *                commands (or isn't {{@link Optional#isPresent()}}), it will only append {@link #COMMAND_PREFIX}
+     *                and the name of this command itself (if possible).
+     * @return The String with all the super {@link Command}s of the provided {@link Command}.
      */
-    protected @NonNull Text getBaseSuperCommand(final @NonNull ColorScheme colorScheme,
-                                                final @NonNull Optional<Command> command)
+    protected @NonNull String getBaseSuperCommand(final @NonNull Optional<Command> command)
     {
-        // Base case
-        if (!command.isPresent())
-            return new Text(colorScheme).add(COMMAND_PREFIX, TextType.COMMAND);
-
-        return getBaseSuperCommand(colorScheme, command.get().getSuperCommand()).add(command.get().getName()).add(" ");
+        return command.map(value -> getBaseSuperCommand(value.getSuperCommand()) + value.getName() + " ")
+                      .orElse(COMMAND_PREFIX);
     }
 
     /**
-     * Recursively constructs the {@link Text} containing the all super {@link Command}s of a {@link Command}.
+     * Recursively constructs the String containing the all super {@link Command}s of a {@link Command}.
      * <p>
      * Note that the {@link Command} that is provided will not be included.
      *
-     * @param colorScheme The {@link ColorScheme} to use to render the {@link Text}.
-     * @param command     The {@link Command} whose super commands to add to the text. If it has no super commands, it
-     *                    will only append {@link #COMMAND_PREFIX}.
-     * @return The {@link Text} with all the super {@link Command}s of the provided {@link Command}.
+     * @param command The {@link Command} whose super commands to add to the text. If it has no super commands, it will
+     *                only append {@link #COMMAND_PREFIX}.
+     * @return The String with all the super {@link Command}s of the provided {@link Command}.
      */
-    protected @NonNull Text getBaseSuperCommand(final @NonNull ColorScheme colorScheme, final @NonNull Command command)
+    protected @NonNull String getBaseSuperCommand(final @NonNull Command command)
     {
-        return getBaseSuperCommand(colorScheme, command.getSuperCommand());
+        return getBaseSuperCommand(command.getSuperCommand());
     }
 
     @Override
@@ -294,7 +291,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (displayHeader && !command.getHeader(colorScheme).equals(""))
             text.add(command.getHeader(colorScheme), TextType.HEADER).add("\n");
 
-        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(colorScheme, command),
+        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command),
                        command, firstPageSize, 0);
 
         return text;
@@ -316,7 +313,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected @NonNull Pair<Integer, Integer> renderCommands(final @NonNull ICommandSender commandSender,
                                                              final @NonNull ColorScheme colorScheme,
                                                              final @NonNull Text text,
-                                                             final @NonNull Text superCommands,
+                                                             final @NonNull String superCommands,
                                                              final @NonNull Command command, final int count,
                                                              final int skip)
     {
@@ -347,8 +344,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 
         // The current command has to be appended to the super commands, because the
         // current command is the super command of all its sub commands (by definition).
-        final Text newSuperCommands =
-            new Text(superCommands).add(command.getName(), TextType.COMMAND).add(" ");
+        final String newSuperCommands = superCommands + command.getName() + " ";
 
         for (final Command subCommand : command.getSubCommands())
         {
@@ -375,9 +371,9 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      *                      will be prepended to the {@link Command}.
      */
     protected void renderCommand(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
-                                 final @NonNull Command command, final @NonNull Text superCommands)
+                                 final @NonNull Command command, final @NonNull String superCommands)
     {
-        text.add(superCommands).add(command.getName(), TextType.COMMAND);
+        text.add(superCommands + command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
         if (!command.getSummary(colorScheme).equals(""))

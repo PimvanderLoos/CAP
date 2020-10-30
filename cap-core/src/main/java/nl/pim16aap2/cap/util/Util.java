@@ -98,4 +98,9 @@ public class Util
             return Optional.empty();
         }
     }
+
+    public boolean between(final int test, final int start, final int end)
+    {
+        return test > start && test < end;
+    }
 }

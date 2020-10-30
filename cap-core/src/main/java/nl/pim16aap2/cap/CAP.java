@@ -1,9 +1,12 @@
 package nl.pim16aap2.cap;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -15,7 +18,6 @@ import nl.pim16aap2.cap.exception.NoPermissionException;
 import nl.pim16aap2.cap.exception.NonExistingArgumentException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
-import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
@@ -31,18 +33,21 @@ import java.util.Optional;
  *
  * @author Pim
  */
+@SuperBuilder(toBuilder = true)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CAP
 {
     /**
      * The map containing all registered commands, with their names as key.
      */
-    private final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
+    protected final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
 
     /**
      * The {@link DefaultHelpCommandRenderer} to use to render help messages.
      */
     @Getter
-    private final @NonNull DefaultHelpCommandRenderer helpCommandRenderer;
+    @Builder.Default
+    protected @NonNull final DefaultHelpCommandRenderer helpCommandRenderer = DefaultHelpCommandRenderer.getDefault();
 
     /**
      * Whether or not to enable debug mode. In debug mode, {@link CommandParserException}s will generate stacktraces,
@@ -50,19 +55,8 @@ public class CAP
      */
     @Getter
     @Setter
-    protected boolean debug;
-
-    /**
-     * @param helpCommandRenderer The {@link DefaultHelpCommandRenderer} to use to render help messages. When null,
-     *                            {@link DefaultHelpCommandRenderer#getDefault()} will be used.
-     * @param debug               See {@link #debug}.
-     */
-    @Builder(toBuilder = true)
-    private CAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug)
-    {
-        this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer::getDefault);
-        this.debug = debug;
-    }
+    @Builder.Default
+    protected boolean debug = false;
 
     /**
      * Gets a new instance of this {@link CAP} using the default values.

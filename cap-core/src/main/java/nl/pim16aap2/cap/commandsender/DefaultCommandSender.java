@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.text.ColorScheme;
+import nl.pim16aap2.cap.text.Text;
 
 /**
  * Represents a basic implementation of {@link ICommandSender}.
@@ -20,7 +21,7 @@ public class DefaultCommandSender implements ICommandSender
     protected ColorScheme colorScheme = ColorScheme.builder().build();
 
     @Override
-    public void sendMessage(final @NonNull String message)
+    public void sendMessage(final @NonNull Text message)
     {
         System.out.println(message);
     }

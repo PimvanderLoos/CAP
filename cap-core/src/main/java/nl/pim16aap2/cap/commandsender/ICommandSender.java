@@ -17,17 +17,7 @@ public interface ICommandSender
      *
      * @param message The message to send.
      */
-    default void sendMessage(final @NonNull Text message)
-    {
-        sendMessage(message.toString());
-    }
-
-    /**
-     * Sends a message to this {@link ICommandSender}.
-     *
-     * @param message The message to send.
-     */
-    void sendMessage(final @NonNull String message);
+    void sendMessage(final @NonNull Text message);
 
     /**
      * Checks if this {@link ICommandSender} has permission to access the given {@link Command}.

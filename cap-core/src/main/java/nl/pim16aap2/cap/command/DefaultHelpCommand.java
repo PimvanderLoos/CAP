@@ -8,11 +8,13 @@ import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
+import nl.pim16aap2.cap.exception.CommandParserException;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
+import nl.pim16aap2.cap.util.Functional.CheckedConsumer;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,6 +57,43 @@ public class DefaultHelpCommand extends Command
      *                            command.
      * @param headerSupplier      The supplier that is used to build the header. Note that this isn't used in case a
      *                            header is provided.
+     * @param commandExecutor     The function that will be executed by {@link CommandResult#run()}.
+     * @param cap                 The {@link CAP} instance that manages this command.
+     */
+    protected DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
+                                 final @Nullable Function<ColorScheme, String> descriptionSupplier,
+                                 final @Nullable String summary,
+                                 final @Nullable Function<ColorScheme, String> summarySupplier,
+                                 final @Nullable String header,
+                                 final @Nullable Function<ColorScheme, String> headerSupplier,
+                                 final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor,
+                                 final @NonNull CAP cap,
+                                 final @Nullable IHelpCommandRenderer helpCommandRenderer)
+    {
+        super(Util.valOrDefault(name, "help"), description, descriptionSupplier, summary, summarySupplier, header,
+              headerSupplier, SUB_COMMANDS, HELP_COMMAND, ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT,
+              ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
+              Collections.singletonList(new StringArgument().getOptionalPositional().name("page/command")
+                                                            .summary("A page number of the name of a command.")
+                                                            .longName("help").build()), HIDDEN, cap, PERMISSION);
+
+        this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
+    }
+
+    /**
+     * @param name                The name of the command.
+     * @param description         The description of the command. This is the longer description shown in the help menu
+     *                            for this command.
+     * @param descriptionSupplier The supplier that is used to build the description. Note that this isn't used in case
+     *                            the description is provided.
+     * @param summary             The summary of the command. This is the short description shown in the list of
+     *                            commands.
+     * @param summarySupplier     The supplier that is used to build the summary. Note that this isn't used in case a
+     *                            summary is provided.
+     * @param header              The header of the command. This is text shown at the top of the help menu for this
+     *                            command.
+     * @param headerSupplier      The supplier that is used to build the header. Note that this isn't used in case a
+     *                            header is provided.
      * @param cap                 The {@link CAP} instance that manages this command.
      */
     @Builder(builderMethodName = "helpCommandBuilder", toBuilder = true)
@@ -67,14 +106,8 @@ public class DefaultHelpCommand extends Command
                               final @NonNull CAP cap,
                               final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
-        super(Util.valOrDefault(name, "help"), description, descriptionSupplier, summary, summarySupplier, header,
-              headerSupplier, SUB_COMMANDS, HELP_COMMAND, ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT,
-              ADD_DEFAULT_HELP_SUB_COMMAND, DefaultHelpCommand::defaultHelpCommandExecutor,
-              Collections.singletonList(new StringArgument().getOptionalPositional().name("page/command")
-                                                            .summary("A page number of the name of a command.")
-                                                            .longName("help").build()), HIDDEN, cap, PERMISSION);
-
-        this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
+        this(name, description, descriptionSupplier, summary, summarySupplier, header, headerSupplier,
+             DefaultHelpCommand::defaultHelpCommandExecutor, cap, helpCommandRenderer);
     }
 
     /**

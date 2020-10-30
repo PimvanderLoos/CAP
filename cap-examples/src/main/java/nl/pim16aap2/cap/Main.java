@@ -89,6 +89,8 @@ final PacketPlayOutChat packet = new PacketPlayOutChat(comp);
 // TODO: Multi-valued arguments? '/teleport x y z'?
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
+// TODO: Add default colorscheme for Spigot.
+// TODO: The CAP instance shouldn't know anything about a color scheme.
 
 public class Main
 {
@@ -124,7 +126,7 @@ public class Main
         final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
-//        commandSender.setColorScheme(Main.getColorScheme());
+        commandSender.setColorScheme(Main.getColorScheme());
 
         try
         {
@@ -173,11 +175,23 @@ public class Main
         System.out.println("=============\n");
     }
 
+    private static void testSubStrings()
+    {
+        ColorScheme colorScheme = ColorScheme.builder().build();
+        Text text = new Text(colorScheme);
+        text.add("123456789");
+        System.out.println(text.subsection(0, 3));
+        System.out.println(text.subsection(3, 6));
+        System.out.println(text.subsection(6, 9));
+
+    }
+
     public static void main(final String... args)
     {
 //        testTextComponents();
         final CAP cap = initCommandManager();
 //        testHelpRenderer(commandManager);
+        testSubStrings();
 
         tabComplete(cap, "big");
         tabComplete(cap, "add");
@@ -310,6 +324,10 @@ public class Main
                 .add("[", TextType.OPTIONAL_PARAMETER)
                 .add("parameter", TextType.OPTIONAL_PARAMETER_LABEL)
                 .add("]", TextType.OPTIONAL_PARAMETER).add("\n")
+
+//                .add("If an argument is followed by a \"+\" symbol, it can be\n", TextType.HEADER)
+//                .add("repeated as many times as you want. For example, for a\n", TextType.HEADER)
+//                .add("hypothetical command \"", TextType.HEADER)
 
                 .add("If an argument is followed by a \"+\" symbol, it can be\n" +
                          "repeated as many times as you want. For example, for a\n" +
