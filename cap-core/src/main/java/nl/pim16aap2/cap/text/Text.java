@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 @RequiredArgsConstructor
 public class Text
@@ -29,13 +30,13 @@ public class Text
     /**
      * The list of {@link StyledSection}s.
      */
-    private final @NonNull List<@NonNull StyledSection> styledSections = new ArrayList<>();
+    private @NonNull List<@NonNull StyledSection> styledSections = new ArrayList<>();
 
     /**
      * The list of {@link ITextDecorator}s.
      */
     @Getter
-    private final @NonNull List<@NonNull ITextDecorator> textDecorators = new ArrayList<>();
+    private @NonNull List<@NonNull ITextDecorator> textDecorators = new ArrayList<>();
 
     /**
      * The total size of the string held by this object. This is used by {@link #toString()} to instantiate a {@link
@@ -159,6 +160,49 @@ public class Text
     }
 
     /**
+     * Prepends another {@link Text} object to this object, so the other text is placed before the current one.
+     * <p>
+     * The other {@link Text} instance is not modified.
+     *
+     * @param other The {@link Text} to insert before the current {@link Text}.
+     * @return The current {@link Text} instance.
+     */
+    public @NonNull Text prepend(final @NonNull Text other)
+    {
+        styledSections = appendSections(other.getLength(), other.styledSections, styledSections,
+                                        (section, offset) -> new StyledSection(section.startIndex + offset,
+                                                                               section.length, section.style));
+
+        textDecorators = appendSections(other.getLength(), other.textDecorators, textDecorators,
+                                        (decorator, offset) -> decorator.duplicate().shift(offset));
+
+        stringBuilder.insert(0, other.stringBuilder);
+        return this;
+    }
+
+    /**
+     * Appends the (copied) values of a list to the values of another list into a list list.
+     *
+     * @param offset The offset of the second set of values.
+     * @param first  The first set of values. All values in this list will maintain their index in the new list.
+     * @param last   The last set of values. These values will be placed after the first set of values.
+     * @param copier The function that creates a new list entry from the current entry and the offset value (this value
+     *               is 0 for the first list).
+     * @param <T>    The type of the entries in the list.
+     * @return The new list with all the values copied from the first and the last list (in taht order).
+     */
+    private static <T> @NonNull List<T> appendSections(final int offset,
+                                                       final @NonNull List<T> first,
+                                                       final @NonNull List<T> last,
+                                                       final @NonNull BiFunction<T, Integer, T> copier)
+    {
+        final @NonNull List<T> ret = new ArrayList<>(first.size() + last.size());
+        first.forEach(entry -> ret.add(copier.apply(entry, 0)));
+        last.forEach(entry -> ret.add(copier.apply(entry, offset)));
+        return ret;
+    }
+
+    /**
      * Appends another {@link Text} object to this one.
      * <p>
      * The other {@link Text} object will not be modified.
@@ -171,32 +215,48 @@ public class Text
         if (other.stringBuilder.length() == 0)
             return this;
 
-        final int currentLength = stringBuilder.length();
+        styledSections = appendSections(getLength(), styledSections, other.styledSections,
+                                        (section, offset) -> new StyledSection(section.startIndex + offset,
+                                                                               section.length, section.style));
+
+        textDecorators = appendSections(getLength(), textDecorators, other.textDecorators,
+                                        (decorator, offset) -> decorator.duplicate().shift(offset));
+
+        stringBuilder.append(other.stringBuilder);
+        styledSize += other.styledSize;
+        return this;
+    }
+
+    /**
+     * Appends {@link #styledSections} and {@link #textDecorators} from one {@link Text} to another one. All the
+     *
+     * @param to   The {@link Text} to which all entries from the lists are appended to.
+     * @param from The {@link Text} to copy the lists from.
+     */
+    private static void appendListsLists(final @NonNull Text to, final @NonNull Text from)
+    {
+        final int currentLength = to.stringBuilder.length();
 
         // Copy everything into an intermediate list to avoid ConcurrentModificationException
         // when adding this text to itself. If it's not the same list, just add it directly.
-        final List<StyledSection> sectionTarget = styledSections == other.styledSections ?
-                                                  new ArrayList<>(styledSections.size()) : styledSections;
-        other.styledSections.forEach(
+        final List<StyledSection> sectionTarget = to.styledSections == from.styledSections ?
+                                                  new ArrayList<>(to.styledSections.size()) : to.styledSections;
+        from.styledSections.forEach(
             styledSection -> sectionTarget.add(new StyledSection(styledSection.startIndex + currentLength,
                                                                  styledSection.length,
                                                                  styledSection.style)));
 
         // If the lists are the same instance, the sections were put in a
         // new map, so append that to the current list.
-        if (styledSections == other.styledSections)
-            styledSections.addAll(sectionTarget);
+        if (to.styledSections == from.styledSections)
+            to.styledSections.addAll(sectionTarget);
 
         // Same thing, but now for decorators.
-        final List<ITextDecorator> decoratorTarget = textDecorators == other.textDecorators ?
-                                                     new ArrayList<>(textDecorators.size()) : textDecorators;
-        other.textDecorators.forEach(decorator -> decoratorTarget.add(decorator.duplicate().shift(currentLength)));
-        if (textDecorators == other.textDecorators)
-            textDecorators.addAll(decoratorTarget);
-
-        stringBuilder.append(other.stringBuilder);
-        styledSize += other.styledSize;
-        return this;
+        final List<ITextDecorator> decoratorTarget = to.textDecorators == from.textDecorators ?
+                                                     new ArrayList<>(to.textDecorators.size()) : to.textDecorators;
+        from.textDecorators.forEach(decorator -> decoratorTarget.add(decorator.duplicate().shift(currentLength)));
+        if (to.textDecorators == from.textDecorators)
+            to.textDecorators.addAll(decoratorTarget);
     }
 
     @Override
