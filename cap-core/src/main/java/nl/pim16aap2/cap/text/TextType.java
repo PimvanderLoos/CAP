@@ -1,6 +1,7 @@
 package nl.pim16aap2.cap.text;
 
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.commandsender.ICommandSender;
 
 /**
  * Represents the different types of {@link Text} used by CAP. Every type of text can have its own {@link
@@ -56,12 +57,12 @@ public enum TextType
     REQUIRED_PARAMETER_SEPARATOR,
 
     /**
-     * The {@link Command#getSummary()} of a {@link Command}.
+     * The {@link Command#getSummary(ICommandSender)} of a {@link Command}.
      */
     SUMMARY,
 
     /**
-     * The {@link Command#getDescription()} of a {@link Command}.
+     * The {@link Command#getDescription(ICommandSender)} of a {@link Command}.
      */
     DESCRIPTION,
 
@@ -71,7 +72,7 @@ public enum TextType
     REGULAR_TEXT,
 
     /**
-     * The {@link Command#getHeader()} ()} of a {@link Command}.
+     * The {@link Command#getHeader(ICommandSender)} of a {@link Command}.
      */
     HEADER,
 
