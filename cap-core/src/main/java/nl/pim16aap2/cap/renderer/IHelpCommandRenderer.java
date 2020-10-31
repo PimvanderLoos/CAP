@@ -27,13 +27,6 @@ public interface IHelpCommandRenderer
         throws IllegalValueException;
 
     /**
-     * Gets the page offset (caused by starting on a non-zero index, e.g. 1).
-     *
-     * @return The page offset.
-     */
-    int getPageOffset();
-
-    /**
      * Either renders the help menu for a sub{@link Command} or a page of the help menu for the provided {@link
      * Command}, depending on the input value.
      * <p>

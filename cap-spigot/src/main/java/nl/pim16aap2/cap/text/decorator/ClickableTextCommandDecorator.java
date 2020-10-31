@@ -9,15 +9,20 @@ import nl.pim16aap2.cap.text.SpigotTextParser;
 import nl.pim16aap2.cap.text.Text;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Represents an {@link ISpigotTextDecorator} for adding clickable text that executes commands when used.
+ *
+ * @author Pim
+ */
 @AllArgsConstructor
-public class ClickableTextDecorator implements ISpigotTextDecorator
+public class ClickableTextCommandDecorator implements ISpigotTextDecorator
 {
-    private int start, end;
+    private int start;
+    private int end;
 
     private final @NonNull String command;
 
     private final @Nullable String hoverMessage;
-
 
     @Override
     public int getStart()
@@ -56,7 +61,7 @@ public class ClickableTextDecorator implements ISpigotTextDecorator
     @Override
     public @NonNull ITextDecorator duplicate()
     {
-        return new ClickableTextDecorator(start, end, command, hoverMessage);
+        return new ClickableTextCommandDecorator(start, end, command, hoverMessage);
     }
 
     @Override

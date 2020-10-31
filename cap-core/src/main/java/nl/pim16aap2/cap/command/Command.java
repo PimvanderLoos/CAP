@@ -225,6 +225,17 @@ public class Command
     }
 
     /**
+     * Gets the top level command of this command. This basically means to traverse up the command tree until we
+     * encounter a {@link Command} that does not have a super command.
+     *
+     * @return The top level {@link Command} of this {@link Command}.
+     */
+    public @NonNull Command getTopLevelCommand()
+    {
+        return getSuperCommand().map(Command::getTopLevelCommand).orElse(this);
+    }
+
+    /**
      * Gets the total number of sub{@link Command}s this {@link Command} has, including the number of sub{@link
      * Command}s for ever sub{@link Command}.
      *

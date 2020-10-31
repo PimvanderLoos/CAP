@@ -28,6 +28,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
 
+/**
+ * Represents a specialized class of {@link CAP} for the Spigot platform.
+ *
+ * @author Pim
+ */
 public class SpigotCAP extends CAP
 {
     @Getter
@@ -70,6 +75,11 @@ public class SpigotCAP extends CAP
         return parseInput(commandSender, fullArgs);
     }
 
+    /**
+     * Generates the default {@link ColorScheme}.
+     *
+     * @return The default {@link ColorScheme}.
+     */
     protected @NonNull ColorScheme generateColorScheme()
     {
         return SpigotColorScheme

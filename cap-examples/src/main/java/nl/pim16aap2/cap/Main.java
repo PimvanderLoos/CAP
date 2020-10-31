@@ -23,28 +23,7 @@ import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Add some way to inject text into the Text system. For example, when adding a piece of text with
-//       a command, store which command it is and if it is listed as a subcommand or a supercommand.
-//       Allow registering event handlers or something when a new component is added.
-//       This is useful for stuff like clickable text. In Minecraft, this would be the ability to click on a command
-//       in a help menu to execute the help command for that command.
-//       More info: https://gaming.stackexchange.com/questions/212474/how-to-make-clickable-text-in-minecraft
-//       https://github.com/SpigotMC/BungeeCord/blob/4199b0ca64a63c6e336ed7a9101b37241c7e0449/chat/src/main/java/net/md_5/bungee/api/chat/TextComponent.java#L30
-//       For Spigot, it's probably easiest like this. Just need to use a bit of reflection.
-/*
-Player player;
-final String msg = "{\"text\":\"Click this!\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/say Hello!\"}}";
-
-final IChatBaseComponent comp = IChatBaseComponent.ChatSerializer.a(msg);
-final PacketPlayOutChat packet = new PacketPlayOutChat(comp);
-((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
- */
-
 // TODO: Allow using space as a separator of flag-value pairs.
-// TODO: Make a class somewhere where you can register ColorScheme objects. This class can then be used for caching
-//       stuff like finished Texts etc.
-//       For this to work properly, there should be some mechanism to keep track of whether a command(system) was
-//       changed since it was last cached. For example, if subcommands are added, the cache will have to be invalidated.
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 //       Also, virtual commands don't need executors, just a help command?
@@ -57,9 +36,6 @@ final PacketPlayOutChat packet = new PacketPlayOutChat(comp);
 // TODO: Support ResourceBundle.
 // TODO: Currently, the commands are kinda stored in a tree shape (1 super, n subs). Perhaps store it in an actual tree?
 // TODO: For the long help, maybe fall back to the summary if no description is available?
-// TODO: Do not use 'helpful' messages in exceptions, but just variables. Whomever catches the exception
-//       Should be able to easily parse it themselves. If an exception requires additional text to explain it
-//       then it's time to create a new type or at the very least a new constructor.
 // TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
 // TODO: Unit tests.
 // TODO: Optional case sensitivity?
@@ -73,8 +49,6 @@ final PacketPlayOutChat packet = new PacketPlayOutChat(comp);
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
-// TODO: The CommandManager should probably accept a factory or something for ICommandSenders. That would make it
-//       easier to hook in to it.
 // TODO: Add CommandExecutor class to the spigot module.
 // TODO: Create optional system to handle exceptions. It'd be nice to not have to catch them all manually
 //       (but just tell CAP to inform the ICommandSender on its own).
@@ -86,7 +60,6 @@ final PacketPlayOutChat packet = new PacketPlayOutChat(comp);
 //       provided, no other positional arguments should be allowed.
 //       It is possible to have some way of mixing this stuff, but that would require too many rules and just get
 //       confusing and bug-prone very fast.
-// TODO: Multi-valued arguments? '/teleport x y z'?
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 // TODO: Add default colorscheme for Spigot.
@@ -191,7 +164,22 @@ public class Main
 //        testTextComponents();
         final CAP cap = initCommandManager();
 //        testHelpRenderer(commandManager);
-        testSubStrings();
+//        testSubStrings();
+
+        Text textA = new Text(getColorScheme()).add("D E F", TextType.COMMAND).add(" ");
+        Text textB = new Text(getColorScheme()).add("A B C", TextType.REGULAR_TEXT).add(" ");
+
+        Text textC = new Text(getColorScheme()).add("D E F", TextType.COMMAND).add(" ");
+        Text textD = new Text(getColorScheme()).add("A B C", TextType.REGULAR_TEXT).add(" ");
+
+        Text textE = new Text(getColorScheme()).add("A B C", TextType.REGULAR_TEXT).add(" ");
+
+        System.out.println(textA.prepend(textB));
+        System.out.println(textD.add(textC));
+        System.out.println(textE.add(textE));
+
+//        if (1 == 1)
+//            return;
 
         tabComplete(cap, "big");
         tabComplete(cap, "add");
@@ -218,6 +206,8 @@ public class Main
         tryArgs(cap, "bigdoors", "help", "addowner");
         tryArgs(cap, "bigdoors");
         tryArgs(cap, "bigdoors", "help", "1");
+        tryArgs(cap, "bigdoors", "help", "2");
+        tryArgs(cap, "bigdoors", "help", "6");
         tryArgs(cap, "bigdoors", "help");
         tryArgs(cap, "bigdoors", "addowner");
     }

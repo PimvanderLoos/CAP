@@ -10,7 +10,6 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
 import nl.pim16aap2.cap.exception.CommandParserException;
 import nl.pim16aap2.cap.exception.IllegalValueException;
-import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
@@ -77,7 +76,7 @@ public class DefaultHelpCommand extends Command
                                                             .summary("A page number of the name of a command.")
                                                             .longName("help").build()), HIDDEN, cap, PERMISSION);
 
-        this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
+        this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, cap.getHelpCommandRenderer());
     }
 
     /**
@@ -146,8 +145,7 @@ public class DefaultHelpCommand extends Command
 
         final @NonNull OptionalInt intOpt = Util.parseInt(val);
         if (intOpt.isPresent())
-            return helpCommandRenderer.render(commandSender, colorScheme, superCommand,
-                                              intOpt.getAsInt() - helpCommandRenderer.getPageOffset());
+            return helpCommandRenderer.render(commandSender, colorScheme, superCommand, intOpt.getAsInt());
 
         final @NonNull Command command = superCommand.getCap().getCommand(val).orElse(superCommand);
         return helpCommandRenderer.render(commandSender, colorScheme, command, val);

@@ -70,12 +70,6 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected @NonNull IArgumentRenderer argumentRenderer = DEFAULT_ARGUMENT_RENDERER;
 
     /**
-     * Whether to start counting pages at 0 (<it>false</it>) or 1 (<it>true</it>). Default = true.
-     */
-    @Builder.Default
-    protected boolean startAt1 = true;
-
-    /**
      * @param pageSize                  The number of subcommands on the first page. Default = 1.
      * @param firstPageSize             The number of subcommands to display per page. Default = 5.
      * @param displayHeader             Whether or not to display the header of the command on the first page. Default =
@@ -99,13 +93,6 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         this.displayArgumentsForSimple = displayArgumentsForSimple;
         this.argumentRenderer = argumentRenderer;
         this.descriptionIndent = descriptionIndent;
-        this.startAt1 = startAt1;
-    }
-
-    @Override
-    public int getPageOffset()
-    {
-        return startAt1 ? 1 : 0;
     }
 
     /**
@@ -164,12 +151,27 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * @param text      The {@link Text} instance to add the page count header to.
      * @param page      The current page number.
      * @param pageCount The total number of available pages.
+     * @param command   The command for which to render the page count header.
      */
-    protected void renderPageCountHeader(final @NonNull Text text, final int page, final int pageCount)
+    protected void renderPageCountHeader(final @NonNull Text text, final int page, final int pageCount,
+                                         final @NonNull Command command)
     {
-        // TODO: Make this prettier. It needs nice colors and clickable text.
-        text.add(String.format("------- Page (%2d / %2d) -------\n",
-                               page + getPageOffset(), pageCount + getPageOffset()));
+        final Text previousPage = new Text(text.getColorScheme());
+        final Text nextPage = new Text(text.getColorScheme());
+
+        if (page == 1)
+            previousPage.add("--", TextType.REGULAR_TEXT);
+        else
+            previousPage.add(">>", TextType.COMMAND);
+
+        if (page == pageCount)
+            nextPage.add("--", TextType.REGULAR_TEXT);
+        else
+            nextPage.add("<<", TextType.COMMAND);
+
+        text.add(previousPage)
+            .add(String.format("----- Page (%2d / %2d) ----", page, pageCount), TextType.REGULAR_TEXT)
+            .add(nextPage).add("\n");
     }
 
     @Override
@@ -178,12 +180,12 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         throws IllegalValueException
     {
         final int pageCount = getPageCount(command, commandSender);
-        if (page > pageCount || page < 0)
+        if (page > pageCount || page < 1)
             throw new IllegalValueException(command, Integer.toString(page), command.getCap().isDebug());
 
         Text text = new Text(colorScheme);
-        renderPageCountHeader(text, page, pageCount);
-        if (page == 0)
+        renderPageCountHeader(text, page, pageCount, command);
+        if (page == 1)
             return renderFirstPage(commandSender, colorScheme, text, command);
 
         final int skip = firstPageSize + (page - 1) * pageSize;
@@ -197,17 +199,11 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         throws IllegalValueException, CommandNotFoundException
     {
         if (val == null)
-            return render(commandSender, colorScheme, command, 0);
+            return render(commandSender, colorScheme, command, 1);
 
         final OptionalInt pageOpt = Util.parseInt(val);
         if (pageOpt.isPresent())
-        // Subtract 1 from the desired page if counting starts at 1, because if the user specified page '1',
-        // They should receive page '0' instead.
-        {
-            System.out.println("Selected page: " + pageOpt.getAsInt() + ", startAt1: " + startAt1 + ", final page: " +
-                                   (pageOpt.getAsInt() - getPageOffset()));
-            return render(commandSender, colorScheme, command, pageOpt.getAsInt() - getPageOffset());
-        }
+            return render(commandSender, colorScheme, command, pageOpt.getAsInt() - 1);
 
         final @NonNull Optional<Command> subCommand = command.getCap().getCommand(val);
         if (!subCommand.isPresent())

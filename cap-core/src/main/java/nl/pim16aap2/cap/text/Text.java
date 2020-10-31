@@ -12,6 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
+/**
+ * Represents a piece of text with styled sections.
+ *
+ * @author Pim
+ */
 @RequiredArgsConstructor
 public class Text
 {
@@ -33,7 +38,8 @@ public class Text
     private @NonNull List<@NonNull StyledSection> styledSections = new ArrayList<>();
 
     /**
-     * The list of {@link ITextDecorator}s.
+     * The list of {@link ITextDecorator}s. By default, these are not used for anything, but this class ensures to take
+     * care to copy them when needed.
      */
     @Getter
     private @NonNull List<@NonNull ITextDecorator> textDecorators = new ArrayList<>();
@@ -57,17 +63,40 @@ public class Text
         styledSize = other.styledSize;
     }
 
+    /**
+     * Gets the length of the raw text without any styles applied to it.
+     *
+     * @return The length of the raw text without any styles applied to it.
+     */
     public int getLength()
     {
         return stringBuilder.length();
     }
 
+    /**
+     * The length of the text including all the styles.
+     * <p>
+     * Note that {@link #textDecorators} are NOT included in this value.
+     *
+     * @return The length of the text including all the styles.
+     */
     public int getStyledLength()
     {
         return styledSize;
     }
 
-    // TODO: The decorator list should be sorted by startIdx.
+    /**
+     * Gets a subsection from this {@link Text}.
+     * <p>
+     * See {@link StringBuilder#substring(int, int)}.
+     * <p>
+     * Any styles/decorators that have at least 1 character inside this range will be copied.
+     *
+     * @param start The beginning index, inclusive.
+     * @param end   The ending index, exclusive.
+     * @return The {@link Text} in the given range.
+     */
+    // TODO: The decorator (and styled?) list(s) should be sorted by startIdx.
     public @NonNull Text subsection(final int start, final int end)
     {
         if (start == 0 && end == stringBuilder.length())
@@ -80,6 +109,7 @@ public class Text
         if (start < 0 || end > stringBuilder.length())
             throw new RuntimeException(String.format("Range [%d %d] out of bounds for range: [0 %d]!",
                                                      start, end, stringBuilder.length()));
+
         final @NonNull String string = stringBuilder.substring(start, end);
         final @NonNull Text newText = new Text(colorScheme);
         newText.add(string);
@@ -89,13 +119,23 @@ public class Text
             if (section.getStartIndex() >= end)
                 break;
 
-            final int startIdx = section.getStartIndex() - start;
-            if (startIdx < 0)
+            if (section.getEnd() < start)
                 continue;
 
             int length = section.getLength();
+
+            int startIdx = section.getStartIndex() - start;
+            if (startIdx < 0)
+            {
+                length += startIdx;
+                startIdx = 0;
+            }
+
             if (section.getEnd() > end)
                 length -= (section.getEnd() - end);
+
+            if (length <= 0)
+                continue;
 
             newText.styledSections.add(new StyledSection(startIdx, length, section.getStyle()));
         }
@@ -104,6 +144,7 @@ public class Text
         {
             if (decorator.getStart() > end)
                 break;
+
             final int endIdx = decorator.getEnd() - start;
             final @NonNull ITextDecorator newDecorator = decorator.duplicate().shift(-start);
             newDecorator.setEnd(endIdx);
@@ -113,6 +154,12 @@ public class Text
         return newText;
     }
 
+    /**
+     * Adds a new {@link ITextDecorator} to this {@link Text}.
+     *
+     * @param newDecorator The {@link ITextDecorator} to append.
+     * @return The current {@link Text} instance.
+     */
     public @NonNull Text addDecorator(final @NonNull ITextDecorator newDecorator)
     {
         for (final @NonNull ITextDecorator decorator : textDecorators)
@@ -225,38 +272,6 @@ public class Text
         stringBuilder.append(other.stringBuilder);
         styledSize += other.styledSize;
         return this;
-    }
-
-    /**
-     * Appends {@link #styledSections} and {@link #textDecorators} from one {@link Text} to another one. All the
-     *
-     * @param to   The {@link Text} to which all entries from the lists are appended to.
-     * @param from The {@link Text} to copy the lists from.
-     */
-    private static void appendListsLists(final @NonNull Text to, final @NonNull Text from)
-    {
-        final int currentLength = to.stringBuilder.length();
-
-        // Copy everything into an intermediate list to avoid ConcurrentModificationException
-        // when adding this text to itself. If it's not the same list, just add it directly.
-        final List<StyledSection> sectionTarget = to.styledSections == from.styledSections ?
-                                                  new ArrayList<>(to.styledSections.size()) : to.styledSections;
-        from.styledSections.forEach(
-            styledSection -> sectionTarget.add(new StyledSection(styledSection.startIndex + currentLength,
-                                                                 styledSection.length,
-                                                                 styledSection.style)));
-
-        // If the lists are the same instance, the sections were put in a
-        // new map, so append that to the current list.
-        if (to.styledSections == from.styledSections)
-            to.styledSections.addAll(sectionTarget);
-
-        // Same thing, but now for decorators.
-        final List<ITextDecorator> decoratorTarget = to.textDecorators == from.textDecorators ?
-                                                     new ArrayList<>(to.textDecorators.size()) : to.textDecorators;
-        from.textDecorators.forEach(decorator -> decoratorTarget.add(decorator.duplicate().shift(currentLength)));
-        if (to.textDecorators == from.textDecorators)
-            to.textDecorators.addAll(decoratorTarget);
     }
 
     @Override

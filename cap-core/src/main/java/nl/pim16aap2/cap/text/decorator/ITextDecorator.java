@@ -37,7 +37,7 @@ public interface ITextDecorator
     /**
      * Updates the start index.
      *
-     * @param end The new start index.
+     * @param start The new start index.
      * @return This {@link ITextDecorator} instance.
      */
     @NonNull ITextDecorator setStart(final int start);
