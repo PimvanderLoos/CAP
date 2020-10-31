@@ -222,8 +222,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         final Text text = new Text(colorScheme).add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
-        if (!command.getDescription(colorScheme).equals(""))
-            text.add("\n").add(descriptionIndent).add(command.getDescription(colorScheme), TextType.DESCRIPTION);
+        if (!command.getDescription(commandSender).equals(""))
+            text.add("\n").add(descriptionIndent).add(command.getDescription(commandSender), TextType.DESCRIPTION);
         renderArgumentsLong(colorScheme, text, command);
         return text;
     }
@@ -284,8 +284,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (!commandSender.hasPermission(command))
             return text;
 
-        if (displayHeader && !command.getHeader(colorScheme).equals(""))
-            text.add(command.getHeader(colorScheme), TextType.HEADER).add("\n");
+        if (displayHeader && !command.getHeader(commandSender).equals(""))
+            text.add(command.getHeader(commandSender), TextType.HEADER).add("\n");
 
         renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command),
                        command, firstPageSize, 0);
@@ -329,7 +329,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
                 ++skipped;
             else
             {
-                renderCommand(colorScheme, text, command, superCommands);
+                renderCommand(commandSender, colorScheme, text, command, superCommands);
                 text.add("\n");
                 ++added;
             }
@@ -366,14 +366,15 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * @param superCommands A {@link Text} with all the appended super commands of the current {@link Command}. This
      *                      will be prepended to the {@link Command}.
      */
-    protected void renderCommand(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
-                                 final @NonNull Command command, final @NonNull String superCommands)
+    protected void renderCommand(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
+                                 final @NonNull Text text, final @NonNull Command command,
+                                 final @NonNull String superCommands)
     {
         text.add(superCommands + command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
-        if (!command.getSummary(colorScheme).equals(""))
-            text.add("\n").add(descriptionIndent).add(command.getSummary(colorScheme), TextType.SUMMARY);
+        if (!command.getSummary(commandSender).equals(""))
+            text.add("\n").add(descriptionIndent).add(command.getSummary(commandSender), TextType.SUMMARY);
     }
 
     /**

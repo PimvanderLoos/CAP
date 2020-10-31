@@ -86,21 +86,21 @@ public class Command
      * not null.
      */
     @Setter
-    protected @Nullable Function<ColorScheme, String> descriptionSupplier;
+    protected @Nullable Function<ICommandSender, String> descriptionSupplier;
 
     /**
      * The supplier that is used to build the summary. Note that this isn't used in case the {@link #summary} is not
      * null.
      */
     @Setter
-    protected @Nullable Function<ColorScheme, String> summarySupplier;
+    protected @Nullable Function<ICommandSender, String> summarySupplier;
 
     /**
      * The supplier that is used to build the summary. Note that this isn't used in case the {@link #header} is not
      * null.
      */
     @Setter
-    protected @Nullable Function<ColorScheme, String> headerSupplier;
+    protected @Nullable Function<ICommandSender, String> headerSupplier;
 
     /**
      * The {@link CAP} that manages this command.
@@ -174,9 +174,10 @@ public class Command
      */
     @Builder(builderMethodName = "commandBuilder")
     protected Command(final @NonNull String name, final @Nullable String description,
-                      final @Nullable Function<ColorScheme, String> descriptionSupplier, final @Nullable String summary,
-                      final @Nullable Function<ColorScheme, String> summarySupplier, final @Nullable String header,
-                      final @Nullable Function<ColorScheme, String> headerSupplier,
+                      final @Nullable Function<ICommandSender, String> descriptionSupplier,
+                      final @Nullable String summary,
+                      final @Nullable Function<ICommandSender, String> summarySupplier, final @Nullable String header,
+                      final @Nullable Function<ICommandSender, String> headerSupplier,
                       final @Nullable @Singular List<Command> subCommands, final @Nullable Command helpCommand,
                       final @Nullable Boolean addDefaultHelpSubCommand, @Nullable Argument<?> helpArgument,
                       final @Nullable Boolean addDefaultHelpArgument,
@@ -275,15 +276,15 @@ public class Command
      * First, it tries to return {@link #description}. If that is null, {@link #descriptionSupplier} is used instead. If
      * that is null as well, an empty String is returned.
      *
-     * @param colorScheme The {@link ColorScheme} to use in case {@link #descriptionSupplier} is needed.
+     * @param commandSender The {@link ICommandSender} to use in case {@link #descriptionSupplier} is needed.
      * @return The description for this command if it could be found/generated, otherwise an empty String.
      */
-    public @NonNull String getDescription(final @NonNull ColorScheme colorScheme)
+    public @NonNull String getDescription(final @NonNull ICommandSender commandSender)
     {
         if (description != null)
             return description;
         if (descriptionSupplier != null)
-            return descriptionSupplier.apply(colorScheme);
+            return descriptionSupplier.apply(commandSender);
         return "";
     }
 
@@ -293,15 +294,15 @@ public class Command
      * First, it tries to return {@link #summary}. If that is null, {@link #summarySupplier} is used instead. If that is
      * null as well, an empty String is returned.
      *
-     * @param colorScheme The {@link ColorScheme} to use in case {@link #summarySupplier} is needed.
+     * @param commandSender The {@link ICommandSender} to use in case {@link #summarySupplier} is needed.
      * @return The summary for this command if it could be found/generated, otherwise an empty String.
      */
-    public @NonNull String getSummary(final @NonNull ColorScheme colorScheme)
+    public @NonNull String getSummary(final @NonNull ICommandSender commandSender)
     {
         if (summary != null)
             return summary;
         if (summarySupplier != null)
-            return summarySupplier.apply(colorScheme);
+            return summarySupplier.apply(commandSender);
         return "";
     }
 
@@ -311,15 +312,15 @@ public class Command
      * First, it tries to return {@link #header}. If that is null, {@link #headerSupplier} is used instead. If that is
      * null as well, an empty String is returned.
      *
-     * @param colorScheme The {@link ColorScheme} to use in case {@link #summarySupplier} is needed.
+     * @param commandSender The {@link ICommandSender} to use in case {@link #summarySupplier} is needed.
      * @return The header for this command if it could be found/generated, otherwise an empty String.
      */
-    public @NonNull String getHeader(final @NonNull ColorScheme colorScheme)
+    public @NonNull String getHeader(final @NonNull ICommandSender commandSender)
     {
         if (header != null)
             return header;
         if (headerSupplier != null)
-            return headerSupplier.apply(colorScheme);
+            return headerSupplier.apply(commandSender);
         return "";
     }
 

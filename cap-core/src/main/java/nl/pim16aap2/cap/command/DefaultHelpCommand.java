@@ -60,11 +60,11 @@ public class DefaultHelpCommand extends Command
      * @param cap                 The {@link CAP} instance that manages this command.
      */
     protected DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
-                                 final @Nullable Function<ColorScheme, String> descriptionSupplier,
+                                 final @Nullable Function<ICommandSender, String> descriptionSupplier,
                                  final @Nullable String summary,
-                                 final @Nullable Function<ColorScheme, String> summarySupplier,
+                                 final @Nullable Function<ICommandSender, String> summarySupplier,
                                  final @Nullable String header,
-                                 final @Nullable Function<ColorScheme, String> headerSupplier,
+                                 final @Nullable Function<ICommandSender, String> headerSupplier,
                                  final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor,
                                  final @NonNull CAP cap,
                                  final @Nullable IHelpCommandRenderer helpCommandRenderer)
@@ -97,11 +97,11 @@ public class DefaultHelpCommand extends Command
      */
     @Builder(builderMethodName = "helpCommandBuilder", toBuilder = true)
     public DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
-                              final @Nullable Function<ColorScheme, String> descriptionSupplier,
+                              final @Nullable Function<ICommandSender, String> descriptionSupplier,
                               final @Nullable String summary,
-                              final @Nullable Function<ColorScheme, String> summarySupplier,
+                              final @Nullable Function<ICommandSender, String> summarySupplier,
                               final @Nullable String header,
-                              final @Nullable Function<ColorScheme, String> headerSupplier,
+                              final @Nullable Function<ICommandSender, String> headerSupplier,
                               final @NonNull CAP cap,
                               final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {

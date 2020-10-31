@@ -304,7 +304,7 @@ public class Main
             .cap(cap)
             .addDefaultHelpSubCommand(true)
             .name("bigdoors")
-            .headerSupplier(colorScheme -> new Text(colorScheme)
+            .headerSupplier(commandSender -> new Text(commandSender.getColorScheme())
                 .add("Parameters in angled brackets are required: ", TextType.HEADER)
                 .add("<", TextType.REQUIRED_PARAMETER)
                 .add("parameter", TextType.REQUIRED_PARAMETER_LABEL)

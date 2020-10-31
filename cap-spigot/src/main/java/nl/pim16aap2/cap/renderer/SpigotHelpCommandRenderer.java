@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.DefaultHelpCommand;
+import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextType;
@@ -87,8 +88,9 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
     }
 
     @Override
-    protected void renderCommand(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
-                                 final @NonNull Command command, final @NonNull String superCommands)
+    protected void renderCommand(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
+                                 final @NonNull Text text, final @NonNull Command command,
+                                 final @NonNull String superCommands)
     {
         final @NonNull Command topCommand = command.getTopLevelCommand();
         final @Nullable Command helpCommand = topCommand.getHelpCommand();
@@ -109,7 +111,7 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
         text.addDecorator(new ClickableTextCommandDecorator(clickableStart, clickableEnd, clickableCommand,
                                                             "§cClick me for more information!"));
 
-        if (!command.getSummary(colorScheme).equals(""))
-            text.add("\n").add(descriptionIndent).add(command.getSummary(colorScheme), TextType.SUMMARY);
+        if (!command.getSummary(commandSender).equals(""))
+            text.add("\n").add(descriptionIndent).add(command.getSummary(commandSender), TextType.SUMMARY);
     }
 }
