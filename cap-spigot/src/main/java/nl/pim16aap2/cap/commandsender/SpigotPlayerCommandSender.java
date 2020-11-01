@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.text.ColorScheme;
-import nl.pim16aap2.cap.text.SpigotTextParser;
+import nl.pim16aap2.cap.text.SpigotTextUtility;
 import nl.pim16aap2.cap.text.Text;
 import org.bukkit.entity.Player;
 
@@ -18,7 +18,7 @@ public class SpigotPlayerCommandSender implements ICommandSender
     @Override
     public void sendMessage(final @NonNull Text message)
     {
-        player.spigot().sendMessage(SpigotTextParser.toBaseComponents(message));
+        player.spigot().sendMessage(SpigotTextUtility.toBaseComponents(message));
     }
 
     @Override

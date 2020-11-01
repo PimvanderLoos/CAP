@@ -8,9 +8,9 @@ import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.DefaultHelpCommand;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.text.ColorScheme;
+import nl.pim16aap2.cap.text.SpigotTextUtility;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextType;
-import nl.pim16aap2.cap.text.decorator.ClickableTextCommandDecorator;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -59,32 +59,21 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
                 () -> new RuntimeException("Failed to find supercommand of help command!"));
         }
 
-        final Text previousPage = new Text(text.getColorScheme());
-        final Text nextPage = new Text(text.getColorScheme());
-
         if (page == 1)
-            previousPage.add("---", TextType.REGULAR_TEXT);
+            text.add("---", TextType.REGULAR_TEXT);
         else
-        {
-            previousPage.add("<<<", TextType.COMMAND);
-            previousPage.addDecorator(
-                new ClickableTextCommandDecorator(0, previousPage.getLength(), String
-                    .format("/%s %s %d", command.getName(), helpCommand.getName(), page - 1), "§cPrevious help page"));
-        }
+            SpigotTextUtility.addClickableCommandText(text, "<<<", TextType.COMMAND, String
+                .format("/%s %s %d", command.getName(), helpCommand.getName(), page - 1), "§cPrevious help page");
+
+        text.add(String.format("---- Page (%2d / %2d) ---", page, pageCount), TextType.REGULAR_TEXT);
 
         if (page == pageCount)
-            nextPage.add("---", TextType.REGULAR_TEXT);
+            text.add("---", TextType.REGULAR_TEXT);
         else
-        {
-            nextPage.add(">>>", TextType.COMMAND);
-            nextPage.addDecorator(
-                new ClickableTextCommandDecorator(0, nextPage.getLength(), String
-                    .format("/%s %s %d", command.getName(), helpCommand.getName(), page + 1), "§cNext help page"));
-        }
+            SpigotTextUtility.addClickableCommandText(text, ">>>", TextType.COMMAND, String
+                .format("/%s %s %d", command.getName(), helpCommand.getName(), page + 1), "§cNext help page");
 
-        text.add(previousPage)
-            .add(String.format("---- Page (%2d / %2d) ---", page, pageCount), TextType.REGULAR_TEXT)
-            .add(nextPage).add("\n");
+        text.add("\n");
     }
 
     @Override
@@ -95,21 +84,18 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
         final @NonNull Command topCommand = command.getTopLevelCommand();
         final @Nullable Command helpCommand = topCommand.getHelpCommand();
 
-        final int clickableStart = text.getLength();
-        final String commandText = superCommands + command.getName();
-        String clickableCommand = "";
+        final @NonNull Text commandText = new Text(text.getColorScheme());
+
+        commandText.add(superCommands + command.getName(), TextType.COMMAND);
+        renderArgumentsShort(colorScheme, commandText, command);
+
         if (helpCommand != null)
         {
             final String commandName = command.getName().equals(helpCommand.getName()) ? "" : " " + command.getName();
-            clickableCommand = "/" + topCommand.getName() + " " + helpCommand.getName() + commandName;
+            final String clickableCommand = "/" + topCommand.getName() + " " + helpCommand.getName() + commandName;
+            SpigotTextUtility.makeClickableCommand(commandText, clickableCommand, "§cClick me for more information!");
         }
-
-        text.add(commandText, TextType.COMMAND);
-        renderArgumentsShort(colorScheme, text, command);
-
-        final int clickableEnd = text.getLength();
-        text.addDecorator(new ClickableTextCommandDecorator(clickableStart, clickableEnd, clickableCommand,
-                                                            "§cClick me for more information!"));
+        text.add(commandText);
 
         if (!command.getSummary(commandSender).equals(""))
             text.add("\n").add(descriptionIndent).add(command.getSummary(commandSender), TextType.SUMMARY);

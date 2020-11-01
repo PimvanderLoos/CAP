@@ -5,7 +5,7 @@ import lombok.NonNull;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import nl.pim16aap2.cap.text.SpigotTextParser;
+import nl.pim16aap2.cap.text.SpigotTextUtility;
 import nl.pim16aap2.cap.text.Text;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,7 +67,7 @@ public class ClickableTextCommandDecorator implements ISpigotTextDecorator
     @Override
     public @NonNull TextComponent getTextComponent(final @NonNull Text text)
     {
-        final @NonNull TextComponent textComponent = SpigotTextParser.toTextComponent(text);
+        final @NonNull TextComponent textComponent = SpigotTextUtility.toTextComponent(text);
 
         textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
         if (hoverMessage != null)
