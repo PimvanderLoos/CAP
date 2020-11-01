@@ -156,22 +156,19 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected void renderPageCountHeader(final @NonNull Text text, final int page, final int pageCount,
                                          final @NonNull Command command)
     {
-        final Text previousPage = new Text(text.getColorScheme());
-        final Text nextPage = new Text(text.getColorScheme());
-
         if (page == 1)
-            previousPage.add("--", TextType.REGULAR_TEXT);
+            text.add("--", TextType.REGULAR_TEXT);
         else
-            previousPage.add(">>", TextType.COMMAND);
+            text.add("<<", TextType.COMMAND);
+
+        text.add(String.format("----- Page (%2d / %2d) ----", page, pageCount), TextType.REGULAR_TEXT);
 
         if (page == pageCount)
-            nextPage.add("--", TextType.REGULAR_TEXT);
+            text.add("--", TextType.REGULAR_TEXT);
         else
-            nextPage.add("<<", TextType.COMMAND);
+            text.add(">>", TextType.COMMAND);
 
-        text.add(previousPage)
-            .add(String.format("----- Page (%2d / %2d) ----", page, pageCount), TextType.REGULAR_TEXT)
-            .add(nextPage).add("\n");
+        text.add("\n");
     }
 
     @Override
