@@ -100,7 +100,7 @@ public class SpigotColorScheme extends ColorScheme
 
         public SpigotColorScheme build()
         {
-            ColorScheme.ColorSchemeBuilder.copyDefaults(styleMap);
+            ColorScheme.ColorSchemeBuilder.prepareBuild(styleMap, defaultDisable);
 
             return new SpigotColorScheme(styleMap, defaultDisable);
         }

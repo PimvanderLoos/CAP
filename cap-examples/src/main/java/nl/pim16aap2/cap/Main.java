@@ -99,7 +99,7 @@ public class Main
         final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
-        commandSender.setColorScheme(Main.getColorScheme());
+//        commandSender.setColorScheme(Main.getColorScheme());
 
         try
         {
@@ -205,6 +205,7 @@ public class Main
 
         tryArgs(cap, "bigdoors", "help", "addowner");
         tryArgs(cap, "bigdoors");
+        tryArgs(cap, "bigdoors", "help");
         tryArgs(cap, "bigdoors", "help", "1");
         tryArgs(cap, "bigdoors", "help", "2");
         tryArgs(cap, "bigdoors", "help", "6");
@@ -315,10 +316,6 @@ public class Main
                 .add("parameter", TextType.OPTIONAL_PARAMETER_LABEL)
                 .add("]", TextType.OPTIONAL_PARAMETER).add("\n")
 
-//                .add("If an argument is followed by a \"+\" symbol, it can be\n", TextType.HEADER)
-//                .add("repeated as many times as you want. For example, for a\n", TextType.HEADER)
-//                .add("hypothetical command \"", TextType.HEADER)
-
                 .add("If an argument is followed by a \"+\" symbol, it can be\n" +
                          "repeated as many times as you want. For example, for a\n" +
                          "hypothetical command \"", TextType.HEADER)
@@ -372,7 +369,7 @@ public class Main
     {
         return ColorScheme
             .builder()
-            .setDisableAll(MinecraftStyle.RESET.getStringValue())
+            .setDefaultDisable(MinecraftStyle.RESET.getStringValue())
             .commandStyle(new TextComponent(MinecraftStyle.GOLD.getStringValue()))
             .optionalParameterStyle(new TextComponent(MinecraftStyle.BLUE.getStringValue() +
                                                           MinecraftStyle.BOLD.getStringValue()))

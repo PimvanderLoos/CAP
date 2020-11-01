@@ -62,7 +62,7 @@ public class ColorScheme
     {
         private final Map<TextType, TextComponent> styleMap = new EnumMap<>(TextType.class);
 
-        private @Nullable String disableAll = null;
+        private @Nullable String defaultDisable = null;
 
         private static final @NonNull TextComponent EMPTY_STYLE = new TextComponent("", "");
 
@@ -81,8 +81,8 @@ public class ColorScheme
          * @param base     The base type whose defined
          * @param targets  The target types to copy the base style to for those that do not have a style yet.
          */
-        public static void copyDefaults(final @NonNull Map<TextType, TextComponent> styleMap,
-                                        final @NonNull TextType base, final @NonNull TextType... targets)
+        private static void copyDefaults(final @NonNull Map<TextType, TextComponent> styleMap,
+                                         final @NonNull TextType base, final @NonNull TextType... targets)
         {
             final @Nullable TextComponent baseStyle = styleMap.get(base);
             if (baseStyle == null)
@@ -97,7 +97,7 @@ public class ColorScheme
          *
          * @param styleMap The {@link #styleMap} to append the default values to if needed.
          */
-        public static void copyDefaults(final @NonNull Map<TextType, TextComponent> styleMap)
+        private static void copyDefaults(final @NonNull Map<TextType, TextComponent> styleMap)
         {
             copyDefaults(styleMap, TextType.OPTIONAL_PARAMETER, TextType.OPTIONAL_PARAMETER_FLAG,
                          TextType.OPTIONAL_PARAMETER_LABEL, TextType.OPTIONAL_PARAMETER_SEPARATOR);
@@ -107,22 +107,28 @@ public class ColorScheme
         }
 
         /**
-         * Constructs the new {@link ColorScheme}.
+         * Prepares this object for building.
+         * <p>
+         * It makes sure all the default values are copied if needed (see {@link #copyDefaults(Map)}, that all missing
+         * values get an empty value, and that all styles without disable style are assigned one (if
+         * <i>defaultDisable</i> is provided).
          *
-         * @return The new {@link ColorScheme}.
+         * @param styleMap       The {@link #styleMap} to prepare for building.
+         * @param defaultDisable See {@link #defaultDisable}.
          */
-        public ColorScheme build()
+        public static void prepareBuild(final @NonNull Map<TextType, TextComponent> styleMap,
+                                        final @Nullable String defaultDisable)
         {
-            // If disableAll was set, apply this default value to any components
+            // If defaultDisable was set, apply this default value to any components
             // that do not have an 'off' value yet.
-            if (disableAll != null)
+            if (defaultDisable != null)
                 for (final Map.Entry<TextType, TextComponent> entry : styleMap.entrySet())
                 {
                     final TextComponent component = entry.getValue();
                     // If 'on' is set, but off isn't,
                     if ((!component.getOn().equals("")) &&
                         component.getOff().equals(""))
-                        styleMap.put(entry.getKey(), new TextComponent(component.getOn(), disableAll));
+                        styleMap.put(entry.getKey(), new TextComponent(component.getOn(), defaultDisable));
                 }
 
             copyDefaults(styleMap);
@@ -131,8 +137,17 @@ public class ColorScheme
             if (styleMap.size() != TextType.class.getEnumConstants().length)
                 for (final @NonNull TextType type : TextType.values())
                     styleMap.putIfAbsent(type, EMPTY_STYLE);
+        }
 
-            return new ColorScheme(styleMap, disableAll);
+        /**
+         * Constructs the new {@link ColorScheme}.
+         *
+         * @return The new {@link ColorScheme}.
+         */
+        public ColorScheme build()
+        {
+            prepareBuild(styleMap, defaultDisable);
+            return new ColorScheme(styleMap, defaultDisable);
         }
 
         /**
@@ -144,9 +159,9 @@ public class ColorScheme
          * @param str The string that disables all active styles.
          * @return This {@link ColorSchemeBuilder} instance.
          */
-        public ColorSchemeBuilder setDisableAll(final @Nullable String str)
+        public ColorSchemeBuilder setDefaultDisable(final @Nullable String str)
         {
-            disableAll = str;
+            defaultDisable = str;
             return this;
         }
 

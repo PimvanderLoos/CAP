@@ -38,7 +38,7 @@ public class TextComponent
 
     /**
      * Creates a new text component without any 'off' value. This is useful when using {@link
-     * ColorScheme.ColorSchemeBuilder#setDisableAll(String)} as that will set the default value.
+     * ColorScheme.ColorSchemeBuilder#setDefaultDisable(String)} as that will set the default value.
      *
      * @param on The String to enable this component.
      */
