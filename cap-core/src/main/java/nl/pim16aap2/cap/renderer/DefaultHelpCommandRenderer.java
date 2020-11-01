@@ -180,12 +180,14 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (page > pageCount || page < 1)
             throw new IllegalValueException(command, Integer.toString(page), command.getCap().isDebug());
 
-        Text text = new Text(colorScheme);
+        final @NonNull Text text = new Text(colorScheme);
         renderPageCountHeader(text, page, pageCount, command);
         if (page == 1)
             return renderFirstPage(commandSender, colorScheme, text, command);
 
-        final int skip = firstPageSize + (page - 1) * pageSize;
+        // Subtract 2, because we start counting at 1 and because we want to know
+        // how many commands were printed up to the previous page.
+        final int skip = firstPageSize + (page - 2) * pageSize;
         renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command), command, pageSize, skip);
         return text;
     }
@@ -198,7 +200,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (val == null)
             return render(commandSender, colorScheme, command, 1);
 
-        final OptionalInt pageOpt = Util.parseInt(val);
+        final @NonNull OptionalInt pageOpt = Util.parseInt(val);
         if (pageOpt.isPresent())
             return render(commandSender, colorScheme, command, pageOpt.getAsInt() - 1);
 
@@ -216,7 +218,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (!commandSender.hasPermission(command))
             return new Text(colorScheme);
 
-        final Text text = new Text(colorScheme).add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
+        final @NonNull Text text = new Text(colorScheme)
+            .add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
         if (!command.getDescription(commandSender).equals(""))
