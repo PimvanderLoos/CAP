@@ -99,6 +99,14 @@ public class Util
         }
     }
 
+    /**
+     * Checks if a value lies between two other values.
+     *
+     * @param test  The value to test.
+     * @param start The lower bound value (exclusive).
+     * @param end   The upper bound value (exclusive).
+     * @return True if the test value is smaller than the lower bound and higher than the upper bound values.
+     */
     public boolean between(final int test, final int start, final int end)
     {
         return test > start && test < end;

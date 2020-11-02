@@ -13,6 +13,7 @@ import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
+import nl.pim16aap2.cap.util.Functional.TriFunction;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -337,10 +338,9 @@ public class Argument<T>
      * The function is supposed to return a list of suggestions to use as values for the {@link Argument} for the given
      * {@link ICommandSender}.
      */
-    //
     @FunctionalInterface
     public interface ITabcompleteFunction
-        extends BiFunction<@NonNull ICommandSender, @NonNull Argument<?>, @NonNull List<@NonNull String>>
+        extends TriFunction<@NonNull ICommandSender, @NonNull Command, @NonNull Argument<?>, @NonNull List<@NonNull String>>
     {
     }
 }

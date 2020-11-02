@@ -85,7 +85,7 @@ class CommandParserTest
             .argument(new StringArgument()
                           .getRequired()
                           .name("doorID")
-                          .tabcompleteFunction((commandSender, argument) -> doorIDs)
+                          .tabcompleteFunction((commandSender, command, argument) -> doorIDs)
                           .summary("The name or UID of the door")
                           .build())
             .argument(Argument.valuesLessBuilder()
@@ -99,7 +99,7 @@ class CommandParserTest
                           .name("p")
                           .longName("player")
                           .label("player")
-                          .tabcompleteFunction((commandSender, argument) -> playerNames)
+                          .tabcompleteFunction((commandSender, command, argument) -> playerNames)
                           .summary("The name of the player to add as owner")
                           .build())
             .argument(new StringArgument()
@@ -146,24 +146,28 @@ class CommandParserTest
         final List<String> playerSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p");
         Assertions.assertEquals(2, playerSuggestions.size());
-        Assertions.assertEquals("p", playerSuggestions.get(0));
-        Assertions.assertEquals("player", playerSuggestions.get(1));
+        Assertions.assertEquals("-p", playerSuggestions.get(0));
+        Assertions.assertEquals("--player", playerSuggestions.get(1));
 
         final List<String> longPlayerSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner --pla");
         Assertions.assertEquals(1, longPlayerSuggestions.size());
-        Assertions.assertEquals("player", longPlayerSuggestions.get(0));
+        Assertions.assertEquals("--player", longPlayerSuggestions.get(0));
 
         final List<String> adminSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner --a");
         Assertions.assertEquals(2, adminSuggestions.size());
-        Assertions.assertEquals("a", adminSuggestions.get(0));
-        Assertions.assertEquals("admin", adminSuggestions.get(1));
+        Assertions.assertEquals("-a", adminSuggestions.get(0));
+        Assertions.assertEquals("--admin", adminSuggestions.get(1));
 
-        final List<String> suggestionsFromEmpty =
+        final List<String> suggestionsForSubcommand =
             cap.getTabCompleteOptions(commandSender, "bigdoors subcommand_0");
-        Assertions.assertEquals(1, suggestionsFromEmpty.size());
-        Assertions.assertEquals("value", suggestionsFromEmpty.get(0));
+        Assertions.assertEquals(1, suggestionsForSubcommand.size());
+        Assertions.assertEquals("value", suggestionsForSubcommand.get(0));
+
+        final List<String> suggestionsHelpCommand =
+            cap.getTabCompleteOptions(commandSender, "bigdoors help subcommand_1");
+        Assertions.assertEquals(11, suggestionsHelpCommand.size());
     }
 
     @Test

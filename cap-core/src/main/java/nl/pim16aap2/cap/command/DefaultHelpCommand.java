@@ -1,5 +1,6 @@
 package nl.pim16aap2.cap.command;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -17,6 +18,7 @@ import nl.pim16aap2.cap.util.Functional.CheckedConsumer;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +43,19 @@ public class DefaultHelpCommand extends Command
     private static final boolean ADD_DEFAULT_HELP_ARGUMENT = false;
     private static final boolean ADD_DEFAULT_HELP_SUB_COMMAND = false;
     private static final String PERMISSION = null;
+
+    /**
+     * The number of subcommands the supercommand had the last time we checked. This is used to invalidate {@link
+     * #suggestions} when any subcommands are added, so that they are always up-to-date.
+     */
+    @Getter(AccessLevel.PRIVATE)
+    private int lastSubCommandCount = 0;
+
+    /**
+     * The list of tabcompletion suggestions.
+     */
+    @Getter(AccessLevel.PRIVATE)
+    private List<String> suggestions = null;
 
     /**
      * @param name                The name of the command.
@@ -75,9 +90,57 @@ public class DefaultHelpCommand extends Command
               Collections.singletonList(new StringArgument()
                                             .getOptionalPositional().name("page/command")
                                             .summary("A page number of the name of a command.").longName("help")
+                                            .tabcompleteFunction((DefaultHelpCommand::getSuggestions))
                                             .build()), HIDDEN, cap, ((commandSender, command) -> true));
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, cap.getHelpCommandRenderer());
+    }
+
+    /**
+     * Gets all the potential tabcompletion suggestions.
+     *
+     * @param commandSender The {@link ICommandSender}.
+     * @param command       The {@link Command} that owns the {@link Argument}.
+     * @param argument      The {@link Argument}.
+     * @return The list of potential tabcompletion suggestions.
+     */
+    public static @NonNull List<@NonNull String> getSuggestions(final @NonNull ICommandSender commandSender,
+                                                                final @NonNull Command command,
+                                                                final @NonNull Argument<?> argument)
+    {
+        // TODO: Add support for numerical stuff using the pageCount stuff from the renderer.
+        
+        if (!(command instanceof DefaultHelpCommand) || !command.getSuperCommand().isPresent() ||
+            command.getSuperCommand().get().getSubCommandCount() == 0)
+            return new ArrayList<>(0);
+
+        final @NonNull DefaultHelpCommand helpCommand = (DefaultHelpCommand) command;
+        final @NonNull Command superCommand = command.getSuperCommand().get();
+
+        if (helpCommand.suggestions == null || helpCommand.getSubCommandCount() != helpCommand.lastSubCommandCount)
+        {
+            helpCommand.suggestions = new ArrayList<>(helpCommand.getSubCommandCount());
+            addAllSubCommands(helpCommand.suggestions, superCommand, helpCommand);
+            helpCommand.suggestions = Collections.unmodifiableList(helpCommand.suggestions);
+        }
+
+        return helpCommand.suggestions;
+    }
+
+    /**
+     * Recursively adds all sub{@link Command}s of a {@link Command} to a target list.
+     *
+     * @param target       The target list to add all sub{@link Command}s to.
+     * @param superCommand The super{@link Command} whose sub{@link Command}s to add to the target list.
+     * @param helpCommand  The {@link DefaultHelpCommand} that will be ignored for the target list.
+     */
+    private static void addAllSubCommands(final @NonNull List<String> target, final @NonNull Command superCommand,
+                                          final @NonNull DefaultHelpCommand helpCommand)
+    {
+        if (superCommand.getName().equals(helpCommand.getName()))
+            return;
+        target.add(superCommand.getName());
+        superCommand.getSubCommands().forEach(subCommand -> addAllSubCommands(target, subCommand, helpCommand));
     }
 
     /**

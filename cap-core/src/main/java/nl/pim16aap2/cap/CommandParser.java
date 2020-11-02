@@ -90,10 +90,10 @@ class CommandParser
             argument ->
             {
                 if (argument.getName().startsWith(lastArg))
-                    ret.add(argument.getName());
+                    ret.add(String.format("%c%s", ARGUMENT_PREFIX, argument.getName()));
 
                 if (argument.getLongName() != null && argument.getLongName().startsWith(lastArg))
-                    ret.add(argument.getLongName());
+                    ret.add(String.format("%c%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName()));
             });
         return ret;
     }
@@ -102,8 +102,9 @@ class CommandParser
      * Gets the tab complete suggestions if there is no value at all. I.e. the last value in args is a (sub){@link
      * Command}.
      * <p>
-     * If the {@link Command} has any positional {@link Argument}s, {@link #getTabCompleteFromArgumentFunction(Optional,
-     * String)} will be used for the first one (and an empty String as value, so every entry will be accepted).
+     * If the {@link Command} has any positional {@link Argument}s, {@link #getTabCompleteFromArgumentFunction(Command,
+     * Optional, String)} will be used for the first one (and an empty String as value, so every entry will be
+     * accepted).
      * <p>
      * If the {@link Command} only has free {@link Argument}s, a list of those will be returned instead.
      * <p>
@@ -134,7 +135,8 @@ class CommandParser
                 });
         }
         else
-            return getTabCompleteFromArgumentFunction(command.getArgumentManager().getPositionalArgumentAtIdx(0), "");
+            return getTabCompleteFromArgumentFunction(command,
+                                                      command.getArgumentManager().getPositionalArgumentAtIdx(0), "");
 
         return ret;
     }
@@ -161,11 +163,13 @@ class CommandParser
     /**
      * Gets the tab complete suggestions from {@link Argument#getTabcompleteFunction()}.
      *
+     * @param command  The {@link Command} that owns the {@link Argument}.
      * @param argument The {@link Argument} that will be used to get the tab complete suggestions.
      * @param value    The current value to compare the results against.
      * @return The list of tab complete suggestions.
      */
-    private @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Optional<Argument<?>> argument,
+    private @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Command command,
+                                                                     final @NonNull Optional<Argument<?>> argument,
                                                                      final @NonNull String value)
     {
         final List<String> options = new ArrayList<>(0);
@@ -174,7 +178,7 @@ class CommandParser
         if (argumentValueCompletion == null)
             return options;
 
-        argumentValueCompletion.apply(commandSender, argument.get()).forEach(
+        argumentValueCompletion.apply(commandSender, command, argument.get()).forEach(
             entry ->
             {
                 if (entry.startsWith(value))
@@ -226,7 +230,7 @@ class CommandParser
             value = lastVal;
         }
 
-        return getTabCompleteFromArgumentFunction(argument, value);
+        return getTabCompleteFromArgumentFunction(command.command, argument, value);
     }
 
     /**
