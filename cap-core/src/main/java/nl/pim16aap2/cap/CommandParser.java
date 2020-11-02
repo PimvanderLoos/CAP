@@ -297,6 +297,8 @@ class CommandParser
             }
         };
 
+        // Represents a argument split by a spaces but inside brackets, e.g. '"my door"' should put 'my door' as a
+        // single entry.
         @Nullable String arg = null;
         for (int idx = 0; idx < rawArgs.length; ++idx)
         {
@@ -395,6 +397,8 @@ class CommandParser
     {
         final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results = new HashMap<>();
 
+        final boolean spaceSeparated = separator.equals(" ");
+
         int requiredArgumentIdx = 0;
         for (int pos = idx + 1; pos < args.size(); ++pos)
         {
@@ -414,7 +418,24 @@ class CommandParser
                                   .orElseThrow(
                                       () -> new NonExistingArgumentException(command, argumentName,
                                                                              cap.isDebug()));
-                value = argument.isValuesLess() ? "" : parts[1];
+
+                if (argument.isValuesLess())
+                    value = "";
+                else
+                {
+                    // When the separator is a space, the value isn't stored in the second part of the
+                    // current entry. The input is split on spaces and as such, it is stored in the next arg.
+                    // So, we get the next arg and increment the current position by 1 to indicated we've
+                    // just processed it.
+                    final int nextPos = pos + 1;
+                    if (spaceSeparated)
+                    {
+                        value = args.size() >= nextPos ? args.get(nextPos) : "";
+                        pos += 1;
+                    }
+                    else
+                        value = parts[1];
+                }
             }
             else
             {

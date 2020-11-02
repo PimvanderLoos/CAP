@@ -294,7 +294,13 @@ class CommandParserTest
     @Test
     void testSpaceSeparator()
     {
-//        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
-//        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -max 9"));
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
+        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -max 9"));
+        Assertions.assertDoesNotThrow(() -> cap
+            .parseInput(commandSender, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\" --admin"));
+        Assertions.assertDoesNotThrow(() -> cap
+            .parseInput(commandSender, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\""));
+        Assertions.assertDoesNotThrow(() -> cap
+            .parseInput(commandSender, "bigdoors addowner mydoor --player pim16aap2"));
     }
 }
