@@ -22,6 +22,7 @@ import org.junit.jupiter.api.function.Executable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 class CommandParserTest
 {
@@ -64,6 +65,10 @@ class CommandParserTest
             .argument(new IntegerArgument().getOptional()
                                            .name("min").label("min").summary("Must be more than 10!")
                                            .argumentValidator(MinimumValidator.integerMinimumValidator(10)).build())
+            .argument(new IntegerArgument().getOptional()
+                                           .name("unbound").label("unbound")
+                                           .summary("This value is not bound by anything!")
+                                           .build())
             .argument(new IntegerArgument().getOptional()
                                            .name("max").label("max").summary("Must be less than 10!")
                                            .argumentValidator(MaximumValidator.integerMaximumValidator(10)).build())
@@ -178,23 +183,35 @@ class CommandParserTest
         Assertions.assertEquals(11, suggestionsHelpCommand.size());
     }
 
-    @Test
-    void getFreeArgumentValueTabCompleteOptions()
+    private void getFreeArgumentValueTabCompleteOptions(final @NonNull CAP cap)
     {
-        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
-
         List<String> playerNameSuggestions =
-            cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p=");
-
+            cap.getTabCompleteOptions(commandSender, String.format("bigdoors addowner -p%c", cap.getSeparator()));
         Assertions.assertEquals(4, playerNameSuggestions.size());
 
-        playerNameSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p=pim");
+        playerNameSuggestions = cap
+            .getTabCompleteOptions(commandSender, String.format("bigdoors addowner -p%cpim", cap.getSeparator()));
         Assertions.assertEquals(3, playerNameSuggestions.size());
 
-        playerNameSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p=pim16");
+        playerNameSuggestions = cap
+            .getTabCompleteOptions(commandSender, String.format("bigdoors addowner -p%cpim16", cap.getSeparator()));
         Assertions.assertEquals(2, playerNameSuggestions.size());
         Assertions.assertEquals("pim16aap2", playerNameSuggestions.get(0));
         Assertions.assertEquals("pim16aap3", playerNameSuggestions.get(1));
+    }
+
+    @Test
+    void getFreeArgumentValueTabCompleteOptions()
+    {
+        getFreeArgumentValueTabCompleteOptions(
+            setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build()));
+    }
+
+    @Test
+    void getFreeArgumentValueTabCompleteOptionsSpaceSeparator()
+    {
+        getFreeArgumentValueTabCompleteOptions(
+            setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build()));
     }
 
     @Test
@@ -253,42 +270,66 @@ class CommandParserTest
     }
 
     @SneakyThrows
-    @Test
-    void testNumericalInput()
+    void testNumericalInput(final @NonNull CAP cap)
     {
-        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
-
+        final char sep = cap.separator;
         // My name is not numerical.
         assertWrappedThrows(IllegalValueException.class,
-                            () -> cap.parseInput(commandSender, "bigdoors numerical -max=pim16aap2"));
+                            () -> cap
+                                .parseInput(commandSender, String.format("bigdoors numerical -max%cpim16aap2", sep)));
         // The max value is set to 10, so 10 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, "bigdoors numerical -max=10"));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -max%c10", sep)));
         // With a max value of 10, 9 is perfect!
-        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -max=9"));
+        Assertions
+            .assertDoesNotThrow(() -> cap.parseInput(commandSender, String.format("bigdoors numerical -max%c9", sep)));
 
 
         // The maxd value is set to 10.0, so 10.0 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, "bigdoors numerical -maxd=10.0"));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -maxd%c10.0", sep)));
         // With a maxd value of 10.0, 9.9 is perfect!
-        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -maxd=9.9"));
+        Assertions
+            .assertDoesNotThrow(
+                () -> cap.parseInput(commandSender, String.format("bigdoors numerical -maxd%c9.9", sep)));
 
 
         // The min value is set to 10, so 10 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, "bigdoors numerical -min=10"));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -min%c10", sep)));
         // With a min value of 10, 11 is perfect!
-        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -min=11"));
+        Assertions
+            .assertDoesNotThrow(() -> cap.parseInput(commandSender, String.format("bigdoors numerical -min%c11", sep)));
 
         // The range is set to [10, 20], so 10 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, "bigdoors numerical -range=10"));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c10", sep)));
         // The range is set to [10, 20], so 20 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, "bigdoors numerical -range=20"));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c20", sep)));
         // With a range of [10, 20], 11 is perfect!
-        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -range=11"));
+        Assertions.assertDoesNotThrow(
+            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c11", sep)));
+
+        // Let's give negative values some love.
+        Assertions.assertDoesNotThrow(
+            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -unbound%c-9", sep)));
+        final Optional<CommandResult> result = cap
+            .parseInput(commandSender, String.format("bigdoors numerical -unbound%c-9", sep));
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(result.get().<Integer>getParsedArgument("unbound"), -9);
+    }
+
+    @Test
+    void testNumericalInput()
+    {
+        testNumericalInput(setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build()));
+    }
+
+    @Test
+    void testNumericalInputSpaceSeparator()
+    {
+        testNumericalInput(setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build()));
     }
 
     @Test

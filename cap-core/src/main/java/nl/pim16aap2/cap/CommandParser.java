@@ -1,5 +1,6 @@
 package nl.pim16aap2.cap;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import nl.pim16aap2.cap.argument.Argument;
@@ -38,6 +39,8 @@ class CommandParser
     private static final Pattern LEADING_PREFIX_PATTERN = Pattern.compile("^[-]{1,2}");
     private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
+    @Getter
+    protected boolean spaceSeparated;
     protected @NonNull String separator;
     protected @NonNull Pattern separatorPattern;
 
@@ -50,6 +53,7 @@ class CommandParser
         this.cap = cap;
         this.separator = separator;
         separatorPattern = Pattern.compile(separator);
+        spaceSeparated = separator.equals(" ");
     }
 
     /**
@@ -202,36 +206,56 @@ class CommandParser
     {
         final String lastVal = args.get(args.size() - 1);
 
+        // If the arguments are NOT separated by spaces, there's no point in looking at the before-last argument
+        // So simply set the previous value to null and it'll be ignored.
+        final @Nullable String previousVal = (spaceSeparated && args.size() > 2) ? args.get(args.size() - 2) : null;
+
+        // Get the before-last argument (which will be complete) if the previous value isn't null
+        // which can be the case if it simply doesn't exist or if the arguments aren't space-separated.
+        final @NonNull Optional<Argument<?>> previousArgument =
+            previousVal == null ? Optional.empty() :
+            lstripArgumentPrefix(previousVal).flatMap(previousName ->
+                                                          command.getCommand().getArgumentManager()
+                                                                 .getArgument(previousName.trim()));
+
         final @NonNull Optional<Argument<?>> argument;
         final String value;
 
-        final @NonNull Optional<String> freeArgumentOpt = lstripArgumentPrefix(lastVal);
-        // If the argument is a free argument (i.e. '--player=playerName'), try to complete the name of
-        // the argument (in this case 'player') if there is no separator ('=' in this case) in the string.
-        //
-        // If the separator does exist, find the argument from the name and treat everything after the
-        // separator as the value.
-        if (freeArgumentOpt.isPresent())
+        if (previousArgument.isPresent() && !previousArgument.get().isValuesLess())
         {
-            final String freeArgument = freeArgumentOpt.get();
-            if (!lastVal.contains(separator))
-                return getTabCompleteArgumentNames(command.getCommand(), freeArgument);
-
-            final String[] parts = separatorPattern.split(freeArgument, 2);
-            final String argumentName = parts[0];
-            value = parts[1];
-            argument = command.getCommand().getArgumentManager().getArgument(argumentName);
+            argument = previousArgument;
+            value = lastVal;
         }
-        // If the argument is a positional argument (i.e. it doesn't start with the prefix and you don't have to
-        // specify the name to use it), simply get the positional argument based on the position in the string.
-        // As value, use the string that was found.
         else
         {
-            // Subtract the command's index from the total size because the command and its supercommands don't count
-            // towards positional indices.
-            final int positionalArgumentIdx = args.size() - command.index - 2;
-            argument = command.getCommand().getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIdx);
-            value = lastVal;
+            final @NonNull Optional<String> freeArgumentOpt = lstripArgumentPrefix(lastVal);
+            // If the argument is a free argument (i.e. '--player=playerName'), try to complete the name of
+            // the argument (in this case 'player') if there is no separator ('=' in this case) in the string.
+            //
+            // If the separator does exist, find the argument from the name and treat everything after the
+            // separator as the value.
+            if (freeArgumentOpt.isPresent())
+            {
+                final String freeArgument = freeArgumentOpt.get();
+                if (!lastVal.contains(separator))
+                    return getTabCompleteArgumentNames(command.getCommand(), freeArgument);
+
+                final String[] parts = separatorPattern.split(freeArgument, 2);
+                final String argumentName = parts[0];
+                value = parts[1];
+                argument = command.getCommand().getArgumentManager().getArgument(argumentName);
+            }
+            // If the argument is a positional argument (i.e. it doesn't start with the prefix and you don't have to
+            // specify the name to use it), simply get the positional argument based on the position in the string.
+            // As value, use the string that was found.
+            else
+            {
+                // Subtract the command's index from the total size because the command and its supercommands don't
+                // count towards positional indices.
+                final int positionalArgumentIdx = args.size() - command.index - 2;
+                argument = command.getCommand().getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIdx);
+                value = lastVal;
+            }
         }
 
         return getTabCompleteFromArgumentFunction(command.command, argument, value);
@@ -287,15 +311,7 @@ class CommandParser
     private @NonNull List<String> preprocess(final @NonNull String[] rawArgs)
         throws EOFException
     {
-        final ArrayList<@NonNull String> argsList = new ArrayList<@NonNull String>(rawArgs.length)
-        {
-            @Override
-            public boolean add(@NonNull String str)
-            {
-                str = str.trim();
-                return super.add(str);
-            }
-        };
+        final ArrayList<@NonNull String> argsList = new ArrayList<>(rawArgs.length);
 
         // Represents a argument split by a spaces but inside brackets, e.g. '"my door"' should put 'my door' as a
         // single entry.
@@ -396,8 +412,6 @@ class CommandParser
         throws NonExistingArgumentException, MissingArgumentException, ValidationFailureException, IllegalValueException
     {
         final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results = new HashMap<>();
-
-        final boolean spaceSeparated = separator.equals(" ");
 
         int requiredArgumentIdx = 0;
         for (int pos = idx + 1; pos < args.size(); ++pos)
@@ -524,7 +538,7 @@ class CommandParser
             if (idx != 0) // TODO:
                 throw new CommandNotFoundException(null, cap.isDebug());
 
-            final @Nullable String commandName = args.size() > idx ? args.get(idx) : null;
+            final @Nullable String commandName = args.size() > idx ? args.get(idx).trim() : null;
             final Command baseCommand =
                 cap.getCommand(commandName)
                    .orElseThrow(() -> new CommandNotFoundException(commandName, cap.isDebug()));
@@ -540,7 +554,7 @@ class CommandParser
             return new ParsedCommand(command, idx);
 
         final int nextIdx = idx + 1;
-        final @Nullable String nextArg = args.size() > nextIdx ? args.get(nextIdx) : null;
+        final @Nullable String nextArg = args.size() > nextIdx ? args.get(nextIdx).trim() : null;
         // If there's no argument available after the current one, we've reached the end of the arguments.
         // This means that the last command we found is the last argument (by definition), so return that.
         if (nextArg == null)

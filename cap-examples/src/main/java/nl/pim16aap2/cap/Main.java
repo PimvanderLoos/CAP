@@ -15,7 +15,6 @@ import nl.pim16aap2.cap.text.TextType;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Allow using space as a separator of flag-value pairs.
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 //       Also, virtual commands don't need executors, just a help command?
@@ -80,6 +79,19 @@ public class Main
             sb2.append(" ").append(arg);
         }
         return sb.append(", total: \"/").toString() + sb2.append("\"").substring(1);
+    }
+
+    private static @NonNull String listToString(final @NonNull List<String> args)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (String arg : args)
+        {
+            sb.append("\"").append(arg).append("\", ");
+        }
+        String res = sb.toString();
+        if (res.length() > 2)
+            res = res.substring(0, res.length() - 2);
+        return res;
     }
 
     private static void tabComplete(final @NonNull CAP cap, final @NonNull String... args)
