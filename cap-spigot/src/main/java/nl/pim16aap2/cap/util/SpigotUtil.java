@@ -2,12 +2,18 @@ package nl.pim16aap2.cap.util;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.AllowedCommandSenderType;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.commandsender.SpigotPlayerCommandSender;
 import nl.pim16aap2.cap.commandsender.SpigotServerCommandSender;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -80,5 +86,21 @@ public class SpigotUtil
             return ((SpigotPlayerCommandSender) commandSender).getPlayer().hasPermission(node);
 
         return true;
+    }
+
+    /**
+     * Gets an {@link Argument.ITabcompleteFunction} that retrieves a list of the names of all online players.
+     *
+     * @return The names of all online players.
+     */
+    public @NonNull Argument.ITabcompleteFunction onlinePlayersTabcompletion()
+    {
+        return (commandSender, command, argument) ->
+        {
+            Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+            List<String> players = new ArrayList<>(onlinePlayers.size());
+            onlinePlayers.forEach(player -> players.add(player.getName()));
+            return players;
+        };
     }
 }

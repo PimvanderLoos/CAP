@@ -89,11 +89,13 @@ class CommandParser
         command.getArgumentManager().getArguments().forEach(
             argument ->
             {
+                final String separator = argument.isValuesLess() ? "" : SEPARATOR;
                 if (argument.getName().startsWith(lastArg))
-                    ret.add(String.format("%c%s", ARGUMENT_PREFIX, argument.getName()));
+                    ret.add(String.format("%c%s", ARGUMENT_PREFIX, argument.getName()) + separator);
 
                 if (argument.getLongName() != null && argument.getLongName().startsWith(lastArg))
-                    ret.add(String.format("%c%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName()));
+                    ret.add(
+                        String.format("%c%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName()) + separator);
             });
         return ret;
     }

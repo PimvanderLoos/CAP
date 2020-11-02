@@ -26,6 +26,7 @@ import java.util.List;
 //       However, every time more text is added, all we have to do is narrow the suggestions down even further.
 // TODO: The tab complete suggestion TriFunctions do not need the command sender. All permission checking etc is
 //       handled further down the line.
+// TODO: For the specialized PlayerArgument, it should already have the option to supply all online players on creation.
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
@@ -38,6 +39,8 @@ import java.util.List;
 //       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
 //       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
 //       could not be validated.
+// TODO: The suggestion of "/bigdoors addowner mydoor " should not be "mydoor".
+//       Similarly, "/bigdoors addowner mydoor --player=pim16aap2 " should not suggest "pim16aap2".
 // TODO: Optional case sensitivity?
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
 //       (there are probably going to be some casting issues).

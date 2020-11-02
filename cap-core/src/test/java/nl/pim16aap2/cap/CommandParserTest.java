@@ -146,13 +146,13 @@ class CommandParserTest
         final List<String> playerSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p");
         Assertions.assertEquals(2, playerSuggestions.size());
-        Assertions.assertEquals("-p", playerSuggestions.get(0));
-        Assertions.assertEquals("--player", playerSuggestions.get(1));
+        Assertions.assertEquals("-p=", playerSuggestions.get(0));
+        Assertions.assertEquals("--player=", playerSuggestions.get(1));
 
         final List<String> longPlayerSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner --pla");
         Assertions.assertEquals(1, longPlayerSuggestions.size());
-        Assertions.assertEquals("--player", longPlayerSuggestions.get(0));
+        Assertions.assertEquals("--player=", longPlayerSuggestions.get(0));
 
         final List<String> adminSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner --a");
