@@ -19,11 +19,10 @@ import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.SpigotColorScheme;
 import nl.pim16aap2.cap.text.TextType;
 import nl.pim16aap2.cap.util.Util;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
@@ -49,6 +48,7 @@ public class SpigotCAP extends CAP
         super(Util.valOrDefault(helpCommandRenderer, SpigotHelpCommandRenderer.getDefault()), debug);
         this.plugin = plugin;
         this.colorScheme = Util.valOrDefault(colorScheme, generateColorScheme());
+        Bukkit.getPluginManager().registerEvents(new CommandListener(this), plugin);
     }
 
     /**
@@ -61,18 +61,12 @@ public class SpigotCAP extends CAP
         return SpigotCAP.spigotCAPBuilder().build();
     }
 
-    public @NonNull CommandResult parseInput(final @NotNull CommandSender sender, final @NotNull Command cmd,
-                                             final @NotNull String[] args)
-        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
-               NoPermissionException, ValidationFailureException, IllegalValueException
+    public @NonNull CommandResult parseInput(final @NonNull CommandSender sender, final @NonNull String message)
+        throws MissingArgumentException, NoPermissionException, EOFException, IllegalValueException,
+               NonExistingArgumentException, ValidationFailureException, CommandNotFoundException
     {
         final @NonNull ICommandSender commandSender = SpigotCommandSender.wrapCommandSender(sender, colorScheme);
-
-        final String[] fullArgs = new String[args.length + 1];
-        fullArgs[0] = cmd.getName();
-        System.arraycopy(args, 0, fullArgs, 1, args.length);
-
-        return parseInput(commandSender, fullArgs);
+        return parseInput(commandSender, message);
     }
 
     /**

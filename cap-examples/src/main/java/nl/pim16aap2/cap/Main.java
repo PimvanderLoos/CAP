@@ -49,9 +49,6 @@ import java.util.List;
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
-// TODO: Add CommandExecutor class to the spigot module.
-//       Unlike an actual executor, it should use the PlayerCommandPreprocessEvent, so we can capture the unprocessed stuff:
-//       https://www.spigotmc.org/threads/preserve-spaces-in-commands.274911/
 // TODO: Create optional system to handle exceptions. It'd be nice to not have to catch them all manually
 //       (but just tell CAP to inform the ICommandSender on its own).
 // TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
@@ -64,7 +61,6 @@ import java.util.List;
 //       confusing and bug-prone very fast.
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
-// TODO: Add default colorscheme for Spigot.
 // TODO: The CAP instance shouldn't know anything about a color scheme.
 
 public class Main

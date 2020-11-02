@@ -193,7 +193,6 @@ class CommandParser
     private @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command)
     {
         final String lastVal = args.get(args.size() - 1);
-        System.out.println("lastVal = " + lastVal);
 
         final @NonNull Optional<Argument<?>> argument;
         final String value;
@@ -280,7 +279,15 @@ class CommandParser
     private @NonNull List<String> preprocess(final @NonNull String[] rawArgs)
         throws EOFException
     {
-        final ArrayList<String> argsList = new ArrayList<>(rawArgs.length);
+        final ArrayList<@NonNull String> argsList = new ArrayList<@NonNull String>(rawArgs.length)
+        {
+            @Override
+            public boolean add(@NonNull String str)
+            {
+                str = str.trim();
+                return super.add(str);
+            }
+        };
 
         @Nullable String arg = null;
         for (int idx = 0; idx < rawArgs.length; ++idx)

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * The main class of this library. All commands within a single command system should be registered here.
@@ -43,6 +44,13 @@ public class CAP
     protected final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
 
     /**
+     * The map containing all registered super commands (i.e. commands without a supercommand of their own), with their
+     * names as key.
+     */
+    @Getter
+    protected final @NonNull Map<@NonNull String, @NonNull Command> superCommandMap = new HashMap<>();
+
+    /**
      * The {@link DefaultHelpCommandRenderer} to use to render help messages.
      */
     @Getter
@@ -57,6 +65,16 @@ public class CAP
     @Setter
     @Builder.Default
     protected boolean debug = false;
+
+    /**
+     * A positive lookbehind for spaces.
+     * <p>
+     * When simply splitting on spaces, whitespace won't be preserved. This regex will make sure to add any trailing
+     * whitespace to each argument.
+     * <p>
+     * For example, "/mycommand test   a" will become ["mycommand ", "test   ", "a"].
+     */
+    private static final @NonNull Pattern pat = Pattern.compile("((?<= ))");
 
     /**
      * Gets a new instance of this {@link CAP} using the default values.
@@ -82,7 +100,7 @@ public class CAP
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
                NoPermissionException, ValidationFailureException, IllegalValueException
     {
-        return parseInput(commandSender, args.split(" "));
+        return parseInput(commandSender, pat.split(args));
     }
 
     /**
@@ -118,6 +136,8 @@ public class CAP
     public @NonNull CAP addCommand(final @NonNull Command command)
     {
         commandMap.put(command.getName(), command);
+        if (!command.getSuperCommand().isPresent())
+            superCommandMap.put(command.getName(), command);
         return this;
     }
 
@@ -132,6 +152,19 @@ public class CAP
         if (name == null)
             return Optional.empty();
         return Optional.ofNullable(commandMap.get(name));
+    }
+
+    /**
+     * Gets a super{@link Command} from its name (i.e. a {@link Command} without any supers of its own).
+     *
+     * @param name The name of the super{@link Command}. See {@link Command#getName()}.
+     * @return The super{@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
+     */
+    public @NonNull Optional<Command> getSuperCommand(final @Nullable String name)
+    {
+        if (name == null)
+            return Optional.empty();
+        return Optional.ofNullable(superCommandMap.get(name));
     }
 
     /**
