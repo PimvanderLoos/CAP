@@ -103,7 +103,7 @@ public class CAP
      * @param commandSender The {@link ICommandSender} that issued a command.
      * @param args          A single String containing multiple arguments.
      */
-    public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String args)
+    public @NonNull Optional<CommandResult> parseInput(final @NonNull ICommandSender commandSender, String args)
     {
         return parseInput(commandSender, pat.split(args));
     }
@@ -125,11 +125,11 @@ public class CAP
      * @throws EOFException                 If there are unmatched quotation marks. E.g. '-p="player'. Note that the
      *                                      matching quotation mark can be in another string further down the array.
      */
-    public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String... args)
+    public @NonNull Optional<CommandResult> parseInput(final @NonNull ICommandSender commandSender, String... args)
     {
         try
         {
-            return new CommandParser(this, commandSender, args).parse();
+            return Optional.of(new CommandParser(this, commandSender, args).parse());
         }
         catch (CAPException exception)
         {
@@ -142,7 +142,7 @@ public class CAP
         {
             throw new RuntimeException(exception);
         }
-        throw new RuntimeException("Failed to parse input!");
+        return Optional.empty();
     }
 
     /**

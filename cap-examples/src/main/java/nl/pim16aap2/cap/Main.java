@@ -30,10 +30,6 @@ import java.util.List;
 // TODO: For the long help, maybe fall back to the summary if no description is available?
 // TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
 // TODO: Unit tests.
-// TODO: Consider removing the current permission system in favor of a BiFunction<ICommandSender, Command, Boolean> system.
-//       This makes it more easily customizable for other platforms (and gets rid of the permission String, which has no
-//       place in the core). Perhaps this should be handled by (Spigot)CAP, so we can take care of casts and stuff.
-//       Or just a SpigotUtil.
 // TODO: ValidationFailureException should get the received value and the instance of the validator.
 //       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
 //       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
@@ -97,7 +93,7 @@ public class Main
         final DefaultCommandSender commandSender = new DefaultCommandSender();
 //        commandSender.setColorScheme(Main.getColorScheme());
 
-        cap.parseInput(commandSender, args).run();
+        cap.parseInput(commandSender, args).ifPresent(CommandResult::run);
         System.out.println("=============\n");
     }
 
@@ -202,7 +198,7 @@ public class Main
             .description("Add 1 or more players or groups of players as owners of a door.")
             .summary("Add another owner to a door.")
             .subCommands(subsubcommands)
-            .permission("bigdoors.user.addowner")
+            .permission(((commandSender, command) -> true))
             .argument(new StringArgument()
                           .getRequired()
                           .name("doorID")

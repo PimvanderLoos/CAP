@@ -1,7 +1,6 @@
 package nl.pim16aap2.cap.commandsender;
 
 import lombok.NonNull;
-import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 
@@ -18,14 +17,6 @@ public interface ICommandSender
      * @param message The message to send.
      */
     void sendMessage(final @NonNull Text message);
-
-    /**
-     * Checks if this {@link ICommandSender} has permission to access the given {@link Command}.
-     *
-     * @param command The {@link Command} to check.
-     * @return True if this {@link ICommandSender} has access to the given {@link Command}.
-     */
-    boolean hasPermission(final @NonNull Command command);
 
     /**
      * Gets the {@link ColorScheme} to use for all messages send to this {@link ICommandSender}.

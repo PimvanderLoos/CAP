@@ -64,7 +64,7 @@ class CommandParser
         commands.forEach(
             subCommand ->
             {
-                if (!commandSender.hasPermission(subCommand))
+                if (!subCommand.hasPermission(commandSender))
                     return;
 
                 if (subCommand.getName().startsWith(partialName))
@@ -119,7 +119,7 @@ class CommandParser
         command.getSubCommands().forEach(
             subCommand ->
             {
-                if (commandSender.hasPermission(subCommand))
+                if (subCommand.hasPermission(commandSender))
                     ret.add(subCommand.getName());
             });
 
@@ -341,7 +341,7 @@ class CommandParser
      * @throws NonExistingArgumentException If one of the specified arguments does not exist.
      * @throws MissingArgumentException     If a required argument was not specified.
      * @throws NoPermissionException        If the {@link ICommandSender} does not have permission to use this command.
-     *                                      See {@link ICommandSender#hasPermission(Command)}.
+     *                                      See {@link Command#hasPermission(ICommandSender)}.
      * @throws ValidationFailureException   If the value of an {@link Argument} could not be validated. See {@link
      *                                      IArgumentValidator#validate(Object)}.
      * @throws IllegalValueException        If the specified value of an {@link Argument} is illegal.
@@ -352,7 +352,7 @@ class CommandParser
                ValidationFailureException, IllegalValueException
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
-        if (!commandSender.hasPermission(parsedCommand.getCommand()))
+        if (!parsedCommand.getCommand().hasPermission(commandSender))
             throw new NoPermissionException(commandSender, parsedCommand.getCommand(), cap.isDebug());
 
         if (parsedCommand.getIndex() == (args.size() - 1) &&

@@ -3,6 +3,7 @@ package nl.pim16aap2.cap;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.command.CommandResult;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -49,7 +50,7 @@ class CommandListener implements Listener
             return;
 
         event.setCancelled(true);
-        cap.parseInput(event.getPlayer(), message).run();
+        cap.parseInput(event.getPlayer(), message).ifPresent(CommandResult::run);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -57,8 +58,8 @@ class CommandListener implements Listener
     {
         if (!startsWithSuperCommand(event.getCommand()))
             return;
-        
+
         event.setCancelled(true);
-        cap.parseInput(event.getSender(), event.getCommand()).run();
+        cap.parseInput(event.getSender(), event.getCommand()).ifPresent(CommandResult::run);
     }
 }

@@ -3,7 +3,6 @@ package nl.pim16aap2.cap.commandsender;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 
@@ -24,11 +23,5 @@ public class DefaultCommandSender implements ICommandSender
     public void sendMessage(final @NonNull Text message)
     {
         System.out.println(message);
-    }
-
-    @Override
-    public boolean hasPermission(final @NonNull Command command)
-    {
-        return true;
     }
 }

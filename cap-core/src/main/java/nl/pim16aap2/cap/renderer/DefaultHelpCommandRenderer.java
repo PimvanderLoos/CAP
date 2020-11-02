@@ -113,13 +113,13 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * @param command       The {@link Command} for which to count the number of sub{@link Command}s (including
      *                      itself).
      * @param commandSender The {@link ICommandSender} used for permission checking. See {@link
-     *                      ICommandSender#hasPermission(Command)}.
+     *                      Command#hasPermission(ICommandSender)}.
      * @return The total number of {@link Command}s that can be put in a help menu for the given {@link ICommandSender}.
      */
     protected final int getCommandCount(final @NonNull Command command, final @NonNull ICommandSender commandSender)
     {
         int count = 0;
-        if (!command.isHidden() && commandSender.hasPermission(command))
+        if (!command.isHidden() && command.hasPermission(commandSender))
             ++count;
 
         for (final @NonNull Command subCommand : command.getSubCommands())
@@ -132,7 +132,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      *
      * @param command       The {@link Command} for which to check the number of help pages.
      * @param commandSender The {@link ICommandSender} used for permission checking. See {@link
-     *                      ICommandSender#hasPermission(Command)}.
+     *                      Command#hasPermission(ICommandSender)}.
      * @return The total number of help pages available for the {@link Command}.
      */
     protected int getPageCount(final @NonNull Command command, final @NonNull ICommandSender commandSender)
@@ -215,7 +215,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     public @NonNull Text renderLongCommand(final @NonNull ICommandSender commandSender,
                                            final @NonNull ColorScheme colorScheme, final @NonNull Command command)
     {
-        if (!commandSender.hasPermission(command))
+        if (!command.hasPermission(commandSender))
             return new Text(colorScheme);
 
         final @NonNull Text text = new Text(colorScheme)
@@ -270,7 +270,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * Renders the first page of the help menu.
      *
      * @param commandSender The {@link ICommandSender} used for permission checking. See {@link
-     *                      ICommandSender#hasPermission(Command)}.
+     *                      Command#hasPermission(ICommandSender)}.
      * @param colorScheme   The {@link ColorScheme} to use to render the {@link Text}.
      * @param text          The {@link Text} instance to add the page count header to.
      * @param command       The {@link Command} for which to render the first help page.
@@ -281,7 +281,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
                                             final @NonNull ColorScheme colorScheme, final @NonNull Text text,
                                             final @NonNull Command command)
     {
-        if (!commandSender.hasPermission(command))
+        if (!command.hasPermission(commandSender))
             return text;
 
         if (displayHeader && !command.getHeader(commandSender).equals(""))
@@ -297,7 +297,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * Recursively renders the given command as well as all its subcommands.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
-     *                      they do not have access to are not included. See {@link ICommandSender#hasPermission(Command)}.
+     *                      they do not have access to are not included. See {@link Command#hasPermission(ICommandSender)}.
      * @param text          The {@link Text} to append the help to.
      * @param superCommands A {@link Text} with all the appended super commands of the current command. This will be
      *                      prepended to the command.
@@ -322,7 +322,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         int skipped = 0;
 
         // Don't render hidden commands, because they're... Well... hidden.
-        if (!command.isHidden() || !commandSender.hasPermission(command))
+        if (!command.isHidden() || !command.hasPermission(commandSender))
         {
             // Only render the command if it doesn't have to be skipped.
             if (skip > skipped)

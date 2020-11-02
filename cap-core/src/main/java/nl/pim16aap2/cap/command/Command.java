@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -135,11 +136,12 @@ public class Command
     protected boolean hidden;
 
     /**
-     * The permission value to use to determine if an {@link ICommandSender} has access to this command or not. See
-     * {@link ICommandSender#hasPermission(Command)}.
+     * The permission function to determine if an {@link ICommandSender} has access to this command or not.
+     * <p>
+     * When this is null, it defaults to <i>true</i>.
      */
     @Getter
-    protected @Nullable String permission;
+    protected @Nullable BiFunction<ICommandSender, Command, Boolean> permission;
 
     /**
      * @param name                     The name of the command.
@@ -183,7 +185,8 @@ public class Command
                       final @Nullable Boolean addDefaultHelpArgument,
                       final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                       @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
-                      final boolean hidden, final @NonNull CAP cap, final @Nullable String permission)
+                      final boolean hidden, final @NonNull CAP cap,
+                      final @Nullable BiFunction<ICommandSender, Command, Boolean> permission)
     {
         this.name = name;
 
@@ -372,5 +375,20 @@ public class Command
         if (name == null)
             return Optional.empty();
         return Util.searchIterable(subCommands, (val) -> val.getName().equals(name));
+    }
+
+    /**
+     * Checks if a given {@link ICommandSender} has permission to use this command.
+     * <p>
+     * See {@link #permission}.
+     *
+     * @param commandSender The {@link ICommandSender} whose permission status to check.
+     * @return True if the {@link ICommandSender} has access to this command.
+     */
+    public boolean hasPermission(final @NonNull ICommandSender commandSender)
+    {
+        if (permission == null)
+            return true;
+        return permission.apply(commandSender, this);
     }
 }

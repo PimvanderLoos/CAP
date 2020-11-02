@@ -72,9 +72,10 @@ public class DefaultHelpCommand extends Command
         super(Util.valOrDefault(name, "help"), description, descriptionSupplier, summary, summarySupplier, header,
               headerSupplier, SUB_COMMANDS, HELP_COMMAND, ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT,
               ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
-              Collections.singletonList(new StringArgument().getOptionalPositional().name("page/command")
-                                                            .summary("A page number of the name of a command.")
-                                                            .longName("help").build()), HIDDEN, cap, PERMISSION);
+              Collections.singletonList(new StringArgument()
+                                            .getOptionalPositional().name("page/command")
+                                            .summary("A page number of the name of a command.").longName("help")
+                                            .build()), HIDDEN, cap, ((commandSender, command) -> true));
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, cap.getHelpCommandRenderer());
     }
