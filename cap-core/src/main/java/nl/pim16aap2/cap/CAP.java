@@ -65,6 +65,14 @@ public class CAP
     protected final @Nullable ExceptionHandler exceptionHandler = ExceptionHandler.getDefault();
 
     /**
+     * The separator between a free argument's name and it's value. In the case of "--player=pim16aap2", this would be
+     * "=". Default: " ".
+     */
+    @Getter
+    @Builder.Default
+    protected final char separator = ' ';
+
+    /**
      * Whether or not to enable debug mode. In debug mode, {@link CAPException}s will generate stacktraces, when it is
      * disabled, they won't (this is much faster).
      */
@@ -129,7 +137,7 @@ public class CAP
     {
         try
         {
-            return Optional.of(new CommandParser(this, commandSender, args).parse());
+            return Optional.of(new CommandParser(this, commandSender, args, Character.toString(separator)).parse());
         }
         catch (CAPException exception)
         {
@@ -218,7 +226,7 @@ public class CAP
     {
         try
         {
-            return new CommandParser(this, commandSender, args).getTabCompleteOptions();
+            return new CommandParser(this, commandSender, args, Character.toString(separator)).getTabCompleteOptions();
         }
         catch (EOFException e)
         {

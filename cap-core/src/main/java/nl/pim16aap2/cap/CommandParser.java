@@ -36,18 +36,20 @@ class CommandParser
 
     private static final char ARGUMENT_PREFIX = '-';
     private static final Pattern LEADING_PREFIX_PATTERN = Pattern.compile("^[-]{1,2}");
-
-    // TODO: Allow space to be used as a separator
-    private static final String SEPARATOR = "=";
-    private static final Pattern SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
     private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
-    CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull String[] args)
+    protected @NonNull String separator;
+    protected @NonNull Pattern separatorPattern;
+
+    protected CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                            final @NonNull String[] args, final @NonNull String separator)
         throws EOFException
     {
         this.args = preprocess(args);
         this.commandSender = commandSender;
         this.cap = cap;
+        this.separator = separator;
+        separatorPattern = Pattern.compile(separator);
     }
 
     /**
@@ -89,7 +91,7 @@ class CommandParser
         command.getArgumentManager().getArguments().forEach(
             argument ->
             {
-                final String separator = argument.isValuesLess() ? "" : SEPARATOR;
+                final String separator = argument.isValuesLess() ? "" : this.separator;
                 if (argument.getName().startsWith(lastArg))
                     ret.add(String.format("%c%s", ARGUMENT_PREFIX, argument.getName()) + separator);
 
@@ -212,10 +214,10 @@ class CommandParser
         if (freeArgumentOpt.isPresent())
         {
             final String freeArgument = freeArgumentOpt.get();
-            if (!lastVal.contains(SEPARATOR))
+            if (!lastVal.contains(separator))
                 return getTabCompleteArgumentNames(command.getCommand(), freeArgument);
 
-            final String[] parts = SEPARATOR_PATTERN.split(freeArgument, 2);
+            final String[] parts = separatorPattern.split(freeArgument, 2);
             final String argumentName = parts[0];
             value = parts[1];
             argument = command.getCommand().getArgumentManager().getArgument(argumentName);
@@ -405,7 +407,7 @@ class CommandParser
                 // If this is the case, then we simply have to start reading the argument name
                 // 1 position later than for the short name (i.e. '-a' vs '--admin'.
                 final int argNameStartIdx = nextArg.charAt(1) == ARGUMENT_PREFIX ? 2 : 1;
-                final String[] parts = SEPARATOR_PATTERN.split(nextArg, 2);
+                final String[] parts = separatorPattern.split(nextArg, 2);
 
                 final @NonNull String argumentName = parts[0].substring(argNameStartIdx);
                 argument = command.getArgumentManager().getArgument(argumentName)

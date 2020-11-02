@@ -44,10 +44,13 @@ public class SpigotCAP extends CAP
     @Builder(builderMethodName = "spigotCAPBuilder")
     protected SpigotCAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug,
                         final @NonNull JavaPlugin plugin, final @Nullable ColorScheme colorScheme,
-                        final @Nullable ExceptionHandler exceptionHandler)
+                        final @Nullable ExceptionHandler exceptionHandler,
+                        final @Nullable Character separator)
     {
         super(Util.valOrDefault(helpCommandRenderer, SpigotHelpCommandRenderer.getDefault()),
-              Util.valOrDefault(exceptionHandler, ExceptionHandler.getDefault()), debug);
+              Util.valOrDefault(exceptionHandler, ExceptionHandler.getDefault()),
+              Util.valOrDefault(separator, ' '), debug);
+
         this.plugin = plugin;
         this.colorScheme = Util.valOrDefault(colorScheme, generateColorScheme());
         Bukkit.getPluginManager().registerEvents(new CommandListener(this), plugin);

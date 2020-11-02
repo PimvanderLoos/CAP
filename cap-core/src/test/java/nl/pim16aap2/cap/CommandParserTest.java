@@ -16,7 +16,6 @@ import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.GenericCommand;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -27,17 +26,20 @@ import java.util.List;
 class CommandParserTest
 {
     final DefaultCommandSender commandSender = new DefaultCommandSender();
-    private @NonNull nl.pim16aap2.cap.CAP cap;
 
     private static final List<String> playerNames = new ArrayList<>(
         Arrays.asList("pim16aap2", "pim16aap3", "mip16aap2", "pim"));
 
     private static final List<String> doorIDs = new ArrayList<>(Arrays.asList("myDoor", "42", "myPortcullis", "84"));
 
-    @BeforeEach
-    void setUp()
+    /**
+     * Populates a {@link CAP} with all the commands and arguments.
+     *
+     * @param cap The {@link CAP} object to populate.
+     * @return The same {@link CAP} instance.
+     */
+    private static @NonNull CAP setUp(final @NonNull CAP cap)
     {
-        cap = CAP.getDefault().toBuilder().exceptionHandler(null).build();
         final int subCommandCount = 20;
         final List<Command> subcommands = new ArrayList<>(subCommandCount);
         for (int idx = 0; idx < subCommandCount; ++idx)
@@ -126,11 +128,15 @@ class CommandParserTest
 
         subcommands.forEach(cap::addCommand);
         cap.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical);
+
+        return cap;
     }
 
     @Test
     void getCommandTabCompleteOptions()
     {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
+
         Assertions.assertEquals(20, cap.getTabCompleteOptions(commandSender, "bigdoors sub").size());
 
         Assertions.assertEquals(23, cap.getTabCompleteOptions(commandSender, "bigdoors").size());
@@ -143,6 +149,8 @@ class CommandParserTest
     @Test
     void getArgumentNameTabCompleteOptions()
     {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
+
         final List<String> playerSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p");
         Assertions.assertEquals(2, playerSuggestions.size());
@@ -173,6 +181,8 @@ class CommandParserTest
     @Test
     void getFreeArgumentValueTabCompleteOptions()
     {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
+
         List<String> playerNameSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p=");
 
@@ -190,6 +200,8 @@ class CommandParserTest
     @Test
     void getPositionalValueTabCompleteOptions()
     {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
+
         List<String> doorIDSuggestions =
             cap.getTabCompleteOptions(commandSender, "bigdoors addowner 4");
 
@@ -244,6 +256,8 @@ class CommandParserTest
     @Test
     void testNumericalInput()
     {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
+
         // My name is not numerical.
         assertWrappedThrows(IllegalValueException.class,
                             () -> cap.parseInput(commandSender, "bigdoors numerical -max=pim16aap2"));
@@ -275,5 +289,12 @@ class CommandParserTest
                             () -> cap.parseInput(commandSender, "bigdoors numerical -range=20"));
         // With a range of [10, 20], 11 is perfect!
         Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -range=11"));
+    }
+
+    @Test
+    void testSpaceSeparator()
+    {
+//        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
+//        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -max 9"));
     }
 }
