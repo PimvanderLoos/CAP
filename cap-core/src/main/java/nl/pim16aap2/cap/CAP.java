@@ -204,7 +204,7 @@ public class CAP
      */
     public List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender, final @NonNull String args)
     {
-        return getTabCompleteOptions(commandSender, args.split(" "));
+        return getTabCompleteOptions(commandSender, pat.split(args));
     }
 
     /**

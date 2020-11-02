@@ -22,6 +22,8 @@ import java.util.List;
 // TODO: Customizable command prefix?
 // TODO: Make is possible to have certain commands be server-only or player-only. These commands shouldn't show up in
 //       the help menus.
+// TODO: Caching for tabcomplete. Currently, everything is re-calculated every time the player types a new letter.
+//       However, every time more text is added, all we have to do is narrow the suggestions down even further.
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?

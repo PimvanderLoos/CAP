@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
+import nl.pim16aap2.cap.commandsender.SpigotCommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.event.server.TabCompleteEvent;
 
 import java.util.regex.Pattern;
 
@@ -61,5 +63,20 @@ class CommandListener implements Listener
 
         event.setCancelled(true);
         cap.parseInput(event.getSender(), event.getCommand()).ifPresent(CommandResult::run);
+    }
+
+    @EventHandler
+    void onTabCompletion(final @NonNull TabCompleteEvent event)
+    {
+        if (event.getBuffer().isEmpty() || !event.getBuffer().startsWith("/"))
+            return;
+
+        final @NonNull String command = event.getBuffer().substring(1); // Strip leading '/'.
+        if (!startsWithSuperCommand(event.getBuffer().substring(1)))
+            return;
+
+        event.setCompletions(cap.getTabCompleteOptions(SpigotCommandSender.wrapCommandSender(event.getSender(),
+                                                                                             cap.getColorScheme()),
+                                                       command));
     }
 }
