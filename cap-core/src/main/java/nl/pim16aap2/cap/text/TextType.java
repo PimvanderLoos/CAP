@@ -80,5 +80,10 @@ public enum TextType
      * UNUSED for now.
      */
     FOOTER,
+
+    /**
+     * Used for errors and stuff.
+     */
+    ERROR,
     ;
 }

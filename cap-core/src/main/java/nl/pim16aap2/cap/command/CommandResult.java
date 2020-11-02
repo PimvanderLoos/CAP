@@ -4,8 +4,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
-import nl.pim16aap2.cap.exception.CommandParserException;
+import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
@@ -132,11 +133,20 @@ public class CommandResult
      * Executes {@link Command#commandExecutor}.
      */
     public void run()
-        throws CommandParserException
     {
-        if (helpRequired())
-            command.sendHelp(commandSender);
-        else
-            command.getCommandExecutor().accept(this);
+        try
+        {
+            if (helpRequired())
+                command.sendHelp(commandSender);
+            else
+                command.getCommandExecutor().accept(this);
+        }
+        catch (final CAPException exception)
+        {
+            final @Nullable ExceptionHandler exceptionHandler = command.getCap().getExceptionHandler();
+            if (exceptionHandler == null)
+                throw new RuntimeException(exception);
+            exceptionHandler.handleException(commandSender, exception);
+        }
     }
 }

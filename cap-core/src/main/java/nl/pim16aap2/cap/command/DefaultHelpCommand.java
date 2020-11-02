@@ -7,8 +7,8 @@ import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
-import nl.pim16aap2.cap.exception.CommandParserException;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
@@ -65,7 +65,7 @@ public class DefaultHelpCommand extends Command
                                  final @Nullable Function<ICommandSender, String> summarySupplier,
                                  final @Nullable String header,
                                  final @Nullable Function<ICommandSender, String> headerSupplier,
-                                 final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor,
+                                 final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                                  final @NonNull CAP cap,
                                  final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {

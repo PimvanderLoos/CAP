@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CommandNotFoundException extends CommandParserException
+@Getter
+public class CommandNotFoundException extends CAPException
 {
-    @Getter
     private final @NonNull String missingCommand;
 
     public CommandNotFoundException(final @Nullable String commandName, final boolean stacktrace)

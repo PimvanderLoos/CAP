@@ -4,12 +4,10 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.command.Command;
 
-public class NonExistingArgumentException extends CommandParserException
+@Getter
+public class NonExistingArgumentException extends CAPException
 {
-    @Getter
     private final @NonNull String nonExistingArgument;
-
-    @Getter
     private final @NonNull Command command;
 
     public NonExistingArgumentException(final @NonNull Command command, final @NonNull String nonExistingArgument,

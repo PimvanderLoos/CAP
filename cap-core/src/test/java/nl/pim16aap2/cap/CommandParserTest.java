@@ -18,6 +18,7 @@ import nl.pim16aap2.cap.util.GenericCommand;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +37,7 @@ class CommandParserTest
     @BeforeEach
     void setUp()
     {
-        cap = CAP.getDefault();
+        cap = CAP.getDefault().toBuilder().exceptionHandler(null).build();
         final int subCommandCount = 20;
         final List<Command> subcommands = new ArrayList<>(subCommandCount);
         for (int idx = 0; idx < subCommandCount; ++idx)
@@ -215,39 +216,59 @@ class CommandParserTest
         Assertions.assertEquals("-admin", CommandParser.lstripArgumentPrefix("---admin").get());
     }
 
+    /**
+     * Asserts that the runnable throws an exception of the specified type.
+     * <p>
+     * Contrary to the regular Assertions.assertThrows, this method will catch a {@link RuntimeException} and check its
+     * cause.
+     *
+     * @param clazz      The type of the exception expected inside the {@link RuntimeException}.
+     * @param executable The method to execute.
+     */
+    @SneakyThrows
+    private static void assertWrappedThrows(final @NonNull Class<?> clazz, final @NonNull Executable executable)
+    {
+        final RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class, executable);
+        Assertions.assertNotNull(runtimeException.getCause());
+
+        if (!clazz.isInstance(runtimeException.getCause()))
+            Assertions.fail("Exception " + runtimeException.getCause().getClass().getCanonicalName() +
+                                " is not of expected type: " + clazz.getCanonicalName());
+    }
+
     @SneakyThrows
     @Test
     void testNumericalInput()
     {
         // My name is not numerical.
-        Assertions.assertThrows(IllegalValueException.class,
-                                () -> cap.parseInput(commandSender, "bigdoors numerical -max=pim16aap2"));
+        assertWrappedThrows(IllegalValueException.class,
+                            () -> cap.parseInput(commandSender, "bigdoors numerical -max=pim16aap2"));
         // The max value is set to 10, so 10 will be illegal.
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> cap.parseInput(commandSender, "bigdoors numerical -max=10"));
+        assertWrappedThrows(ValidationFailureException.class,
+                            () -> cap.parseInput(commandSender, "bigdoors numerical -max=10"));
         // With a max value of 10, 9 is perfect!
         Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -max=9"));
 
 
         // The maxd value is set to 10.0, so 10.0 will be illegal.
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> cap.parseInput(commandSender, "bigdoors numerical -maxd=10.0"));
+        assertWrappedThrows(ValidationFailureException.class,
+                            () -> cap.parseInput(commandSender, "bigdoors numerical -maxd=10.0"));
         // With a maxd value of 10.0, 9.9 is perfect!
         Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -maxd=9.9"));
 
 
         // The min value is set to 10, so 10 will be illegal.
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> cap.parseInput(commandSender, "bigdoors numerical -min=10"));
+        assertWrappedThrows(ValidationFailureException.class,
+                            () -> cap.parseInput(commandSender, "bigdoors numerical -min=10"));
         // With a min value of 10, 11 is perfect!
         Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -min=11"));
 
         // The range is set to [10, 20], so 10 will be illegal.
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> cap.parseInput(commandSender, "bigdoors numerical -range=10"));
+        assertWrappedThrows(ValidationFailureException.class,
+                            () -> cap.parseInput(commandSender, "bigdoors numerical -range=10"));
         // The range is set to [10, 20], so 20 will be illegal.
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> cap.parseInput(commandSender, "bigdoors numerical -range=20"));
+        assertWrappedThrows(ValidationFailureException.class,
+                            () -> cap.parseInput(commandSender, "bigdoors numerical -range=20"));
         // With a range of [10, 20], 11 is perfect!
         Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -range=11"));
     }

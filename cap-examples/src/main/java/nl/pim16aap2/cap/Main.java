@@ -6,20 +6,12 @@ import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
-import nl.pim16aap2.cap.exception.CommandNotFoundException;
-import nl.pim16aap2.cap.exception.CommandParserException;
-import nl.pim16aap2.cap.exception.IllegalValueException;
-import nl.pim16aap2.cap.exception.MissingArgumentException;
-import nl.pim16aap2.cap.exception.NoPermissionException;
-import nl.pim16aap2.cap.exception.NonExistingArgumentException;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextComponent;
 import nl.pim16aap2.cap.text.TextType;
-import nl.pim16aap2.cap.util.Functional.CheckedSupplier;
 
-import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +30,14 @@ import java.util.List;
 // TODO: For the long help, maybe fall back to the summary if no description is available?
 // TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
 // TODO: Unit tests.
+// TODO: Consider removing the current permission system in favor of a BiFunction<ICommandSender, Command, Boolean> system.
+//       This makes it more easily customizable for other platforms (and gets rid of the permission String, which has no
+//       place in the core). Perhaps this should be handled by (Spigot)CAP, so we can take care of casts and stuff.
+//       Or just a SpigotUtil.
+// TODO: ValidationFailureException should get the received value and the instance of the validator.
+//       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
+//       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
+//       could not be validated.
 // TODO: Optional case sensitivity?
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
 //       (there are probably going to be some casting issues).
@@ -49,8 +49,6 @@ import java.util.List;
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
-// TODO: Create optional system to handle exceptions. It'd be nice to not have to catch them all manually
-//       (but just tell CAP to inform the ICommandSender on its own).
 // TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
 // TODO: Don't throw and EOFException when preprocessing input arguments for tab complete. It should be allowed to
 //       tab-complete values split by spaces as well.
@@ -99,50 +97,7 @@ public class Main
         final DefaultCommandSender commandSender = new DefaultCommandSender();
 //        commandSender.setColorScheme(Main.getColorScheme());
 
-        try
-        {
-            cap.parseInput(commandSender, args).run();
-        }
-        catch (CommandNotFoundException e)
-        {
-            System.out.println("Failed to find command: " + e.getMissingCommand());
-            e.printStackTrace();
-        }
-        catch (NonExistingArgumentException e)
-        {
-            System.out.println("Failed to find argument: \"" + e.getNonExistingArgument() + "\" for command: \"" +
-                                   e.getCommand().getName() + "\"");
-            e.printStackTrace();
-        }
-        catch (MissingArgumentException e)
-        {
-            System.out.println(
-                "Failed to find value for argument: \"" + e.getMissingArgument().getName() + "\" for command: \"" +
-                    e.getCommand().getName() + "\"");
-            e.printStackTrace();
-        }
-        catch (IllegalValueException e)
-        {
-            System.out.println(
-                "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" + e.getCommand().getName() + "\"");
-            e.printStackTrace();
-        }
-        catch (EOFException e)
-        {
-            System.out.println("EOFException!");
-            e.printStackTrace();
-        }
-        catch (NoPermissionException e)
-        {
-            System.out.println("No permission!");
-            e.printStackTrace();
-        }
-        catch (CommandParserException e)
-        {
-            System.out.println("General CommandParserException!");
-            e.printStackTrace();
-        }
-
+        cap.parseInput(commandSender, args).run();
         System.out.println("=============\n");
     }
 
@@ -341,21 +296,6 @@ public class Main
         cap.addCommand(addOwner).addCommand(bigdoors);
 
         return cap;
-    }
-
-    private static void tryHelpCommand(CheckedSupplier<Text, IllegalValueException> sup)
-    {
-        System.out.println("==============================");
-        try
-        {
-            System.out.print(sup.get());
-        }
-        catch (IllegalValueException e)
-        {
-            System.out.println(
-                "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" + e.getCommand().getName() + "\"");
-        }
-        System.out.println("==============================\n");
     }
 
     static ColorScheme getClearColorScheme()

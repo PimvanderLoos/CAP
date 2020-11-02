@@ -10,13 +10,11 @@ import lombok.experimental.SuperBuilder;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
-import nl.pim16aap2.cap.exception.CommandParserException;
-import nl.pim16aap2.cap.exception.IllegalValueException;
+import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.exception.MissingArgumentException;
-import nl.pim16aap2.cap.exception.NoPermissionException;
 import nl.pim16aap2.cap.exception.NonExistingArgumentException;
-import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,11 +53,20 @@ public class CAP
      */
     @Getter
     @Builder.Default
-    protected @NonNull final DefaultHelpCommandRenderer helpCommandRenderer = DefaultHelpCommandRenderer.getDefault();
+    protected final @NonNull DefaultHelpCommandRenderer helpCommandRenderer = DefaultHelpCommandRenderer.getDefault();
 
     /**
-     * Whether or not to enable debug mode. In debug mode, {@link CommandParserException}s will generate stacktraces,
-     * when it is disabled, they won't (this is much faster).
+     * The {@link ExceptionHandler} that is used to handle CAP-related exceptions.
+     * <p>
+     * When null, all exceptions will be rethrown as {@link RuntimeException}s.
+     */
+    @Getter
+    @Builder.Default
+    protected final @Nullable ExceptionHandler exceptionHandler = ExceptionHandler.getDefault();
+
+    /**
+     * Whether or not to enable debug mode. In debug mode, {@link CAPException}s will generate stacktraces, when it is
+     * disabled, they won't (this is much faster).
      */
     @Getter
     @Setter
@@ -97,8 +104,6 @@ public class CAP
      * @param args          A single String containing multiple arguments.
      */
     public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String args)
-        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
-               NoPermissionException, ValidationFailureException, IllegalValueException
     {
         return parseInput(commandSender, pat.split(args));
     }
@@ -121,10 +126,23 @@ public class CAP
      *                                      matching quotation mark can be in another string further down the array.
      */
     public @NonNull CommandResult parseInput(final @NonNull ICommandSender commandSender, String... args)
-        throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, EOFException,
-               NoPermissionException, ValidationFailureException, IllegalValueException
     {
-        return new CommandParser(this, commandSender, args).parse();
+        try
+        {
+            return new CommandParser(this, commandSender, args).parse();
+        }
+        catch (CAPException exception)
+        {
+            if (exceptionHandler == null)
+                throw new RuntimeException(exception);
+            exceptionHandler.handleException(commandSender, exception);
+        }
+        // TODO: Use our own exception
+        catch (EOFException exception)
+        {
+            throw new RuntimeException(exception);
+        }
+        throw new RuntimeException("Failed to parse input!");
     }
 
     /**

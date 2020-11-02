@@ -8,7 +8,7 @@ import lombok.Singular;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
-import nl.pim16aap2.cap.exception.CommandParserException;
+import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.util.Functional.CheckedConsumer;
@@ -61,7 +61,7 @@ public class Command
      * The function that will be executed by {@link CommandResult#run()}.
      */
     @Getter
-    protected final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor;
+    protected final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor;
 
     /**
      * The description of the command. This is the longer description shown in the help menu for this command.
@@ -181,7 +181,7 @@ public class Command
                       final @Nullable @Singular List<Command> subCommands, final @Nullable Command helpCommand,
                       final @Nullable Boolean addDefaultHelpSubCommand, @Nullable Argument<?> helpArgument,
                       final @Nullable Boolean addDefaultHelpArgument,
-                      final @NonNull CheckedConsumer<@NonNull CommandResult, CommandParserException> commandExecutor,
+                      final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                       @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
                       final boolean hidden, final @NonNull CAP cap, final @Nullable String permission)
     {

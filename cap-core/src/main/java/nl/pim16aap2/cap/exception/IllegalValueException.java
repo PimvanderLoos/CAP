@@ -4,12 +4,10 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.command.Command;
 
-public class IllegalValueException extends CommandParserException
+@Getter
+public class IllegalValueException extends CAPException
 {
-    @Getter
     private final String illegalValue;
-
-    @Getter
     private final @NonNull Command command;
 
     public IllegalValueException(final @NonNull Command command, final @NonNull String illegalValue,

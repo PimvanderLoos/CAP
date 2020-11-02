@@ -7,12 +7,7 @@ import lombok.Setter;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.commandsender.SpigotCommandSender;
-import nl.pim16aap2.cap.exception.CommandNotFoundException;
-import nl.pim16aap2.cap.exception.IllegalValueException;
-import nl.pim16aap2.cap.exception.MissingArgumentException;
-import nl.pim16aap2.cap.exception.NoPermissionException;
-import nl.pim16aap2.cap.exception.NonExistingArgumentException;
-import nl.pim16aap2.cap.exception.ValidationFailureException;
+import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.renderer.SpigotHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
@@ -24,8 +19,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.EOFException;
 
 /**
  * Represents a specialized class of {@link CAP} for the Spigot platform.
@@ -43,9 +36,10 @@ public class SpigotCAP extends CAP
 
     @Builder(builderMethodName = "spigotCAPBuilder")
     protected SpigotCAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug,
-                        final @NonNull JavaPlugin plugin, final @Nullable ColorScheme colorScheme)
+                        final @NonNull JavaPlugin plugin, final @Nullable ColorScheme colorScheme,
+                        final @Nullable ExceptionHandler exceptionHandler)
     {
-        super(Util.valOrDefault(helpCommandRenderer, SpigotHelpCommandRenderer.getDefault()), debug);
+        super(Util.valOrDefault(helpCommandRenderer, SpigotHelpCommandRenderer.getDefault()), exceptionHandler, debug);
         this.plugin = plugin;
         this.colorScheme = Util.valOrDefault(colorScheme, generateColorScheme());
         Bukkit.getPluginManager().registerEvents(new CommandListener(this), plugin);
@@ -62,8 +56,6 @@ public class SpigotCAP extends CAP
     }
 
     public @NonNull CommandResult parseInput(final @NonNull CommandSender sender, final @NonNull String message)
-        throws MissingArgumentException, NoPermissionException, EOFException, IllegalValueException,
-               NonExistingArgumentException, ValidationFailureException, CommandNotFoundException
     {
         final @NonNull ICommandSender commandSender = SpigotCommandSender.wrapCommandSender(sender, colorScheme);
         return parseInput(commandSender, message);
@@ -92,6 +84,7 @@ public class SpigotCAP extends CAP
             .addStyle(TextType.REGULAR_TEXT, ChatColor.DARK_PURPLE)
             .addStyle(TextType.HEADER, ChatColor.GREEN)
             .addStyle(TextType.FOOTER, ChatColor.DARK_RED)
+            .addStyle(TextType.ERROR, ChatColor.DARK_RED, ChatColor.BOLD)
             .build();
     }
 }

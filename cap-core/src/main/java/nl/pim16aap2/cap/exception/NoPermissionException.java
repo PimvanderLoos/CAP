@@ -1,10 +1,12 @@
 package nl.pim16aap2.cap.exception;
 
+import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 
-public class NoPermissionException extends CommandParserException
+@Getter
+public class NoPermissionException extends CAPException
 {
     private final @NonNull ICommandSender commandSender;
     private final @NonNull Command command;
