@@ -20,7 +20,6 @@ import java.util.List;
 //       Also, virtual commands don't need executors, just a help command?
 // TODO: Caching for tabcomplete. Currently, everything is re-calculated every time the player types a new letter.
 //       However, every time more text is added, all we have to do is narrow the suggestions down even further.
-// TODO: For the specialized PlayerArgument, it should already have the option to supply all online players on creation.
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
