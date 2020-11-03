@@ -356,9 +356,9 @@ class CommandParserTest
     private void assertLastArgument(final @NonNull CAP cap, final @NonNull String command,
                                     final @NonNull String commandName)
     {
-        final String[] args = cap.split(command);
-        final CommandParser commandParser = new CommandParser(cap, commandSender, args,
-                                                              Character.toString(cap.separator));
+        final @NonNull List<String> args = CAP.split(command);
+        final @NonNull CommandParser commandParser = new CommandParser(cap, commandSender, args,
+                                                                       Character.toString(cap.separator));
         Assertions.assertEquals(commandName, commandParser.getLastCommand().getCommand().getName());
     }
 

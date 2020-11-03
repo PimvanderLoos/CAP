@@ -92,7 +92,7 @@ public class CAP
     /**
      * Parses a string containing multiple arguments delimited by spaces.
      * <p>
-     * See {@link #parseInput(ICommandSender, String...)}.
+     * See {@link #parseInput(ICommandSender, List)}.
      *
      * @param commandSender The {@link ICommandSender} that issued a command.
      * @param args          A single String containing multiple arguments.
@@ -112,7 +112,8 @@ public class CAP
      *                      escaped will be removed.
      * @return The {@link CommandResult} containing the parsed arguments.
      */
-    public @NonNull Optional<CommandResult> parseInput(final @NonNull ICommandSender commandSender, String... args)
+    public @NonNull Optional<CommandResult> parseInput(final @NonNull ICommandSender commandSender,
+                                                       final @NonNull List<String> args)
     {
         try
         {
@@ -190,7 +191,7 @@ public class CAP
      * @param command The string to split.
      * @return The command split on spaces.
      */
-    public static @NonNull String[] split(final @NonNull String command)
+    public static @NonNull List<String> split(final @NonNull String command)
     {
         final @NonNull List<String> args = new ArrayList<>();
         int startIdx = 0;
@@ -212,7 +213,7 @@ public class CAP
         }
         if (startIdx < command.length())
             args.add(command.substring(startIdx));
-        return args.toArray(new String[0]);
+        return args;
     }
 
     /**
@@ -236,7 +237,7 @@ public class CAP
      * @return The list of suggestions based on the current set of input arguments.
      */
     public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
-                                                       final @NonNull String[] args)
+                                                       final @NonNull List<String> args)
     {
         try
         {

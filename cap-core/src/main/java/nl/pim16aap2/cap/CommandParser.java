@@ -44,7 +44,7 @@ class CommandParser
     protected @NonNull String separator;
     protected @NonNull Pattern separatorPattern;
 
-    CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull String[] args,
+    CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull List<String> args,
                   final @NonNull String separator)
         throws EOFException
     {
@@ -308,17 +308,17 @@ class CommandParser
      *
      * @throws EOFException When an unmatched quotation mark is encountered. E.g. 'name="my name'.
      */
-    private @NonNull List<String> preprocess(final @NonNull String[] rawArgs)
+    private @NonNull List<String> preprocess(final @NonNull List<String> rawArgs)
         throws EOFException
     {
-        final ArrayList<@NonNull String> argsList = new ArrayList<>(rawArgs.length);
+        final ArrayList<@NonNull String> argsList = new ArrayList<>(rawArgs.size());
 
         // Represents a argument split by a spaces but inside brackets, e.g. '"my door"' should put 'my door' as a
         // single entry.
         @Nullable String arg = null;
-        for (int idx = 0; idx < rawArgs.length; ++idx)
+        for (int idx = 0; idx < rawArgs.size(); ++idx)
         {
-            String entry = rawArgs[idx];
+            String entry = rawArgs.get(idx);
             final Matcher matcher = NON_ESCAPED_QUOTATION_MARKS.matcher(entry);
             int count = 0;
             while (matcher.find())
@@ -350,7 +350,7 @@ class CommandParser
                 }
             }
 
-            if (arg != null && idx == (rawArgs.length - 1))
+            if (arg != null && idx == (rawArgs.size() - 1))
                 throw new EOFException();
         }
 

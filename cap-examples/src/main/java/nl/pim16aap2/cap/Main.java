@@ -94,13 +94,12 @@ public class Main
         return "[" + res + "]";
     }
 
-    private static void tabComplete(final @NonNull CAP cap, final @NonNull String... args)
+    private static void tabComplete(final @NonNull CAP cap, final @NonNull String command)
     {
-        final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
 
-        final @NonNull List<String> tabOptions = cap.getTabCompleteOptions(commandSender, args);
+        final @NonNull List<String> tabOptions = cap.getTabCompleteOptions(commandSender, command);
         final StringBuilder sb = new StringBuilder();
         sb.append("Tab complete options:\n");
         tabOptions.forEach(opt -> sb.append(opt).append("\n"));
@@ -108,14 +107,13 @@ public class Main
         System.out.println("=============\n");
     }
 
-    private static void tryArgs(final @NonNull CAP cap, final @NonNull String... args)
+    private static void tryArgs(final @NonNull CAP cap, final @NonNull String command)
     {
-        final String command = arrToString(args);
         System.out.println(command + ":\n");
         final DefaultCommandSender commandSender = new DefaultCommandSender();
 //        commandSender.setColorScheme(Main.getColorScheme());
 
-        cap.parseInput(commandSender, args).ifPresent(CommandResult::run);
+        cap.parseInput(commandSender, command).ifPresent(CommandResult::run);
         System.out.println("=============\n");
     }
 
@@ -154,34 +152,34 @@ public class Main
 
         tabComplete(cap, "big");
         tabComplete(cap, "add");
-        tabComplete(cap, "bigdoors", "a");
-        tabComplete(cap, "bigdoors", "\"a");
-        tabComplete(cap, "bigdoors", "h");
-        tabComplete(cap, "bigdoors", "subcomma");
-        tabComplete(cap, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
-        tabComplete(cap, "bigdoors", "addowner", "myDoor", "--play");
+        tabComplete(cap, "bigdoors a");
+        tabComplete(cap, "bigdoors \"a");
+        tabComplete(cap, "bigdoors h");
+        tabComplete(cap, "bigdoors subcomma");
+        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2");
+        tabComplete(cap, "bigdoors addowner myDoor --play");
 
-        tryArgs(cap, "bigdoors", "addowner", "myDoor", "-p=pim16aap2");
-        tryArgs(cap, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-p=pim16aap3", "-p=pim16aap4");
-        tryArgs(cap, "bigdoors", "addowner", "myDoor", "--player=pim16aap2");
-        tryArgs(cap, "bigdoors", "addowner", "myDoor", "--player=pim16aap2", "--admin");
-        tryArgs(cap, "bigdoors", "addowner", "myDoor", "-p=pim16aap2", "-a");
-        tryArgs(cap, "bigdoors", "addowner", "myD\\\"oor", "-p=pim16aap2", "-a");
-        tryArgs(cap, "bigdoors", "addowner", "\"myD\\\"oor\"", "-p=pim16aap2", "-a");
-        tryArgs(cap, "bigdoors", "addowner", "\"myD\\\"", "oor\"", "-p=\"pim16\"aap2", "-a");
-        tryArgs(cap, "bigdoors", "addowner", "'myDoor'", "-p=pim16aap2", "-a");
-        tryArgs(cap, "bigdoors", "addowner", "'myDoor'", "-p=pim16aap2", "-a");
-        tryArgs(cap, "bigdoors", "addowner", "-h");
-        tryArgs(cap, "bigdoors", "addowner", "myDoor", "-p=\"pim16", "\"aap2", "-a");
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2");
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4");
+        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2");
+        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2 --admin");
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner myD\\\"oor -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner \"myD\\\"oor\" -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner \"myD\\\" oor\" -p=\"pim16\"aap2 -a");
+        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner -h");
+        tryArgs(cap, "bigdoors addowner myDoor -p=\"pim16 \"aap2 -a");
 
-        tryArgs(cap, "bigdoors", "help", "addowner");
+        tryArgs(cap, "bigdoors help addowner");
         tryArgs(cap, "bigdoors");
-        tryArgs(cap, "bigdoors", "help");
-        tryArgs(cap, "bigdoors", "help", "1");
-        tryArgs(cap, "bigdoors", "help", "2");
-        tryArgs(cap, "bigdoors", "help", "6");
-        tryArgs(cap, "bigdoors", "help");
-        tryArgs(cap, "bigdoors", "addowner");
+        tryArgs(cap, "bigdoors help");
+        tryArgs(cap, "bigdoors help 1");
+        tryArgs(cap, "bigdoors help 2");
+        tryArgs(cap, "bigdoors help 6");
+        tryArgs(cap, "bigdoors help");
+        tryArgs(cap, "bigdoors addowner");
     }
 
     private static CAP initCommandManager()
