@@ -99,17 +99,15 @@ public class DefaultHelpCommand extends Command
     /**
      * Gets all the potential tabcompletion suggestions.
      *
-     * @param commandSender The {@link ICommandSender}.
-     * @param command       The {@link Command} that owns the {@link Argument}.
-     * @param argument      The {@link Argument}.
+     * @param command  The {@link Command} that owns the {@link Argument}.
+     * @param argument The {@link Argument}.
      * @return The list of potential tabcompletion suggestions.
      */
-    public static @NonNull List<@NonNull String> getSuggestions(final @NonNull ICommandSender commandSender,
-                                                                final @NonNull Command command,
+    public static @NonNull List<@NonNull String> getSuggestions(final @NonNull Command command,
                                                                 final @NonNull Argument<?> argument)
     {
         // TODO: Add support for numerical stuff using the pageCount stuff from the renderer.
-        
+
         if (!(command instanceof DefaultHelpCommand) || !command.getSuperCommand().isPresent() ||
             command.getSuperCommand().get().getSubCommandCount() == 0)
             return new ArrayList<>(0);

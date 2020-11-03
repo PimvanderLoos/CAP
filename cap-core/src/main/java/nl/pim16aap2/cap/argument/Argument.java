@@ -13,7 +13,6 @@ import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
-import nl.pim16aap2.cap.util.Functional.TriFunction;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -340,7 +339,7 @@ public class Argument<T>
      */
     @FunctionalInterface
     public interface ITabcompleteFunction
-        extends TriFunction<@NonNull ICommandSender, @NonNull Command, @NonNull Argument<?>, @NonNull List<@NonNull String>>
+        extends BiFunction<@NonNull Command, @NonNull Argument<?>, @NonNull List<@NonNull String>>
     {
     }
 }

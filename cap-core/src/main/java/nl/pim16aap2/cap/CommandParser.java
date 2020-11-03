@@ -186,7 +186,7 @@ class CommandParser
         if (argumentValueCompletion == null)
             return options;
 
-        argumentValueCompletion.apply(commandSender, command, argument.get()).forEach(
+        argumentValueCompletion.apply(command, argument.get()).forEach(
             entry ->
             {
                 if (entry.startsWith(value))

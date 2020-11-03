@@ -18,13 +18,8 @@ import java.util.List;
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 //       Also, virtual commands don't need executors, just a help command?
-// TODO: Customizable command prefix?
-// TODO: Make is possible to have certain commands be server-only or player-only. These commands shouldn't show up in
-//       the help menus.
 // TODO: Caching for tabcomplete. Currently, everything is re-calculated every time the player types a new letter.
 //       However, every time more text is added, all we have to do is narrow the suggestions down even further.
-// TODO: The tab complete suggestion TriFunctions do not need the command sender. All permission checking etc is
-//       handled further down the line.
 // TODO: For the specialized PlayerArgument, it should already have the option to supply all online players on creation.
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
@@ -41,8 +36,8 @@ import java.util.List;
 // TODO: For Spigot's tabcompletions, suggesting "pim16aap2" for "--player=pim" will actually remove the "--player=pim"
 //       part when selected and only use "pim16aap2". As such, the flag and everything will have to be prepended when the
 //       separator is not a space.
-// TODO: The suggestion of "/bigdoors addowner mydoor " should not be "mydoor".
-//       Similarly, "/bigdoors addowner mydoor --player=pim16aap2 " should not suggest "pim16aap2".
+// TODO: The suggestion of "/bigdoors addowner mydoor " should not be "mydoor" again.
+//       Similarly, "/bigdoors addowner mydoor --player=pim16aap2 " should not suggest "pim16aap2" again.
 // TODO: Optional case sensitivity?
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
 //       (there are probably going to be some casting issues).

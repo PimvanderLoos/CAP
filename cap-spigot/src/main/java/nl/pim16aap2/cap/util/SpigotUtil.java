@@ -21,6 +21,7 @@ import java.util.function.BiFunction;
  *
  * @author Pim
  */
+@SuppressWarnings("unused")
 @UtilityClass
 public class SpigotUtil
 {
@@ -95,7 +96,7 @@ public class SpigotUtil
      */
     public @NonNull Argument.ITabcompleteFunction onlinePlayersTabcompletion()
     {
-        return (commandSender, command, argument) ->
+        return (command, argument) ->
         {
             Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
             List<String> players = new ArrayList<>(onlinePlayers.size());
