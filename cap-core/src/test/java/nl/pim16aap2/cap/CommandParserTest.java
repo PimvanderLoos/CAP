@@ -337,8 +337,11 @@ class CommandParserTest
     void testSpaceSeparator()
     {
         final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
-        Assertions.assertDoesNotThrow(() -> cap
-            .parseInput(commandSender, "bigdoors numerical -max 9"));
+        assertParseResult(cap, "bigdoors numerical -max 9", "max", 9);
+        assertParseResult(cap, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\" --admin", "a",
+                          true);
+        assertParseResult(cap, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\"", "doorID", "mydoor");
+
         Assertions.assertDoesNotThrow(() -> cap
             .parseInput(commandSender, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\" --admin"));
         Assertions.assertDoesNotThrow(() -> cap

@@ -418,7 +418,7 @@ class CommandParser
         {
             final String nextArg = args.get(pos);
             final @NonNull Argument<?> argument;
-            final @NonNull String value;
+            @NonNull String value;
             if (nextArg.charAt(0) == ARGUMENT_PREFIX)
             {
                 // If the second character is also an ARGUMENT_PREFIX, then the long name is used
@@ -464,6 +464,7 @@ class CommandParser
                 value = nextArg;
             }
 
+            value = value.trim();
             try
             {
                 final @NonNull Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, cap);
