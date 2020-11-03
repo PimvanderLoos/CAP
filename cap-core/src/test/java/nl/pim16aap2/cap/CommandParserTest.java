@@ -75,9 +75,9 @@ class CommandParserTest
             .argument(new DoubleArgument().getOptional()
                                           .name("maxd").label("maxd").summary("Must be less than 10.0!")
                                           .argumentValidator(MaximumValidator.doubleMaximumValidator(10.0)).build())
-            .argument(new DoubleArgument().getOptional()
-                                          .name("range").label("range").summary("Must be between 10 and 20!")
-                                          .argumentValidator(RangeValidator.doubleRangeValidator(10, 20)).build())
+            .argument(new IntegerArgument().getOptional()
+                                           .name("range").label("range").summary("Must be between 10 and 20!")
+                                           .argumentValidator(RangeValidator.integerRangeValidator(10, 20)).build())
             .commandExecutor(commandResult ->
                                  new GenericCommand("numerical", commandResult.getParsedArgument("value")).runCommand())
             .build();
@@ -269,6 +269,16 @@ class CommandParserTest
                                 " is not of expected type: " + clazz.getCanonicalName());
     }
 
+    private <T> void assertParseResult(final @NonNull CAP cap, final @NonNull String command,
+                                       final @NonNull String name, final @NonNull T expected)
+    {
+        final @NonNull Optional<CommandResult> result = Assertions
+            .assertDoesNotThrow(() -> cap.parseInput(commandSender, command));
+
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(expected, result.get().getParsedArgument(name));
+    }
+
     @SneakyThrows
     void testNumericalInput(final @NonNull CAP cap)
     {
@@ -281,25 +291,22 @@ class CommandParserTest
         assertWrappedThrows(ValidationFailureException.class,
                             () -> cap.parseInput(commandSender, String.format("bigdoors numerical -max%c10", sep)));
         // With a max value of 10, 9 is perfect!
-        Assertions
-            .assertDoesNotThrow(() -> cap.parseInput(commandSender, String.format("bigdoors numerical -max%c9", sep)));
+        assertParseResult(cap, String.format("bigdoors numerical -max%c9", sep), "max", 9);
 
 
         // The maxd value is set to 10.0, so 10.0 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
                             () -> cap.parseInput(commandSender, String.format("bigdoors numerical -maxd%c10.0", sep)));
         // With a maxd value of 10.0, 9.9 is perfect!
-        Assertions
-            .assertDoesNotThrow(
-                () -> cap.parseInput(commandSender, String.format("bigdoors numerical -maxd%c9.9", sep)));
+        assertParseResult(cap, String.format("bigdoors numerical -maxd%c9.9", sep), "maxd", 9.9);
 
 
         // The min value is set to 10, so 10 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
                             () -> cap.parseInput(commandSender, String.format("bigdoors numerical -min%c10", sep)));
         // With a min value of 10, 11 is perfect!
-        Assertions
-            .assertDoesNotThrow(() -> cap.parseInput(commandSender, String.format("bigdoors numerical -min%c11", sep)));
+        assertParseResult(cap, String.format("bigdoors numerical -min%c11", sep), "min", 11);
+
 
         // The range is set to [10, 20], so 10 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
@@ -308,16 +315,10 @@ class CommandParserTest
         assertWrappedThrows(ValidationFailureException.class,
                             () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c20", sep)));
         // With a range of [10, 20], 11 is perfect!
-        Assertions.assertDoesNotThrow(
-            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c11", sep)));
+        assertParseResult(cap, String.format("bigdoors numerical -range%c11", sep), "range", 11);
 
-        // Let's give negative values some love.
-        Assertions.assertDoesNotThrow(
-            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -unbound%c-9", sep)));
-        final Optional<CommandResult> result = cap
-            .parseInput(commandSender, String.format("bigdoors numerical -unbound%c-9", sep));
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(result.get().<Integer>getParsedArgument("unbound"), -9);
+
+        assertParseResult(cap, String.format("bigdoors numerical -unbound%c-9", sep), "unbound", -9);
     }
 
     @Test
@@ -336,12 +337,44 @@ class CommandParserTest
     void testSpaceSeparator()
     {
         final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
-        Assertions.assertDoesNotThrow(() -> cap.parseInput(commandSender, "bigdoors numerical -max 9"));
+        Assertions.assertDoesNotThrow(() -> cap
+            .parseInput(commandSender, "bigdoors numerical -max 9"));
         Assertions.assertDoesNotThrow(() -> cap
             .parseInput(commandSender, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\" --admin"));
         Assertions.assertDoesNotThrow(() -> cap
             .parseInput(commandSender, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\""));
         Assertions.assertDoesNotThrow(() -> cap
             .parseInput(commandSender, "bigdoors addowner mydoor --player pim16aap2"));
+        Assertions.assertDoesNotThrow(() -> cap
+            .parseInput(commandSender, "bigdoors addowner mydoor --player    pim16aap2"));
+    }
+
+    @SneakyThrows
+    private void assertLastArgument(final @NonNull CAP cap, final @NonNull String command,
+                                    final @NonNull String commandName)
+    {
+        final String[] args = cap.split(command);
+        final CommandParser commandParser = new CommandParser(cap, commandSender, args,
+                                                              Character.toString(cap.separator));
+        Assertions.assertEquals(commandName, commandParser.getLastCommand().getCommand().getName());
+    }
+
+    @Test
+    void testGetLastCommand()
+    {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
+        assertLastArgument(cap, "bigdoors addowner test", "addowner");
+        assertLastArgument(cap, "bigdoors addowner ", "addowner");
+        assertLastArgument(cap, "bigdoors addowner=", "bigdoors");
+        assertLastArgument(cap, "bigdoors addowner help", "addowner");
+        assertLastArgument(cap, "bigdoors addowner help bigdoors", "addowner");
+        assertLastArgument(cap, "bigdoors help addowner ", "help");
+    }
+
+    @Test
+    void testGetLastCommandSpaceSeparator()
+    {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
+        assertLastArgument(cap, "bigdoors addowner ", "addowner");
     }
 }

@@ -44,16 +44,16 @@ class CommandParser
     protected @NonNull String separator;
     protected @NonNull Pattern separatorPattern;
 
-    protected CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                            final @NonNull String[] args, final @NonNull String separator)
+    CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull String[] args,
+                  final @NonNull String separator)
         throws EOFException
     {
-        this.args = preprocess(args);
-        this.commandSender = commandSender;
-        this.cap = cap;
         this.separator = separator;
         separatorPattern = Pattern.compile(separator);
         spaceSeparated = separator.equals(" ");
+        this.args = preprocess(args);
+        this.commandSender = commandSender;
+        this.cap = cap;
     }
 
     /**
@@ -63,8 +63,8 @@ class CommandParser
      * @param commands    The {@link Command}s to choose from.
      * @return The subset of {@link Command}s whose names start with the provided partial name.
      */
-    private @NonNull List<String> selectCommandsPartialMatch(final @NonNull String partialName,
-                                                             final @NonNull Collection<Command> commands)
+    protected @NonNull List<String> selectCommandsPartialMatch(final @NonNull String partialName,
+                                                               final @NonNull Collection<Command> commands)
     {
         final List<String> ret = new ArrayList<>(0);
         commands.forEach(
@@ -88,8 +88,8 @@ class CommandParser
      *                registered {@link Argument} for the given {@link Command}.
      * @return The list of {@link Argument#getName()} that can be used to complete the current {@link #args}.
      */
-    private @NonNull List<String> getTabCompleteArgumentNames(final @NonNull Command command,
-                                                              final @NonNull String lastArg)
+    protected @NonNull List<String> getTabCompleteArgumentNames(final @NonNull Command command,
+                                                                final @NonNull String lastArg)
     {
         final List<String> ret = new ArrayList<>(0);
         command.getArgumentManager().getArguments().forEach(
@@ -121,7 +121,7 @@ class CommandParser
      * @param command The {@link Command} for which to get the tab complete suggestions.
      * @return The list of tab complete suggestions.
      */
-    private @NonNull List<String> getTabCompleteWithoutValue(final @NonNull Command command)
+    protected @NonNull List<String> getTabCompleteWithoutValue(final @NonNull Command command)
     {
         final List<String> ret = new ArrayList<>(0);
 
@@ -176,9 +176,9 @@ class CommandParser
      * @param value    The current value to compare the results against.
      * @return The list of tab complete suggestions.
      */
-    private @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Command command,
-                                                                     final @NonNull Optional<Argument<?>> argument,
-                                                                     final @NonNull String value)
+    protected @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Command command,
+                                                                       final @NonNull Optional<Argument<?>> argument,
+                                                                       final @NonNull String value)
     {
         final List<String> options = new ArrayList<>(0);
         final @Nullable ITabcompleteFunction argumentValueCompletion = argument.map(Argument::getTabcompleteFunction)
@@ -202,7 +202,7 @@ class CommandParser
      * @param command The {@link Command} to get the tab complete options for.
      * @return The list of Strings suggested for the next parameter.
      */
-    private @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command)
+    protected @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command)
     {
         final String lastVal = args.get(args.size() - 1);
 
@@ -506,7 +506,7 @@ class CommandParser
     /**
      * See {@link #getLastCommand(Command, int)}.
      */
-    private @NonNull ParsedCommand getLastCommand()
+    protected @NonNull ParsedCommand getLastCommand()
         throws CommandNotFoundException
     {
         return getLastCommand(null, 0);
@@ -530,12 +530,12 @@ class CommandParser
      *                                  previous command or if the subcommand has not registered the supercommand as
      *                                  such.
      */
-    private @NonNull ParsedCommand getLastCommand(final @Nullable Command command, final int idx)
+    protected @NonNull ParsedCommand getLastCommand(final @Nullable Command command, final int idx)
         throws CommandNotFoundException
     {
         if (command == null)
         {
-            if (idx != 0) // TODO:
+            if (idx != 0)
                 throw new CommandNotFoundException(null, cap.isDebug());
 
             final @Nullable String commandName = args.size() > idx ? args.get(idx).trim() : null;
@@ -579,7 +579,7 @@ class CommandParser
      * @author Pim
      */
     @Value
-    private static class ParsedCommand
+    static class ParsedCommand
     {
         Command command;
         Integer index;

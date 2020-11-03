@@ -91,7 +91,7 @@ public class Main
         String res = sb.toString();
         if (res.length() > 2)
             res = res.substring(0, res.length() - 2);
-        return res;
+        return "[" + res + "]";
     }
 
     private static void tabComplete(final @NonNull CAP cap, final @NonNull String... args)

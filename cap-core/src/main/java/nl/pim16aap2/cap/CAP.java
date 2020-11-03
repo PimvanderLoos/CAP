@@ -11,10 +11,7 @@ import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
-import nl.pim16aap2.cap.exception.CommandNotFoundException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
-import nl.pim16aap2.cap.exception.MissingArgumentException;
-import nl.pim16aap2.cap.exception.NonExistingArgumentException;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 /**
  * The main class of this library. All commands within a single command system should be registered here.
@@ -82,16 +78,6 @@ public class CAP
     protected boolean debug = false;
 
     /**
-     * A positive lookbehind for spaces.
-     * <p>
-     * When simply splitting on spaces, whitespace won't be preserved. This regex will make sure to add any trailing
-     * whitespace to each argument.
-     * <p>
-     * For example, "/mycommand test   a" will become ["mycommand ", "test   ", "a"].
-     */
-    private static final @NonNull Pattern pat = Pattern.compile("((?<= ))");
-
-    /**
      * Gets a new instance of this {@link CAP} using the default values.
      * <p>
      * Use {@link CAP#toBuilder()} if you wish to customize it.
@@ -113,7 +99,7 @@ public class CAP
      */
     public @NonNull Optional<CommandResult> parseInput(final @NonNull ICommandSender commandSender, String args)
     {
-        return parseInput(commandSender, pat.split(args));
+        return parseInput(commandSender, split(args));
     }
 
     /**
@@ -125,13 +111,6 @@ public class CAP
      *                      If spaces are required in a value, use double quotation marks. Quotation marks that are not
      *                      escaped will be removed.
      * @return The {@link CommandResult} containing the parsed arguments.
-     *
-     * @throws CommandNotFoundException     If a specified command could not be found.
-     * @throws NonExistingArgumentException If a specified argument could not be found. E.g. '-p=player' for a command
-     *                                      for which no argument named "p" was registered.
-     * @throws MissingArgumentException     If a required argument was not provided.
-     * @throws EOFException                 If there are unmatched quotation marks. E.g. '-p="player'. Note that the
-     *                                      matching quotation mark can be in another string further down the array.
      */
     public @NonNull Optional<CommandResult> parseInput(final @NonNull ICommandSender commandSender, String... args)
     {
@@ -204,15 +183,49 @@ public class CAP
     }
 
     /**
+     * Splits a string containing a command on spaces while preserving whitespace as trailing whitespace.
+     * <p>
+     * E.g. <pre>"/mycommand  arg  value"</pre> will return <pre>["/mycommand  ", "arg  ", "value"]</pre>
+     *
+     * @param command The string to split.
+     * @return The command split on spaces.
+     */
+    public static @NonNull String[] split(final @NonNull String command)
+    {
+        final @NonNull List<String> args = new ArrayList<>();
+        int startIdx = 0;
+        boolean lastWhiteSpace = false;
+        for (int idx = 0; idx < command.length(); ++idx)
+        {
+            final char c = command.charAt(idx);
+            if (Character.isWhitespace(c))
+                lastWhiteSpace = true;
+            else
+            {
+                if (lastWhiteSpace)
+                {
+                    args.add(command.substring(startIdx, idx));
+                    startIdx = idx;
+                }
+                lastWhiteSpace = false;
+            }
+        }
+        if (startIdx < command.length())
+            args.add(command.substring(startIdx));
+        return args.toArray(new String[0]);
+    }
+
+    /**
      * Gets a list of suggestions for tab complete based on the current set of arguments.
      *
      * @param commandSender The {@link ICommandSender} to get the suggestions for.
      * @param args          The current set of (potentially incomplete) input arguments.
      * @return The list of suggestions based on the current set of input arguments.
      */
-    public List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender, final @NonNull String args)
+    public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
+                                                       final @NonNull String args)
     {
-        return getTabCompleteOptions(commandSender, pat.split(args));
+        return getTabCompleteOptions(commandSender, split(args));
     }
 
     /**
@@ -222,7 +235,8 @@ public class CAP
      * @param args          The current set of (potentially incomplete) input arguments split on spaces.
      * @return The list of suggestions based on the current set of input arguments.
      */
-    public List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender, final @NonNull String[] args)
+    public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
+                                                       final @NonNull String[] args)
     {
         try
         {
