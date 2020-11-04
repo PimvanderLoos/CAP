@@ -36,6 +36,7 @@ public class TabCompletionCache
             .duration(Duration.ofMinutes(2))
             .cleanup(Duration.ofMinutes(5))
             .softReference(true)
+            .refresh(true)
             .build();
 
     /**

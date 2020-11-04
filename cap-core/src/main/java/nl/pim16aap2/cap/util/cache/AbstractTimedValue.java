@@ -11,13 +11,21 @@ import java.util.Objects;
  */
 abstract class AbstractTimedValue<T>
 {
-    protected final long insertTime;
     protected final long timeOut;
+    protected long insertTime;
 
     protected AbstractTimedValue(final long timeOut)
     {
-        insertTime = System.currentTimeMillis();
         this.timeOut = timeOut;
+        refresh();
+    }
+
+    /**
+     * Refreshes the insertion time of this timed value. This updates the {@link #insertTime} to the current time.
+     */
+    public void refresh()
+    {
+        insertTime = System.currentTimeMillis();
     }
 
     /**

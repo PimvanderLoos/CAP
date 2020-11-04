@@ -18,7 +18,6 @@ import java.util.List;
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 //       Also, virtual commands don't need executors, just a help command?
-// TODO: Optionally refresh entries in the timed cache after accessing them.
 // TODO: Allow async suggestion generation.
 // TODO: Implement a system to load async-generated suggestions into the cache for synchronized usage (E.g. Spigot
 //       doesn't support async suggestion generation, Paper does).

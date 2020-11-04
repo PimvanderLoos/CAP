@@ -47,6 +47,15 @@ public class TimedCache<K, V>
     private final @NonNull Function<V, AbstractTimedValue<V>> timedValueCreator;
 
     /**
+     * Whether to refresh entries whenever they are accessed.
+     * <p>
+     * When set to false, entries will expire after the configured amount of time after their insertion time.
+     * <p>
+     * When set to true, entries will expire  after the configured amount of time after they were last retrieved.
+     */
+    private final boolean refresh;
+
+    /**
      * Constructor of {@link TimedCache}
      *
      * @param duration      The amount of time a cached entry remains valid.
@@ -58,14 +67,22 @@ public class TimedCache<K, V>
      *                      accessed after they have expired. This value also uses millisecond precision.
      * @param softReference Whether to wrap values in {@link SoftReference}s or not. This allows the garbage collector
      *                      to clear up any values as it sees fit.
+     * @param refresh       Whether to refresh entries whenever they are accessed.
+     *                      <p>
+     *                      When set to false, entries will expire after the configured amount of time after their
+     *                      insertion time.
+     *                      <p>
+     *                      When set to true, entries will expire  after the configured amount of time after they were
+     *                      last retrieved.
      */
     @Builder
     protected TimedCache(final @NonNull Duration duration, final @Nullable Duration cleanup,
-                         final boolean softReference)
+                         final boolean softReference, final boolean refresh)
     {
         timeOut = duration.toMillis();
         timedValueCreator = softReference ? this::createTimedSoftValue : this::createTimedValue;
         setupCleanupTask(cleanup == null ? 0 : cleanup.toMillis());
+        this.refresh = refresh;
     }
 
     /**
@@ -93,7 +110,11 @@ public class TimedCache<K, V>
         {
             final @Nullable V currentValue = current.getValue();
             if (currentValue != null)
+            {
+                if (refresh)
+                    current.refresh();
                 return currentValue;
+            }
         }
 
         return put(key, mappingFunction.apply(key));
@@ -127,6 +148,8 @@ public class TimedCache<K, V>
             cache.remove(key);
             return Optional.empty();
         }
+        if (refresh)
+            entry.refresh();
         return Optional.ofNullable(entry.getValue());
     }
 
