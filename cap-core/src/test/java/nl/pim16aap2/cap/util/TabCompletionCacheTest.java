@@ -53,7 +53,6 @@ class TabCompletionCacheTest
     {
         final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
 
-        System.out.println("\n0:");
         @NonNull List<String> input = new ArrayList<>(Arrays.asList("mycommand ", "t"));
         @NonNull List<String> output = tabCompletionCache
             .getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
