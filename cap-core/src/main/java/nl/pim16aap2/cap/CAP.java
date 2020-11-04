@@ -13,6 +13,7 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
+import nl.pim16aap2.cap.util.TabCompletionCache;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
@@ -32,6 +33,9 @@ import java.util.Optional;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CAP
 {
+    // Ideally, we wouldn't construct this at all if not needed, but Lombok won't allow me to use a constructor :(
+    private final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
+
     /**
      * The map containing all registered commands, with their names as key.
      */
@@ -50,6 +54,14 @@ public class CAP
     @Getter
     @Builder.Default
     protected final @NonNull DefaultHelpCommandRenderer helpCommandRenderer = DefaultHelpCommandRenderer.getDefault();
+
+    /**
+     * Whether or not to cache tabcompletion suggestions using a  {@link TabCompletionCache}.
+     */
+    @Getter
+    @Setter
+    @Builder.Default
+    protected boolean cacheTabcompletionSuggestions = true;
 
     /**
      * The {@link ExceptionHandler} that is used to handle CAP-related exceptions.
@@ -241,7 +253,14 @@ public class CAP
     {
         try
         {
-            return new CommandParser(this, commandSender, args, Character.toString(separator)).getTabCompleteOptions();
+            if (!cacheTabcompletionSuggestions)
+                return new CommandParser(this, commandSender, args, Character.toString(separator))
+                    .getTabCompleteOptions();
+
+            return tabCompletionCache
+                .getTabCompleteOptions(commandSender, args,
+                                       () -> new CommandParser(this, commandSender, args, Character.toString(separator))
+                                           .getTabCompleteOptions());
         }
         catch (EOFException e)
         {

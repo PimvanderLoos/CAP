@@ -20,9 +20,14 @@ import java.util.List;
 //       Also, virtual commands don't need executors, just a help command?
 // TODO: Caching for tabcomplete. Currently, everything is re-calculated every time the player types a new letter.
 //       However, every time more text is added, all we have to do is narrow the suggestions down even further.
+// TODO: Optionally refresh entries in the timed cache after accessing them.
+// TODO: TabCompletionCache: Maybe also store the suggestions for the last 1 or 2 letters? So if you make a typo, it's
+//       not immediately evicted from the cache.
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
+// TODO: The Argument's tab-completion function should take in the partial string to look for and the Commandsender.
+//       How else can we retrieve door names from the database?
 // TODO: Support ResourceBundle.
 // TODO: Currently, the commands are kinda stored in a tree shape (1 super, n subs). Perhaps store it in an actual tree?
 // TODO: For the long help, maybe fall back to the summary if no description is available?
