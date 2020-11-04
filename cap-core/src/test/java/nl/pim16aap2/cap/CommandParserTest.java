@@ -41,7 +41,6 @@ class CommandParserTest
      */
     private static @NonNull CAP setUp(final @NonNull CAP cap)
     {
-        cap.setCacheTabcompletionSuggestions(false);
         final int subCommandCount = 20;
         final List<Command> subcommands = new ArrayList<>(subCommandCount);
         for (int idx = 0; idx < subCommandCount; ++idx)

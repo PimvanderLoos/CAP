@@ -43,6 +43,8 @@ public class TabCompletionCache
      *
      * @param commandSender The {@link ICommandSender} for which to get the list of suggested tab completions.
      * @param args          The current list of arguments.
+     * @param lastArg       The last argument in the command. This may or may not be the last entry in the list of
+     *                      arguments, but the parser can figure that out.
      * @param fun           The function to retrieve the list of arguments if they cannot be retrieved from cache.
      * @return The list of suggested tab completions.
      *
@@ -50,6 +52,7 @@ public class TabCompletionCache
      */
     public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
                                                        final @NonNull List<String> args,
+                                                       final @NonNull String lastArg,
                                                        final @NonNull CheckedSupplier<List<String>, EOFException> fun)
         throws EOFException
     {
@@ -58,7 +61,7 @@ public class TabCompletionCache
         if (entryOpt.isPresent())
         {
             entry = entryOpt.get();
-            final @NonNull Optional<List<String>> suggestions = entry.suggestionsSubSelection(args);
+            final @NonNull Optional<List<String>> suggestions = entry.suggestionsSubSelection(args.size(), lastArg);
             if (suggestions.isPresent())
                 return suggestions.get();
         }
@@ -66,7 +69,7 @@ public class TabCompletionCache
             entry = tabCompletionCache.put(commandSender, new CacheEntry());
 
         final @NonNull List<String> newSuggestions = fun.get();
-        entry.update(newSuggestions, args.size(), args.get(args.size() - 1));
+        entry.update(newSuggestions, args.size(), lastArg);
         return newSuggestions;
     }
 
@@ -79,7 +82,7 @@ public class TabCompletionCache
     {
         private @Nullable List<String> suggestions = null;
         private int argCount = 0;
-        private @NonNull String lastArg = "";
+        private @NonNull String previousArg = "";
 
         /**
          * Updates the current suggestions data.
@@ -92,28 +95,28 @@ public class TabCompletionCache
         {
             this.suggestions = new ArrayList<>(suggestions);
             this.argCount = argCount;
-            this.lastArg = lastArg;
+            previousArg = lastArg;
         }
 
         /**
          * Gets all the cached suggestions
          *
-         * @param args The list of space-split arguments.
+         * @param newArgCount The new number of arguments.
          * @return The list of the narrowed-down suggestions list.
          */
-        public @NonNull Optional<List<String>> suggestionsSubSelection(final @NonNull List<String> args)
+        public @NonNull Optional<List<String>> suggestionsSubSelection(final int newArgCount,
+                                                                       final @NonNull String lastArg)
         {
-            if (suggestions == null || args.size() != argCount)
+            if (suggestions == null || newArgCount != argCount)
                 return Optional.empty();
 
-            argCount = args.size();
+            argCount = newArgCount;
 
-            final @NonNull String arg = args.get(args.size() - 1);
-            if (!arg.startsWith(lastArg))
+            if (!lastArg.startsWith(previousArg))
                 return Optional.empty();
 
-            suggestions.removeIf(val -> !val.startsWith(arg));
-            lastArg = arg;
+            suggestions.removeIf(val -> !val.startsWith(lastArg));
+            previousArg = lastArg;
 
             return Optional.of(new ArrayList<>(suggestions));
         }

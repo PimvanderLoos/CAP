@@ -258,7 +258,7 @@ public class CAP
                     .getTabCompleteOptions();
 
             return tabCompletionCache
-                .getTabCompleteOptions(commandSender, args,
+                .getTabCompleteOptions(commandSender, args, CommandParser.getLastArgumentValue(args, separator),
                                        () -> new CommandParser(this, commandSender, args, Character.toString(separator))
                                            .getTabCompleteOptions());
         }

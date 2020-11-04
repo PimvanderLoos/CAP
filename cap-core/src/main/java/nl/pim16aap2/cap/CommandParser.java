@@ -66,6 +66,13 @@ class CommandParser
         this.cap = cap;
     }
 
+    public static @NonNull String getLastArgumentValue(final @NonNull List<String> args, final char separator)
+    {
+        final String[] parts = args.get(args.size() - 1).split(Character.toString(separator), 2);
+        System.out.printf("Parts: %s, %s\n", parts[0], (parts.length > 1 ? parts[1] : "NULL"));
+        return parts[parts.length - 1].trim();
+    }
+
     /**
      * Selects a list of {@link Command}s that start with a certain string from a superset of {@link Command}s.
      *

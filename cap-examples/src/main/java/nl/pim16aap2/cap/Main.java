@@ -23,6 +23,9 @@ import java.util.List;
 // TODO: Optionally refresh entries in the timed cache after accessing them.
 // TODO: TabCompletionCache: Maybe also store the suggestions for the last 1 or 2 letters? So if you make a typo, it's
 //       not immediately evicted from the cache.
+// TODO: Allow async suggestion generation.
+// TODO: Implement a system to load async-generated suggestions into the cache for synchronized usage (E.g. Spigot
+//       doesn't support async suggestion generation, Paper does).
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?

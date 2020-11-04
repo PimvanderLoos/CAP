@@ -56,43 +56,46 @@ class TabCompletionCacheTest
         System.out.println("\n0:");
         @NonNull List<String> input = new ArrayList<>(Arrays.asList("mycommand ", "t"));
         @NonNull List<String> output = tabCompletionCache
-            .getTabCompleteOptions(commandSender, input, () -> supplier(suggestionsA, "t"));
+            .getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
         Assertions.assertEquals(5, output.size());
         Assertions.assertEquals(1, usedSupplier);
 
         output = tabCompletionCache
-            .getTabCompleteOptions(commandSender, input, () -> supplier(suggestionsA, "t"));
+            .getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
         Assertions.assertEquals(5, output.size());
         Assertions.assertEquals(1, usedSupplier);
 
         input = new ArrayList<>(Arrays.asList("mycommand ", "test"));
-        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, () -> supplier(suggestionsA, "test"));
+        output = tabCompletionCache
+            .getTabCompleteOptions(commandSender, input, "test", () -> supplier(suggestionsA, "test"));
         Assertions.assertEquals(4, output.size());
         Assertions.assertEquals(1, usedSupplier);
 
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "t"));
-        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, () -> supplier(suggestionsA, "t"));
+        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
         Assertions.assertEquals(5, output.size());
         Assertions.assertEquals(2, usedSupplier);
 
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "t"));
-        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, () -> supplier(suggestionsA, "t"));
+        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
         Assertions.assertEquals(5, output.size());
         Assertions.assertEquals(2, usedSupplier);
 
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "tt"));
-        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, () -> supplier(suggestionsA, "tt"));
+        output = tabCompletionCache
+            .getTabCompleteOptions(commandSender, input, "tt", () -> supplier(suggestionsA, "tt"));
         Assertions.assertEquals(1, output.size());
         Assertions.assertEquals(2, usedSupplier);
 
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "test"));
-        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, () -> supplier(suggestionsA, "test"));
+        output = tabCompletionCache
+            .getTabCompleteOptions(commandSender, input, "test", () -> supplier(suggestionsA, "test"));
         Assertions.assertEquals(4, output.size());
         Assertions.assertEquals(3, usedSupplier);
 
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "testCom"));
         output = tabCompletionCache
-            .getTabCompleteOptions(commandSender, input, () -> supplier(suggestionsA, "testCom"));
+            .getTabCompleteOptions(commandSender, input, "testCom", () -> supplier(suggestionsA, "testCom"));
         Assertions.assertEquals(2, output.size());
         Assertions.assertEquals(3, usedSupplier);
     }
