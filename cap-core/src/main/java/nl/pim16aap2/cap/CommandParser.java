@@ -29,19 +29,62 @@ import java.util.stream.Collectors;
 
 import static nl.pim16aap2.cap.argument.Argument.ITabcompleteFunction;
 
+/**
+ * This class is used to parse commands and their arguments into a single {@link CommandResult} and to generate
+ * suggestions.
+ *
+ * @author Pim
+ */
 class CommandParser
 {
+    /**
+     * The list of {@link Command}s/{@link Argument}s to parse.
+     */
     private final @NonNull List<String> args;
-    final @NonNull nl.pim16aap2.cap.CAP cap;
+
+    /**
+     * The {@link CAP} instance that controls this command parser.
+     */
+    final @NonNull CAP cap;
+
+    /**
+     * The {@link ICommandSender} for which to parse the {@link #args}.
+     */
     private final @NonNull ICommandSender commandSender;
 
+    /**
+     * The prefix used for free {@link Argument}s.
+     */
     private static final char ARGUMENT_PREFIX = '-';
+    /**
+     * The pattern for leading {@link #ARGUMENT_PREFIX}es.
+     */
     private static final Pattern LEADING_PREFIX_PATTERN = Pattern.compile("^[-]{1,2}");
+    /**
+     * The pattern for non-escaped quotation marks.
+     */
     private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
+    /**
+     * Whether or not free {@link Argument}s are separated from their values using spaces or not.
+     * <p>
+     * Example for true: "--player pim16aap2".
+     * <p>
+     * Example for false: "--player=pim16aap2".
+     */
     @Getter
     protected boolean spaceSeparated;
+
+    /**
+     * The separator between free {@link Argument}s are separated from their values.
+     * <p>
+     * For example, when this is '=', the resulting input for a free argument could be: "--player=pim16aap2".
+     */
     protected @NonNull String separator;
+
+    /**
+     * The pattern for the {@link #separator}.
+     */
     protected @NonNull Pattern separatorPattern;
 
     /**
@@ -66,6 +109,13 @@ class CommandParser
         this.cap = cap;
     }
 
+    /**
+     * Gets the value of the last argument in a list of arguments.
+     *
+     * @param args      The list of arguments.
+     * @param separator The separator to use.
+     * @return THe value of the last argument.
+     */
     public static @NonNull String getLastArgumentValue(final @NonNull List<String> args, final char separator)
     {
         final String[] parts = args.get(args.size() - 1).split(Character.toString(separator), 2);
