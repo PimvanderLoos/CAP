@@ -35,8 +35,6 @@ import java.util.List;
 // TODO: For Spigot's tabcompletions, suggesting "pim16aap2" for "--player=pim" will actually remove the "--player=pim"
 //       part when selected and only use "pim16aap2". As such, the flag and everything will have to be prepended when the
 //       separator is not a space.
-// TODO: The suggestion of "/bigdoors addowner mydoor " should not be "mydoor" again.
-//       Similarly, "/bigdoors addowner mydoor --player=pim16aap2 " should not suggest "pim16aap2" again.
 // TODO: Optional case sensitivity?
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
 //       (there are probably going to be some casting issues).
@@ -59,6 +57,9 @@ import java.util.List;
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 // TODO: The CAP instance shouldn't know anything about a color scheme.
+// TODO: If valueless flags have been provided already, don't suggest them again.
+//       E.g. when giving "/bigdoors addowner mydoor --admin -", it shouldn't suggest "-a" or "--admin" again, as using
+//       that flag again won't do anything.
 
 public class Main
 {

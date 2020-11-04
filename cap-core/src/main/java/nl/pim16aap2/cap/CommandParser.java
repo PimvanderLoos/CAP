@@ -219,9 +219,10 @@ class CommandParser
                                                                  .getArgument(previousName.trim()));
 
         final @NonNull Optional<Argument<?>> argument;
-        final String value;
+        String value;
 
-        if (previousArgument.isPresent() && !previousArgument.get().isValuesLess())
+        if (previousArgument.isPresent() && !previousArgument.get().isValuesLess() &&
+            !previousArgument.get().isPositional())
         {
             argument = previousArgument;
             value = lastVal;
@@ -242,7 +243,7 @@ class CommandParser
 
                 final String[] parts = separatorPattern.split(freeArgument, 2);
                 final String argumentName = parts[0];
-                value = parts[1];
+                value = parts[1].trim();
                 argument = command.getCommand().getArgumentManager().getArgument(argumentName);
             }
             // If the argument is a positional argument (i.e. it doesn't start with the prefix and you don't have to

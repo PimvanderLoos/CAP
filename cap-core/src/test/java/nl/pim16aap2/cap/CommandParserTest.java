@@ -210,8 +210,12 @@ class CommandParserTest
     @Test
     void getFreeArgumentValueTabCompleteOptionsSpaceSeparator()
     {
-        getFreeArgumentValueTabCompleteOptions(
-            setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build()));
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
+        getFreeArgumentValueTabCompleteOptions(cap);
+
+        final @NonNull List<String> playerNameSuggestions =
+            cap.getTabCompleteOptions(commandSender, "bigdoors addowner flag --player  ");
+        Assertions.assertEquals(4, playerNameSuggestions.size());
     }
 
     @Test
