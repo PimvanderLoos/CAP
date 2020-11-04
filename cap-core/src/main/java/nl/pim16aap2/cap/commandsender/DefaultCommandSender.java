@@ -24,4 +24,13 @@ public class DefaultCommandSender implements ICommandSender
     {
         System.out.println(message);
     }
+
+    @Override
+    public int hashCode()
+    {
+        // A hashcode of 0 works fine, because this command sender interacts directly with sysout,
+        // which is assumed to be just 1 user. This is only a default implementation anyway, so
+        // it doesn't matter that this may not cover every use case.
+        return 0;
+    }
 }
