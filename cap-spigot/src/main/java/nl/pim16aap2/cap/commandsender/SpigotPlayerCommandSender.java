@@ -22,4 +22,10 @@ public class SpigotPlayerCommandSender implements ICommandSender
     {
         player.spigot().sendMessage(SpigotTextUtility.toBaseComponents(message));
     }
+
+    @Override
+    public int hashCode()
+    {
+        return player.hashCode();
+    }
 }

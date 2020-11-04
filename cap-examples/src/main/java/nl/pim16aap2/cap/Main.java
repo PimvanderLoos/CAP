@@ -18,11 +18,15 @@ import java.util.List;
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 //       Also, virtual commands don't need executors, just a help command?
-// TODO: Caching for tabcomplete. Currently, everything is re-calculated every time the player types a new letter.
-//       However, every time more text is added, all we have to do is narrow the suggestions down even further.
+// TODO: Optionally refresh entries in the timed cache after accessing them.
+// TODO: Allow async suggestion generation.
+// TODO: Implement a system to load async-generated suggestions into the cache for synchronized usage (E.g. Spigot
+//       doesn't support async suggestion generation, Paper does).
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
+// TODO: The Argument's tab-completion function should take in the partial string to look for and the Commandsender.
+//       How else can we retrieve door names from the database?
 // TODO: Support ResourceBundle.
 // TODO: Currently, the commands are kinda stored in a tree shape (1 super, n subs). Perhaps store it in an actual tree?
 // TODO: For the long help, maybe fall back to the summary if no description is available?

@@ -44,6 +44,16 @@ class CommandParser
     protected @NonNull String separator;
     protected @NonNull Pattern separatorPattern;
 
+    /**
+     * Constructs a new command parser.
+     *
+     * @param cap           The {@link CAP} instance that owns this object..
+     * @param commandSender The {@link ICommandSender} that issued the command.
+     * @param args          The list of arguments split on spaces (with preserved whitespace).
+     * @param separator     The separator between a free argument's flag and its value. E.g. '<i>=</i>' for the format
+     *                      <i>'--player=pim16aap2'</i>.
+     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
+     */
     CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull List<String> args,
                   final @NonNull String separator)
         throws EOFException
@@ -54,6 +64,12 @@ class CommandParser
         this.args = preprocess(args);
         this.commandSender = commandSender;
         this.cap = cap;
+    }
+
+    public static @NonNull String getLastArgumentValue(final @NonNull List<String> args, final char separator)
+    {
+        final String[] parts = args.get(args.size() - 1).split(Character.toString(separator), 2);
+        return parts[parts.length - 1].trim();
     }
 
     /**
