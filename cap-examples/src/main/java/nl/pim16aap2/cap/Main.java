@@ -18,11 +18,7 @@ import java.util.List;
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 //       Also, virtual commands don't need executors, just a help command?
-// TODO: Caching for tabcomplete. Currently, everything is re-calculated every time the player types a new letter.
-//       However, every time more text is added, all we have to do is narrow the suggestions down even further.
 // TODO: Optionally refresh entries in the timed cache after accessing them.
-// TODO: TabCompletionCache: Maybe also store the suggestions for the last 1 or 2 letters? So if you make a typo, it's
-//       not immediately evicted from the cache.
 // TODO: Allow async suggestion generation.
 // TODO: Implement a system to load async-generated suggestions into the cache for synchronized usage (E.g. Spigot
 //       doesn't support async suggestion generation, Paper does).

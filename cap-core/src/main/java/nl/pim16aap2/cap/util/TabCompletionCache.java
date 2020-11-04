@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Represents a cache for tabcompletion suggestions. Once a list of suggestions is created for an {@link
+ * Represents a cache for tab completion suggestions. Once a list of suggestions is created for an {@link
  * ICommandSender}, this list will be used for future lookups, if possible. Once a list of String suggestions is
  * constructed, we don't have to recalculate all the options if the partial match increased in size, but still starts
  * with the same characters as used for the last lookup. If this is the case, we can just remove all entries from the
@@ -80,16 +80,34 @@ public class TabCompletionCache
      */
     private static class CacheEntry
     {
+        /**
+         * The number of characters to keep in the cache behind the new one.
+         * <p>
+         * For example, when set to a value of two and a "lastarg" of "pim", the suggestions list will contain all
+         * suggestions for "pi" and "pim", but not "p".
+         */
+        private static final int CUTOFF_DELTA = 2;
+
+        /**
+         * The cached list of suggestions.
+         */
         private @Nullable List<String> suggestions = null;
-        private int argCount = 0;
+
+        /**
+         * The cached last argument.
+         */
         private @NonNull String previousArg = "";
+
+        /**
+         * The number of arguments in the command.
+         */
+        private int argCount = 0;
 
         /**
          * Updates the current suggestions data.
          *
          * @param suggestions The updated list of suggestions.
          * @param argCount    The updated number of arguments in the command.
-         * @param lastArg     The updated value of the last argument in the command.
          */
         public void update(final @NonNull List<String> suggestions, final int argCount, final @NonNull String lastArg)
         {
@@ -112,13 +130,33 @@ public class TabCompletionCache
 
             argCount = newArgCount;
 
-            if (!lastArg.startsWith(previousArg))
+            // Get the cutoff for the old argument. This is the base string for every entry in the cached list.
+            // So, if the provided lastArg does not start with that, we know that we don't have its results cached.
+            // Because the CUTOFF_DELTA is 2, we'd get an empty string if there are only 2 characters. Therefore, we
+            // try to get the first character in that case (if long enough).
+            final int previousCutoff = Math.min(previousArg.length(), Math.max(1, previousArg.length() - CUTOFF_DELTA));
+            final @NonNull String basePreviousArg =
+                previousArg.substring(0, Math.min(previousArg.length(), previousCutoff));
+
+            // If the basePrevious arg is empty we don't have any data about what substring the argument starts with.
+            // So we treat it as an invalid start.
+            if (basePreviousArg.isEmpty() || !lastArg.startsWith(basePreviousArg))
                 return Optional.empty();
 
-            suggestions.removeIf(val -> !val.startsWith(lastArg));
-            previousArg = lastArg;
+            final int newCutoff = Math.max(0, lastArg.length() - CUTOFF_DELTA);
+            suggestions.removeIf(val -> val.length() < newCutoff);
 
-            return Optional.of(new ArrayList<>(suggestions));
+            final @NonNull ArrayList<String> newSuggestions = new ArrayList<>(suggestions.size());
+            suggestions.forEach(
+                val ->
+                {
+                    if (val.startsWith(lastArg))
+                        newSuggestions.add(val);
+                });
+
+            newSuggestions.trimToSize();
+            previousArg = lastArg;
+            return Optional.of(newSuggestions);
         }
     }
 }

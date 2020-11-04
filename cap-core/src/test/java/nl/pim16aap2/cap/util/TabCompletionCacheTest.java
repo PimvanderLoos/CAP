@@ -53,49 +53,69 @@ class TabCompletionCacheTest
     {
         final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
 
+        // Make sure that all suggestions are returned properly.
         @NonNull List<String> input = new ArrayList<>(Arrays.asList("mycommand ", "t"));
         @NonNull List<String> output = tabCompletionCache
             .getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
         Assertions.assertEquals(5, output.size());
         Assertions.assertEquals(1, usedSupplier);
 
+        // Make sure that the suggestions didn't get corrupted between retrievals.
+        // So it should give the same output for the same input without quering the supplier method.
         output = tabCompletionCache
             .getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
         Assertions.assertEquals(5, output.size());
         Assertions.assertEquals(1, usedSupplier);
 
+        // Ensure that the cache can properly create subselections from the cached suggestions from
+        // new data without querying the supplier.
         input = new ArrayList<>(Arrays.asList("mycommand ", "test"));
         output = tabCompletionCache
             .getTabCompleteOptions(commandSender, input, "test", () -> supplier(suggestionsA, "test"));
         Assertions.assertEquals(4, output.size());
         Assertions.assertEquals(1, usedSupplier);
 
+        // Ensure the the cache will use the supplier if it cannot generate suggestions from the cached data.
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "t"));
         output = tabCompletionCache.getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
         Assertions.assertEquals(5, output.size());
         Assertions.assertEquals(2, usedSupplier);
 
-        input = new ArrayList<>(Arrays.asList("mycommand ", "test", "t"));
-        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
-        Assertions.assertEquals(5, output.size());
-        Assertions.assertEquals(2, usedSupplier);
-
+        // Make sure that making another subselection still works as intended (correct results, supplier not queried).
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "tt"));
         output = tabCompletionCache
             .getTabCompleteOptions(commandSender, input, "tt", () -> supplier(suggestionsA, "tt"));
         Assertions.assertEquals(1, output.size());
         Assertions.assertEquals(2, usedSupplier);
 
+        // Make sure that going back one character and then typing something else returns the
+        // correct results without querying the supplier.
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "test"));
         output = tabCompletionCache
             .getTabCompleteOptions(commandSender, input, "test", () -> supplier(suggestionsA, "test"));
         Assertions.assertEquals(4, output.size());
-        Assertions.assertEquals(3, usedSupplier);
+        Assertions.assertEquals(2, usedSupplier);
 
-        input = new ArrayList<>(Arrays.asList("mycommand ", "test", "testCom"));
+        // Make a subselection to prepare for the next test.
+        input = new ArrayList<>(Arrays.asList("mycommand ", "test", "testCo"));
         output = tabCompletionCache
-            .getTabCompleteOptions(commandSender, input, "testCom", () -> supplier(suggestionsA, "testCom"));
+            .getTabCompleteOptions(commandSender, input, "testCo", () -> supplier(suggestionsA, "testCo"));
         Assertions.assertEquals(2, output.size());
-        Assertions.assertEquals(3, usedSupplier);
+        Assertions.assertEquals(2, usedSupplier);
+
+        // Make sure that going back two characters and then typing something else returns the
+        // correct results without querying the supplier.
+        input = new ArrayList<>(Arrays.asList("mycommand ", "test", "test"));
+        output = tabCompletionCache
+            .getTabCompleteOptions(commandSender, input, "test", () -> supplier(suggestionsA, "test"));
+        Assertions.assertEquals(4, output.size());
+        Assertions.assertEquals(2, usedSupplier);
+
+        // Make sure that an invalid input does not generate any suggestions and doesn't query the supplier.
+        input = new ArrayList<>(Arrays.asList("mycommand ", "test", "testa"));
+        output = tabCompletionCache
+            .getTabCompleteOptions(commandSender, input, "testa", () -> supplier(suggestionsA, "testa"));
+        Assertions.assertEquals(0, output.size());
+        Assertions.assertEquals(2, usedSupplier);
     }
 }
