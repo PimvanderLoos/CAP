@@ -94,9 +94,9 @@ public class SpigotUtil
      *
      * @return The names of all online players.
      */
-    public @NonNull Argument.ITabcompleteFunction onlinePlayersTabcompletion()
+    public @NonNull Argument.ITabcompleteFunction onlinePlayersTabCompletion()
     {
-        return (command, argument) ->
+        return (request) ->
         {
             Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
             List<String> players = new ArrayList<>(onlinePlayers.size());

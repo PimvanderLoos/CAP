@@ -14,6 +14,7 @@ import nl.pim16aap2.cap.exception.MissingArgumentException;
 import nl.pim16aap2.cap.exception.NoPermissionException;
 import nl.pim16aap2.cap.exception.NonExistingArgumentException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
+import nl.pim16aap2.cap.util.TabCompletionRequest;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
@@ -252,7 +253,7 @@ class CommandParser
         if (argumentValueCompletion == null)
             return options;
 
-        argumentValueCompletion.apply(command, argument.get()).forEach(
+        argumentValueCompletion.apply(new TabCompletionRequest(command, argument.get(), commandSender, value)).forEach(
             entry ->
             {
                 if (entry.startsWith(value))

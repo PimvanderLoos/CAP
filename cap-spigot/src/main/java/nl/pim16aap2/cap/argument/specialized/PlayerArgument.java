@@ -24,24 +24,24 @@ public class PlayerArgument extends SpecializedArgument<Player>
     @Override
     public Argument.OptionalBuilder<Player> getOptional()
     {
-        return super.getOptional().tabcompleteFunction(SpigotUtil.onlinePlayersTabcompletion());
+        return super.getOptional().tabcompleteFunction(SpigotUtil.onlinePlayersTabCompletion());
     }
 
     @Override
     public Argument.@NonNull RequiredBuilder<Player> getRequired()
     {
-        return super.getRequired().tabcompleteFunction(SpigotUtil.onlinePlayersTabcompletion());
+        return super.getRequired().tabcompleteFunction(SpigotUtil.onlinePlayersTabCompletion());
     }
 
     @Override
     public Argument.@NonNull OptionalPositionalBuilder<Player> getOptionalPositional()
     {
-        return super.getOptionalPositional().tabcompleteFunction(SpigotUtil.onlinePlayersTabcompletion());
+        return super.getOptionalPositional().tabcompleteFunction(SpigotUtil.onlinePlayersTabCompletion());
     }
 
     @Override
     public RepeatableArgument.@NonNull RepeatableArgumentBuilder<Player> getRepeatable()
     {
-        return super.getRepeatable().tabcompleteFunction(SpigotUtil.onlinePlayersTabcompletion());
+        return super.getRepeatable().tabcompleteFunction(SpigotUtil.onlinePlayersTabCompletion());
     }
 }

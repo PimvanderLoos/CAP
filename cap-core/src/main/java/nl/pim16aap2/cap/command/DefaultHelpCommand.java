@@ -15,6 +15,7 @@ import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.util.Functional.CheckedConsumer;
+import nl.pim16aap2.cap.util.TabCompletionRequest;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,15 +100,13 @@ public class DefaultHelpCommand extends Command
     /**
      * Gets all the potential tabcompletion suggestions.
      *
-     * @param command  The {@link Command} that owns the {@link Argument}.
-     * @param argument The {@link Argument}.
+     * @param request The {@link TabCompletionRequest} containing the data required to build a list of suggestions.
      * @return The list of potential tabcompletion suggestions.
      */
-    public static @NonNull List<@NonNull String> getSuggestions(final @NonNull Command command,
-                                                                final @NonNull Argument<?> argument)
+    public static @NonNull List<@NonNull String> getSuggestions(final @NonNull TabCompletionRequest request)
     {
         // TODO: Add support for numerical stuff using the pageCount stuff from the renderer.
-
+        final @NonNull Command command = request.getCommand();
         if (!(command instanceof DefaultHelpCommand) || !command.getSuperCommand().isPresent() ||
             command.getSuperCommand().get().getSubCommandCount() == 0)
             return new ArrayList<>(0);
