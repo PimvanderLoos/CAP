@@ -47,15 +47,24 @@ class TabCompletionCacheTest
     }
 
     /**
-     * Returns a completablefuture.
+     * Selects a list of Strings starting with a certain prefix from another List. The list is returned after a delay.
      *
-     * @param fut The completable future to return.
+     * @param supply The list of Strings to choose from.
+     * @param prefix The prefix each string in the returned list must {@link String#startsWith(String)}.
+     * @param millis The amount of time (in milliseconds) to wait before returning the value.
      * @return A {@link CompletableFuture} with a new list of Strings starting with the prefix.
      */
-    private @NonNull CompletableFuture<List<String>> asyncSupplier(final @NonNull CompletableFuture<List<String>> fut)
+    private @NonNull List<String> delayedSupplier(final @NonNull List<String> supply, final @NonNull String prefix,
+                                                  final long millis)
     {
         usedSupplier += 1;
-        return fut;
+        List<String> ret = new ArrayList<>();
+        supply.forEach(val ->
+                       {
+                           if (val.startsWith(prefix)) ret.add(val);
+                       });
+        UtilsForTesting.sleep(millis);
+        return ret;
     }
 
     /**
@@ -142,36 +151,45 @@ class TabCompletionCacheTest
         // Make sure that all suggestions are returned properly.
         @NonNull List<String> input = new ArrayList<>(Arrays.asList("mycommand ", "t"));
 
-        final @NonNull CompletableFuture<List<String>> suggestions = new CompletableFuture<>();
+        // Make sure that the output is empty while it hasn't been accessed yet.
         @NonNull List<String> output = tabCompletionCache
-            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> asyncSupplier(suggestions));
+            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> delayedSupplier(suggestionsA, "t", 30));
         Assertions.assertEquals(0, output.size());
+        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
+        // Make sure that requesting the same input before the supplier has completed doesn't query the supplier again.
+        // It should just wait instead.
         output = tabCompletionCache
-            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> asyncSupplier(suggestions));
+            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> delayedSupplier(suggestionsA, "t", 30));
         Assertions.assertEquals(0, output.size());
+        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
-        suggestions.complete(suggestionsA);
+        // Make sure that once the supplier has completed, the result is available without querying the supplier again.
+        UtilsForTesting.sleep(35); // Make sure that the CompletableFuture has completed.
         output = tabCompletionCache
-            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> asyncSupplier(suggestions));
+            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> delayedSupplier(suggestionsA, "t", 30));
         Assertions.assertEquals(suggestionsA.size(), output.size());
+        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
-
+        // Add another argument, this should invalidate the cache (i.e., it should be empty again).
         input = new ArrayList<>(Arrays.asList("mycommand ", "test ", "t"));
-        final @NonNull CompletableFuture<List<String>> newSuggestions = new CompletableFuture<>();
         output = tabCompletionCache
-            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> asyncSupplier(newSuggestions));
+            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> delayedSupplier(suggestionsA, "t", 30));
         Assertions.assertEquals(0, output.size());
+        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(2, usedSupplier);
 
+        // Make sure that after completion, we can retrieve a narrower result without querying the cache again.
+        UtilsForTesting.sleep(35); // Make sure that the CompletableFuture has completed.
         input = new ArrayList<>(Arrays.asList("mycommand ", "test ", "testCom"));
-        newSuggestions.complete(suggestionsA);
         output = tabCompletionCache
-            .getDelayedTabCompleteOptions(commandSender, input, "testCom", () -> asyncSupplier(newSuggestions));
+            .getDelayedTabCompleteOptions(commandSender, input, "testCom",
+                                          () -> delayedSupplier(suggestionsA, "testCom", 30));
         Assertions.assertEquals(2, output.size());
+        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(2, usedSupplier);
     }
 
@@ -184,19 +202,24 @@ class TabCompletionCacheTest
         // Make sure that all suggestions are returned properly.
         @NonNull List<String> input = new ArrayList<>(Arrays.asList("mycommand ", "t"));
 
-        final @NonNull CompletableFuture<List<String>> suggestions = new CompletableFuture<>();
+        // Place a request that takes 30ms to complete.
+        tabCompletionCache
+            .getTabCompleteOptionsAsync(commandSender, input, "t", () -> delayedSupplier(suggestionsA, "t", 30));
+        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        Assertions.assertEquals(1, usedSupplier);
+
+        // Make sure that placing another request before the 30ms are over doesn't result in querying the supplier again.
+        tabCompletionCache
+            .getTabCompleteOptionsAsync(commandSender, input, "t", () -> delayedSupplier(suggestionsA, "t", 30));
+        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        Assertions.assertEquals(1, usedSupplier);
+
+        // Make sure that the output is correct once the supplier does complete (and that the supplier isn't queried again).
+        UtilsForTesting.sleep(35);
         @NonNull CompletableFuture<List<String>> output = tabCompletionCache
-            .getTabCompleteOptionsAsync(commandSender, input, "t", () -> asyncSupplier(suggestions));
-        Assertions.assertEquals(output, suggestions);
-        Assertions.assertEquals(1, usedSupplier);
-
-        tabCompletionCache.getTabCompleteOptionsAsync(commandSender, input, "t", () -> asyncSupplier(suggestions));
-        Assertions.assertEquals(1, usedSupplier);
-
-        suggestions.complete(suggestionsA);
-        output = tabCompletionCache
-            .getTabCompleteOptionsAsync(commandSender, input, "t", () -> asyncSupplier(suggestions));
+            .getTabCompleteOptionsAsync(commandSender, input, "t", () -> delayedSupplier(suggestionsA, "t", 30));
         Assertions.assertEquals(suggestionsA.size(), output.get(1, TimeUnit.MILLISECONDS).size());
+        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
     }
 }

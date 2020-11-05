@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Represents a cache for tab completion suggestions. Once a list of suggestions is created for an {@link
@@ -84,13 +85,10 @@ public class TabCompletionCache
      * @param fun           The function to retrieve the {@link CompletableFuture} list of arguments if they cannot be
      *                      retrieved from cache.
      * @return The {@link CompletableFuture} of the list of suggested tab completions.
-     *
-     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
      */
     public @NonNull CompletableFuture<List<String>> getTabCompleteOptionsAsync(
         final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
-        final @NonNull CheckedSupplier<CompletableFuture<List<String>>, EOFException> fun)
-        throws EOFException
+        final @NonNull Supplier<List<String>> fun)
     {
         final @NonNull Pair<List<String>, CompletableFuture<List<String>>> result =
             getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun);
@@ -105,9 +103,9 @@ public class TabCompletionCache
      * <p>
      * If the results are not cached, the results will be put in the cache using an asynchronous method.
      * <p>
-     * Unlike {@link #getTabCompleteOptionsAsync(ICommandSender, List, String, CheckedSupplier)}, this method will not
-     * return a {@link CompletableFuture} with the results if they had to be retrieved async, but instead, it will
-     * return an empty list.
+     * Unlike {@link #getTabCompleteOptionsAsync(ICommandSender, List, String, Supplier)}, this method will not return a
+     * {@link CompletableFuture} with the results if they had to be retrieved async, but instead, it will return an
+     * empty list.
      * <p>
      * Successive calls will keep returning empty lists until the async supplier has supplied the cache with a result.
      * From then on, it will retrieve any values
@@ -120,17 +118,15 @@ public class TabCompletionCache
      *                      retrieved from cache.
      * @return The list of suggested tab completions if one could be found. If no results are in the cache yet an empty
      * list is returned.
-     *
-     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
      */
     public @NonNull List<String> getDelayedTabCompleteOptions(
         final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
-        final @NonNull CheckedSupplier<CompletableFuture<List<String>>, EOFException> fun)
-        throws EOFException
+        final @NonNull Supplier<List<String>> fun)
     {
         final @NonNull Pair<List<String>, CompletableFuture<List<String>>> result =
             getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun);
 
+        System.out.println("is first null? " + (result.first == null));
         if (result.first != null)
             return result.first;
         return new ArrayList<>(0);
@@ -155,13 +151,10 @@ public class TabCompletionCache
      * returned and the other value is always null. So if a list of suggestions could be found, those will be returned
      * and null for the future one. If no list of suggestions could be found, the future suggestions will be returned
      * and the list will be null.
-     *
-     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
      */
     private @NonNull Pair<List<String>, CompletableFuture<List<String>>> getAsyncCachedEntrySuggestions(
         final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
-        final @NonNull CheckedSupplier<CompletableFuture<List<String>>, EOFException> fun)
-        throws EOFException
+        final @NonNull Supplier<List<String>> fun)
     {
         final @NonNull AsyncCacheEntry cacheEntry;
         final @NonNull Optional<CacheEntry> entryOpt = tabCompletionCache.get(commandSender);
@@ -175,7 +168,7 @@ public class TabCompletionCache
             return new Pair<>(suggestions.get(), null);
 
 
-        final @NonNull CompletableFuture<List<String>> newSuggestions = fun.get();
+        final @NonNull CompletableFuture<List<String>> newSuggestions = CompletableFuture.supplyAsync(fun);
         cacheEntry.prepare(newSuggestions, args.size(), lastArg);
 
         return new Pair<>(null, newSuggestions);

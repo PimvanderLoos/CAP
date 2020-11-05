@@ -30,4 +30,13 @@ public class TabCompletionRequest
      * The partial String to use as base for the tab-completion suggestions.
      */
     @NonNull String partial;
+
+    /**
+     * Whether this request was made asynchronously or not.
+     * <p>
+     * False = This request was made from the main thread.
+     * <p>
+     * True = This request was made asynchronously.
+     */
+    boolean async;
 }

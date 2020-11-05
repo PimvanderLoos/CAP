@@ -2,6 +2,7 @@ package nl.pim16aap2.cap.util.cache;
 
 import lombok.NonNull;
 import lombok.Setter;
+import nl.pim16aap2.cap.util.UtilsForTesting;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -163,31 +164,12 @@ class TimedCacheTest
         timedCache.put("key", "value");
         Assertions.assertTrue(timedCache.get("key").isPresent());
         Assertions.assertEquals(1, timedCache.getSize());
-        sleep(3);
+        UtilsForTesting.sleep(3);
         Assertions.assertEquals(1, timedCache.getSize());
 
         clock.setCurrentMillis(200);
-        sleep(3);
+        UtilsForTesting.sleep(3);
         Assertions.assertEquals(0, timedCache.getSize());
-    }
-
-    /**
-     * Sleeps the thread for a defined amount of time.
-     * <p>
-     * When interrupted, the test will fail.
-     *
-     * @param millis The number of milliseconds to sleep for.
-     */
-    private void sleep(final long millis)
-    {
-        try
-        {
-            Thread.sleep(millis);
-        }
-        catch (InterruptedException e)
-        {
-            Assertions.fail("Failed to sleep thread");
-        }
     }
 
     /**

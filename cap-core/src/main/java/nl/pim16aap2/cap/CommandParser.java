@@ -178,7 +178,7 @@ class CommandParser
      * Command}.
      * <p>
      * If the {@link Command} has any positional {@link Argument}s, {@link #getTabCompleteFromArgumentFunction(Command,
-     * Optional, String)} will be used for the first one (and an empty String as value, so every entry will be
+     * Optional, String, boolean)} will be used for the first one (and an empty String as value, so every entry will be
      * accepted).
      * <p>
      * If the {@link Command} only has free {@link Argument}s, a list of those will be returned instead.
@@ -188,7 +188,7 @@ class CommandParser
      * @param command The {@link Command} for which to get the tab complete suggestions.
      * @return The list of tab complete suggestions.
      */
-    protected @NonNull List<String> getTabCompleteWithoutValue(final @NonNull Command command)
+    protected @NonNull List<String> getTabCompleteWithoutValue(final @NonNull Command command, final boolean async)
     {
         final List<String> ret = new ArrayList<>(0);
 
@@ -210,8 +210,8 @@ class CommandParser
                 });
         }
         else
-            return getTabCompleteFromArgumentFunction(command,
-                                                      command.getArgumentManager().getPositionalArgumentAtIdx(0), "");
+            return getTabCompleteFromArgumentFunction
+                (command, command.getArgumentManager().getPositionalArgumentAtIdx(0), "", async);
 
         return ret;
     }
@@ -241,11 +241,12 @@ class CommandParser
      * @param command  The {@link Command} that owns the {@link Argument}.
      * @param argument The {@link Argument} that will be used to get the tab complete suggestions.
      * @param value    The current value to compare the results against.
+     * @param async    Whether this request was made on the main thread.
      * @return The list of tab complete suggestions.
      */
     protected @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Command command,
                                                                        final @NonNull Optional<Argument<?>> argument,
-                                                                       final @NonNull String value)
+                                                                       final @NonNull String value, final boolean async)
     {
         final List<String> options = new ArrayList<>(0);
         final @Nullable ITabcompleteFunction argumentValueCompletion = argument.map(Argument::getTabcompleteFunction)
@@ -253,12 +254,13 @@ class CommandParser
         if (argumentValueCompletion == null)
             return options;
 
-        argumentValueCompletion.apply(new TabCompletionRequest(command, argument.get(), commandSender, value)).forEach(
-            entry ->
-            {
-                if (entry.startsWith(value))
-                    options.add(entry);
-            });
+        argumentValueCompletion.apply(new TabCompletionRequest(command, argument.get(), commandSender, value, async))
+                               .forEach(
+                                   entry ->
+                                   {
+                                       if (entry.startsWith(value))
+                                           options.add(entry);
+                                   });
 
         return options;
     }
@@ -267,9 +269,10 @@ class CommandParser
      * Gets the tab complete options for the {@link Argument}s of a {@link Command}.
      *
      * @param command The {@link Command} to get the tab complete options for.
+     * @param async   Whether or not this method was called asynchronously.
      * @return The list of Strings suggested for the next parameter.
      */
-    protected @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command)
+    protected @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command, final boolean async)
     {
         final String lastVal = args.get(args.size() - 1);
 
@@ -326,21 +329,22 @@ class CommandParser
             }
         }
 
-        return getTabCompleteFromArgumentFunction(command.command, argument, value);
+        return getTabCompleteFromArgumentFunction(command.command, argument, value, async);
     }
 
     /**
      * Gets a list of suggestions for tab complete based on the current {@link #args}.
      *
+     * @param async Whether or not this method was called asynchronously or not.
      * @return A list of tab completion suggestions.
      */
-    public @NonNull List<String> getTabCompleteOptions()
+    public @NonNull List<String> getTabCompleteOptions(final boolean async)
     {
         try
         {
             final @NonNull ParsedCommand parsedCommand = getLastCommand();
             if (parsedCommand.getIndex() >= (args.size() - 1))
-                return getTabCompleteWithoutValue(parsedCommand.getCommand());
+                return getTabCompleteWithoutValue(parsedCommand.getCommand(), async);
 
             final List<String> suggestions = new ArrayList<>();
             // Check if the found index is the before-last argument.
@@ -352,7 +356,7 @@ class CommandParser
                                                               parsedCommand.getCommand().getSubCommands()));
 
             if (parsedCommand.getCommand().getArgumentManager().getArguments().size() > 0)
-                suggestions.addAll(getTabCompleteArguments(parsedCommand));
+                suggestions.addAll(getTabCompleteArguments(parsedCommand, async));
 
             return suggestions;
         }

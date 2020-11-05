@@ -18,9 +18,10 @@ import java.util.List;
 // TODO: Hidden commands should have a default executor that just displays the help menu.
 // TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
 //       Also, virtual commands don't need executors, just a help command?
-// TODO: Allow async suggestion generation.
-// TODO: Implement a system to load async-generated suggestions into the cache for synchronized usage (E.g. Spigot
-//       doesn't support async suggestion generation, Paper does).
+// TODO: Make sure that async permission checking is allowed for Spigot. Currently, when using async tab-completion
+//       suggestions generation, the permissions are checked asynchronously. That may or may not be problematic.
+// TODO: Let the Spigot module load async-generated tab-completion suggestions into the cache for synchronized usage
+//       (as Spigot doesn't have an async tab-complete event).
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?

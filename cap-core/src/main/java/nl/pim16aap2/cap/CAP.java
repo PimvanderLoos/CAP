@@ -13,6 +13,7 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
+import nl.pim16aap2.cap.util.Functional.CheckedSupplier;
 import nl.pim16aap2.cap.util.TabCompletionCache;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * The main class of this library. All commands within a single command system should be registered here.
@@ -241,6 +244,7 @@ public class CAP
         return getTabCompleteOptions(commandSender, split(args));
     }
 
+
     /**
      * Gets a list of suggestions for tab complete based on the current set of arguments.
      *
@@ -253,18 +257,51 @@ public class CAP
     {
         try
         {
-            if (!cacheTabcompletionSuggestions)
-                return new CommandParser(this, commandSender, args, Character.toString(separator))
-                    .getTabCompleteOptions();
+            final @NonNull CheckedSupplier<List<String>, EOFException> supplier = () ->
+                new CommandParser(this, commandSender, args, Character.toString(separator))
+                    .getTabCompleteOptions(false);
 
-            return tabCompletionCache
-                .getTabCompleteOptions(commandSender, args, CommandParser.getLastArgumentValue(args, separator),
-                                       () -> new CommandParser(this, commandSender, args, Character.toString(separator))
-                                           .getTabCompleteOptions());
+            if (!cacheTabcompletionSuggestions)
+                return supplier.get();
+
+            final @NonNull String lastValue = CommandParser.getLastArgumentValue(args, separator);
+            return tabCompletionCache.getTabCompleteOptions(commandSender, args, lastValue, supplier);
         }
         catch (EOFException e)
         {
             return new ArrayList<>(0);
         }
+    }
+
+    /**
+     * Asynchronously gets a list of suggestions for tab complete based on the current set of arguments.
+     *
+     * @param commandSender The {@link ICommandSender} to get the suggestions for.
+     * @param args          The current set of (potentially incomplete) input arguments split on spaces.
+     * @return The list of suggestions based on the current set of input arguments.
+     */
+    public @NonNull CompletableFuture<List<String>> getTabCompleteOptionsAsync(
+        final @NonNull ICommandSender commandSender, final @NonNull List<String> args)
+    {
+        // TODO: Do something about the EOFException.
+        final @NonNull Supplier<List<String>> supplier = () ->
+        {
+            try
+            {
+                return new CommandParser(this, commandSender, args, Character.toString(separator))
+                    .getTabCompleteOptions(true);
+            }
+            catch (EOFException e)
+            {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        };
+
+        if (!cacheTabcompletionSuggestions)
+            return CompletableFuture.supplyAsync(supplier);
+
+        final @NonNull String lastValue = CommandParser.getLastArgumentValue(args, separator);
+        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, args, lastValue, supplier);
     }
 }
