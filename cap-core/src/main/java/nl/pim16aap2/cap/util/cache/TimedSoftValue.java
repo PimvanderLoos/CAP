@@ -4,15 +4,29 @@ import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.SoftReference;
+import java.time.Clock;
 import java.util.Objects;
 
+/**
+ * Represents an {@link AbstractTimedValue} wrapped in a {@link SoftReference}.
+ *
+ * @param <T> The type of the value to store.
+ * @author Pim
+ */
 class TimedSoftValue<T> extends AbstractTimedValue<T>
 {
     private final @NonNull SoftReference<T> value;
 
-    public TimedSoftValue(final @NonNull T val, final long timeOut)
+    /**
+     * Constructor of {@link TimedSoftValue}.
+     *
+     * @param clock   The {@link Clock} to use to determine anything related to time (insertion, age).
+     * @param val     The value of this {@link TimedSoftValue}.
+     * @param timeOut The amount of time (in milliseconds) before this entry expires.
+     */
+    public TimedSoftValue(final @NonNull Clock clock, final @NonNull T val, final long timeOut)
     {
-        super(timeOut);
+        super(clock, timeOut);
         value = new SoftReference<>(val);
     }
 

@@ -1,7 +1,9 @@
 package nl.pim16aap2.cap.util.cache;
 
+import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Clock;
 import java.util.Objects;
 
 /**
@@ -13,9 +15,11 @@ abstract class AbstractTimedValue<T>
 {
     protected final long timeOut;
     protected long insertTime;
+    protected final @NonNull Clock clock;
 
-    protected AbstractTimedValue(final long timeOut)
+    protected AbstractTimedValue(final @NonNull Clock clock, final long timeOut)
     {
+        this.clock = clock;
         this.timeOut = timeOut;
         refresh();
     }
@@ -25,7 +29,7 @@ abstract class AbstractTimedValue<T>
      */
     public void refresh()
     {
-        insertTime = System.currentTimeMillis();
+        insertTime = clock.millis();
     }
 
     /**
@@ -48,7 +52,7 @@ abstract class AbstractTimedValue<T>
     {
         if (timeOut == 0)
             return false;
-        return (System.currentTimeMillis() - insertTime) > timeOut;
+        return (clock.millis() - insertTime) > timeOut;
     }
 
     /**

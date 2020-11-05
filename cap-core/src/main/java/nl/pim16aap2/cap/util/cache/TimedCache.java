@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.SoftReference;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -56,6 +57,22 @@ public class TimedCache<K, V>
     private final boolean refresh;
 
     /**
+     * The clock to use to determine the insertion/cleanup times.
+     */
+    private final @NonNull Clock clock;
+
+    // For testing purposes.
+    TimedCache(final @NonNull Clock clock, final @NonNull Duration duration, final @Nullable Duration cleanup,
+               final boolean softReference, final boolean refresh)
+    {
+        this.clock = clock;
+        timeOut = duration.toMillis();
+        timedValueCreator = softReference ? this::createTimedSoftValue : this::createTimedValue;
+        setupCleanupTask(cleanup == null ? 0 : cleanup.toMillis());
+        this.refresh = refresh;
+    }
+
+    /**
      * Constructor of {@link TimedCache}
      *
      * @param duration      The amount of time a cached entry remains valid.
@@ -79,11 +96,9 @@ public class TimedCache<K, V>
     protected TimedCache(final @NonNull Duration duration, final @Nullable Duration cleanup,
                          final boolean softReference, final boolean refresh)
     {
-        timeOut = duration.toMillis();
-        timedValueCreator = softReference ? this::createTimedSoftValue : this::createTimedValue;
-        setupCleanupTask(cleanup == null ? 0 : cleanup.toMillis());
-        this.refresh = refresh;
+        this(Clock.systemUTC(), duration, cleanup, softReference, refresh);
     }
+
 
     /**
      * Puts a new key/value pair in the cache.
@@ -196,7 +211,7 @@ public class TimedCache<K, V>
      */
     private AbstractTimedValue<V> createTimedValue(final @NonNull V val)
     {
-        return new TimedValue<>(val, timeOut);
+        return new TimedValue<>(clock, val, timeOut);
     }
 
     /**
@@ -208,7 +223,7 @@ public class TimedCache<K, V>
      */
     private AbstractTimedValue<V> createTimedSoftValue(final @NonNull V val)
     {
-        return new TimedSoftValue<>(val, timeOut);
+        return new TimedSoftValue<>(clock, val, timeOut);
     }
 
     /**
