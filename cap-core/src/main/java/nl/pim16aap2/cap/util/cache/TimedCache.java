@@ -158,14 +158,15 @@ public class TimedCache<K, V>
         if (entry == null)
             return Optional.empty();
 
-        if (entry.timedOut())
+        final @Nullable V value = entry.getValue();
+        if (value == null)
         {
             cache.remove(key);
             return Optional.empty();
         }
         if (refresh)
             entry.refresh();
-        return Optional.ofNullable(entry.getValue());
+        return Optional.ofNullable(value);
     }
 
     /**

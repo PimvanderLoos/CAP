@@ -4,7 +4,6 @@ import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Clock;
-import java.util.Objects;
 
 /**
  * Represents a value in a {@link TimedCache}. It holds the value and the time of insertion.
@@ -53,24 +52,5 @@ abstract class AbstractTimedValue<T>
         if (timeOut == 0)
             return false;
         return (clock.millis() - insertTime) > timeOut;
-    }
-
-    /**
-     * Check if an object equals the {@link AbstractTimedValue#getValue()} of this {@link AbstractTimedValue}. Note that
-     * a {@link AbstractTimedValue} object would return false!
-     *
-     * @param o The object to compare to the {@link AbstractTimedValue#getValue()} of this {@link AbstractTimedValue}.
-     * @return True if the {@link AbstractTimedValue#getValue()} of the object equals the {@link
-     * AbstractTimedValue#getValue()} of this {@link AbstractTimedValue}, otherwise false.
-     */
-    public boolean equalsValue(final @Nullable Object o)
-    {
-        if (o == null)
-            return false;
-        if (o == this)
-            return true;
-        if (o instanceof TimedValue)
-            return Objects.equals(getValue(), ((TimedValue) o).getValue());
-        return false;
     }
 }

@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.SoftReference;
 import java.time.Clock;
-import java.util.Objects;
 
 /**
  * Represents an {@link AbstractTimedValue} wrapped in a {@link SoftReference}.
@@ -52,17 +51,5 @@ class TimedSoftValue<T> extends AbstractTimedValue<T>
     public @NonNull SoftReference<T> getRawValue()
     {
         return value;
-    }
-
-    @Override
-    public boolean equalsValue(final @Nullable Object o)
-    {
-        if (o == null)
-            return false;
-        if (o == this)
-            return true;
-        if (o instanceof TimedSoftValue)
-            return Objects.equals(getValue(), ((TimedSoftValue) o).getValue());
-        return false;
     }
 }

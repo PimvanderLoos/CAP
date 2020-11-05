@@ -112,6 +112,31 @@
                 </configuration>
             </plugin>
 
+            <!-- Add Lombok config -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>lombok-config</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <propertyfile file="lombok.config">
+                                    <entry key="config.stopBubbling" value="true"/>
+                                    <!-- Adding the lombok annotation makes sure that Jacoco will ignore these methods -->
+                                    <entry key="lombok.addLombokGeneratedAnnotation" value="true"/>
+                                </propertyfile>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
