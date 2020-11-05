@@ -138,6 +138,17 @@ class CommandParserTest
     }
 
     @Test
+    void testGetLastArgumentValue()
+    {
+        Assertions.assertEquals("user",
+                                CommandParser.getLastArgumentValue(Arrays.asList("command", "--player=user"), '='));
+        Assertions.assertEquals("user",
+                                CommandParser.getLastArgumentValue(Arrays.asList("command", "--player ", "user"), ' '));
+        Assertions.assertEquals("user",
+                                CommandParser.getLastArgumentValue(Arrays.asList("command", "user"), '='));
+    }
+
+    @Test
     void getCommandTabCompleteOptions()
     {
         final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
