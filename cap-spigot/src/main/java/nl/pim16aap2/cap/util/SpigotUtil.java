@@ -2,6 +2,7 @@ package nl.pim16aap2.cap.util;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import nl.pim16aap2.cap.SpigotCAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.AllowedCommandSenderType;
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 
 /**
@@ -89,6 +91,14 @@ public class SpigotUtil
         return true;
     }
 
+    private @NonNull List<String> getOnlinePlayers()
+    {
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+        List<String> players = new ArrayList<>(onlinePlayers.size());
+        onlinePlayers.forEach(player -> players.add(player.getName()));
+        return players;
+    }
+
     /**
      * Gets an {@link Argument.ITabcompleteFunction} that retrieves a list of the names of all online players.
      *
@@ -98,10 +108,23 @@ public class SpigotUtil
     {
         return (request) ->
         {
-            Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
-            List<String> players = new ArrayList<>(onlinePlayers.size());
-            onlinePlayers.forEach(player -> players.add(player.getName()));
-            return players;
+            if (request.isAsync())
+            {
+                if (!(request.getCap() instanceof SpigotCAP))
+                    throw new RuntimeException(
+                        "CAP of request for online players is not a Spigot CAP! No results generated!");
+                try
+                {
+                    return Bukkit.getServer().getScheduler().callSyncMethod(((SpigotCAP) request.getCap()).getPlugin(),
+                                                                            SpigotUtil::getOnlinePlayers).get();
+                }
+                catch (InterruptedException | ExecutionException e)
+                {
+                    Thread.currentThread().interrupt();
+                    return new ArrayList<>(0);
+                }
+            }
+            return getOnlinePlayers();
         };
     }
 }

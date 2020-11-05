@@ -254,13 +254,13 @@ class CommandParser
         if (argumentValueCompletion == null)
             return options;
 
-        argumentValueCompletion.apply(new TabCompletionRequest(command, argument.get(), commandSender, value, async))
-                               .forEach(
-                                   entry ->
-                                   {
-                                       if (entry.startsWith(value))
-                                           options.add(entry);
-                                   });
+        argumentValueCompletion
+            .apply(new TabCompletionRequest(command, argument.get(), commandSender, value, async, cap))
+            .forEach(entry ->
+                     {
+                         if (entry.startsWith(value))
+                             options.add(entry);
+                     });
 
         return options;
     }

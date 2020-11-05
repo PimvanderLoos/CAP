@@ -2,6 +2,7 @@ package nl.pim16aap2.cap.util;
 
 import lombok.NonNull;
 import lombok.Value;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -39,4 +40,9 @@ public class TabCompletionRequest
      * True = This request was made asynchronously.
      */
     boolean async;
+
+    /**
+     * The {@link CAP} instance that issued this request.
+     */
+    @NonNull CAP cap;
 }
