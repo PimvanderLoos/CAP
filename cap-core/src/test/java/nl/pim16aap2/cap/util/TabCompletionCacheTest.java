@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 class TabCompletionCacheTest
 {
@@ -42,6 +44,18 @@ class TabCompletionCacheTest
                            if (val.startsWith(prefix)) ret.add(val);
                        });
         return ret;
+    }
+
+    /**
+     * Returns a completablefuture.
+     *
+     * @param fut The completable future to return.
+     * @return A {@link CompletableFuture} with a new list of Strings starting with the prefix.
+     */
+    private @NonNull CompletableFuture<List<String>> asyncSupplier(final @NonNull CompletableFuture<List<String>> fut)
+    {
+        usedSupplier += 1;
+        return fut;
     }
 
     /**
@@ -117,5 +131,72 @@ class TabCompletionCacheTest
             .getTabCompleteOptions(commandSender, input, "testa", () -> supplier(suggestionsA, "testa"));
         Assertions.assertEquals(0, output.size());
         Assertions.assertEquals(2, usedSupplier);
+    }
+
+    @SneakyThrows
+    @Test
+    void testDelayedSuggestions()
+    {
+        final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
+
+        // Make sure that all suggestions are returned properly.
+        @NonNull List<String> input = new ArrayList<>(Arrays.asList("mycommand ", "t"));
+
+        final @NonNull CompletableFuture<List<String>> suggestions = new CompletableFuture<>();
+        @NonNull List<String> output = tabCompletionCache
+            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> asyncSupplier(suggestions));
+        Assertions.assertEquals(0, output.size());
+        Assertions.assertEquals(1, usedSupplier);
+
+        output = tabCompletionCache
+            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> asyncSupplier(suggestions));
+        Assertions.assertEquals(0, output.size());
+        Assertions.assertEquals(1, usedSupplier);
+
+        suggestions.complete(suggestionsA);
+        output = tabCompletionCache
+            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> asyncSupplier(suggestions));
+        Assertions.assertEquals(suggestionsA.size(), output.size());
+        Assertions.assertEquals(1, usedSupplier);
+
+
+        input = new ArrayList<>(Arrays.asList("mycommand ", "test ", "t"));
+        final @NonNull CompletableFuture<List<String>> newSuggestions = new CompletableFuture<>();
+        output = tabCompletionCache
+            .getDelayedTabCompleteOptions(commandSender, input, "t", () -> asyncSupplier(newSuggestions));
+        Assertions.assertEquals(0, output.size());
+        Assertions.assertEquals(2, usedSupplier);
+
+        input = new ArrayList<>(Arrays.asList("mycommand ", "test ", "testCom"));
+        newSuggestions.complete(suggestionsA);
+        output = tabCompletionCache
+            .getDelayedTabCompleteOptions(commandSender, input, "testCom", () -> asyncSupplier(newSuggestions));
+        Assertions.assertEquals(2, output.size());
+        Assertions.assertEquals(2, usedSupplier);
+    }
+
+    @SneakyThrows
+    @Test
+    void testFutureSuggestions()
+    {
+        final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
+
+        // Make sure that all suggestions are returned properly.
+        @NonNull List<String> input = new ArrayList<>(Arrays.asList("mycommand ", "t"));
+
+        final @NonNull CompletableFuture<List<String>> suggestions = new CompletableFuture<>();
+        @NonNull CompletableFuture<List<String>> output = tabCompletionCache
+            .getTabCompleteOptionsAsync(commandSender, input, "t", () -> asyncSupplier(suggestions));
+        Assertions.assertEquals(output, suggestions);
+        Assertions.assertEquals(1, usedSupplier);
+
+        tabCompletionCache.getTabCompleteOptionsAsync(commandSender, input, "t", () -> asyncSupplier(suggestions));
+        Assertions.assertEquals(1, usedSupplier);
+
+        suggestions.complete(suggestionsA);
+        output = tabCompletionCache
+            .getTabCompleteOptionsAsync(commandSender, input, "t", () -> asyncSupplier(suggestions));
+        Assertions.assertEquals(suggestionsA.size(), output.get(1, TimeUnit.MILLISECONDS).size());
+        Assertions.assertEquals(1, usedSupplier);
     }
 }

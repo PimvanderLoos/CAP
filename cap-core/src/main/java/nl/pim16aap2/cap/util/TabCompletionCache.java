@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a cache for tab completion suggestions. Once a list of suggestions is created for an {@link
@@ -57,21 +58,127 @@ public class TabCompletionCache
                                                        final @NonNull CheckedSupplier<List<String>, EOFException> fun)
         throws EOFException
     {
-        final @NonNull Optional<CacheEntry> entryOpt = tabCompletionCache.get(commandSender);
-        final @NonNull CacheEntry entry;
-        if (entryOpt.isPresent())
-        {
-            entry = entryOpt.get();
-            final @NonNull Optional<List<String>> suggestions = entry.suggestionsSubSelection(args.size(), lastArg);
-            if (suggestions.isPresent())
-                return suggestions.get();
-        }
-        else
-            entry = tabCompletionCache.put(commandSender, new CacheEntry());
+        final @NonNull CacheEntry cacheEntry =
+            tabCompletionCache.get(commandSender)
+                              .orElseGet(() -> tabCompletionCache.put(commandSender, new CacheEntry()));
+
+        final @NonNull Optional<List<String>> suggestions = cacheEntry.suggestionsSubSelection(args.size(), lastArg);
+        if (suggestions.isPresent())
+            return suggestions.get();
+
 
         final @NonNull List<String> newSuggestions = fun.get();
-        entry.update(newSuggestions, args.size(), lastArg);
+        cacheEntry.reset(newSuggestions, args.size(), lastArg);
         return newSuggestions;
+    }
+
+    /**
+     * Gets the list of suggested tab complete options for an {@link ICommandSender} base on the current arguments.
+     * <p>
+     * If the results are not cached, the results will be obtained using an asynchronous method.
+     *
+     * @param commandSender The {@link ICommandSender} for which to get the list of suggested tab completions.
+     * @param args          The current list of arguments.
+     * @param lastArg       The last argument in the command. This may or may not be the last entry in the list of
+     *                      arguments, but the parser can figure that out.
+     * @param fun           The function to retrieve the {@link CompletableFuture} list of arguments if they cannot be
+     *                      retrieved from cache.
+     * @return The {@link CompletableFuture} of the list of suggested tab completions.
+     *
+     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
+     */
+    public @NonNull CompletableFuture<List<String>> getTabCompleteOptionsAsync(
+        final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
+        final @NonNull CheckedSupplier<CompletableFuture<List<String>>, EOFException> fun)
+        throws EOFException
+    {
+        final @NonNull Pair<List<String>, CompletableFuture<List<String>>> result =
+            getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun);
+
+        if (result.first != null)
+            return CompletableFuture.completedFuture(result.first);
+        return result.second;
+    }
+
+    /**
+     * Gets the list of suggested tab complete options for an {@link ICommandSender} base on the current arguments.
+     * <p>
+     * If the results are not cached, the results will be put in the cache using an asynchronous method.
+     * <p>
+     * Unlike {@link #getTabCompleteOptionsAsync(ICommandSender, List, String, CheckedSupplier)}, this method will not
+     * return a {@link CompletableFuture} with the results if they had to be retrieved async, but instead, it will
+     * return an empty list.
+     * <p>
+     * Successive calls will keep returning empty lists until the async supplier has supplied the cache with a result.
+     * From then on, it will retrieve any values
+     *
+     * @param commandSender The {@link ICommandSender} for which to get the list of suggested tab completions.
+     * @param args          The current list of arguments.
+     * @param lastArg       The last argument in the command. This may or may not be the last entry in the list of
+     *                      arguments, but the parser can figure that out.
+     * @param fun           The function to retrieve the {@link CompletableFuture} list of arguments if they cannot be
+     *                      retrieved from cache.
+     * @return The list of suggested tab completions if one could be found. If no results are in the cache yet an empty
+     * list is returned.
+     *
+     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
+     */
+    public @NonNull List<String> getDelayedTabCompleteOptions(
+        final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
+        final @NonNull CheckedSupplier<CompletableFuture<List<String>>, EOFException> fun)
+        throws EOFException
+    {
+        final @NonNull Pair<List<String>, CompletableFuture<List<String>>> result =
+            getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun);
+
+        if (result.first != null)
+            return result.first;
+        return new ArrayList<>(0);
+    }
+
+    /**
+     * Gets the list of tab completion suggestions from an async supplier.
+     * <p>
+     * If no entry exists in the cache for the provided {@link ICommandSender}, a new entry will be created with a new
+     * {@link AsyncCacheEntry} as its value.
+     * <p>
+     * If the entry does exist, it will be used to narrow down the previously-obtained suggestions using the provided
+     * lastArg.
+     *
+     * @param commandSender The {@link ICommandSender} for which to get the list of suggested tab completions.
+     * @param args          The current list of arguments.
+     * @param lastArg       The last argument in the command. This may or may not be the last entry in the list of
+     *                      arguments, but the parser can figure that out.
+     * @param fun           The function to retrieve the {@link CompletableFuture} list of arguments if they cannot be
+     *                      retrieved from cache.
+     * @return Either a list of suggestions or a {@link CompletableFuture} with the suggestions. Only a single value is
+     * returned and the other value is always null. So if a list of suggestions could be found, those will be returned
+     * and null for the future one. If no list of suggestions could be found, the future suggestions will be returned
+     * and the list will be null.
+     *
+     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
+     */
+    private @NonNull Pair<List<String>, CompletableFuture<List<String>>> getAsyncCachedEntrySuggestions(
+        final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
+        final @NonNull CheckedSupplier<CompletableFuture<List<String>>, EOFException> fun)
+        throws EOFException
+    {
+        final @NonNull AsyncCacheEntry cacheEntry;
+        final @NonNull Optional<CacheEntry> entryOpt = tabCompletionCache.get(commandSender);
+        if (!entryOpt.isPresent() || !(entryOpt.get() instanceof AsyncCacheEntry))
+            cacheEntry = (AsyncCacheEntry) tabCompletionCache.put(commandSender, new AsyncCacheEntry());
+        else
+            cacheEntry = (AsyncCacheEntry) entryOpt.get();
+
+        final @NonNull Optional<List<String>> suggestions = cacheEntry.suggestionsSubSelection(args.size(), lastArg);
+        if (suggestions.isPresent())
+            return new Pair<>(suggestions.get(), null);
+
+
+        final @NonNull CompletableFuture<List<String>> newSuggestions = fun.get();
+        cacheEntry.prepare(newSuggestions, args.size(), lastArg);
+
+        return new Pair<>(null, newSuggestions);
     }
 
     /**
@@ -87,22 +194,22 @@ public class TabCompletionCache
          * For example, when set to a value of two and a "lastarg" of "pim", the suggestions list will contain all
          * suggestions for "pi" and "pim", but not "p".
          */
-        private static final int CUTOFF_DELTA = 2;
+        protected static final int CUTOFF_DELTA = 2;
 
         /**
          * The cached list of suggestions.
          */
-        private @Nullable List<String> suggestions = null;
+        protected @Nullable List<String> suggestions = null;
 
         /**
          * The cached last argument.
          */
-        private @NonNull String previousArg = "";
+        protected @NonNull String previousArg = "";
 
         /**
          * The number of arguments in the command.
          */
-        private int argCount = 0;
+        protected int argCount = 0;
 
         /**
          * Updates the current suggestions data.
@@ -110,7 +217,7 @@ public class TabCompletionCache
          * @param suggestions The updated list of suggestions.
          * @param argCount    The updated number of arguments in the command.
          */
-        public void update(final @NonNull List<String> suggestions, final int argCount, final @NonNull String lastArg)
+        public void reset(final @NonNull List<String> suggestions, final int argCount, final @NonNull String lastArg)
         {
             this.suggestions = new ArrayList<>(suggestions);
             this.argCount = argCount;
@@ -159,5 +266,48 @@ public class TabCompletionCache
             previousArg = lastArg;
             return Optional.of(newSuggestions);
         }
+    }
+
+    /**
+     * Represents a specialization of the {@link CacheEntry} to use values that may or may not be immediately
+     * available.
+     *
+     * @author Pim
+     */
+    private static class AsyncCacheEntry extends CacheEntry
+    {
+        protected @NonNull ENTRY_STATUS entryStatus = ENTRY_STATUS.NULL;
+
+        public void prepare(final @NonNull CompletableFuture<List<String>> newSuggestions, final int argCount,
+                            final @NonNull String lastArg)
+        {
+            entryStatus = ENTRY_STATUS.PENDING;
+            newSuggestions.whenComplete((suggestions, throwable) -> reset(suggestions, argCount, lastArg));
+        }
+
+        @Override
+        public void reset(final @NonNull List<String> suggestions, final int argCount, final @NonNull String lastArg)
+        {
+            entryStatus = ENTRY_STATUS.AVAILABLE;
+            super.reset(suggestions, argCount, lastArg);
+        }
+
+        @Override
+        public @NonNull Optional<List<String>> suggestionsSubSelection(final int newArgCount,
+                                                                       final @NonNull String lastArg)
+        {
+            // If the data isn't available yet, return an empty list (not an empty optional).
+            if (entryStatus == ENTRY_STATUS.PENDING)
+                return Optional.of(new ArrayList<>(0));
+
+            return super.suggestionsSubSelection(newArgCount, lastArg);
+        }
+    }
+
+    private enum ENTRY_STATUS
+    {
+        NULL,
+        PENDING,
+        AVAILABLE
     }
 }
