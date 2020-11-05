@@ -25,8 +25,6 @@ import java.util.List;
 // TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
 //       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
 //       Perhaps this can be done via the color scheme?
-// TODO: The Argument's tab-completion function should take in the partial string to look for and the Commandsender.
-//       How else can we retrieve door names from the database?
 // TODO: Support ResourceBundle.
 // TODO: Currently, the commands are kinda stored in a tree shape (1 super, n subs). Perhaps store it in an actual tree?
 // TODO: For the long help, maybe fall back to the summary if no description is available?
@@ -60,7 +58,6 @@ import java.util.List;
 //       confusing and bug-prone very fast.
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
-// TODO: The CAP instance shouldn't know anything about a color scheme.
 // TODO: If valueless flags have been provided already, don't suggest them again.
 //       E.g. when giving "/bigdoors addowner mydoor --admin -", it shouldn't suggest "-a" or "--admin" again, as using
 //       that flag again won't do anything.
