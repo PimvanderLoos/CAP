@@ -177,7 +177,7 @@ public class TimedCache<K, V>
      * @param entry The entry to wrap.
      * @return The value stored in the entry, if any.
      */
-    private @NonNull Optional<V> getValue(final @Nullable AbstractTimedValue<V> entry)
+    protected @NonNull Optional<V> getValue(final @Nullable AbstractTimedValue<V> entry)
     {
         return entry == null ? Optional.empty() : Optional.ofNullable(entry.getValue());
     }
@@ -203,13 +203,26 @@ public class TimedCache<K, V>
     }
 
     /**
+     * Gets the raw {@link AbstractTimedValue} from the cache, if it exists.
+     * <p>
+     * This does not respect any kind of timeouts.
+     *
+     * @param key The key associated with the value to retrieve.
+     * @return The value associated with the key, if it exists.
+     */
+    protected @Nullable AbstractTimedValue<V> getRaw(final @NonNull K key)
+    {
+        return cache.get(key);
+    }
+
+    /**
      * Creates a new {@link TimedValue}. This method should not be called directly. Instead, use to {@link
      * #timedValueCreator}.
      *
      * @param val The value to wrap in an {@link AbstractTimedValue}.
      * @return The newly created {@link TimedValue}.
      */
-    private AbstractTimedValue<V> createTimedValue(final @NonNull V val)
+    private @NonNull AbstractTimedValue<V> createTimedValue(final @NonNull V val)
     {
         return new TimedValue<>(clock, val, timeOut);
     }
@@ -221,7 +234,7 @@ public class TimedCache<K, V>
      * @param val The value to wrap in an {@link AbstractTimedValue}.
      * @return The newly created {@link TimedSoftValue}.
      */
-    private AbstractTimedValue<V> createTimedSoftValue(final @NonNull V val)
+    private @NonNull AbstractTimedValue<V> createTimedSoftValue(final @NonNull V val)
     {
         return new TimedSoftValue<>(clock, val, timeOut);
     }
@@ -231,7 +244,7 @@ public class TimedCache<K, V>
      * <p>
      * An entry counts as expired if {@link AbstractTimedValue#getValue()} returns null.
      */
-    private void cleanupCache()
+    protected void cleanupCache()
     {
         for (Map.Entry<K, AbstractTimedValue<V>> entry : cache.entrySet())
         {
