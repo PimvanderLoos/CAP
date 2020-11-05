@@ -18,7 +18,6 @@ import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -343,18 +342,6 @@ public class Argument<T>
     @FunctionalInterface
     public interface ITabcompleteFunction
         extends Function<@NonNull TabCompletionRequest, @NonNull List<@NonNull String>>
-    {
-    }
-
-    /**
-     * Represents a asynchronous {@link Function} that receives an {@link ICommandSender} and an {@link Argument}.
-     * <p>
-     * The function is supposed to return a {@link CompletableFuture} with a list of suggestions to use as values for
-     * the {@link Argument} for the given {@link ICommandSender}.
-     */
-    @FunctionalInterface
-    public interface ITabcompleteFunctionAsync
-        extends Function<@NonNull TabCompletionRequest, @NonNull CompletableFuture<@NonNull List<@NonNull String>>>
     {
     }
 }
