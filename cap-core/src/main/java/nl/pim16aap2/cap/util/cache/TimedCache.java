@@ -251,8 +251,8 @@ public class TimedCache<K, V>
         if (period < 1)
             return;
 
-        Timer taskTimer = new Timer();
-        @NonNull TimerTask verifyTask = new TimerTask()
+        final @NonNull Timer taskTimer = new Timer(true);
+        final @NonNull TimerTask verifyTask = new TimerTask()
         {
             @Override
             public void run()
