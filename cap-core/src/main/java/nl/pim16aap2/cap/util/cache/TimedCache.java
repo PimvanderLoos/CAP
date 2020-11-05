@@ -105,7 +105,7 @@ public class TimedCache<K, V>
     {
         // We can't use ConcurrentHashMap#computeIfAbsent(Object, Function) because we don't just want the value to be
         // present, we want it to be available (i.e. does not exceed time limit).
-        final @Nullable AbstractTimedValue<V> current = getRaw(key);
+        final @Nullable AbstractTimedValue<V> current = cache.get(key);
         if (current != null)
         {
             final @Nullable V currentValue = current.getValue();
@@ -139,7 +139,7 @@ public class TimedCache<K, V>
      */
     public @NonNull Optional<V> get(final @NonNull K key)
     {
-        final @Nullable AbstractTimedValue<V> entry = getRaw(key);
+        final @Nullable AbstractTimedValue<V> entry = cache.get(key);
         if (entry == null)
             return Optional.empty();
 
@@ -151,19 +151,6 @@ public class TimedCache<K, V>
         if (refresh)
             entry.refresh();
         return Optional.ofNullable(entry.getValue());
-    }
-
-    /**
-     * Gets the raw {@link AbstractTimedValue} from the cache, if it exists.
-     * <p>
-     * This does not respect any kind of timeouts.
-     *
-     * @param key The key associated with the value to retrieve.
-     * @return The value associated with the key, if it exists.
-     */
-    private @Nullable AbstractTimedValue<V> getRaw(final @NonNull K key)
-    {
-        return cache.get(key);
     }
 
     /**
