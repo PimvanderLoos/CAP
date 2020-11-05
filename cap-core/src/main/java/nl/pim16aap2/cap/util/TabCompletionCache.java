@@ -126,7 +126,6 @@ public class TabCompletionCache
         final @NonNull Pair<List<String>, CompletableFuture<List<String>>> result =
             getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun);
 
-        System.out.println("is first null? " + (result.first == null));
         if (result.first != null)
             return result.first;
         return new ArrayList<>(0);
