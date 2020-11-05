@@ -41,3 +41,6 @@ random
 tests
 dependency-reduced-pom.xml
 ignoredFiles
+*lombok.config
+
+

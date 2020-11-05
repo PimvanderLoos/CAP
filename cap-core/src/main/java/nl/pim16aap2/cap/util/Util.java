@@ -5,7 +5,9 @@ import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -80,6 +82,48 @@ public class Util
     }
 
     /**
+     * Attempts to parse a double from a String.
+     *
+     * @param str The String to parse.
+     * @return An {@link OptionalDouble} containing the double if the String was a double, otherwise {@link
+     * OptionalDouble#empty()}.
+     */
+    public @NonNull OptionalDouble parseDouble(final @Nullable String str)
+    {
+        if (str == null)
+            return OptionalDouble.empty();
+        try
+        {
+            return OptionalDouble.of(Double.parseDouble(str));
+        }
+        catch (NumberFormatException e)
+        {
+            return OptionalDouble.empty();
+        }
+    }
+
+    /**
+     * Attempts to parse a long from a String.
+     *
+     * @param str The String to parse.
+     * @return An {@link OptionalLong} containing the long if the String was a long, otherwise {@link
+     * OptionalLong#empty()}.
+     */
+    public @NonNull OptionalLong parseLong(final @Nullable String str)
+    {
+        if (str == null)
+            return OptionalLong.empty();
+        try
+        {
+            return OptionalLong.of(Long.parseLong(str));
+        }
+        catch (NumberFormatException e)
+        {
+            return OptionalLong.empty();
+        }
+    }
+
+    /**
      * Attempts to parse a UUID from a String.
      *
      * @param str The string to parse.
@@ -93,7 +137,7 @@ public class Util
         {
             return Optional.of(UUID.fromString(str));
         }
-        catch (NumberFormatException e)
+        catch (IllegalArgumentException e)
         {
             return Optional.empty();
         }
