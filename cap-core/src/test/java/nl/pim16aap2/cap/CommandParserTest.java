@@ -204,11 +204,26 @@ class CommandParserTest
             .getTabCompleteOptions(commandSender, String.format("bigdoors addowner -p%cpim", cap.getSeparator()));
         Assertions.assertEquals(3, playerNameSuggestions.size());
 
+        // Make sure that the suggestions properly have the flag if needed.
+        // Space-separated arguments don't need a prefix (they are not part of the suggestion).
+        @NonNull String argumentFlag = cap.getSeparator() == ' ' ? "" : String.format("-p%c", cap.getSeparator());
+
         playerNameSuggestions = cap
             .getTabCompleteOptions(commandSender, String.format("bigdoors addowner -p%cpim16", cap.getSeparator()));
         Assertions.assertEquals(2, playerNameSuggestions.size());
-        Assertions.assertEquals("pim16aap2", playerNameSuggestions.get(0));
-        Assertions.assertEquals("pim16aap3", playerNameSuggestions.get(1));
+
+
+        Assertions.assertEquals(argumentFlag + "pim16aap2", playerNameSuggestions.get(0));
+        Assertions.assertEquals(argumentFlag + "pim16aap3", playerNameSuggestions.get(1));
+
+        // Also test the long flag
+        argumentFlag = cap.getSeparator() == ' ' ? "" : String.format("--player%c", cap.getSeparator());
+        playerNameSuggestions = cap
+            .getTabCompleteOptions(commandSender, String.format("bigdoors addowner --player%cpim16",
+                                                                cap.getSeparator()));
+        Assertions.assertEquals(2, playerNameSuggestions.size());
+        Assertions.assertEquals(argumentFlag + "pim16aap2", playerNameSuggestions.get(0));
+        Assertions.assertEquals(argumentFlag + "pim16aap3", playerNameSuggestions.get(1));
     }
 
     @Test

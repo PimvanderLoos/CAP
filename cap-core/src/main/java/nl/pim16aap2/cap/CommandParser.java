@@ -14,6 +14,7 @@ import nl.pim16aap2.cap.exception.MissingArgumentException;
 import nl.pim16aap2.cap.exception.NoPermissionException;
 import nl.pim16aap2.cap.exception.NonExistingArgumentException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
+import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.TabCompletionRequest;
 import org.jetbrains.annotations.Nullable;
 
@@ -124,6 +125,23 @@ class CommandParser
     }
 
     /**
+     * Gets the argument name and its value for the last argument in a list of arguments.
+     *
+     * @param args      The list of arguments.
+     * @param separator The separator to use.
+     * @return The name and value of the last argument.
+     */
+    public static @NonNull Pair<String, String> getLastArgumentData(final @NonNull List<String> args,
+                                                                    final char separator)
+    {
+        final String[] parts = args.get(args.size() - 1).split(Character.toString(separator), 2);
+        if (parts.length == 2)
+            return new Pair<>(parts[0] + separator, parts[1]);
+        return new Pair<>("", parts[0]);
+
+    }
+
+    /**
      * Selects a list of {@link Command}s that start with a certain string from a superset of {@link Command}s.
      *
      * @param partialName The base of a {@link Command#getName()}. See {@link String#startsWith(String)}.
@@ -178,8 +196,8 @@ class CommandParser
      * Command}.
      * <p>
      * If the {@link Command} has any positional {@link Argument}s, {@link #getTabCompleteFromArgumentFunction(Command,
-     * Optional, String, boolean)} will be used for the first one (and an empty String as value, so every entry will be
-     * accepted).
+     * Optional, String, String, boolean)} will be used for the first one (and an empty String as value, so every entry
+     * will be accepted).
      * <p>
      * If the {@link Command} only has free {@link Argument}s, a list of those will be returned instead.
      * <p>
@@ -211,7 +229,7 @@ class CommandParser
         }
         else
             return getTabCompleteFromArgumentFunction
-                (command, command.getArgumentManager().getPositionalArgumentAtIdx(0), "", async);
+                (command, command.getArgumentManager().getPositionalArgumentAtIdx(0), "", "", async);
 
         return ret;
     }
@@ -241,12 +259,15 @@ class CommandParser
      * @param command  The {@link Command} that owns the {@link Argument}.
      * @param argument The {@link Argument} that will be used to get the tab complete suggestions.
      * @param value    The current value to compare the results against.
+     * @param prefix   The prefix to use for all suggestions.
      * @param async    Whether this request was made on the main thread.
      * @return The list of tab complete suggestions.
      */
     protected @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Command command,
                                                                        final @NonNull Optional<Argument<?>> argument,
-                                                                       final @NonNull String value, final boolean async)
+                                                                       final @NonNull String value,
+                                                                       final @NonNull String prefix,
+                                                                       final boolean async)
     {
         final List<String> options = new ArrayList<>(0);
         final @Nullable ITabcompleteFunction argumentValueCompletion = argument.map(Argument::getTabcompleteFunction)
@@ -259,7 +280,7 @@ class CommandParser
             .forEach(entry ->
                      {
                          if (entry.startsWith(value))
-                             options.add(entry);
+                             options.add(prefix + entry);
                      });
 
         return options;
@@ -291,6 +312,11 @@ class CommandParser
         final @NonNull Optional<Argument<?>> argument;
         String value;
 
+        // The potential prefix of the suggestion. When the separator is a non-space, just providing the value of an
+        // argument would override the argument on some platforms. As such "--player=pim" should not suggest "pim16aap2",
+        // but rather "--player=pim16aap2".
+        String prefix = "";
+
         if (previousArgument.isPresent() && !previousArgument.get().isValuesLess() &&
             !previousArgument.get().isPositional())
         {
@@ -315,6 +341,18 @@ class CommandParser
                 final String argumentName = parts[0];
                 value = parts[1].trim();
                 argument = command.getCommand().getArgumentManager().getArgument(argumentName);
+
+                prefix = argument.map(
+                    arg ->
+                    {
+                        // Short name
+                        if (arg.getName().equals(argumentName))
+                            return String.format("%c%s%s", ARGUMENT_PREFIX, arg.getName(), separator);
+                        if (arg.getLongName() == null)
+                            return "";
+                        return String.format("%c%c%s%s",
+                                             ARGUMENT_PREFIX, ARGUMENT_PREFIX, arg.getLongName(), separator);
+                    }).orElse("");
             }
             // If the argument is a positional argument (i.e. it doesn't start with the prefix and you don't have to
             // specify the name to use it), simply get the positional argument based on the position in the string.
@@ -329,7 +367,7 @@ class CommandParser
             }
         }
 
-        return getTabCompleteFromArgumentFunction(command.command, argument, value, async);
+        return getTabCompleteFromArgumentFunction(command.command, argument, value, prefix, async);
     }
 
     /**

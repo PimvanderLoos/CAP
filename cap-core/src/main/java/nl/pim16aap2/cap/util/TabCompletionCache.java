@@ -54,8 +54,7 @@ public class TabCompletionCache
      * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
      */
     public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
-                                                       final @NonNull List<String> args,
-                                                       final @NonNull String lastArg,
+                                                       final @NonNull List<String> args, final @NonNull String lastArg,
                                                        final @NonNull CheckedSupplier<List<String>, EOFException> fun)
         throws EOFException
     {
@@ -220,6 +219,7 @@ public class TabCompletionCache
          * Gets all the cached suggestions
          *
          * @param newArgCount The new number of arguments.
+         * @param lastArg     The value of the last argument.
          * @return The list of the narrowed-down suggestions list.
          */
         public @NonNull Optional<List<String>> suggestionsSubSelection(final int newArgCount,
@@ -243,10 +243,13 @@ public class TabCompletionCache
             if (basePreviousArg.isEmpty() || !lastArg.startsWith(basePreviousArg))
                 return Optional.empty();
 
+            // Get rid of all entries that do not meet the cutoff.
             final int newCutoff = Math.max(0, lastArg.length() - CUTOFF_DELTA);
             suggestions.removeIf(val -> val.length() < newCutoff);
 
             final @NonNull ArrayList<String> newSuggestions = new ArrayList<>(suggestions.size());
+
+
             suggestions.forEach(
                 val ->
                 {

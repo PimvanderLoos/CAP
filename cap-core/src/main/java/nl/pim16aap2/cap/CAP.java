@@ -14,6 +14,7 @@ import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.util.Functional.CheckedSupplier;
+import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.TabCompletionCache;
 import org.jetbrains.annotations.Nullable;
 
@@ -264,8 +265,11 @@ public class CAP
             if (!cacheTabcompletionSuggestions)
                 return supplier.get();
 
-            final @NonNull String lastValue = CommandParser.getLastArgumentValue(args, separator);
-            return tabCompletionCache.getTabCompleteOptions(commandSender, args, lastValue, supplier);
+            final @NonNull Pair<@NonNull String, @NonNull String> lastArgument =
+                CommandParser.getLastArgumentData(args, separator);
+
+            return tabCompletionCache.getTabCompleteOptions(commandSender, args, lastArgument.first +
+                lastArgument.second, supplier);
         }
         catch (EOFException e)
         {
@@ -301,7 +305,10 @@ public class CAP
         if (!cacheTabcompletionSuggestions)
             return CompletableFuture.supplyAsync(supplier);
 
-        final @NonNull String lastValue = CommandParser.getLastArgumentValue(args, separator);
-        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, args, lastValue, supplier);
+        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument =
+            CommandParser.getLastArgumentData(args, separator);
+
+        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, args, lastArgument.first +
+            lastArgument.second, supplier);
     }
 }

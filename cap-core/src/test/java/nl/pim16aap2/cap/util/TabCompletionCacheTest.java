@@ -100,7 +100,8 @@ class TabCompletionCacheTest
 
         // Ensure the the cache will use the supplier if it cannot generate suggestions from the cached data.
         input = new ArrayList<>(Arrays.asList("mycommand ", "test", "t"));
-        output = tabCompletionCache.getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
+        output = tabCompletionCache
+            .getTabCompleteOptions(commandSender, input, "t", () -> supplier(suggestionsA, "t"));
         Assertions.assertEquals(5, output.size());
         Assertions.assertEquals(2, usedSupplier);
 
@@ -188,9 +189,9 @@ class TabCompletionCacheTest
         output = tabCompletionCache
             .getDelayedTabCompleteOptions(commandSender, input, "testCom",
                                           () -> delayedSupplier(suggestionsA, "testCom", 30));
-        Assertions.assertEquals(2, output.size());
         UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(2, usedSupplier);
+        Assertions.assertEquals(2, output.size());
     }
 
     @SneakyThrows

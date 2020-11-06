@@ -34,9 +34,6 @@ import java.util.List;
 //       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
 //       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
 //       could not be validated.
-// TODO: For Spigot's tabcompletions, suggesting "pim16aap2" for "--player=pim" will actually remove the "--player=pim"
-//       part when selected and only use "pim16aap2". As such, the flag and everything will have to be prepended when the
-//       separator is not a space.
 // TODO: Optional case sensitivity?
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
 //       (there are probably going to be some casting issues).
