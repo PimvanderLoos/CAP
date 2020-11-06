@@ -171,8 +171,8 @@ public class Command
      * @param hidden                   Whether this command is hidden or not. Hidden commands will not show up in help
      *                                 menus.
      * @param cap                      The {@link CAP} instance that manages this command.
-     * @param permission               The permission value to use to determine if an {@link ICommandSender} has access
-     *                                 to this command or not. See {@link ICommandSender#hasPermission(Command)}.
+     * @param permission               The permission function to use to determine if an {@link ICommandSender} has
+     *                                 access to this command or not.
      */
     @Builder(builderMethodName = "commandBuilder")
     protected Command(final @NonNull String name, final @Nullable String description,
