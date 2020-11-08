@@ -228,8 +228,8 @@ class CommandParser
                 });
         }
         else
-            return getTabCompleteFromArgumentFunction
-                (command, command.getArgumentManager().getPositionalArgumentAtIdx(0), "", "", async);
+            ret.addAll(getTabCompleteFromArgumentFunction
+                           (command, command.getArgumentManager().getPositionalArgumentAtIdx(0), "", "", async));
 
         return ret;
     }
