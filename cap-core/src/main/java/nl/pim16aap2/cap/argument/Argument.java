@@ -175,7 +175,7 @@ public class Argument<T>
      * @param argumentValidator   {@link #argumentValidator}.
      */
     @Builder(builderMethodName = "optionalPositionalBuilder", builderClassName = "OptionalPositionalBuilder")
-    protected Argument(final @NonNull String name, final @NonNull String longName, final @NonNull String summary,
+    protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
                        final @Nullable ITabcompleteFunction tabcompleteFunction,
                        final @NonNull ArgumentParser<T> parser,
                        final @Nullable IArgumentValidator<T> argumentValidator)

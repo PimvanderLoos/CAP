@@ -245,7 +245,6 @@ public class CAP
         return getTabCompleteOptions(commandSender, split(args));
     }
 
-
     /**
      * Gets a list of suggestions for tab complete based on the current set of arguments.
      *

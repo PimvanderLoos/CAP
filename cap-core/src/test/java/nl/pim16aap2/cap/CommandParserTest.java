@@ -127,8 +127,7 @@ class CommandParserTest
             .subCommand(addOwner)
             .subCommand(numerical)
             .subCommands(subcommands)
-            .commandExecutor(CommandResult::sendHelpMenu)
-            .hidden(true)
+            .virtual(true)
             .build();
 
         subcommands.forEach(cap::addCommand);

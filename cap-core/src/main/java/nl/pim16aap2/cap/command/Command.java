@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.Singular;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.text.ColorScheme;
@@ -36,6 +37,13 @@ public class Command
                 .summary("Displays the help menu for this command.").build();
 
     /**
+     * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s.
+     */
+    static final @NonNull Argument<Integer> DEFAULT_VIRTUAL_ARGUMENT =
+        new IntegerArgument().getOptionalPositional().name("page")
+                             .summary("The page number of the help menu to display").build();
+
+    /**
      * The name of this command.
      */
     @Getter
@@ -59,7 +67,8 @@ public class Command
     protected final @NonNull ArgumentManager argumentManager;
 
     /**
-     * The function that will be executed by {@link CommandResult#run()}.
+     * The function that will be executed by {@link CommandResult#run()}. This value is ignored when {@link #virtual} is
+     * enabled. Otherwise, it's required.
      */
     @Getter
     protected final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor;
@@ -129,11 +138,14 @@ public class Command
     protected @Nullable Argument<?> helpArgument;
 
     /**
-     * Whether this command is hidden or not. Hidden commands will not show up in help menus.
+     * Whether this command is virtual or not. Hidden commands will not show up in help menus. Virtual commands are
+     * assigned the virtual command executor, see {@link #virtualCommandExecutor(CommandResult)}, which delegates
+     * numerical optional positional arguments (see {@link Command#DEFAULT_VIRTUAL_ARGUMENT}) to the help command
+     * renderer.
      */
     @Setter
     @Getter
-    protected boolean hidden;
+    protected boolean virtual;
 
     /**
      * The permission function to determine if an {@link ICommandSender} has access to this command or not.
@@ -166,10 +178,14 @@ public class Command
      * @param helpArgument             The help argument to use. This is used in the format '/command [-h / --help]'.
      * @param addDefaultHelpArgument   Whether to add the default help argument. See {@link #DEFAULT_HELP_ARGUMENT}.
      *                                 Note that this has no effect if you specified your own helpArgument.
-     * @param commandExecutor          The function that will be executed by {@link CommandResult#run()}.
+     * @param commandExecutor          The function that will be executed by {@link CommandResult#run()}. This value is
+     *                                 ignored when {@link #virtual} is enabled. Otherwise, it's required.
      * @param arguments                The list of {@link Argument}s accepted by this command.
-     * @param hidden                   Whether this command is hidden or not. Hidden commands will not show up in help
-     *                                 menus.
+     * @param virtual                  Whether this command is virtual or not. Hidden commands will not show up in help
+     *                                 menus. Virtual commands are assigned the virtual command executor, see {@link
+     *                                 #virtualCommandExecutor(CommandResult)}, which delegates numerical optional
+     *                                 positional arguments (see {@link Command#DEFAULT_VIRTUAL_ARGUMENT}) to the help
+     *                                 command renderer.
      * @param cap                      The {@link CAP} instance that manages this command.
      * @param permission               The permission function to use to determine if an {@link ICommandSender} has
      *                                 access to this command or not.
@@ -183,11 +199,14 @@ public class Command
                       final @Nullable @Singular List<Command> subCommands, final @Nullable Command helpCommand,
                       final @Nullable Boolean addDefaultHelpSubCommand, @Nullable Argument<?> helpArgument,
                       final @Nullable Boolean addDefaultHelpArgument,
-                      final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
+                      final @Nullable CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                       @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
-                      final boolean hidden, final @NonNull CAP cap,
+                      final boolean virtual, final @NonNull CAP cap,
                       final @Nullable BiFunction<ICommandSender, Command, Boolean> permission)
     {
+        if (commandExecutor == null && !virtual)
+            throw new IllegalArgumentException("CommandExecutor may not be null for non-virtual commands!");
+
         this.name = name;
 
         this.description = description;
@@ -201,8 +220,8 @@ public class Command
 
         // If there are no subcommands, make an empty list. If there are subcommands, put them in a modifiable list.
         this.subCommands = subCommands == null ? new ArrayList<>(0) : new ArrayList<>(subCommands);
-        this.commandExecutor = commandExecutor;
-        this.hidden = hidden;
+        this.commandExecutor = virtual ? Command::virtualCommandExecutor : commandExecutor;
+        this.virtual = virtual;
 
         this.permission = permission;
 
@@ -224,8 +243,26 @@ public class Command
         // Add the help argument to the list.
         if (this.helpArgument != null)
             arguments.add(this.helpArgument);
+        if (this.virtual)
+            arguments.add(Command.DEFAULT_VIRTUAL_ARGUMENT);
 
         argumentManager = new ArgumentManager(arguments);
+    }
+
+    /**
+     * The default {@link #commandExecutor} for {@link #virtual} {@link Command}s.
+     * <p>
+     * If will display the help page with the value determined by the integer argument named "page". If this argument is
+     * not provided, the first page will be displayed.
+     *
+     * @param commandResult The {@link CommandResult} to use for sending the help menu of this virtual command.
+     * @throws CAPException If a CAP-related issue occurred.
+     */
+    public static void virtualCommandExecutor(final @NonNull CommandResult commandResult)
+        throws CAPException
+    {
+        final int page = Util.valOrDefault(commandResult.getParsedArgument("page"), 1);
+        commandResult.sendSubcommandHelp(page);
     }
 
     /**

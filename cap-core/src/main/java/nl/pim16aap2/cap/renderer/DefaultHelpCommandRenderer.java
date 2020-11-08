@@ -119,7 +119,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected final int getCommandCount(final @NonNull Command command, final @NonNull ICommandSender commandSender)
     {
         int count = 0;
-        if (!command.isHidden() && command.hasPermission(commandSender))
+        if (!command.isVirtual() && command.hasPermission(commandSender))
             ++count;
 
         for (final @NonNull Command subCommand : command.getSubCommands())
@@ -322,7 +322,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         int skipped = 0;
 
         // Don't render hidden commands, because they're... Well... hidden.
-        if (!command.isHidden() || !command.hasPermission(commandSender))
+        if (!command.isVirtual() || !command.hasPermission(commandSender))
         {
             // Only render the command if it doesn't have to be skipped.
             if (skip > skipped)
@@ -362,7 +362,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      *
      * @param text          The {@link Text} to append the rendered {@link Command} to.
      * @param command       The {@link Command} to render. Note that this method does not care about {@link
-     *                      Command#isHidden()}.
+     *                      Command#isVirtual()}.
      * @param superCommands A {@link Text} with all the appended super commands of the current {@link Command}. This
      *                      will be prepended to the {@link Command}.
      */

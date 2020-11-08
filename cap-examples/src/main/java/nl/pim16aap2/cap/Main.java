@@ -6,6 +6,7 @@ import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
+import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
@@ -15,9 +16,6 @@ import nl.pim16aap2.cap.text.TextType;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Hidden commands should have a default executor that just displays the help menu.
-// TODO: Rename hidden commands to virtual commands as that more accurately describes what they are.
-//       Also, virtual commands don't need executors, just a help command?
 // TODO: Make sure that async permission checking is allowed for Spigot. Currently, when using async tab-completion
 //       suggestions generation, the permissions are checked asynchronously. That may or may not be problematic.
 // TODO: Let the Spigot module load async-generated tab-completion suggestions into the cache for synchronized usage
@@ -166,13 +164,15 @@ public class Main
         tryArgs(cap, "bigdoors addowner myDoor -p=\"pim16 \"aap2 -a");
 
         tryArgs(cap, "bigdoors help addowner");
-        tryArgs(cap, "bigdoors");
         tryArgs(cap, "bigdoors help");
         tryArgs(cap, "bigdoors help 1");
         tryArgs(cap, "bigdoors help 2");
         tryArgs(cap, "bigdoors help 6");
         tryArgs(cap, "bigdoors help");
         tryArgs(cap, "bigdoors addowner");
+        tryArgs(cap, "bigdoors");
+        tryArgs(cap, "bigdoors 1");
+        tryArgs(cap, "bigdoors 2");
     }
 
     private static CAP initCommandManager()
@@ -181,6 +181,20 @@ public class Main
             .builder()
             .separator('=')
             .debug(true)
+            .exceptionHandler(ExceptionHandler.getDefault().toBuilder()
+                                              .handler(nl.pim16aap2.cap.exception.NonExistingArgumentException.class,
+                                                       (sender, ex) -> ex.printStackTrace())
+                                              .handler(nl.pim16aap2.cap.exception.IllegalValueException.class,
+                                                       (sender, ex) -> ex.printStackTrace())
+                                              .handler(nl.pim16aap2.cap.exception.CommandNotFoundException.class,
+                                                       (sender, ex) -> ex.printStackTrace())
+                                              .handler(nl.pim16aap2.cap.exception.MissingArgumentException.class,
+                                                       (sender, ex) -> ex.printStackTrace())
+                                              .handler(nl.pim16aap2.cap.exception.NoPermissionException.class,
+                                                       (sender, ex) -> ex.printStackTrace())
+                                              .handler(nl.pim16aap2.cap.exception.ValidationFailureException.class,
+                                                       (sender, ex) -> ex.printStackTrace())
+                                              .build())
             .helpCommandRenderer(DefaultHelpCommandRenderer
                                      .builder()
                                      .firstPageSize(1)
@@ -297,8 +311,7 @@ public class Main
 
             .subCommand(addOwner)
             .subCommands(subcommands)
-            .commandExecutor(CommandResult::sendHelpMenu)
-            .hidden(true)
+            .virtual(true)
             .build();
 
         subcommands.forEach(cap::addCommand);

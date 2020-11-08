@@ -5,7 +5,6 @@ import lombok.NonNull;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
-import nl.pim16aap2.cap.exception.CommandNotFoundException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
@@ -94,10 +93,22 @@ public class CommandResult
      * (ColorScheme, Command)} to the {@link #commandSender} for the {@link #command}. It will send the first page.
      */
     public void sendSubcommandHelp()
-        throws IllegalValueException, CommandNotFoundException
+        throws IllegalValueException
     {
-        command.getCap().getHelpCommandRenderer()
-               .render(commandSender, commandSender.getColorScheme(), command, null);
+        sendSubcommandHelp(1);
+    }
+
+    /**
+     * Sends the text rendered by {@link IHelpCommandRenderer#render(ICommandSender, ColorScheme, Command, int)}
+     * (ColorScheme, Command)} to the {@link #commandSender} for the {@link #command}. It will send the first page.
+     *
+     * @param page The number of the page to send. Note that counting starts at 1, not 0!
+     */
+    public void sendSubcommandHelp(final int page)
+        throws IllegalValueException
+    {
+        commandSender.sendMessage(command.getCap().getHelpCommandRenderer()
+                                         .render(commandSender, commandSender.getColorScheme(), command, page));
     }
 
     /**
