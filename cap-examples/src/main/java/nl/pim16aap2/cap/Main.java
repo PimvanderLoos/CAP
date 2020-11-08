@@ -56,6 +56,8 @@ import java.util.List;
 // TODO: If valueless flags have been provided already, don't suggest them again.
 //       E.g. when giving "/bigdoors addowner mydoor --admin -", it shouldn't suggest "-a" or "--admin" again, as using
 //       that flag again won't do anything.
+// TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
+//       or "-a" for "--a".
 
 public class Main
 {
@@ -70,19 +72,6 @@ public class Main
             sb2.append(" ").append(arg);
         }
         return sb.append(", total: \"/").toString() + sb2.append("\"").substring(1);
-    }
-
-    private static @NonNull String listToString(final @NonNull List<String> args)
-    {
-        StringBuilder sb = new StringBuilder();
-        for (String arg : args)
-        {
-            sb.append("\"").append(arg).append("\", ");
-        }
-        String res = sb.toString();
-        if (res.length() > 2)
-            res = res.substring(0, res.length() - 2);
-        return "[" + res + "]";
     }
 
     private static void tabComplete(final @NonNull CAP cap, final @NonNull String command)
@@ -138,9 +127,6 @@ public class Main
         System.out.println(textD.add(textC));
         System.out.println(textE.add(textE));
 
-//        if (1 == 1)
-//            return;
-
         tabComplete(cap, "big");
         tabComplete(cap, "add");
         tabComplete(cap, "bigdoors a");
@@ -149,6 +135,8 @@ public class Main
         tabComplete(cap, "bigdoors subcomma");
         tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2");
         tabComplete(cap, "bigdoors addowner myDoor --play");
+
+        tabComplete(cap, "bigdoors addowner mydoor --admin ");
 
         tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2");
         tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4");

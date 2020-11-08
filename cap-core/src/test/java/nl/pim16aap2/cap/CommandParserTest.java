@@ -166,31 +166,28 @@ class CommandParserTest
     {
         final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
 
-        final List<String> playerSuggestions =
-            cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p");
-        Assertions.assertEquals(2, playerSuggestions.size());
-        Assertions.assertEquals("-p=", playerSuggestions.get(0));
-        Assertions.assertEquals("--player=", playerSuggestions.get(1));
+        List<String> suggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner -p");
+        Assertions.assertEquals(2, suggestions.size());
+        Assertions.assertEquals("-p=", suggestions.get(0));
+        Assertions.assertEquals("--player=", suggestions.get(1));
 
-        final List<String> longPlayerSuggestions =
-            cap.getTabCompleteOptions(commandSender, "bigdoors addowner --pla");
-        Assertions.assertEquals(1, longPlayerSuggestions.size());
-        Assertions.assertEquals("--player=", longPlayerSuggestions.get(0));
+        suggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner --pla");
+        Assertions.assertEquals(1, suggestions.size());
+        Assertions.assertEquals("--player=", suggestions.get(0));
 
-        final List<String> adminSuggestions =
-            cap.getTabCompleteOptions(commandSender, "bigdoors addowner --a");
-        Assertions.assertEquals(2, adminSuggestions.size());
-        Assertions.assertEquals("-a", adminSuggestions.get(0));
-        Assertions.assertEquals("--admin", adminSuggestions.get(1));
+        suggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner --ad");
+        Assertions.assertEquals(1, suggestions.size());
+        Assertions.assertEquals("--admin", suggestions.get(0));
 
-        final List<String> suggestionsForSubcommand =
-            cap.getTabCompleteOptions(commandSender, "bigdoors subcommand_0");
-        Assertions.assertEquals(1, suggestionsForSubcommand.size());
-        Assertions.assertEquals("value", suggestionsForSubcommand.get(0));
+        suggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner mydoor --admin ");
+        Assertions.assertEquals(8, suggestions.size());
 
-        final List<String> suggestionsHelpCommand =
-            cap.getTabCompleteOptions(commandSender, "bigdoors help subcommand_1");
-        Assertions.assertEquals(11, suggestionsHelpCommand.size());
+        suggestions = cap.getTabCompleteOptions(commandSender, "bigdoors subcommand_0");
+        Assertions.assertEquals(1, suggestions.size());
+        Assertions.assertEquals("value", suggestions.get(0));
+
+        suggestions = cap.getTabCompleteOptions(commandSender, "bigdoors help subcommand_1");
+        Assertions.assertEquals(11, suggestions.size());
     }
 
     private void getFreeArgumentValueTabCompleteOptions(final @NonNull CAP cap)

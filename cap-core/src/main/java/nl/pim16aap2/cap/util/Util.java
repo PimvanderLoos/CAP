@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -154,5 +155,19 @@ public class Util
     public boolean between(final int test, final int start, final int end)
     {
         return test > start && test < end;
+    }
+
+    // TODO: Remove this
+    public static @NonNull String listToString(final @NonNull List<String> args)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (String arg : args)
+        {
+            sb.append("\"").append(arg).append("\", ");
+        }
+        String res = sb.toString();
+        if (res.length() > 2)
+            res = res.substring(0, res.length() - 2);
+        return "[" + res + "]";
     }
 }

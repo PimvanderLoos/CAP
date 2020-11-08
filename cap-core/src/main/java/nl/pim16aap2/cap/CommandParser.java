@@ -180,6 +180,8 @@ class CommandParser
         command.getArgumentManager().getArguments().forEach(
             argument ->
             {
+                if (argument.isPositional())
+                    return;
                 final String separator = argument.isValuesLess() ? "" : this.separator;
                 if (argument.getName().startsWith(lastArg))
                     ret.add(String.format("%c%s", ARGUMENT_PREFIX, argument.getName()) + separator);
@@ -196,7 +198,7 @@ class CommandParser
      * Command}.
      * <p>
      * If the {@link Command} has any positional {@link Argument}s, {@link #getTabCompleteFromArgumentFunction(Command,
-     * Optional, String, String, boolean)} will be used for the first one (and an empty String as value, so every entry
+     * Argument, String, String, boolean)} will be used for the first one (and an empty String as value, so every entry
      * will be accepted).
      * <p>
      * If the {@link Command} only has free {@link Argument}s, a list of those will be returned instead.
@@ -228,8 +230,8 @@ class CommandParser
                 });
         }
         else
-            ret.addAll(getTabCompleteFromArgumentFunction
-                           (command, command.getArgumentManager().getPositionalArgumentAtIdx(0), "", "", async));
+            command.getArgumentManager().getPositionalArgumentAtIdx(0).ifPresent(
+                arg -> ret.addAll(getTabCompleteFromArgumentFunction(command, arg, "", "", async)));
 
         return ret;
     }
@@ -264,19 +266,18 @@ class CommandParser
      * @return The list of tab complete suggestions.
      */
     protected @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Command command,
-                                                                       final @NonNull Optional<Argument<?>> argument,
+                                                                       final @NonNull Argument<?> argument,
                                                                        final @NonNull String value,
                                                                        final @NonNull String prefix,
                                                                        final boolean async)
     {
         final List<String> options = new ArrayList<>(0);
-        final @Nullable ITabcompleteFunction argumentValueCompletion = argument.map(Argument::getTabcompleteFunction)
-                                                                               .orElse(null);
+        final @Nullable ITabcompleteFunction argumentValueCompletion = argument.getTabcompleteFunction();
         if (argumentValueCompletion == null)
             return options;
 
         argumentValueCompletion
-            .apply(new TabCompletionRequest(command, argument.get(), commandSender, value, async, cap))
+            .apply(new TabCompletionRequest(command, argument, commandSender, value, async, cap))
             .forEach(entry ->
                      {
                          if (entry.startsWith(value))
@@ -309,7 +310,7 @@ class CommandParser
                                                           command.getCommand().getArgumentManager()
                                                                  .getArgument(previousName.trim()));
 
-        final @NonNull Optional<Argument<?>> argument;
+        final @Nullable Argument<?> argument;
         String value;
 
         // The potential prefix of the suggestion. When the separator is a non-space, just providing the value of an
@@ -320,12 +321,13 @@ class CommandParser
         if (previousArgument.isPresent() && !previousArgument.get().isValuesLess() &&
             !previousArgument.get().isPositional())
         {
-            argument = previousArgument;
+            argument = previousArgument.orElse(null);
             value = lastVal;
         }
         else
         {
             final @NonNull Optional<String> freeArgumentOpt = lstripArgumentPrefix(lastVal);
+
             // If the argument is a free argument (i.e. '--player=playerName'), try to complete the name of
             // the argument (in this case 'player') if there is no separator ('=' in this case) in the string.
             //
@@ -334,25 +336,33 @@ class CommandParser
             if (freeArgumentOpt.isPresent())
             {
                 final String freeArgument = freeArgumentOpt.get();
-                if (!lastVal.contains(separator))
-                    return getTabCompleteArgumentNames(command.getCommand(), freeArgument);
 
                 final String[] parts = separatorPattern.split(freeArgument, 2);
-                final String argumentName = parts[0];
-                value = parts[1].trim();
-                argument = command.getCommand().getArgumentManager().getArgument(argumentName);
+                final String argumentName = parts[0].trim();
+                value = parts.length == 2 ? parts[1].trim() : "";
+                argument = command.getCommand().getArgumentManager().getArgument(argumentName).orElse(null);
 
-                prefix = argument.map(
-                    arg ->
-                    {
-                        // Short name
-                        if (arg.getName().equals(argumentName))
-                            return String.format("%c%s%s", ARGUMENT_PREFIX, arg.getName(), separator);
-                        if (arg.getLongName() == null)
-                            return "";
-                        return String.format("%c%c%s%s",
-                                             ARGUMENT_PREFIX, ARGUMENT_PREFIX, arg.getLongName(), separator);
-                    }).orElse("");
+                // If the argument is present (and therefore completed) and valueless, there's nothing to complete
+                // As such, we can get all arguments.
+                if (argument != null && argument.isValuesLess())
+                    return getTabCompleteArgumentNames(command.getCommand(), "");
+
+                // If the argument does not have a separator (otherwise there would be 2 parts)
+                // Get all arguments starting with the current name.
+                if (parts.length == 1)
+                    return getTabCompleteArgumentNames(command.getCommand(), freeArgument);
+
+                // If the argument exists and is complete, construct the prefix.
+                if (argument != null)
+                {
+                    if (argument.getName().equals(argumentName))
+                        prefix = String.format("%c%s%s", ARGUMENT_PREFIX, argument.getName(), separator);
+                    else if (argument.getLongName() == null)
+                        prefix = "";
+                    else
+                        prefix = String.format("%c%c%s%s",
+                                               ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName(), separator);
+                }
             }
             // If the argument is a positional argument (i.e. it doesn't start with the prefix and you don't have to
             // specify the name to use it), simply get the positional argument based on the position in the string.
@@ -362,10 +372,14 @@ class CommandParser
                 // Subtract the command's index from the total size because the command and its supercommands don't
                 // count towards positional indices.
                 final int positionalArgumentIdx = args.size() - command.index - 2;
-                argument = command.getCommand().getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIdx);
+                argument = command.getCommand().getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIdx)
+                                  .orElse(null);
                 value = lastVal;
             }
         }
+
+        if (argument == null)
+            return new ArrayList<>(0);
 
         return getTabCompleteFromArgumentFunction(command.command, argument, value, prefix, async);
     }
