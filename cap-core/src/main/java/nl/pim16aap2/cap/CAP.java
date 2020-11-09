@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandparser.CommandParser;
+import nl.pim16aap2.cap.commandparser.TabCompletionSuggestor;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
@@ -127,7 +128,7 @@ public class CAP
     {
         try
         {
-            return Optional.of(CommandParser.parseInput(this, commandSender, input, separator));
+            return Optional.of(new CommandParser(this, commandSender, input, separator).parse());
         }
         catch (CAPException exception)
         {
@@ -216,15 +217,16 @@ public class CAP
     public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
                                                        final @NonNull String input)
     {
-        final @NonNull CommandParser commandParser = new CommandParser(this, commandSender, input, separator);
-        final @NonNull Supplier<List<String>> supplier = () -> commandParser.getTabCompleteOptions(false);
+        final @NonNull TabCompletionSuggestor suggestor =
+            new TabCompletionSuggestor(this, commandSender, input, separator);
+        final @NonNull Supplier<List<String>> supplier = () -> suggestor.getTabCompleteOptions(false);
 
         if (!cacheTabcompletionSuggestions)
             return supplier.get();
 
-        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = commandParser.getLastArgumentData();
+        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggestor.getLastArgumentData();
 
-        return tabCompletionCache.getTabCompleteOptions(commandSender, commandParser.getArgs(),
+        return tabCompletionCache.getTabCompleteOptions(commandSender, suggestor.getArgs(),
                                                         lastArgument.first + lastArgument.second, supplier);
     }
 
@@ -238,15 +240,16 @@ public class CAP
     public @NonNull CompletableFuture<List<String>> getTabCompleteOptionsAsync(
         final @NonNull ICommandSender commandSender, final @NonNull String input)
     {
-        final @NonNull CommandParser commandParser = new CommandParser(this, commandSender, input, separator);
-        final @NonNull Supplier<List<String>> supplier = () -> commandParser.getTabCompleteOptions(true);
+        final @NonNull TabCompletionSuggestor suggestor =
+            new TabCompletionSuggestor(this, commandSender, input, separator);
+        final @NonNull Supplier<List<String>> supplier = () -> suggestor.getTabCompleteOptions(true);
 
         if (!cacheTabcompletionSuggestions)
             return CompletableFuture.supplyAsync(supplier);
 
-        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = commandParser.getLastArgumentData();
+        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggestor.getLastArgumentData();
 
-        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, commandParser.getArgs(),
+        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, suggestor.getArgs(),
                                                              lastArgument.first + lastArgument.second, supplier);
     }
 }
