@@ -85,7 +85,7 @@ public class ArgumentManager
      * @param argumentName The name of the {@link Argument}.
      * @return The name of the command, made all lower case if needed.
      */
-    private @NonNull String getArgumentNameCaseCheck(final @NonNull String argumentName)
+    protected @NonNull String getArgumentNameCaseCheck(final @NonNull String argumentName)
     {
         return caseSensitive ? argumentName : argumentName.toLowerCase();
     }
