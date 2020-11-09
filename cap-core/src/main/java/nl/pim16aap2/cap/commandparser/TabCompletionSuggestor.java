@@ -60,13 +60,15 @@ public class TabCompletionSuggestor extends CommandParser
     }
 
     /**
-     * Gets a list of {@link Argument#getName()} that can be used to complete the current {@link #input}.
+     * Gets a list of {@link Argument#getShortName()}s and {@link Argument#getLongName()}s that can be used to complete
+     * the current {@link #input}.
      *
      * @param command The {@link Command} for which to check the {@link Argument}s.
      * @param lastArg The last value in {@link #input} that will be used as a base for the auto suggestions. E.g. when
      *                supplied "a", it will suggest "admin" but it won't suggest "player" (provided "admin" is a
      *                registered {@link Argument} for the given {@link Command}.
-     * @return The list of {@link Argument#getName()} that can be used to complete the current {@link #input}.
+     * @return The list of {@link Argument#getShortName()}s and {@link Argument#getLongName()}s that can be used to
+     * complete the current {@link #input}.
      */
     protected @NonNull List<String> getTabCompleteArgumentNames(final @NonNull Command command,
                                                                 final @NonNull String lastArg)
@@ -78,8 +80,8 @@ public class TabCompletionSuggestor extends CommandParser
                 if (argument.isPositional())
                     return;
                 final String separator = argument.isValuesLess() ? "" : this.separator;
-                if (argument.getName().startsWith(lastArg))
-                    ret.add(String.format("%c%s", ARGUMENT_PREFIX, argument.getName()) + separator);
+                if (argument.getShortName().startsWith(lastArg))
+                    ret.add(String.format("%c%s", ARGUMENT_PREFIX, argument.getShortName()) + separator);
 
                 if (argument.getLongName() != null && argument.getLongName().startsWith(lastArg))
                     ret.add(
@@ -119,7 +121,7 @@ public class TabCompletionSuggestor extends CommandParser
             command.getArgumentManager().getArguments().forEach(
                 argument ->
                 {
-                    ret.add(argument.getName());
+                    ret.add(argument.getShortName());
                     if (argument.getLongName() != null)
                         ret.add(argument.getLongName());
                 });
@@ -239,8 +241,8 @@ public class TabCompletionSuggestor extends CommandParser
                 // If the argument exists and is complete, construct the prefix.
                 if (argument != null)
                 {
-                    if (argument.getName().equals(argumentName))
-                        prefix = String.format("%c%s%s", ARGUMENT_PREFIX, argument.getName(), separator);
+                    if (argument.getShortName().equals(argumentName))
+                        prefix = String.format("%c%s%s", ARGUMENT_PREFIX, argument.getShortName(), separator);
                     else if (argument.getLongName() == null)
                         prefix = "";
                     else

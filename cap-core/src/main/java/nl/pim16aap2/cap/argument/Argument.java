@@ -34,7 +34,7 @@ public class Argument<T>
     /**
      * The name of this {@link Argument}.
      */
-    protected final @NonNull String name;
+    protected final @NonNull String shortName;
 
     /**
      * The (optional) long name of this {@link Argument}. For example, a help command usually has the short name '-h'
@@ -55,6 +55,8 @@ public class Argument<T>
 
     /**
      * The label of the this {@link Argument}. For example, in the case of '[-p=player]', "player" would be the label.
+     * <p>
+     * This is also the name by which this Argument's result can be retrieved.
      */
     protected final @NonNull String label;
 
@@ -110,7 +112,12 @@ public class Argument<T>
     protected final @Nullable IArgumentValidator<T> argumentValidator;
 
     /**
-     * @param name                {@link #name}.
+     * The identifier to use for retrieving results. Defaults: {@link #shortName}.
+     */
+    protected final @NonNull String identifier;
+
+    /**
+     * @param shortName           {@link #shortName}.
      * @param longName            {@link #longName}.
      * @param summary             {@link #summary}.
      * @param parser              {@link #parser}.
@@ -122,15 +129,16 @@ public class Argument<T>
      * @param required            {@link #required}.
      * @param tabcompleteFunction {@link #tabcompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
+     * @param identifier          {@link #identifier}.
      */
-    protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
+    protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final boolean valuesLess, final boolean repeatable,
                        final boolean positional, final boolean required,
                        final @Nullable ITabcompleteFunction tabcompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
     {
-        this.name = name;
+        this.shortName = shortName;
         this.longName = longName;
         this.summary = summary;
         this.parser = parser;
@@ -142,52 +150,55 @@ public class Argument<T>
         this.required = required;
         this.tabcompleteFunction = tabcompleteFunction;
         this.argumentValidator = argumentValidator;
+        this.identifier = Util.valOrDefault(identifier, shortName);
     }
 
     /**
      * Creates a new required and positional {@link Argument}.
      *
-     * @param name                {@link #name}.
+     * @param shortName           {@link #shortName}.
      * @param longName            {@link #longName}.
      * @param summary             {@link #summary}.
      * @param parser              {@link #parser}.
      * @param tabcompleteFunction {@link #tabcompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
+     * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "requiredBuilder", builderClassName = "RequiredBuilder")
-    protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
+    protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser,
                        final @Nullable ITabcompleteFunction tabcompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
     {
-        this(name, longName, summary, parser, null, "", false, false, true, true, tabcompleteFunction,
-             argumentValidator);
+        this(shortName, longName, summary, parser, null, "", false, false, true, true, tabcompleteFunction,
+             argumentValidator, identifier);
     }
 
     /**
      * Creates a new optional and positional {@link Argument}.
      *
-     * @param name                {@link #name}.
+     * @param shortName           {@link #shortName}.
      * @param longName            {@link #longName}.
      * @param summary             {@link #summary}.
      * @param parser              {@link #parser}.
      * @param tabcompleteFunction {@link #tabcompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
+     * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "optionalPositionalBuilder", builderClassName = "OptionalPositionalBuilder")
-    protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
+    protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @Nullable ITabcompleteFunction tabcompleteFunction,
                        final @NonNull ArgumentParser<T> parser,
-                       final @Nullable IArgumentValidator<T> argumentValidator)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
     {
-        this(name, longName, summary, parser, null, "", false, false, true, false, tabcompleteFunction,
-             argumentValidator);
+        this(shortName, longName, summary, parser, null, "", false, false, true, false, tabcompleteFunction,
+             argumentValidator, identifier);
     }
 
     /**
      * Creates a new optional {@link Argument}.
      *
-     * @param name                {@link #name}.
+     * @param shortName           {@link #shortName}.
      * @param longName            {@link #longName}.
      * @param summary             {@link #summary}.
      * @param parser              {@link #parser}.
@@ -195,33 +206,36 @@ public class Argument<T>
      * @param label               {@link #label}.
      * @param tabcompleteFunction {@link #tabcompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
+     * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "optionalBuilder", builderClassName = "OptionalBuilder")
-    protected Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
+    protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final @Nullable ITabcompleteFunction tabcompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
     {
-        this(name, longName, summary, parser, defaultValue, label, false, false, false, false, tabcompleteFunction,
-             argumentValidator);
+        this(shortName, longName, summary, parser, defaultValue, label, false, false, false, false, tabcompleteFunction,
+             argumentValidator, identifier);
     }
 
     /**
      * Creates a new valueless {@link Argument}. See {@link #valuesLess}.
      *
-     * @param name     {@link #name}.
-     * @param longName {@link #longName}.
-     * @param summary  {@link #summary}.
-     * @param value    Whether the presence of this flag means 'true' or 'false'. Default: True
+     * @param shortName  {@link #shortName}.
+     * @param longName   {@link #longName}.
+     * @param summary    {@link #summary}.
+     * @param value      Whether the presence of this flag means 'true' or 'false'. Default: True
+     * @param identifier {@link #identifier}.
      */
     @SuppressWarnings("unchecked")
     @Builder(builderMethodName = "privateValuesLessBuilder", builderClassName = "ValuesLessBuilder")
-    private Argument(final @NonNull String name, final @Nullable String longName, final @NonNull String summary,
-                     final @Nullable Boolean value)
+    private Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
+                     final @Nullable Boolean value, final @Nullable String identifier)
     {
-        this(name, longName, summary,
+        this(shortName, longName, summary,
              (ArgumentParser<T>) ValuelessParser.create(Util.valOrDefault(value, Boolean.TRUE)),
-             (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), "", true, false, false, false, null, null);
+             (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), "", true, false, false, false, null, null,
+             identifier);
     }
 
     /**

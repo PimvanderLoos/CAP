@@ -32,7 +32,7 @@ public class CommandResult
     /**
      * The list of parsed {@link Argument}s.
      * <p>
-     * The key for every entry is {@link Argument#getName()}.
+     * The key for every entry is {@link Argument#getIdentifier()}.
      */
     private final @Nullable Map<@NonNull String, Argument.IParsedArgument<?>> parsedArguments;
 
@@ -125,18 +125,18 @@ public class CommandResult
     /**
      * Gets the parsed value associated with an {@link Argument}.
      *
-     * @param name The name of the {@link Argument}. See {@link Argument#getName()}.
-     * @param <T>  The type of the parsed value of the {@link Argument}.
+     * @param identifier The label of the {@link Argument}. See {@link Argument#getIdentifier()}.
+     * @param <T>        The type of the parsed value of the {@link Argument}.
      * @return The parsed value of the {@link Argument}.
      */
     @SuppressWarnings("unchecked")
-    public <T> T getParsedArgument(final @NonNull String name)
+    public <T> T getParsedArgument(final @NonNull String identifier)
     {
         // TODO: Handle this a bit better, maybe? This line shouldn't
         //       really be true if parsedArguments is null anyway.
         if (parsedArguments == null)
             return null;
-        final Argument.IParsedArgument<T> result = (Argument.IParsedArgument<T>) parsedArguments.get(name);
+        final Argument.IParsedArgument<T> result = (Argument.IParsedArgument<T>) parsedArguments.get(identifier);
         return result == null ? null : result.getValue();
     }
 

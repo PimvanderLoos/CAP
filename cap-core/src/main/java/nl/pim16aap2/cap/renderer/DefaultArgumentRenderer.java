@@ -80,7 +80,8 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
      * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
-     *                    long name before using this! When this value is false, {@link Argument#getName()} is used.
+     *                    long name before using this! When this value is false, {@link Argument#getShortName()} is
+     *                    used.
      * @return The {@link Text} representing the {@link Argument}.
      */
     protected @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
@@ -97,7 +98,8 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
      * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
-     *                    long name before using this! When this value is false, {@link Argument#getName()} is used.
+     *                    long name before using this! When this value is false, {@link Argument#getShortName()} is
+     *                    used.
      * @return The {@link Text} representing an optional {@link Argument}.
      */
     protected @NonNull Text renderOptional(final @NonNull ColorScheme colorScheme,
@@ -116,7 +118,8 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
      * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
-     *                    long name before using this! When this value is false, {@link Argument#getName()} is used.
+     *                    long name before using this! When this value is false, {@link Argument#getShortName()} is
+     *                    used.
      * @return The {@link Text} representing a required {@link Argument}.
      */
     protected @NonNull Text renderRequired(final @NonNull ColorScheme colorScheme,
@@ -136,7 +139,8 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
      * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
-     *                    long name before using this! When this value is false, {@link Argument#getName()} is used.
+     *                    long name before using this! When this value is false, {@link Argument#getShortName()} is
+     *                    used.
      * @return The {@link Text} representing the {@link Argument}.
      */
     protected @NonNull Text renderArgument(final @NonNull ColorScheme colorScheme,
@@ -144,7 +148,7 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
                                            final boolean useLongName)
     {
         final Text text = new Text(colorScheme);
-        final String argLabel = argument.getLabel().equals("") ? argument.getName() : argument.getLabel();
+        final String argLabel = argument.getLabel().equals("") ? argument.getShortName() : argument.getLabel();
 
         if (argument.isPositional())
             return text.add(argLabel, (argument.isRequired() ?
@@ -168,7 +172,7 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
         // TODO: The '-' should be configurable, right?
         final @NonNull String argumentName = useLongName ?
                                              ("--" + argument.getLongName()) :
-                                             ("-" + argument.getName());
+                                             ("-" + argument.getShortName());
         text.add(argumentName, name);
 
         if (argument.isValuesLess())

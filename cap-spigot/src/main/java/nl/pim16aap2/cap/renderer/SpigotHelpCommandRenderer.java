@@ -63,7 +63,8 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
             text.add("---", TextType.REGULAR_TEXT);
         else
             SpigotTextUtility.addClickableCommandText(text, "<<<", TextType.COMMAND, String
-                .format("/%s %s %d", command.getName(), helpCommand.getName(), page - 1), "§cPrevious help page");
+                                                          .format("/%s %s %d", command.getName(), helpCommand.getName(), page - 1),
+                                                      "§cPrevious help page");
 
         text.add(String.format("---- Page (%2d / %2d) ---", page, pageCount), TextType.REGULAR_TEXT);
 
@@ -91,8 +92,10 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
 
         if (helpCommand != null)
         {
-            final String commandName = command.getName().equals(helpCommand.getName()) ? "" : " " + command.getName();
-            final String clickableCommand = "/" + topCommand.getName() + " " + helpCommand.getName() + commandName;
+            final String commandName =
+                command.getName().equals(helpCommand.getName()) ? "" : " " + command.getName();
+            final String clickableCommand =
+                "/" + topCommand.getName() + " " + helpCommand.getName() + commandName;
             SpigotTextUtility.makeClickableCommand(commandText, clickableCommand, "§cClick me for more information!");
         }
         text.add(commandText);

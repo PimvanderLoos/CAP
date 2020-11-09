@@ -52,7 +52,7 @@ class CommandParserTest
                 .commandBuilder().name(command)
                 .cap(cap)
                 .argument(new StringArgument().getOptional()
-                                              .name("value").label("val").summary("random value").build())
+                                              .shortName("value").label("val").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
@@ -63,22 +63,22 @@ class CommandParserTest
             .commandBuilder().name("numerical")
             .cap(cap)
             .argument(new StringArgument().getOptional()
-                                          .name("value").label("val").summary("random value").build())
+                                          .shortName("value").label("val").summary("random value").build())
             .argument(new IntegerArgument().getOptional()
-                                           .name("min").label("min").summary("Must be more than 10!")
+                                           .shortName("min").label("min").summary("Must be more than 10!")
                                            .argumentValidator(MinimumValidator.integerMinimumValidator(10)).build())
             .argument(new IntegerArgument().getOptional()
-                                           .name("unbound").label("unbound")
+                                           .shortName("unbound").label("unbound")
                                            .summary("This value is not bound by anything!")
                                            .build())
             .argument(new IntegerArgument().getOptional()
-                                           .name("max").label("max").summary("Must be less than 10!")
+                                           .shortName("max").label("max").summary("Must be less than 10!")
                                            .argumentValidator(MaximumValidator.integerMaximumValidator(10)).build())
             .argument(new DoubleArgument().getOptional()
-                                          .name("maxd").label("maxd").summary("Must be less than 10.0!")
+                                          .shortName("maxd").label("maxd").summary("Must be less than 10.0!")
                                           .argumentValidator(MaximumValidator.doubleMaximumValidator(10.0)).build())
             .argument(new IntegerArgument().getOptional()
-                                           .name("range").label("range").summary("Must be between 10 and 20!")
+                                           .shortName("range").label("range").summary("Must be between 10 and 20!")
                                            .argumentValidator(RangeValidator.integerRangeValidator(10, 20)).build())
             .commandExecutor(commandResult ->
                                  new GenericCommand("numerical", commandResult.getParsedArgument("value")).runCommand())
@@ -93,14 +93,15 @@ class CommandParserTest
             .summary("Add another owner to a door.")
             .argument(new StringArgument()
                           .getRequired()
-                          .name("doorID")
+                          .shortName("doorID")
                           .tabcompleteFunction((request) -> doorIDs)
                           .summary("The name or UID of the door")
                           .build())
             .argument(Argument.valuesLessBuilder()
                               .value(true)
-                              .name("a")
+                              .shortName("a")
                               .longName("admin")
+                              .identifier("admin")
                               .summary("Make the user an admin for the given door. Only applies to players.")
                               .build())
             .argument(new StringArgument()
@@ -115,7 +116,7 @@ class CommandParserTest
                           .getRepeatable()
                           .name("g")
                           .longName("group")
-                          .label("group")
+                          .label("player")
                           .summary("The name of the group to add as owner")
                           .build())
             .commandExecutor(CommandResult::sendHelpMenu)
@@ -172,13 +173,13 @@ class CommandParserTest
     }
 
     private <T> void assertParseResult(final @NonNull CAP cap, final @NonNull String command,
-                                       final @NonNull String name, final @NonNull T expected)
+                                       final @NonNull String identifier, final @NonNull T expected)
     {
         final @NonNull Optional<CommandResult> result = Assertions
             .assertDoesNotThrow(() -> cap.parseInput(commandSender, command));
 
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(expected, result.get().getParsedArgument(name));
+        Assertions.assertEquals(expected, result.get().getParsedArgument(identifier));
     }
 
     @SneakyThrows
@@ -240,7 +241,7 @@ class CommandParserTest
     {
         final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
         assertParseResult(cap, "bigdoors numerical -max 9", "max", 9);
-        assertParseResult(cap, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\" --admin", "a",
+        assertParseResult(cap, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\" --admin", "admin",
                           true);
         assertParseResult(cap, "bigdoors addowner mydoor --player pim16aap2 --group \"group 1\"", "doorID", "mydoor");
 

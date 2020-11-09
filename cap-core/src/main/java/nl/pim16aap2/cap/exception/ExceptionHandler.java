@@ -116,7 +116,7 @@ public class ExceptionHandler
                                                         final @NonNull ValidationFailureException e)
     {
         sendError(commandSender, "Failed to validate value: \"" + e.getValue() +
-            "\" for argument: \"" + e.getArgument().getName() + "\"");
+            "\" for argument: \"" + e.getArgument().getShortName() + "\"");
     }
 
     public static void handleNoPermissionException(final @NonNull ICommandSender commandSender,
@@ -136,7 +136,7 @@ public class ExceptionHandler
                                                       final @NonNull MissingArgumentException e)
     {
         sendError(commandSender, "Failed to find value for argument: \"" +
-            e.getMissingArgument().getName() + "\" for command: \"" + e.getCommand().getName() + "\"");
+            e.getMissingArgument().getShortName() + "\" for command: \"" + e.getCommand().getName() + "\"");
     }
 
     public static void handleIllegalValueException(final @NonNull ICommandSender commandSender,

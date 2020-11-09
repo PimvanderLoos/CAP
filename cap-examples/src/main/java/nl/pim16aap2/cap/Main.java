@@ -39,7 +39,6 @@ import java.util.List;
 //       Currently, the positional arguments are counted separately, but this breaks the tab completion.
 // TODO: Make sure that autocomplete works if all the current string is empty and all positional arguments
 //       have already been filled (just return args list).
-// TODO: Maybe store the arguments by their label inside the CommandResult? That would avoid confusion of name vs longName.
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
@@ -56,6 +55,7 @@ import java.util.List;
 //       that flag again won't do anything.
 // TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
 //       or "-a" for "--a".
+// TODO: Positional arguments don't really need a short name right? Just a label.
 
 public class Main
 {
@@ -197,7 +197,8 @@ public class Main
                 .addDefaultHelpArgument(true)
                 .cap(cap)
                 .summary("This is the summary for subsubcommand_" + idx)
-                .argument(new StringArgument().getRequired().name("value").summary("random value").build())
+                .argument(
+                    new StringArgument().getRequired().shortName("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
@@ -215,13 +216,13 @@ public class Main
             .permission(((commandSender, command) -> true))
             .argument(new StringArgument()
                           .getRequired()
-                          .name("doorID")
+                          .shortName("doorID")
                           .summary("The name or UID of the door")
                           .tabcompleteFunction(request -> Arrays.asList("test a", "test_b"))
                           .build())
             .argument(Argument.valuesLessBuilder()
                               .value(true)
-                              .name("a")
+                              .shortName("a")
                               .longName("admin")
                               .summary("Makes all the supplied users admins for the given door. " +
                                            "Only applies to players.")
@@ -257,7 +258,8 @@ public class Main
                 .commandBuilder().name(command)
                 .addDefaultHelpArgument(true)
                 .cap(cap)
-                .argument(new StringArgument().getRequired().name("value").summary("random value").build())
+                .argument(
+                    new StringArgument().getRequired().shortName("value").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();

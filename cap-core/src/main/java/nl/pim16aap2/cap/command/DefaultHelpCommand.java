@@ -59,7 +59,7 @@ public class DefaultHelpCommand extends Command
     private List<String> suggestions = null;
 
     /**
-     * @param name                The name of the command.
+     * @param shortName           The name of the command.
      * @param description         The description of the command. This is the longer description shown in the help menu
      *                            for this command.
      * @param descriptionSupplier The supplier that is used to build the description. Note that this isn't used in case
@@ -75,7 +75,7 @@ public class DefaultHelpCommand extends Command
      * @param commandExecutor     The function that will be executed by {@link CommandResult#run()}.
      * @param cap                 The {@link CAP} instance that manages this command.
      */
-    protected DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
+    protected DefaultHelpCommand(final @Nullable String shortName, final @Nullable String description,
                                  final @Nullable Function<ICommandSender, String> descriptionSupplier,
                                  final @Nullable String summary,
                                  final @Nullable Function<ICommandSender, String> summarySupplier,
@@ -85,11 +85,11 @@ public class DefaultHelpCommand extends Command
                                  final @NonNull CAP cap,
                                  final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
-        super(Util.valOrDefault(name, "help"), description, descriptionSupplier, summary, summarySupplier, header,
+        super(Util.valOrDefault(shortName, "help"), description, descriptionSupplier, summary, summarySupplier, header,
               headerSupplier, SUB_COMMANDS, HELP_COMMAND, ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT,
               ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
               Collections.singletonList(new StringArgument()
-                                            .getOptionalPositional().name("page/command")
+                                            .getOptionalPositional().shortName("page/command")
                                             .summary("A page number of the name of a command.").longName("help")
                                             .tabcompleteFunction((DefaultHelpCommand::getSuggestions))
                                             .build()), HIDDEN, cap, ((commandSender, command) -> true));

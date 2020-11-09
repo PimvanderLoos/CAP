@@ -192,8 +192,8 @@ public class CommandParser
      * @param idx     The index of the {@link Command} in {@link #input}. All values with a higher index than this will
      *                be processed as {@link Argument}s.
      * @return The map of {@link Argument.IParsedArgument}s resulting from parsing the input. Any missing optional
-     * {@link Argument}s with default values will be assigned their default value. {@link Argument#getName()} is used
-     * for the keys in the map.
+     * {@link Argument}s with default values will be assigned their default value. {@link Argument#getIdentifier()} is
+     * used for the keys in the map.
      *
      * @throws NonExistingArgumentException If one of the specified arguments does not exist.
      * @throws MissingArgumentException     If a required argument was not specified.
@@ -201,9 +201,8 @@ public class CommandParser
      *                                      IArgumentValidator#validate(Object)}.
      * @throws IllegalValueException        If the specified value of an {@link Argument} is illegal.
      */
-    @Nullable
-    private Map<@NonNull String, Argument.IParsedArgument<?>> parseArguments(final @NonNull Command command,
-                                                                             final int idx)
+    private @Nullable Map<@NonNull String, Argument.IParsedArgument<?>> parseArguments(final @NonNull Command command,
+                                                                                       final int idx)
         throws NonExistingArgumentException, MissingArgumentException, ValidationFailureException, IllegalValueException
     {
         final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results = new HashMap<>();
@@ -267,7 +266,7 @@ public class CommandParser
                 // If the argument was already parsed before, update the value (in case of a repeatable argument,
                 // the value is added to the list).
                 final @Nullable Argument.IParsedArgument<?> result =
-                    results.putIfAbsent(argument.getName(), parsedArgument);
+                    results.putIfAbsent(argument.getIdentifier(), parsedArgument);
 
                 if (result != null)
                     result.updateValue(parsedArgument.getValue());
@@ -278,15 +277,14 @@ public class CommandParser
             }
         }
 
-        // If the help argument was specified, simply return null, because none of the other argument matter.
+        // If the help argument was specified, simply return null, because none of the other arguments matter.
         if (command.getHelpArgument() != null)
-            if (results.containsKey(command.getHelpArgument().getName()) ||
-                results.containsKey(command.getHelpArgument().getLongName()))
+            if (results.containsKey(command.getHelpArgument().getIdentifier()))
                 return null;
 
         for (final @NonNull Argument<?> argument : command.getArgumentManager().getArguments())
         {
-            final boolean missing = !results.containsKey(argument.getName());
+            final boolean missing = !results.containsKey(argument.getIdentifier());
 
             // Ensure every required argument is present.
             if (argument.isRequired() && missing)
@@ -294,7 +292,7 @@ public class CommandParser
 
             // Add default values for missing optional parameters.
             if (missing)
-                results.put(argument.getName(), argument.getDefault());
+                results.put(argument.getIdentifier(), argument.getDefault());
         }
         return results;
     }

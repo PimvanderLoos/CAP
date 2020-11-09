@@ -13,7 +13,8 @@ public class NonExistingArgumentException extends CAPException
     public NonExistingArgumentException(final @NonNull Command command, final @NonNull String nonExistingArgument,
                                         final boolean stacktrace)
     {
-        super("Argument \"" + nonExistingArgument + "\" does not exist for command: " + command.getName(), stacktrace);
+        super("Argument \"" + nonExistingArgument + "\" does not exist for command: " + command.getName(),
+              stacktrace);
         this.nonExistingArgument = nonExistingArgument;
         this.command = command;
     }

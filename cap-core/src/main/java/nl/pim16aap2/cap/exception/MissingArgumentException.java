@@ -14,7 +14,7 @@ public class MissingArgumentException extends CAPException
     public MissingArgumentException(final @NonNull Command command, final @NonNull Argument<?> missingArgument,
                                     final boolean stacktrace)
     {
-        super("No value found for argument \"" + missingArgument.getName() +
+        super("No value found for argument \"" + missingArgument.getShortName() +
                   "\" of command: " + command.getName(), stacktrace);
         this.missingArgument = missingArgument;
         this.command = command;

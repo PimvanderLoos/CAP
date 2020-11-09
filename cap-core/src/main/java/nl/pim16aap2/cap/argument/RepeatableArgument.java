@@ -23,10 +23,11 @@ public class RepeatableArgument<T> extends Argument<T>
                                final @NonNull String summary, final @NonNull ArgumentParser<T> parser,
                                final @NonNull String label, final boolean required,
                                final @Nullable ITabcompleteFunction tabcompleteFunction,
-                               final @Nullable IArgumentValidator<T> argumentValidator)
+                               final @Nullable IArgumentValidator<T> argumentValidator,
+                               final @Nullable String identifier)
     {
         super(name, longName, summary, parser, null, label, VALUE_LESS, REPEATABLE, POSITION, required,
-              tabcompleteFunction, argumentValidator);
+              tabcompleteFunction, argumentValidator, identifier);
     }
 
     @Override

@@ -21,7 +21,8 @@ public class IllegalValueException extends CAPException
     public IllegalValueException(final @NonNull Command command, final @NonNull String illegalValue,
                                  final @NonNull Throwable cause, final boolean stacktrace)
     {
-        super("Received illegal value \"" + illegalValue + "\" for command: " + command.getName(), cause, stacktrace);
+        super("Received illegal value \"" + illegalValue + "\" for command: " + command.getName(), cause,
+              stacktrace);
         this.illegalValue = illegalValue;
         this.command = command;
     }

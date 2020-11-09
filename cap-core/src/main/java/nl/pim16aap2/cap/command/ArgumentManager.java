@@ -22,7 +22,7 @@ import java.util.Optional;
 public class ArgumentManager
 {
     /**
-     * An (unsorted) map containing all {@link Argument}s, with their {@link Argument#getName()} as key.
+     * An (unsorted) map containing all {@link Argument}s, with their {@link Argument#getIdentifier()} as key.
      */
     protected final @NonNull Map<@NonNull String, @NonNull Argument<?>> argumentsMap;
 
@@ -63,7 +63,7 @@ public class ArgumentManager
 
         for (final @NonNull Argument<?> argument : argumentsList)
         {
-            argumentsMap.put(getArgumentNameCaseCheck(argument.getName()), argument);
+            argumentsMap.put(getArgumentNameCaseCheck(argument.getShortName()), argument);
             if (argument.getLongName() != null)
                 argumentsMap.put(getArgumentNameCaseCheck(argument.getLongName()), argument);
 
@@ -91,7 +91,7 @@ public class ArgumentManager
     }
 
     /**
-     * Gets an argument from its name. See {@link Argument#getName()}.
+     * Gets an argument from its name. See {@link Argument#getShortName()}.
      *
      * @param argumentName The name of the {@link Argument}.
      * @return The {@link Argument}, if one is registered by the provided name.

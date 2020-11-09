@@ -33,14 +33,14 @@ public class Command
      * The default help argument to use in case that is required.
      */
     static final @NonNull Argument<Boolean> DEFAULT_HELP_ARGUMENT =
-        Argument.valuesLessBuilder().name("h").longName("help")
+        Argument.valuesLessBuilder().shortName("h").longName("help").identifier("help")
                 .summary("Displays the help menu for this command.").build();
 
     /**
      * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s.
      */
     static final @NonNull Argument<Integer> DEFAULT_VIRTUAL_ARGUMENT =
-        new IntegerArgument().getOptionalPositional().name("page")
+        new IntegerArgument().getOptionalPositional().shortName("page").identifier("page")
                              .summary("The page number of the help menu to display").build();
 
     /**
@@ -156,7 +156,7 @@ public class Command
     protected @Nullable BiFunction<ICommandSender, Command, Boolean> permission;
 
     /**
-     * @param name                     The name of the command.
+     * @param name                     The shortname of the command.
      * @param description              The description of the command. This is the longer description shown in the help
      *                                 menu for this command.
      * @param descriptionSupplier      The supplier that is used to build the description. Note that this isn't used in
