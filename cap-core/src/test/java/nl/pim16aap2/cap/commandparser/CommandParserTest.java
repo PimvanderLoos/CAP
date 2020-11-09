@@ -1,7 +1,8 @@
-package nl.pim16aap2.cap;
+package nl.pim16aap2.cap.commandparser;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.DoubleArgument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
@@ -15,6 +16,7 @@ import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.GenericCommand;
+import nl.pim16aap2.cap.util.UtilsForTesting;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -284,7 +286,7 @@ class CommandParserTest
         Assertions.assertTrue(CommandParser.lstripArgumentPrefix("-admin").isPresent());
         Assertions.assertTrue(CommandParser.lstripArgumentPrefix("--admin").isPresent());
 
-        Assertions.assertEquals("-admin", CommandParser.lstripArgumentPrefix("---admin").get());
+        UtilsForTesting.optionalEquals(CommandParser.lstripArgumentPrefix("---admin"), "-admin");
     }
 
     /**
@@ -320,7 +322,7 @@ class CommandParserTest
     @SneakyThrows
     void testNumericalInput(final @NonNull CAP cap)
     {
-        final char sep = cap.separator;
+        final char sep = cap.getSeparator();
         // My name is not numerical.
         assertWrappedThrows(IllegalValueException.class,
                             () -> cap
@@ -394,7 +396,7 @@ class CommandParserTest
     private void assertLastArgument(final @NonNull CAP cap, final @NonNull String input,
                                     final @NonNull String commandName)
     {
-        final @NonNull CommandParser commandParser = new CommandParser(cap, commandSender, input, cap.separator);
+        final @NonNull CommandParser commandParser = new CommandParser(cap, commandSender, input, cap.getSeparator());
         Assertions.assertEquals(commandName, commandParser.getLastCommand().getCommand().getName());
     }
 

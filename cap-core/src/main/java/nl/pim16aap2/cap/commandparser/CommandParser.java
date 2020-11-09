@@ -1,8 +1,9 @@
-package nl.pim16aap2.cap;
+package nl.pim16aap2.cap.commandparser;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.command.Command;
@@ -37,7 +38,7 @@ import static nl.pim16aap2.cap.argument.Argument.ITabcompleteFunction;
  *
  * @author Pim
  */
-class CommandParser
+public class CommandParser
 {
     /**
      * The list of {@link Command}s/{@link Argument}s to parse.
@@ -115,8 +116,8 @@ class CommandParser
      *                      <i>'--player=pim16aap2'</i>.
      */
     // TODO: Tab completion should be done in its own class (subclass of this class).
-    CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull String input,
-                  final char separator)
+    public CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                         final @NonNull String input, final char separator)
     {
         this.separator = Character.toString(separator);
         separatorPattern = Pattern.compile(this.separator);
@@ -446,10 +447,10 @@ class CommandParser
      * @param async         Whether or not this method was called asynchronously or not.
      * @return A list of tab completion suggestions.
      */
-    static @NonNull List<String> getTabCompleteOptions(final @NonNull CAP cap,
-                                                       final @NonNull ICommandSender commandSender,
-                                                       final @NonNull String input, final char separator,
-                                                       final boolean async)
+    public static @NonNull List<String> getTabCompleteOptions(final @NonNull CAP cap,
+                                                              final @NonNull ICommandSender commandSender,
+                                                              final @NonNull String input, final char separator,
+                                                              final boolean async)
     {
         return new CommandParser(cap, commandSender, input, separator).getTabCompleteOptions(async);
     }
@@ -563,8 +564,8 @@ class CommandParser
      *                      <i>'--player=pim16aap2'</i>.
      * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
      */
-    static @NonNull CommandResult parseInput(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                                             final @NonNull String input, final char separator)
+    public static @NonNull CommandResult parseInput(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                                                    final @NonNull String input, final char separator)
         throws EOFException, MissingArgumentException, NoPermissionException, IllegalValueException,
                NonExistingArgumentException, ValidationFailureException, CommandNotFoundException
     {
@@ -725,7 +726,7 @@ class CommandParser
     /**
      * See {@link #getLastCommand(Command, int)}.
      */
-    protected @NonNull ParsedCommand getLastCommand()
+    public @NonNull ParsedCommand getLastCommand()
         throws CommandNotFoundException
     {
         return getLastCommand(null, 0);
