@@ -13,6 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Represents the set of {@link Argument}s that are part of a {@link Command}.
+ *
+ * @author Pim
+ */
 @Getter
 public class ArgumentManager
 {
@@ -42,8 +47,14 @@ public class ArgumentManager
      */
     protected final @NonNull ArrayList<@NonNull Argument<?>> optionalArguments = new ArrayList<>(0);
 
-    ArgumentManager(final @NonNull List<Argument<?>> arguments)
+    /**
+     * Whether to enable case sensitivity or not.
+     */
+    protected final boolean caseSensitive;
+
+    ArgumentManager(final @NonNull List<Argument<?>> arguments, final boolean caseSensitive)
     {
+        this.caseSensitive = caseSensitive;
         argumentsMap = new HashMap<>(arguments.size());
         argumentsList = new ArrayList<>(arguments);
 
@@ -52,9 +63,9 @@ public class ArgumentManager
 
         for (final @NonNull Argument<?> argument : argumentsList)
         {
-            argumentsMap.put(argument.getName(), argument);
+            argumentsMap.put(getArgumentNameCaseCheck(argument.getName()), argument);
             if (argument.getLongName() != null)
-                argumentsMap.put(argument.getLongName(), argument);
+                argumentsMap.put(getArgumentNameCaseCheck(argument.getLongName()), argument);
 
             if (argument.isRequired())
                 requiredArguments.add(argument);
@@ -67,6 +78,19 @@ public class ArgumentManager
     }
 
     /**
+     * Converts the name of a {@link Argument} to lower case if needed (i.e. when {@link #caseSensitive} is disabled).
+     * <p>
+     * When it is not needed, the same value is returned.
+     *
+     * @param argumentName The name of the {@link Argument}.
+     * @return The name of the command, made all lower case if needed.
+     */
+    private @NonNull String getArgumentNameCaseCheck(final @NonNull String argumentName)
+    {
+        return caseSensitive ? argumentName : argumentName.toLowerCase();
+    }
+
+    /**
      * Gets an argument from its name. See {@link Argument#getName()}.
      *
      * @param argumentName The name of the {@link Argument}.
@@ -74,7 +98,7 @@ public class ArgumentManager
      */
     public @NonNull Optional<Argument<?>> getArgument(final @Nullable String argumentName)
     {
-        return Optional.ofNullable(argumentsMap.get(argumentName));
+        return Optional.ofNullable(argumentsMap.get(getArgumentNameCaseCheck(argumentName)));
     }
 
     /**

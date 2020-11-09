@@ -246,7 +246,7 @@ public class Command
         if (this.virtual)
             arguments.add(Command.DEFAULT_VIRTUAL_ARGUMENT);
 
-        argumentManager = new ArgumentManager(arguments);
+        argumentManager = new ArgumentManager(arguments, cap.isCaseSensitive());
     }
 
     /**

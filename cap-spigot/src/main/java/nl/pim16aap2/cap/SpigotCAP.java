@@ -45,12 +45,13 @@ public class SpigotCAP extends CAP
     protected SpigotCAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug,
                         final @NonNull JavaPlugin plugin, final @Nullable ColorScheme colorScheme,
                         final @Nullable ExceptionHandler exceptionHandler,
-                        final @Nullable Character separator, final @Nullable Boolean cacheTabcompletionSuggestions)
+                        final @Nullable Character separator, final @Nullable Boolean cacheTabcompletionSuggestions,
+                        final boolean caseSensitive)
     {
         super(Util.valOrDefault(helpCommandRenderer, SpigotHelpCommandRenderer.getDefault()),
               Util.valOrDefault(cacheTabcompletionSuggestions, true),
               Util.valOrDefault(exceptionHandler, ExceptionHandler.getDefault()),
-              Util.valOrDefault(separator, ' '), debug);
+              Util.valOrDefault(separator, ' '), debug, caseSensitive);
 
         this.plugin = plugin;
         this.colorScheme = Util.valOrDefault(colorScheme, generateColorScheme());

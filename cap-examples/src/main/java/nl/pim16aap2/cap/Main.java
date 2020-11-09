@@ -32,7 +32,6 @@ import java.util.List;
 //       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
 //       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
 //       could not be validated.
-// TODO: Optional case sensitivity?
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
 //       (there are probably going to be some casting issues).
 //       Also, be more strict in the positional argument parsing. All positional arguments must come before any free ones.

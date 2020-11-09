@@ -94,6 +94,17 @@ public class CAP
     protected boolean debug = false;
 
     /**
+     * Whether to enable case sensitivity. Default: False.
+     * <p>
+     * When enabled, "/myCommand" will not match to "/mycommand". When disabled, this works fine.
+     * <p>
+     * Note that this only applies to command and argument names, not argument values.
+     */
+    @Getter
+    @Builder.Default
+    protected final boolean caseSensitive = false;
+
+    /**
      * Gets a new instance of this {@link CAP} using the default values.
      * <p>
      * Use {@link CAP#toBuilder()} if you wish to customize it.
@@ -159,8 +170,21 @@ public class CAP
     {
         commandMap.put(command.getName(), command);
         if (!command.getSuperCommand().isPresent())
-            superCommandMap.put(command.getName(), command);
+            superCommandMap.put(getCommandNameCaseCheck(command.getName()), command);
         return this;
+    }
+
+    /**
+     * Converts the name of a {@link Command} to lower case if needed (i.e. when {@link #caseSensitive} is disabled).
+     * <p>
+     * When it is not needed, the same value is returned.
+     *
+     * @param commandName The name of the {@link Command}.
+     * @return The name of the command, made all lower case if needed.
+     */
+    private @NonNull String getCommandNameCaseCheck(final @NonNull String commandName)
+    {
+        return caseSensitive ? commandName : commandName.toLowerCase();
     }
 
     /**
@@ -173,7 +197,7 @@ public class CAP
     {
         if (name == null)
             return Optional.empty();
-        return Optional.ofNullable(commandMap.get(name));
+        return Optional.ofNullable(commandMap.get(getCommandNameCaseCheck(name)));
     }
 
     /**
@@ -186,7 +210,7 @@ public class CAP
     {
         if (name == null)
             return Optional.empty();
-        return Optional.ofNullable(superCommandMap.get(name));
+        return Optional.ofNullable(superCommandMap.get(getCommandNameCaseCheck(name)));
     }
 
     /**
