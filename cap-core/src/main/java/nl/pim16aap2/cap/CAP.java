@@ -168,7 +168,7 @@ public class CAP
      */
     public @NonNull CAP addCommand(final @NonNull Command command)
     {
-        commandMap.put(command.getName(), command);
+        commandMap.put(getCommandNameCaseCheck(command.getName()), command);
         if (!command.getSuperCommand().isPresent())
             superCommandMap.put(getCommandNameCaseCheck(command.getName()), command);
         return this;
@@ -182,7 +182,7 @@ public class CAP
      * @param commandName The name of the {@link Command}.
      * @return The name of the command, made all lower case if needed.
      */
-    private @NonNull String getCommandNameCaseCheck(final @NonNull String commandName)
+    protected @NonNull String getCommandNameCaseCheck(final @NonNull String commandName)
     {
         return caseSensitive ? commandName : commandName.toLowerCase();
     }
