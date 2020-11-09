@@ -13,13 +13,11 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
-import nl.pim16aap2.cap.util.Functional.CheckedSupplier;
 import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.TabCompletionCache;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -118,33 +116,17 @@ public class CAP
 
     /**
      * Parses a string containing multiple arguments delimited by spaces.
-     * <p>
-     * See {@link #parseInput(ICommandSender, List)}.
      *
      * @param commandSender The {@link ICommandSender} that issued a command.
-     * @param args          A single String containing multiple arguments.
-     */
-    public @NonNull Optional<CommandResult> parseInput(final @NonNull ICommandSender commandSender, String args)
-    {
-        return parseInput(commandSender, split(args));
-    }
-
-    /**
-     * Parses an array of commandline arguments.
-     *
-     * @param commandSender The {@link ICommandSender} that issued a command.
-     * @param args          The commandline arguments to parse split by spaces.
-     *                      <p>
-     *                      If spaces are required in a value, use double quotation marks. Quotation marks that are not
-     *                      escaped will be removed.
-     * @return The {@link CommandResult} containing the parsed arguments.
+     * @param input         The string that may contain a set of commands and arguments.
+     * @return The {@link CommandResult} if it could be constructed.
      */
     public @NonNull Optional<CommandResult> parseInput(final @NonNull ICommandSender commandSender,
-                                                       final @NonNull List<String> args)
+                                                       final @NonNull String input)
     {
         try
         {
-            return Optional.of(new CommandParser(this, commandSender, args, Character.toString(separator)).parse());
+            return Optional.of(CommandParser.parseInput(this, commandSender, input, separator));
         }
         catch (CAPException exception)
         {
@@ -224,114 +206,46 @@ public class CAP
     }
 
     /**
-     * Splits a string containing a command on spaces while preserving whitespace as trailing whitespace.
-     * <p>
-     * E.g. <pre>"/mycommand  arg  value"</pre> will return <pre>["/mycommand  ", "arg  ", "value"]</pre>
-     *
-     * @param command The string to split.
-     * @return The command split on spaces.
-     */
-    public static @NonNull List<String> split(final @NonNull String command)
-    {
-        final @NonNull List<String> args = new ArrayList<>();
-        int startIdx = 0;
-        boolean lastWhiteSpace = false;
-        for (int idx = 0; idx < command.length(); ++idx)
-        {
-            final char c = command.charAt(idx);
-            if (Character.isWhitespace(c))
-                lastWhiteSpace = true;
-            else
-            {
-                if (lastWhiteSpace)
-                {
-                    args.add(command.substring(startIdx, idx));
-                    startIdx = idx;
-                }
-                lastWhiteSpace = false;
-            }
-        }
-        if (startIdx < command.length())
-            args.add(command.substring(startIdx));
-        return args;
-    }
-
-    /**
      * Gets a list of suggestions for tab complete based on the current set of arguments.
      *
      * @param commandSender The {@link ICommandSender} to get the suggestions for.
-     * @param args          The current set of (potentially incomplete) input arguments.
+     * @param input         The current set of (potentially incomplete) input arguments.
      * @return The list of suggestions based on the current set of input arguments.
      */
     public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
-                                                       final @NonNull String args)
+                                                       final @NonNull String input)
     {
-        return getTabCompleteOptions(commandSender, split(args));
-    }
+        final @NonNull CommandParser commandParser = new CommandParser(this, commandSender, input, separator);
+        final @NonNull Supplier<List<String>> supplier = () -> commandParser.getTabCompleteOptions(false);
 
-    /**
-     * Gets a list of suggestions for tab complete based on the current set of arguments.
-     *
-     * @param commandSender The {@link ICommandSender} to get the suggestions for.
-     * @param args          The current set of (potentially incomplete) input arguments split on spaces.
-     * @return The list of suggestions based on the current set of input arguments.
-     */
-    public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
-                                                       final @NonNull List<String> args)
-    {
-        try
-        {
-            final @NonNull CheckedSupplier<List<String>, EOFException> supplier = () ->
-                new CommandParser(this, commandSender, args, Character.toString(separator))
-                    .getTabCompleteOptions(false);
+        if (!cacheTabcompletionSuggestions)
+            return supplier.get();
 
-            if (!cacheTabcompletionSuggestions)
-                return supplier.get();
+        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = commandParser.getLastArgumentData();
 
-            final @NonNull Pair<@NonNull String, @NonNull String> lastArgument =
-                CommandParser.getLastArgumentData(args, separator);
-
-            return tabCompletionCache.getTabCompleteOptions(commandSender, args, lastArgument.first +
-                lastArgument.second, supplier);
-        }
-        catch (EOFException e)
-        {
-            return new ArrayList<>(0);
-        }
+        return tabCompletionCache.getTabCompleteOptions(commandSender, commandParser.getArgs(),
+                                                        lastArgument.first + lastArgument.second, supplier);
     }
 
     /**
      * Asynchronously gets a list of suggestions for tab complete based on the current set of arguments.
      *
      * @param commandSender The {@link ICommandSender} to get the suggestions for.
-     * @param args          The current set of (potentially incomplete) input arguments split on spaces.
+     * @param input         The current set of (potentially incomplete) input arguments.
      * @return The list of suggestions based on the current set of input arguments.
      */
     public @NonNull CompletableFuture<List<String>> getTabCompleteOptionsAsync(
-        final @NonNull ICommandSender commandSender, final @NonNull List<String> args)
+        final @NonNull ICommandSender commandSender, final @NonNull String input)
     {
-        // TODO: Do something about the EOFException.
-        final @NonNull Supplier<List<String>> supplier = () ->
-        {
-            try
-            {
-                return new CommandParser(this, commandSender, args, Character.toString(separator))
-                    .getTabCompleteOptions(true);
-            }
-            catch (EOFException e)
-            {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        };
+        final @NonNull CommandParser commandParser = new CommandParser(this, commandSender, input, separator);
+        final @NonNull Supplier<List<String>> supplier = () -> commandParser.getTabCompleteOptions(true);
 
         if (!cacheTabcompletionSuggestions)
             return CompletableFuture.supplyAsync(supplier);
 
-        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument =
-            CommandParser.getLastArgumentData(args, separator);
+        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = commandParser.getLastArgumentData();
 
-        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, args, lastArgument.first +
-            lastArgument.second, supplier);
+        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, commandParser.getArgs(),
+                                                             lastArgument.first + lastArgument.second, supplier);
     }
 }

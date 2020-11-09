@@ -2,17 +2,16 @@ package nl.pim16aap2.cap.util;
 
 import lombok.NonNull;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
-import nl.pim16aap2.cap.util.Functional.CheckedSupplier;
 import nl.pim16aap2.cap.util.cache.TimedCache;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.EOFException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * Represents a cache for tab completion suggestions. Once a list of suggestions is created for an {@link
@@ -33,6 +32,8 @@ import java.util.function.Supplier;
  */
 public class TabCompletionCache
 {
+    private static final Pattern LEADING_QUOTATION_MARK = Pattern.compile("^[\"]?");
+
     private final @NonNull TimedCache<ICommandSender, CacheEntry> tabCompletionCache =
         TimedCache.<ICommandSender, CacheEntry>builder()
             .duration(Duration.ofMinutes(2))
@@ -50,13 +51,10 @@ public class TabCompletionCache
      *                      arguments, but the parser can figure that out.
      * @param fun           The function to retrieve the list of arguments if they cannot be retrieved from cache.
      * @return The list of suggested tab completions.
-     *
-     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
      */
     public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
                                                        final @NonNull List<String> args, final @NonNull String lastArg,
-                                                       final @NonNull CheckedSupplier<List<String>, EOFException> fun)
-        throws EOFException
+                                                       final @NonNull Supplier<List<String>> fun)
     {
         final @NonNull CacheEntry cacheEntry =
             tabCompletionCache.get(commandSender)
@@ -234,7 +232,8 @@ public class TabCompletionCache
             // So, if the provided lastArg does not start with that, we know that we don't have its results cached.
             // Because the CUTOFF_DELTA is 2, we'd get an empty string if there are only 2 characters. Therefore, we
             // try to get the first character in that case (if long enough).
-            final int previousCutoff = Math.min(previousArg.length(), Math.max(1, previousArg.length() - CUTOFF_DELTA));
+            final int previousCutoff = Math.min(previousArg.length(),
+                                                Math.max(1, previousArg.length() - CUTOFF_DELTA));
             final @NonNull String basePreviousArg =
                 previousArg.substring(0, Math.min(previousArg.length(), previousCutoff));
 
@@ -249,11 +248,12 @@ public class TabCompletionCache
 
             final @NonNull ArrayList<String> newSuggestions = new ArrayList<>(suggestions.size());
 
+            final Pattern search = Pattern.compile(LEADING_QUOTATION_MARK + Pattern.quote(lastArg));
 
             suggestions.forEach(
                 val ->
                 {
-                    if (val.startsWith(lastArg))
+                    if (search.matcher(val).find())
                         newSuggestions.add(val);
                 });
 

@@ -42,6 +42,7 @@ class CommandParser
     /**
      * The list of {@link Command}s/{@link Argument}s to parse.
      */
+    @Getter
     private final @NonNull List<String> args;
 
     /**
@@ -90,25 +91,73 @@ class CommandParser
     protected @NonNull Pattern separatorPattern;
 
     /**
+     * The raw input.
+     */
+    protected @NonNull String input;
+
+    /**
+     * Keeps track of whether all unescaped quotation marks were matched properly.
+     * <p>
+     * Example of True: '/command --player="that player"'
+     * <p>
+     * Example of False: '/command --player="that player'
+     */
+    // TODO: All the input stuff should get handled by its own class. This class is getting too fat.
+    private boolean completeQuotationMarks = true;
+
+    /**
      * Constructs a new command parser.
      *
      * @param cap           The {@link CAP} instance that owns this object..
      * @param commandSender The {@link ICommandSender} that issued the command.
-     * @param args          The list of arguments split on spaces (with preserved whitespace).
+     * @param input         The string that may contain a set of commands and arguments.
      * @param separator     The separator between a free argument's flag and its value. E.g. '<i>=</i>' for the format
      *                      <i>'--player=pim16aap2'</i>.
-     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
      */
-    CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull List<String> args,
-                  final @NonNull String separator)
-        throws EOFException
+    // TODO: Tab completion should be done in its own class (subclass of this class).
+    CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender, final @NonNull String input,
+                  final char separator)
     {
-        this.separator = separator;
-        separatorPattern = Pattern.compile(separator);
-        spaceSeparated = separator.equals(" ");
-        this.args = preprocess(args);
+        this.separator = Character.toString(separator);
+        separatorPattern = Pattern.compile(this.separator);
+        spaceSeparated = this.separator.equals(" ");
+        this.input = input;
+        args = preprocess(split(input));
         this.commandSender = commandSender;
         this.cap = cap;
+    }
+
+    /**
+     * Splits a string containing a command on spaces while preserving whitespace as trailing whitespace.
+     * <p>
+     * E.g. <pre>"/mycommand  arg  value"</pre> will return <pre>["/mycommand  ", "arg  ", "value"]</pre>
+     *
+     * @param command The string to split.
+     * @return The command split on spaces.
+     */
+    public static @NonNull List<String> split(final @NonNull String command)
+    {
+        final @NonNull List<String> args = new ArrayList<>();
+        int startIdx = 0;
+        boolean lastWhiteSpace = false;
+        for (int idx = 0; idx < command.length(); ++idx)
+        {
+            final char c = command.charAt(idx);
+            if (Character.isWhitespace(c))
+                lastWhiteSpace = true;
+            else
+            {
+                if (lastWhiteSpace)
+                {
+                    args.add(command.substring(startIdx, idx));
+                    startIdx = idx;
+                }
+                lastWhiteSpace = false;
+            }
+        }
+        if (startIdx < command.length())
+            args.add(command.substring(startIdx));
+        return args;
     }
 
     /**
@@ -127,14 +176,11 @@ class CommandParser
     /**
      * Gets the argument name and its value for the last argument in a list of arguments.
      *
-     * @param args      The list of arguments.
-     * @param separator The separator to use.
      * @return The name and value of the last argument.
      */
-    public static @NonNull Pair<String, String> getLastArgumentData(final @NonNull List<String> args,
-                                                                    final char separator)
+    public @NonNull Pair<String, String> getLastArgumentData()
     {
-        final String[] parts = args.get(args.size() - 1).split(Character.toString(separator), 2);
+        final String[] parts = args.get(args.size() - 1).split(separator, 2);
         if (parts.length == 2)
             return new Pair<>(parts[0] + separator, parts[1]);
         return new Pair<>("", parts[0]);
@@ -281,7 +327,12 @@ class CommandParser
             .forEach(entry ->
                      {
                          if (entry.startsWith(value))
-                             options.add(prefix + entry);
+                         {
+                             if (entry.contains(" "))
+                                 options.add(prefix + "\"" + entry + "\"");
+                             else
+                                 options.add(prefix + entry);
+                         }
                      });
 
         return options;
@@ -385,6 +436,25 @@ class CommandParser
     }
 
     /**
+     * Gets a list of suggestions for tab complete based on the current input arguments.
+     *
+     * @param cap           The {@link CAP} instance that owns this object..
+     * @param commandSender The {@link ICommandSender} that issued the command.
+     * @param input         The string that may contain a set of commands and arguments.
+     * @param separator     The separator between a free argument's flag and its value. E.g. '<i>=</i>' for the format
+     *                      <i>'--player=pim16aap2'</i>.
+     * @param async         Whether or not this method was called asynchronously or not.
+     * @return A list of tab completion suggestions.
+     */
+    static @NonNull List<String> getTabCompleteOptions(final @NonNull CAP cap,
+                                                       final @NonNull ICommandSender commandSender,
+                                                       final @NonNull String input, final char separator,
+                                                       final boolean async)
+    {
+        return new CommandParser(cap, commandSender, input, separator).getTabCompleteOptions(async);
+    }
+
+    /**
      * Gets a list of suggestions for tab complete based on the current {@link #args}.
      *
      * @param async Whether or not this method was called asynchronously or not.
@@ -429,11 +499,8 @@ class CommandParser
      *
      * @param rawArgs The raw array of arguments split by spaces.
      * @return The list of preprocessed arguments.
-     *
-     * @throws EOFException When an unmatched quotation mark is encountered. E.g. 'name="my name'.
      */
-    private @NonNull List<String> preprocess(final @NonNull List<String> rawArgs)
-        throws EOFException
+    protected @NonNull List<String> preprocess(final @NonNull List<String> rawArgs)
     {
         final ArrayList<@NonNull String> argsList = new ArrayList<>(rawArgs.size());
 
@@ -475,11 +542,38 @@ class CommandParser
             }
 
             if (arg != null && idx == (rawArgs.size() - 1))
-                throw new EOFException();
+                completeQuotationMarks = false;
         }
+
+        // Add all remaining entries.
+        if (arg != null)
+            argsList.add(arg);
 
         argsList.trimToSize();
         return argsList;
+    }
+
+    /**
+     * Constructs a new command parser.
+     *
+     * @param cap           The {@link CAP} instance that owns this object..
+     * @param commandSender The {@link ICommandSender} that issued the command.
+     * @param input         The string that may contain a set of commands and arguments.
+     * @param separator     The separator between a free argument's flag and its value. E.g. '<i>=</i>' for the format
+     *                      <i>'--player=pim16aap2'</i>.
+     * @throws EOFException If the command contains unmatched quotation marks. E.g. '<i>--player="pim 16aap2</i>'.
+     */
+    static @NonNull CommandResult parseInput(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                                             final @NonNull String input, final char separator)
+        throws EOFException, MissingArgumentException, NoPermissionException, IllegalValueException,
+               NonExistingArgumentException, ValidationFailureException, CommandNotFoundException
+    {
+        final @NonNull CommandParser parser = new CommandParser(cap, commandSender, input, separator);
+
+        if (!parser.completeQuotationMarks)
+            throw new EOFException();
+
+        return parser.parse();
     }
 
     /**

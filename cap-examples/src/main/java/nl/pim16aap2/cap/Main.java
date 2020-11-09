@@ -14,6 +14,7 @@ import nl.pim16aap2.cap.text.TextComponent;
 import nl.pim16aap2.cap.text.TextType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // TODO: Make sure that async permission checking is allowed for Spigot. Currently, when using async tab-completion
@@ -57,6 +58,13 @@ import java.util.List;
 //       that flag again won't do anything.
 // TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
 //       or "-a" for "--a".
+// TODO: The CommandParser should be split up into 3 classes (it's too fat atm):
+//       1) CommandParser, doing all the parsing and shit.
+//       2) An input class to preprocess the input and to keep track of whether or not the input is valid (quotation marks etc)
+//       3) A tab-suggestion class. This class extends the CommandParser (or maybe it only needs the input class. Prefer composition here)
+// TODO: Most of the tab suggestion code in the CAP class can be moved into the cache class. Just let the cache class
+//       take care of getting the results on its own. Maybe rename it to make it clear that it's not a cache.
+//       Also, this component will have to become required, but the caching aspect can become optional.
 
 public class Main
 {
@@ -134,8 +142,8 @@ public class Main
         tabComplete(cap, "bigdoors subcomma");
         tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2");
         tabComplete(cap, "bigdoors addowner myDoor --play");
-
         tabComplete(cap, "bigdoors addowner mydoor --admin ");
+        tabComplete(cap, "bigdoors addowner \"tes");
 
         tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2");
         tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4");
@@ -218,6 +226,7 @@ public class Main
                           .getRequired()
                           .name("doorID")
                           .summary("The name or UID of the door")
+                          .tabcompleteFunction(request -> Arrays.asList("test a", "test_b"))
                           .build())
             .argument(Argument.valuesLessBuilder()
                               .value(true)

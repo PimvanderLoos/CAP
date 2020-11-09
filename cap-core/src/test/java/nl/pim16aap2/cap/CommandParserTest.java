@@ -31,7 +31,7 @@ class CommandParserTest
     private static final List<String> playerNames = new ArrayList<>(
         Arrays.asList("pim16aap2", "pim16aap3", "mip16aap2", "pim"));
 
-    private static final List<String> doorIDs = new ArrayList<>(Arrays.asList("myDoor", "42", "myPortcullis", "84"));
+    private static final List<String> doorIDs = new ArrayList<>(Arrays.asList("myDoor", "42", "my Portcullis", "84"));
 
     /**
      * Populates a {@link CAP} with all the commands and arguments.
@@ -134,6 +134,18 @@ class CommandParserTest
         cap.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical);
 
         return cap;
+    }
+
+    @Test
+    void split()
+    {
+        Assertions.assertEquals(5, CommandParser.split("bigdoors addowner mydoor --player pim16aap2").size());
+        Assertions.assertEquals(5, CommandParser.split("bigdoors addowner mydoor --player    pim16aap2").size());
+
+        final @NonNull List<String> split = CommandParser.split("bigdoors addowner mydoor --player    pim16aap2   a ");
+        Assertions.assertEquals(split.size(), 6);
+        // Check that the last entry is "a "
+        Assertions.assertEquals(2, split.get(5).length());
     }
 
     @Test
@@ -254,7 +266,7 @@ class CommandParserTest
         doorIDSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner my");
         Assertions.assertEquals(2, doorIDSuggestions.size());
         Assertions.assertEquals("myDoor", doorIDSuggestions.get(0));
-        Assertions.assertEquals("myPortcullis", doorIDSuggestions.get(1));
+        Assertions.assertEquals("\"my Portcullis\"", doorIDSuggestions.get(1));
 
         doorIDSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner");
         Assertions.assertEquals(4, doorIDSuggestions.size());
@@ -379,12 +391,10 @@ class CommandParserTest
     }
 
     @SneakyThrows
-    private void assertLastArgument(final @NonNull CAP cap, final @NonNull String command,
+    private void assertLastArgument(final @NonNull CAP cap, final @NonNull String input,
                                     final @NonNull String commandName)
     {
-        final @NonNull List<String> args = CAP.split(command);
-        final @NonNull CommandParser commandParser = new CommandParser(cap, commandSender, args,
-                                                                       Character.toString(cap.separator));
+        final @NonNull CommandParser commandParser = new CommandParser(cap, commandSender, input, cap.separator);
         Assertions.assertEquals(commandName, commandParser.getLastCommand().getCommand().getName());
     }
 
