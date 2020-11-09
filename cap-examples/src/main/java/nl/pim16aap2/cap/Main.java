@@ -60,8 +60,10 @@ import java.util.List;
 //       or "-a" for "--a".
 // TODO: The CommandParser should be split up into 3 classes (it's too fat atm):
 //       1) CommandParser, doing all the parsing and shit.
-//       2) An input class to preprocess the input and to keep track of whether or not the input is valid (quotation marks etc)
-//       3) A tab-suggestion class. This class extends the CommandParser (or maybe it only needs the input class. Prefer composition here)
+//       2) An commandLineInput class to preprocess the input and to keep track of whether or not the input is
+//          valid (quotation marks etc)
+//       3) A tab-suggestion class. This class extends the CommandParser (or maybe it only needs the commandLineInput
+//          class. Prefer composition here)
 // TODO: Most of the tab suggestion code in the CAP class can be moved into the cache class. Just let the cache class
 //       take care of getting the results on its own. Maybe rename it to make it clear that it's not a cache.
 //       Also, this component will have to become required, but the caching aspect can become optional.

@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -41,18 +40,12 @@ import static nl.pim16aap2.cap.argument.Argument.ITabcompleteFunction;
 public class CommandParser
 {
     /**
-     * The list of {@link Command}s/{@link Argument}s to parse.
-     */
-    @Getter
-    private final @NonNull List<String> args;
-
-    /**
      * The {@link CAP} instance that controls this command parser.
      */
     final @NonNull CAP cap;
 
     /**
-     * The {@link ICommandSender} for which to parse the {@link #args}.
+     * The {@link ICommandSender} for which to parse the {@link #input}.
      */
     private final @NonNull ICommandSender commandSender;
 
@@ -64,10 +57,6 @@ public class CommandParser
      * The pattern for leading {@link #ARGUMENT_PREFIX}es.
      */
     private static final Pattern LEADING_PREFIX_PATTERN = Pattern.compile("^[-]{1,2}");
-    /**
-     * The pattern for non-escaped quotation marks.
-     */
-    private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
     /**
      * Whether or not free {@link Argument}s are separated from their values using spaces or not.
@@ -92,19 +81,9 @@ public class CommandParser
     protected @NonNull Pattern separatorPattern;
 
     /**
-     * The raw input.
+     * The {@link CommandLineInput} containing the input to parse.
      */
-    protected @NonNull String input;
-
-    /**
-     * Keeps track of whether all unescaped quotation marks were matched properly.
-     * <p>
-     * Example of True: '/command --player="that player"'
-     * <p>
-     * Example of False: '/command --player="that player'
-     */
-    // TODO: All the input stuff should get handled by its own class. This class is getting too fat.
-    private boolean completeQuotationMarks = true;
+    protected @NonNull CommandLineInput input;
 
     /**
      * Constructs a new command parser.
@@ -115,63 +94,21 @@ public class CommandParser
      * @param separator     The separator between a free argument's flag and its value. E.g. '<i>=</i>' for the format
      *                      <i>'--player=pim16aap2'</i>.
      */
-    // TODO: Tab completion should be done in its own class (subclass of this class).
     public CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
                          final @NonNull String input, final char separator)
     {
         this.separator = Character.toString(separator);
         separatorPattern = Pattern.compile(this.separator);
         spaceSeparated = this.separator.equals(" ");
-        this.input = input;
-        args = preprocess(split(input));
+        this.input = new CommandLineInput(input);
         this.commandSender = commandSender;
         this.cap = cap;
     }
 
-    /**
-     * Splits a string containing a command on spaces while preserving whitespace as trailing whitespace.
-     * <p>
-     * E.g. <pre>"/mycommand  arg  value"</pre> will return <pre>["/mycommand  ", "arg  ", "value"]</pre>
-     *
-     * @param command The string to split.
-     * @return The command split on spaces.
-     */
-    public static @NonNull List<String> split(final @NonNull String command)
+    // TODO: REMOVE THIS
+    public List<String> getArgs()
     {
-        final @NonNull List<String> args = new ArrayList<>();
-        int startIdx = 0;
-        boolean lastWhiteSpace = false;
-        for (int idx = 0; idx < command.length(); ++idx)
-        {
-            final char c = command.charAt(idx);
-            if (Character.isWhitespace(c))
-                lastWhiteSpace = true;
-            else
-            {
-                if (lastWhiteSpace)
-                {
-                    args.add(command.substring(startIdx, idx));
-                    startIdx = idx;
-                }
-                lastWhiteSpace = false;
-            }
-        }
-        if (startIdx < command.length())
-            args.add(command.substring(startIdx));
-        return args;
-    }
-
-    /**
-     * Gets the value of the last argument in a list of arguments.
-     *
-     * @param args      The list of arguments.
-     * @param separator The separator to use.
-     * @return THe value of the last argument.
-     */
-    public static @NonNull String getLastArgumentValue(final @NonNull List<String> args, final char separator)
-    {
-        final String[] parts = args.get(args.size() - 1).split(Character.toString(separator), 2);
-        return parts[parts.length - 1].trim();
+        return input.getArgs();
     }
 
     /**
@@ -181,7 +118,7 @@ public class CommandParser
      */
     public @NonNull Pair<String, String> getLastArgumentData()
     {
-        final String[] parts = args.get(args.size() - 1).split(separator, 2);
+        final String[] parts = input.getArgs().get(input.size() - 1).split(separator, 2);
         if (parts.length == 2)
             return new Pair<>(parts[0] + separator, parts[1]);
         return new Pair<>("", parts[0]);
@@ -212,13 +149,13 @@ public class CommandParser
     }
 
     /**
-     * Gets a list of {@link Argument#getName()} that can be used to complete the current {@link #args}.
+     * Gets a list of {@link Argument#getName()} that can be used to complete the current {@link #input}.
      *
      * @param command The {@link Command} for which to check the {@link Argument}s.
-     * @param lastArg The last value in {@link #args} that will be used as a base for the auto suggestions. E.g. when
+     * @param lastArg The last value in {@link #input} that will be used as a base for the auto suggestions. E.g. when
      *                supplied "a", it will suggest "admin" but it won't suggest "player" (provided "admin" is a
      *                registered {@link Argument} for the given {@link Command}.
-     * @return The list of {@link Argument#getName()} that can be used to complete the current {@link #args}.
+     * @return The list of {@link Argument#getName()} that can be used to complete the current {@link #input}.
      */
     protected @NonNull List<String> getTabCompleteArgumentNames(final @NonNull Command command,
                                                                 final @NonNull String lastArg)
@@ -348,11 +285,12 @@ public class CommandParser
      */
     protected @NonNull List<String> getTabCompleteArguments(final @NonNull ParsedCommand command, final boolean async)
     {
-        final String lastVal = args.get(args.size() - 1);
+        final String lastVal = input.getArgs().get(input.size() - 1);
 
         // If the arguments are NOT separated by spaces, there's no point in looking at the before-last argument
         // So simply set the previous value to null and it'll be ignored.
-        final @Nullable String previousVal = (spaceSeparated && args.size() > 2) ? args.get(args.size() - 2) : null;
+        final @Nullable String previousVal =
+            (spaceSeparated && input.size() > 2) ? input.getArgs().get(input.size() - 2) : null;
 
         // Get the before-last argument (which will be complete) if the previous value isn't null
         // which can be the case if it simply doesn't exist or if the arguments aren't space-separated.
@@ -423,7 +361,7 @@ public class CommandParser
             {
                 // Subtract the command's index from the total size because the command and its supercommands don't
                 // count towards positional indices.
-                final int positionalArgumentIdx = args.size() - command.index - 2;
+                final int positionalArgumentIdx = input.size() - command.index - 2;
                 argument = command.getCommand().getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIdx)
                                   .orElse(null);
                 value = lastVal;
@@ -456,7 +394,7 @@ public class CommandParser
     }
 
     /**
-     * Gets a list of suggestions for tab complete based on the current {@link #args}.
+     * Gets a list of suggestions for tab complete based on the current {@link #input}.
      *
      * @param async Whether or not this method was called asynchronously or not.
      * @return A list of tab completion suggestions.
@@ -466,16 +404,16 @@ public class CommandParser
         try
         {
             final @NonNull ParsedCommand parsedCommand = getLastCommand();
-            if (parsedCommand.getIndex() >= (args.size() - 1))
+            if (parsedCommand.getIndex() >= (input.size() - 1))
                 return getTabCompleteWithoutValue(parsedCommand.getCommand(), async);
 
             final List<String> suggestions = new ArrayList<>();
             // Check if the found index is the before-last argument.
             // If it's further back than that, we know it cannot be subcommand,
             // and it has to be an argument.
-            if (parsedCommand.getIndex() == (args.size() - 2) &&
+            if (parsedCommand.getIndex() == (input.size() - 2) &&
                 parsedCommand.getCommand().getSubCommands().size() > 0)
-                suggestions.addAll(selectCommandsPartialMatch(args.get(args.size() - 1),
+                suggestions.addAll(selectCommandsPartialMatch(input.getArgs().get(input.size() - 1),
                                                               parsedCommand.getCommand().getSubCommands()));
 
             if (parsedCommand.getCommand().getArgumentManager().getArguments().size() > 0)
@@ -485,73 +423,11 @@ public class CommandParser
         }
         catch (CommandNotFoundException e)
         {
-            return selectCommandsPartialMatch(args.get(0),
+            return selectCommandsPartialMatch(input.getArgs().get(0),
                                               cap.getCommands().stream().filter(
                                                   command -> !command.getSuperCommand().isPresent())
                                                  .collect(Collectors.toList()));
         }
-    }
-
-    /**
-     * Preprocesses the arguments.
-     * <p>
-     * Any arguments that are split by spaces (and therefore in different entries) while they should be in a single
-     * entry (because of quotation marks, e.g. 'name="my name"') will be merged into single entries.
-     *
-     * @param rawArgs The raw array of arguments split by spaces.
-     * @return The list of preprocessed arguments.
-     */
-    protected @NonNull List<String> preprocess(final @NonNull List<String> rawArgs)
-    {
-        final ArrayList<@NonNull String> argsList = new ArrayList<>(rawArgs.size());
-
-        // Represents a argument split by a spaces but inside brackets, e.g. '"my door"' should put 'my door' as a
-        // single entry.
-        @Nullable String arg = null;
-        for (int idx = 0; idx < rawArgs.size(); ++idx)
-        {
-            String entry = rawArgs.get(idx);
-            final Matcher matcher = NON_ESCAPED_QUOTATION_MARKS.matcher(entry);
-            int count = 0;
-            while (matcher.find())
-                ++count;
-
-            if (count > 0)
-                entry = matcher.replaceAll("");
-
-            // When there's an even number of (non-escaped) quotation marks, it means that there aren't any spaces
-            // between them and as such, we can ignore them.
-            if (count % 2 == 0)
-            {
-                // If arg is null, it means that we don't have to append the current block to another one
-                // As such, we can add it to the list directly. Otherwise, we can add it to the arg and look for the
-                // termination quotation mark in the next string.
-                if (arg == null)
-                    argsList.add(entry);
-                else
-                    arg += entry;
-            }
-            else
-            {
-                if (arg == null)
-                    arg = entry;
-                else
-                {
-                    argsList.add(arg + entry);
-                    arg = null;
-                }
-            }
-
-            if (arg != null && idx == (rawArgs.size() - 1))
-                completeQuotationMarks = false;
-        }
-
-        // Add all remaining entries.
-        if (arg != null)
-            argsList.add(arg);
-
-        argsList.trimToSize();
-        return argsList;
     }
 
     /**
@@ -571,7 +447,7 @@ public class CommandParser
     {
         final @NonNull CommandParser parser = new CommandParser(cap, commandSender, input, separator);
 
-        if (!parser.completeQuotationMarks)
+        if (!parser.input.isCompleteQuotationMarks())
             throw new EOFException();
 
         return parser.parse();
@@ -600,7 +476,7 @@ public class CommandParser
         if (!parsedCommand.getCommand().hasPermission(commandSender))
             throw new NoPermissionException(commandSender, parsedCommand.getCommand(), cap.isDebug());
 
-        if (parsedCommand.getIndex() == (args.size() - 1) &&
+        if (parsedCommand.getIndex() == (input.size() - 1) &&
             parsedCommand.getCommand().getArgumentManager().getRequiredArguments().size() > 0)
             return new CommandResult(commandSender, parsedCommand.getCommand());
 
@@ -613,7 +489,7 @@ public class CommandParser
      * Parses all the {@link Argument}s for a given {@link Command}.
      *
      * @param command The {@link Command} to parse the {@link Argument}s for.
-     * @param idx     The index of the {@link Command} in {@link #args}. All values with a higher index than this will
+     * @param idx     The index of the {@link Command} in {@link #input}. All values with a higher index than this will
      *                be processed as {@link Argument}s.
      * @return The map of {@link Argument.IParsedArgument}s resulting from parsing the input. Any missing optional
      * {@link Argument}s with default values will be assigned their default value. {@link Argument#getName()} is used
@@ -633,9 +509,9 @@ public class CommandParser
         final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results = new HashMap<>();
 
         int requiredArgumentIdx = 0;
-        for (int pos = idx + 1; pos < args.size(); ++pos)
+        for (int pos = idx + 1; pos < input.size(); ++pos)
         {
-            final String nextArg = args.get(pos);
+            final String nextArg = input.getArgs().get(pos);
             final @NonNull Argument<?> argument;
             @NonNull String value;
             if (nextArg.charAt(0) == ARGUMENT_PREFIX)
@@ -663,7 +539,7 @@ public class CommandParser
                     final int nextPos = pos + 1;
                     if (spaceSeparated)
                     {
-                        value = args.size() >= nextPos ? args.get(nextPos) : "";
+                        value = input.size() >= nextPos ? input.getArgs().get(nextPos) : "";
                         pos += 1;
                     }
                     else
@@ -733,7 +609,7 @@ public class CommandParser
     }
 
     /**
-     * Recursively gets the last command in the {@link #args}.
+     * Recursively gets the last command in the {@link #input}.
      * <p>
      * For example, in "<b><u>supercommand</u> <u>subcommand</u> -opt=val</b>" with <u>supercommand</u> and
      * <u>subcommand</u> being registered commands, it would return the {@link Command} object for <u>subcommand</u>.
@@ -743,8 +619,8 @@ public class CommandParser
      * object for <u>subcommand</u>, just a little bit slower.
      *
      * @param command The latest {@link Command} that has been found so far.
-     * @param idx     The index of the latest command in {@link #args}.
-     * @return The last {@link Command} that can be parsed from the arguments in {@link #args}.
+     * @param idx     The index of the latest command in {@link #input}.
+     * @return The last {@link Command} that can be parsed from the arguments in {@link #input}.
      *
      * @throws CommandNotFoundException If a command is found at an index that is not registered as subcommand of the
      *                                  previous command or if the subcommand has not registered the supercommand as
@@ -758,7 +634,7 @@ public class CommandParser
             if (idx != 0)
                 throw new CommandNotFoundException(null, cap.isDebug());
 
-            final @Nullable String commandName = args.size() > idx ? args.get(idx).trim() : null;
+            final @Nullable String commandName = input.size() > idx ? input.getArgs().get(idx).trim() : null;
             final Command baseCommand =
                 cap.getCommand(commandName)
                    .orElseThrow(() -> new CommandNotFoundException(commandName, cap.isDebug()));
@@ -774,7 +650,7 @@ public class CommandParser
             return new ParsedCommand(command, idx);
 
         final int nextIdx = idx + 1;
-        final @Nullable String nextArg = args.size() > nextIdx ? args.get(nextIdx).trim() : null;
+        final @Nullable String nextArg = input.size() > nextIdx ? input.getArgs().get(nextIdx).trim() : null;
         // If there's no argument available after the current one, we've reached the end of the arguments.
         // This means that the last command we found is the last argument (by definition), so return that.
         if (nextArg == null)

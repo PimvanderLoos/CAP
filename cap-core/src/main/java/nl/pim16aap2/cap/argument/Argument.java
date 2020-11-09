@@ -270,8 +270,7 @@ public class Argument<T>
     /**
      * Parses the input and stores the result in an {@link IParsedArgument}. See {@link #parseArgument(String, CAP)}.
      */
-    public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value,
-                                                         final @NonNull CAP cap)
+    public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value, final @NonNull CAP cap)
         throws ValidationFailureException
     {
         if (value == null)

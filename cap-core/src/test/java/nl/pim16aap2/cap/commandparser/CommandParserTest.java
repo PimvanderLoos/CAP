@@ -139,29 +139,6 @@ class CommandParserTest
     }
 
     @Test
-    void split()
-    {
-        Assertions.assertEquals(5, CommandParser.split("bigdoors addowner mydoor --player pim16aap2").size());
-        Assertions.assertEquals(5, CommandParser.split("bigdoors addowner mydoor --player    pim16aap2").size());
-
-        final @NonNull List<String> split = CommandParser.split("bigdoors addowner mydoor --player    pim16aap2   a ");
-        Assertions.assertEquals(split.size(), 6);
-        // Check that the last entry is "a "
-        Assertions.assertEquals(2, split.get(5).length());
-    }
-
-    @Test
-    void testGetLastArgumentValue()
-    {
-        Assertions.assertEquals("user",
-                                CommandParser.getLastArgumentValue(Arrays.asList("command", "--player=user"), '='));
-        Assertions.assertEquals("user",
-                                CommandParser.getLastArgumentValue(Arrays.asList("command", "--player ", "user"), ' '));
-        Assertions.assertEquals("user",
-                                CommandParser.getLastArgumentValue(Arrays.asList("command", "user"), '='));
-    }
-
-    @Test
     void getCommandTabCompleteOptions()
     {
         final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build());
