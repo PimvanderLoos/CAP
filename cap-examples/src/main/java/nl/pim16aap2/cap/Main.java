@@ -44,8 +44,6 @@ import java.util.List;
 //       and the command's list of subcommands. Maybe help text and help menu?
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
 // TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
-// TODO: Don't throw and EOFException when preprocessing input arguments for tab complete. It should be allowed to
-//       tab-complete values split by spaces as well.
 // TODO: Add some safeguards for required optional parameters. If it's '/command [pos0] [pos1] <pos2> [pos3]',
 //       you cannot know which arguments were provided from "/command val val". So if 1 optional positional argument is
 //       provided, no other positional arguments should be allowed.
@@ -58,9 +56,6 @@ import java.util.List;
 //       that flag again won't do anything.
 // TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
 //       or "-a" for "--a".
-// TODO: Most of the tab suggestion code in the CAP class can be moved into the cache class. Just let the cache class
-//       take care of getting the results on its own. Maybe rename it to make it clear that it's not a cache.
-//       Also, this component will have to become required, but the caching aspect can become optional.
 
 public class Main
 {

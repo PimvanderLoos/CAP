@@ -15,11 +15,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Represents a class that can generate suggestions based on some input.
+ *
+ * @author Pim
+ */
 public class TabCompletionSuggestor extends CommandParser
 {
     /**
-     * Constructs a new command parser.
-     *
      * @param cap           The {@link CAP} instance that owns this object..
      * @param commandSender The {@link ICommandSender} that issued the command.
      * @param input         The string that may contain a set of commands and arguments.

@@ -110,8 +110,12 @@ public class CommandParser
             throw new EOFException();
     }
 
-    // TODO: REMOVE THIS
-    public List<String> getArgs()
+    /**
+     * Gets the list of entries as parsed from the input string.
+     *
+     * @return The list of arguments.
+     */
+    public @NonNull List<@NonNull String> getArgs()
     {
         return input.getArgs();
     }

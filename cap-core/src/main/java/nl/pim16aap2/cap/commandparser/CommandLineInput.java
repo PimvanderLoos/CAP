@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Represents commandline input.
+ * Represents commandline input that is prepared so that it can be used for parsing later on.
  *
  * @author Pim
  */
@@ -23,12 +23,11 @@ class CommandLineInput
      */
     private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
-
     /**
      * The list of {@link Command}s/{@link Argument}s to parse.
      */
     @Getter
-    private final @NonNull List<String> args;
+    private final @NonNull List<@NonNull String> args;
 
     /**
      * The raw input.
