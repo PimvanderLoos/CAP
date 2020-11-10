@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *
  * @author Pim
  */
-public class TabCompletionSuggestor extends CommandParser
+public class TabCompletionSuggester extends CommandParser
 {
     /**
      * @param cap           The {@link CAP} instance that owns this object..
@@ -29,7 +29,7 @@ public class TabCompletionSuggestor extends CommandParser
      * @param separator     The separator between a free argument's flag and its value. E.g. '<i>=</i>' for the format
      *                      <i>'--player=pim16aap2'</i>.
      */
-    public TabCompletionSuggestor(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+    public TabCompletionSuggester(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
                                   final @NonNull String input, final char separator)
     {
         super(cap, commandSender, new CommandLineInput(input), separator);
@@ -148,7 +148,7 @@ public class TabCompletionSuggestor extends CommandParser
 
 
     /**
-     * Gets the tab complete suggestions from {@link Argument#getTabcompleteFunction()}.
+     * Gets the tab complete suggestions from {@link Argument#getTabCompleteFunction()}.
      *
      * @param command  The {@link Command} that owns the {@link Argument}.
      * @param argument The {@link Argument} that will be used to get the tab complete suggestions.
@@ -164,7 +164,7 @@ public class TabCompletionSuggestor extends CommandParser
                                                                        final boolean async)
     {
         final List<String> options = new ArrayList<>(0);
-        final @Nullable Argument.ITabcompleteFunction argumentValueCompletion = argument.getTabcompleteFunction();
+        final @Nullable Argument.ITabCompleteFunction argumentValueCompletion = argument.getTabCompleteFunction();
         if (argumentValueCompletion == null)
             return options;
 

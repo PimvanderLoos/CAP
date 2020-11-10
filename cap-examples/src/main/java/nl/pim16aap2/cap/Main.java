@@ -212,7 +212,7 @@ public class Main
                           .getRequired()
                           .shortName("doorID")
                           .summary("The name or UID of the door")
-                          .tabcompleteFunction(request -> Arrays.asList("test a", "test_b"))
+                          .tabCompleteFunction(request -> Arrays.asList("test a", "test_b"))
                           .build())
             .argument(Argument.valuesLessBuilder()
                               .value(true)

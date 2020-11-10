@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-class TabCompletionSuggestorTest
+class TabCompletionSuggesterTest
 {
     final DefaultCommandSender commandSender = new DefaultCommandSender();
 

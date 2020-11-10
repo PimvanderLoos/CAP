@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.argument.Argument;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -85,8 +86,11 @@ public class ArgumentManager
      * @param argumentName The name of the {@link Argument}.
      * @return The name of the command, made all lower case if needed.
      */
-    protected @NonNull String getArgumentNameCaseCheck(final @NonNull String argumentName)
+    @Contract("!null -> !null")
+    protected String getArgumentNameCaseCheck(final @Nullable String argumentName)
     {
+        if (argumentName == null)
+            return null;
         return caseSensitive ? argumentName : argumentName.toLowerCase();
     }
 

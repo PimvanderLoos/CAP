@@ -10,13 +10,14 @@ import lombok.experimental.SuperBuilder;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandparser.CommandParser;
-import nl.pim16aap2.cap.commandparser.TabCompletionSuggestor;
+import nl.pim16aap2.cap.commandparser.TabCompletionSuggester;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.TabCompletionCache;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
@@ -60,12 +61,12 @@ public class CAP
     protected final @NonNull DefaultHelpCommandRenderer helpCommandRenderer = DefaultHelpCommandRenderer.getDefault();
 
     /**
-     * Whether or not to cache tabcompletion suggestions using a  {@link TabCompletionCache}.
+     * Whether or not to cache tab-completion suggestions using a {@link TabCompletionCache}.
      */
     @Getter
     @Setter
     @Builder.Default
-    protected boolean cacheTabcompletionSuggestions = true;
+    protected boolean cacheTabCompletionSuggestions = true;
 
     /**
      * The {@link ExceptionHandler} that is used to handle CAP-related exceptions.
@@ -166,8 +167,11 @@ public class CAP
      * @param commandName The name of the {@link Command}.
      * @return The name of the command, made all lower case if needed.
      */
-    protected @NonNull String getCommandNameCaseCheck(final @NonNull String commandName)
+    @Contract("!null -> !null")
+    protected String getCommandNameCaseCheck(final @Nullable String commandName)
     {
+        if (commandName == null)
+            return null;
         return caseSensitive ? commandName : commandName.toLowerCase();
     }
 
@@ -217,16 +221,16 @@ public class CAP
     public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
                                                        final @NonNull String input)
     {
-        final @NonNull TabCompletionSuggestor suggestor =
-            new TabCompletionSuggestor(this, commandSender, input, separator);
-        final @NonNull Supplier<List<String>> supplier = () -> suggestor.getTabCompleteOptions(false);
+        final @NonNull TabCompletionSuggester suggester =
+            new TabCompletionSuggester(this, commandSender, input, separator);
+        final @NonNull Supplier<List<String>> supplier = () -> suggester.getTabCompleteOptions(false);
 
-        if (!cacheTabcompletionSuggestions)
+        if (!cacheTabCompletionSuggestions)
             return supplier.get();
 
-        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggestor.getLastArgumentData();
+        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggester.getLastArgumentData();
 
-        return tabCompletionCache.getTabCompleteOptions(commandSender, suggestor.getArgs(),
+        return tabCompletionCache.getTabCompleteOptions(commandSender, suggester.getArgs(),
                                                         lastArgument.first + lastArgument.second, supplier);
     }
 
@@ -240,16 +244,16 @@ public class CAP
     public @NonNull CompletableFuture<List<String>> getTabCompleteOptionsAsync(
         final @NonNull ICommandSender commandSender, final @NonNull String input)
     {
-        final @NonNull TabCompletionSuggestor suggestor =
-            new TabCompletionSuggestor(this, commandSender, input, separator);
-        final @NonNull Supplier<List<String>> supplier = () -> suggestor.getTabCompleteOptions(true);
+        final @NonNull TabCompletionSuggester suggester =
+            new TabCompletionSuggester(this, commandSender, input, separator);
+        final @NonNull Supplier<List<String>> supplier = () -> suggester.getTabCompleteOptions(true);
 
-        if (!cacheTabcompletionSuggestions)
+        if (!cacheTabCompletionSuggestions)
             return CompletableFuture.supplyAsync(supplier);
 
-        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggestor.getLastArgumentData();
+        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggester.getLastArgumentData();
 
-        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, suggestor.getArgs(),
+        return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, suggester.getArgs(),
                                                              lastArgument.first + lastArgument.second, supplier);
     }
 }

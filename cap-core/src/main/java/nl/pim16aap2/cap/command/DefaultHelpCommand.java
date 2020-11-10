@@ -53,7 +53,7 @@ public class DefaultHelpCommand extends Command
     private int lastSubCommandCount = 0;
 
     /**
-     * The list of tabcompletion suggestions.
+     * The list of tab-completion suggestions.
      */
     @Getter(AccessLevel.PRIVATE)
     private List<String> suggestions = null;
@@ -91,17 +91,17 @@ public class DefaultHelpCommand extends Command
               Collections.singletonList(new StringArgument()
                                             .getOptionalPositional().shortName("page/command")
                                             .summary("A page number of the name of a command.").longName("help")
-                                            .tabcompleteFunction((DefaultHelpCommand::getSuggestions))
+                                            .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
                                             .build()), HIDDEN, cap, ((commandSender, command) -> true));
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, cap.getHelpCommandRenderer());
     }
 
     /**
-     * Gets all the potential tabcompletion suggestions.
+     * Gets all the potential tab-completion suggestions.
      *
      * @param request The {@link TabCompletionRequest} containing the data required to build a list of suggestions.
-     * @return The list of potential tabcompletion suggestions.
+     * @return The list of potential tab-completion suggestions.
      */
     public static @NonNull List<@NonNull String> getSuggestions(final @NonNull TabCompletionRequest request)
     {

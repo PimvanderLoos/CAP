@@ -101,7 +101,7 @@ public class Argument<T>
      * <p>
      * For example, if this {@link Argument} requires a playername, it could provide a list of names of nearby players.
      */
-    protected final @Nullable ITabcompleteFunction tabcompleteFunction;
+    protected final @Nullable ITabCompleteFunction tabCompleteFunction;
 
     /**
      * The {@link IArgumentValidator} to use to make sure that the input value meets certain constraints.
@@ -127,7 +127,7 @@ public class Argument<T>
      * @param repeatable          {@link #repeatable}.
      * @param positional          {@link #positional}.
      * @param required            {@link #required}.
-     * @param tabcompleteFunction {@link #tabcompleteFunction}.
+     * @param tabCompleteFunction {@link #tabCompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
      * @param identifier          {@link #identifier}.
      */
@@ -135,7 +135,7 @@ public class Argument<T>
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final boolean valuesLess, final boolean repeatable,
                        final boolean positional, final boolean required,
-                       final @Nullable ITabcompleteFunction tabcompleteFunction,
+                       final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
     {
         this.shortName = shortName;
@@ -148,7 +148,7 @@ public class Argument<T>
         this.repeatable = repeatable;
         this.positional = positional;
         this.required = required;
-        this.tabcompleteFunction = tabcompleteFunction;
+        this.tabCompleteFunction = tabCompleteFunction;
         this.argumentValidator = argumentValidator;
         this.identifier = Util.valOrDefault(identifier, shortName);
     }
@@ -160,17 +160,17 @@ public class Argument<T>
      * @param longName            {@link #longName}.
      * @param summary             {@link #summary}.
      * @param parser              {@link #parser}.
-     * @param tabcompleteFunction {@link #tabcompleteFunction}.
+     * @param tabCompleteFunction {@link #tabCompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
      * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "requiredBuilder", builderClassName = "RequiredBuilder")
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser,
-                       final @Nullable ITabcompleteFunction tabcompleteFunction,
+                       final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
     {
-        this(shortName, longName, summary, parser, null, "", false, false, true, true, tabcompleteFunction,
+        this(shortName, longName, summary, parser, null, "", false, false, true, true, tabCompleteFunction,
              argumentValidator, identifier);
     }
 
@@ -181,17 +181,17 @@ public class Argument<T>
      * @param longName            {@link #longName}.
      * @param summary             {@link #summary}.
      * @param parser              {@link #parser}.
-     * @param tabcompleteFunction {@link #tabcompleteFunction}.
+     * @param tabCompleteFunction {@link #tabCompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
      * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "optionalPositionalBuilder", builderClassName = "OptionalPositionalBuilder")
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
-                       final @Nullable ITabcompleteFunction tabcompleteFunction,
+                       final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @NonNull ArgumentParser<T> parser,
                        final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
     {
-        this(shortName, longName, summary, parser, null, "", false, false, true, false, tabcompleteFunction,
+        this(shortName, longName, summary, parser, null, "", false, false, true, false, tabCompleteFunction,
              argumentValidator, identifier);
     }
 
@@ -204,17 +204,17 @@ public class Argument<T>
      * @param parser              {@link #parser}.
      * @param defaultValue        {@link #defaultValue}.
      * @param label               {@link #label}.
-     * @param tabcompleteFunction {@link #tabcompleteFunction}.
+     * @param tabCompleteFunction {@link #tabCompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
      * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "optionalBuilder", builderClassName = "OptionalBuilder")
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
-                       final @NonNull String label, final @Nullable ITabcompleteFunction tabcompleteFunction,
+                       final @NonNull String label, final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
     {
-        this(shortName, longName, summary, parser, defaultValue, label, false, false, false, false, tabcompleteFunction,
+        this(shortName, longName, summary, parser, defaultValue, label, false, false, false, false, tabCompleteFunction,
              argumentValidator, identifier);
     }
 
@@ -353,7 +353,7 @@ public class Argument<T>
      * {@link ICommandSender}.
      */
     @FunctionalInterface
-    public interface ITabcompleteFunction
+    public interface ITabCompleteFunction
         extends Function<@NonNull TabCompletionRequest, @NonNull List<@NonNull String>>
     {
     }

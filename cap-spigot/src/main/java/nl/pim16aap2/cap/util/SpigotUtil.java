@@ -100,11 +100,11 @@ public class SpigotUtil
     }
 
     /**
-     * Gets an {@link Argument.ITabcompleteFunction} that retrieves a list of the names of all online players.
+     * Gets an {@link Argument.ITabCompleteFunction} that retrieves a list of the names of all online players.
      *
      * @return The names of all online players.
      */
-    public @NonNull Argument.ITabcompleteFunction onlinePlayersTabCompletion()
+    public @NonNull Argument.ITabCompleteFunction onlinePlayersTabCompletion()
     {
         return (request) ->
         {
