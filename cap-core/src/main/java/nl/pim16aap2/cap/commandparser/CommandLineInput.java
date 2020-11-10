@@ -33,7 +33,7 @@ class CommandLineInput
      * The raw input.
      */
     @Getter
-    protected @NonNull String input;
+    protected @NonNull String rawInput;
 
     /**
      * Keeps track of whether all unescaped quotation marks were matched properly.
@@ -45,10 +45,10 @@ class CommandLineInput
     @Getter
     private boolean completeQuotationMarks = true;
 
-    public CommandLineInput(final @NonNull String input)
+    public CommandLineInput(final @NonNull String rawInput)
     {
-        this.input = input;
-        args = preprocess(split(input));
+        this.rawInput = rawInput;
+        args = preprocess(split(rawInput));
     }
 
     /**

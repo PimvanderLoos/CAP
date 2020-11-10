@@ -47,7 +47,7 @@ class TabCompletionSuggestorTest
         Assertions.assertEquals("--admin", suggestions.get(0));
 
         suggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner mydoor --admin ");
-        Assertions.assertEquals(8, suggestions.size());
+        Assertions.assertEquals(6, suggestions.size());
 
         suggestions = cap.getTabCompleteOptions(commandSender, "bigdoors subcommand_0");
         Assertions.assertEquals(1, suggestions.size());

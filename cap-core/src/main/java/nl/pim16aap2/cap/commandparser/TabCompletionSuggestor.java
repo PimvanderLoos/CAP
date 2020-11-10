@@ -70,22 +70,35 @@ public class TabCompletionSuggestor extends CommandParser
      * @return The list of {@link Argument#getShortName()}s and {@link Argument#getLongName()}s that can be used to
      * complete the current {@link #input}.
      */
-    protected @NonNull List<String> getTabCompleteArgumentNames(final @NonNull Command command,
-                                                                final @NonNull String lastArg)
+    protected @NonNull List<@NonNull String> getTabCompleteArgumentNames(final @NonNull Command command,
+                                                                         final @NonNull String lastArg)
     {
-        final List<String> ret = new ArrayList<>(0);
+        final @NonNull List<@NonNull String> ret = new ArrayList<>(0);
         command.getArgumentManager().getArguments().forEach(
             argument ->
             {
                 if (argument.isPositional())
                     return;
-                final String separator = argument.isValuesLess() ? "" : this.separator;
-                if (argument.getShortName().startsWith(lastArg))
-                    ret.add(String.format("%c%s", ARGUMENT_PREFIX, argument.getShortName()) + separator);
 
-                if (argument.getLongName() != null && argument.getLongName().startsWith(lastArg))
-                    ret.add(
-                        String.format("%c%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName()) + separator);
+                final @NonNull String separator = argument.isValuesLess() ? "" : this.separator;
+
+                final @NonNull String shortName = String.format("%c%s",
+                                                                ARGUMENT_PREFIX, argument.getShortName()) + separator;
+                final @NonNull String longName = argument.getLongName() == null ? "" :
+                                                 String.format("%c%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX,
+                                                               argument.getLongName()) + separator;
+
+                if (argument.getShortName().startsWith(lastArg) &&
+                    // Do not suggest valueless arguments that have already been provided.
+                    // Providing those twice doesn't do anything.
+                    !(argument.isValuesLess() && input.getRawInput().contains(shortName)))
+                    ret.add(shortName);
+
+                if (argument.getLongName() != null && argument.getLongName().startsWith(lastArg) &&
+                    // Do not suggest valueless arguments that have already been provided.
+                    // Providing those twice doesn't do anything.
+                    !(argument.isValuesLess() && input.getRawInput().contains(longName)))
+                    ret.add(longName);
             });
         return ret;
     }

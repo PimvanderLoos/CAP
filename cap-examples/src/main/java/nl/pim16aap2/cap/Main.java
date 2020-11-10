@@ -39,9 +39,6 @@ import java.util.List;
 //       confusing and bug-prone very fast.
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
-// TODO: If valueless flags have been provided already, don't suggest them again.
-//       E.g. when giving "/bigdoors addowner mydoor --admin -", it shouldn't suggest "-a" or "--admin" again, as using
-//       that flag again won't do anything.
 // TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
 //       or "-a" for "--a".
 // TODO: Positional arguments don't really need a short name right? Just a label.
@@ -128,7 +125,7 @@ public class Main
         tabComplete(cap, "bigdoors \"a");
         tabComplete(cap, "bigdoors h");
         tabComplete(cap, "bigdoors subcomma");
-        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2");
+        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 -");
         tabComplete(cap, "bigdoors addowner myDoor --play");
         tabComplete(cap, "bigdoors addowner mydoor --admin ");
         tabComplete(cap, "bigdoors addowner \"tes");
