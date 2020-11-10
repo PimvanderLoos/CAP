@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 public class Argument<T>
 {
     /**
-     * The name of this {@link Argument}.
+     * The short name of this {@link Argument}.
      */
     protected final @NonNull String shortName;
 

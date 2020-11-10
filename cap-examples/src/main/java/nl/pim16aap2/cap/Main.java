@@ -41,7 +41,6 @@ import java.util.List;
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 // TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
 //       or "-a" for "--a".
-// TODO: Positional arguments don't really need a short name right? Just a label.
 // TODO: For the Spigot platform, we should probably ensure that the package isn't the default one to avoid
 //       people not shading this dependency properly.
 

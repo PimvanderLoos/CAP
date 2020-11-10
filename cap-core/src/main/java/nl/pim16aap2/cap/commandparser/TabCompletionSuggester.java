@@ -279,10 +279,10 @@ public class TabCompletionSuggester extends CommandParser
             value = parts.length == 2 ? parts[1].trim() : "";
             argument = command.getArgumentManager().getArgument(argumentName).orElse(null);
 
-            // If the argument is present (and therefore completed) and valueless, there's nothing to complete
-            // As such, we can get all arguments.
+            // If the argument is present (and therefore completed) and valueless, there's nothing to complete.
+            // However, it's not open-ended, so we're still working on the current argument.
             if (argument != null && argument.isValuesLess())
-                return getFreeArgumentNames(command, "");
+                return getFreeArgumentNames(command, freeArgument);
 
             // If the argument does not have a separator (otherwise there would be 2 parts)
             // Get all arguments starting with the current name.
@@ -309,6 +309,32 @@ public class TabCompletionSuggester extends CommandParser
     }
 
     /**
+     * Formats the {@link Argument#getShortName()} using the correct argument prefix and the provided suffix.
+     *
+     * @param argument The argument whose short name to format.
+     * @param suffix   The suffix to use. E.g. '=' for the format "-argument_shortName="
+     * @return The formatted {@link Argument#getShortName()}.
+     */
+    protected @NonNull String getFormattedShortName(final @NonNull Argument<?> argument, final @NonNull String suffix)
+    {
+        return String.format("%c%s%s", ARGUMENT_PREFIX, argument.getShortName(), suffix);
+    }
+
+    /**
+     * Formats the {@link Argument#getLongName()} using the correct argument prefixes and the provided suffix.
+     *
+     * @param argument The argument whose long name to format.
+     * @param suffix   The suffix to use. E.g. '=' for the format "--argument_longName="
+     * @return The formatted {@link Argument#getLongName()} if the {@link Argument#getLongName()} exists, otherwise
+     * null.
+     */
+    protected @Nullable String getFormattedLongName(final @NonNull Argument<?> argument, final @NonNull String suffix)
+    {
+        return argument.getLongName() == null ? null :
+               String.format("%c%s%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName(), suffix);
+    }
+
+    /**
      * Gets a list of {@link Argument#getShortName()}s and {@link Argument#getLongName()}s that can be used to complete
      * the current {@link #input}.
      *
@@ -322,6 +348,7 @@ public class TabCompletionSuggester extends CommandParser
     protected @NonNull List<@NonNull String> getFreeArgumentNames(final @NonNull Command command,
                                                                   final @NonNull String lastArg)
     {
+        System.out.println("Checking lastArg: " + lastArg);
         final @NonNull List<@NonNull String> ret = new ArrayList<>(0);
         command.getArgumentManager().getArguments().forEach(
             argument ->
@@ -329,24 +356,27 @@ public class TabCompletionSuggester extends CommandParser
                 if (argument.isPositional())
                     return;
 
+
                 final @NonNull String separator = argument.isValuesLess() ? "" : this.separator;
 
-                final @NonNull String shortName = String.format("%c%s",
-                                                                ARGUMENT_PREFIX, argument.getShortName()) + separator;
-                final @NonNull String longName = argument.getLongName() == null ? "" :
-                                                 String.format("%c%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX,
-                                                               argument.getLongName()) + separator;
+                final @NonNull String shortName = getFormattedShortName(argument, separator);
+                final @Nullable String longName = getFormattedLongName(argument, separator);
 
-                if (argument.getShortName().startsWith(lastArg) &&
-                    // Do not suggest valueless arguments that have already been provided.
-                    // Providing those twice doesn't do anything.
-                    !(argument.isValuesLess() && input.getRawInput().contains(shortName)))
+                // Do not suggest valueless arguments that have already been provided.
+                // Providing those twice doesn't do anything.
+                if (argument.isValuesLess())
+                {
+                    // When checking if the value has already been provided, we prepaend and append some spaces.
+                    // This makes sure that it doesn't match something like "--adventure for "-a"
+                    if (input.getRawInput().contains(" " + shortName + " ") ||
+                        (argument.getLongName() != null && input.getRawInput().contains(" " + longName + " ")))
+                        return;
+                }
+
+                if (argument.getShortName().startsWith(lastArg))
                     ret.add(shortName);
 
-                if (argument.getLongName() != null && argument.getLongName().startsWith(lastArg) &&
-                    // Do not suggest valueless arguments that have already been provided.
-                    // Providing those twice doesn't do anything.
-                    !(argument.isValuesLess() && input.getRawInput().contains(longName)))
+                if (argument.getLongName() != null && longName != null && argument.getLongName().startsWith(lastArg))
                     ret.add(longName);
             });
         return ret;
