@@ -21,24 +21,13 @@ import java.util.List;
 //       suggestions generation, the permissions are checked asynchronously. That may or may not be problematic.
 // TODO: Let the Spigot module load async-generated tab-completion suggestions into the cache for synchronized usage
 //       (as Spigot doesn't have an async tab-complete event).
-// TODO: Allow the use of empty lines. For Spigot (and probably other platforms?) '\n' isn't good enough.
-//       Instead, Spigot needs a color code on an otherwise empty line to have empty lines.
-//       Perhaps this can be done via the color scheme?
 // TODO: Support ResourceBundle.
-// TODO: Currently, the commands are kinda stored in a tree shape (1 super, n subs). Perhaps store it in an actual tree?
 // TODO: For the long help, maybe fall back to the summary if no description is available?
-// TODO: Should Optional arguments be wrapped inside Optional as well? Might be nice.
-// TODO: Unit tests.
+// TODO: Add more unit tests.
 // TODO: ValidationFailureException should get the received value and the instance of the validator.
 //       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
 //       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
 //       could not be validated.
-// TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
-//       (there are probably going to be some casting issues).
-//       Also, be more strict in the positional argument parsing. All positional arguments must come before any free ones.
-//       Currently, the positional arguments are counted separately, but this breaks the tab completion.
-// TODO: Make sure that autocomplete works if all the current string is empty and all positional arguments
-//       have already been filled (just return args list).
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
@@ -56,6 +45,14 @@ import java.util.List;
 // TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
 //       or "-a" for "--a".
 // TODO: Positional arguments don't really need a short name right? Just a label.
+
+
+// TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
+//       (there are probably going to be some casting issues).
+//       Also, be more strict in the positional argument parsing. All positional arguments must come before any free ones.
+//       Currently, the positional arguments are counted separately, but this breaks the tab completion.
+// TODO: Make sure that autocomplete works if all the current string is empty and all positional arguments
+//       have already been filled (just return args list).
 
 public class Main
 {
