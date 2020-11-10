@@ -52,7 +52,7 @@ class CommandParserTest
                 .commandBuilder().name(command)
                 .cap(cap)
                 .argument(new StringArgument().getOptional()
-                                              .shortName("value").label("val").summary("random value").build())
+                                              .shortName("v").label("val").summary("random value").build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
@@ -142,14 +142,14 @@ class CommandParserTest
     @Test
     void testLstripArgumentPrefix()
     {
-        Assertions.assertFalse(CommandParser.lstripArgumentPrefix("admin--").isPresent());
-        Assertions.assertFalse(CommandParser.lstripArgumentPrefix("admin-").isPresent());
-        Assertions.assertFalse(CommandParser.lstripArgumentPrefix("admin").isPresent());
+        Assertions.assertFalse(CommandParser.lStripArgumentPrefix("admin--").isPresent());
+        Assertions.assertFalse(CommandParser.lStripArgumentPrefix("admin-").isPresent());
+        Assertions.assertFalse(CommandParser.lStripArgumentPrefix("admin").isPresent());
 
-        Assertions.assertTrue(CommandParser.lstripArgumentPrefix("-admin").isPresent());
-        Assertions.assertTrue(CommandParser.lstripArgumentPrefix("--admin").isPresent());
+        Assertions.assertTrue(CommandParser.lStripArgumentPrefix("-admin").isPresent());
+        Assertions.assertTrue(CommandParser.lStripArgumentPrefix("--admin").isPresent());
 
-        UtilsForTesting.optionalEquals(CommandParser.lstripArgumentPrefix("---admin"), "-admin");
+        UtilsForTesting.optionalEquals(CommandParser.lStripArgumentPrefix("---admin"), "-admin");
     }
 
     /**

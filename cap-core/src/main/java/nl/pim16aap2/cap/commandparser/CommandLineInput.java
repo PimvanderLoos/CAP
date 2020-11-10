@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ class CommandLineInput
     /**
      * The pattern for non-escaped quotation marks.
      */
-    private static final Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
+    private static final @NonNull Pattern NON_ESCAPED_QUOTATION_MARKS = Pattern.compile("(?<!\\\\)\"");
 
     /**
      * The list of {@link Command}s/{@link Argument}s to parse.
@@ -33,7 +34,7 @@ class CommandLineInput
      * The raw input.
      */
     @Getter
-    protected @NonNull String rawInput;
+    private final @NonNull String rawInput;
 
     /**
      * Keeps track of whether all unescaped quotation marks were matched properly.
@@ -70,9 +71,9 @@ class CommandLineInput
      * @param rawArgs The raw array of arguments split by spaces.
      * @return The list of preprocessed arguments.
      */
-    protected @NonNull List<String> preprocess(final @NonNull List<String> rawArgs)
+    protected @NonNull List<@NonNull String> preprocess(final @NonNull List<@NonNull String> rawArgs)
     {
-        final ArrayList<@NonNull String> argsList = new ArrayList<>(rawArgs.size());
+        final @NonNull ArrayList<@NonNull String> argsList = new ArrayList<>(rawArgs.size());
 
         // Represents a argument split by a spaces but inside brackets, e.g. '"my door"' should put 'my door' as a
         // single entry.
@@ -80,7 +81,7 @@ class CommandLineInput
         for (int idx = 0; idx < rawArgs.size(); ++idx)
         {
             String entry = rawArgs.get(idx);
-            final Matcher matcher = NON_ESCAPED_QUOTATION_MARKS.matcher(entry);
+            final @NonNull Matcher matcher = NON_ESCAPED_QUOTATION_MARKS.matcher(entry);
             int count = 0;
             while (matcher.find())
                 ++count;
@@ -131,9 +132,9 @@ class CommandLineInput
      * @param input The string to split.
      * @return The input split on spaces.
      */
-    public static @NonNull List<String> split(final @NonNull String input)
+    public static @NonNull List<@NonNull String> split(final @NonNull String input)
     {
-        final @NonNull List<String> args = new ArrayList<>();
+        final @NonNull List<@NonNull String> args = new ArrayList<>();
         int startIdx = 0;
         boolean lastWhiteSpace = false;
         for (int idx = 0; idx < input.length(); ++idx)
@@ -154,5 +155,11 @@ class CommandLineInput
         if (startIdx < input.length())
             args.add(input.substring(startIdx));
         return args;
+    }
+
+    @Override
+    public @NonNull String toString()
+    {
+        return "Raw input: \"" + rawInput + "\"\nArguments: " + Util.listToString(getArgs());
     }
 }

@@ -157,13 +157,18 @@ public class Util
         return test > start && test < end;
     }
 
-    // TODO: Remove this
-    public static @NonNull String listToString(final @NonNull List<String> args)
+    /**
+     * Converts a list to a single String.
+     *
+     * @param lst The list to convert to a String.
+     * @return The list represented by a String.
+     */
+    public static <T> @NonNull String listToString(final @NonNull List<T> lst)
     {
         StringBuilder sb = new StringBuilder();
-        for (String arg : args)
+        for (T arg : lst)
         {
-            sb.append("\"").append(arg).append("\", ");
+            sb.append("\"").append(arg.toString()).append("\", ");
         }
         String res = sb.toString();
         if (res.length() > 2)

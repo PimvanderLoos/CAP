@@ -47,11 +47,11 @@ public class CAP
     protected final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
 
     /**
-     * The map containing all registered super commands (i.e. commands without a supercommand of their own), with their
-     * names as key.
+     * The map containing all registered top-level commands (i.e. commands without a supercommand of their own), with
+     * their names as key.
      */
     @Getter
-    protected final @NonNull Map<@NonNull String, @NonNull Command> superCommandMap = new HashMap<>();
+    protected final @NonNull Map<@NonNull String, @NonNull Command> topLevelCommandMap = new HashMap<>();
 
     /**
      * The {@link DefaultHelpCommandRenderer} to use to render help messages.
@@ -155,7 +155,7 @@ public class CAP
     {
         commandMap.put(getCommandNameCaseCheck(command.getName()), command);
         if (!command.getSuperCommand().isPresent())
-            superCommandMap.put(getCommandNameCaseCheck(command.getName()), command);
+            topLevelCommandMap.put(getCommandNameCaseCheck(command.getName()), command);
         return this;
     }
 
@@ -198,7 +198,7 @@ public class CAP
     {
         if (name == null)
             return Optional.empty();
-        return Optional.ofNullable(superCommandMap.get(getCommandNameCaseCheck(name)));
+        return Optional.ofNullable(topLevelCommandMap.get(getCommandNameCaseCheck(name)));
     }
 
     /**
@@ -231,7 +231,8 @@ public class CAP
         final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggester.getLastArgumentData();
 
         return tabCompletionCache.getTabCompleteOptions(commandSender, suggester.getArgs(),
-                                                        lastArgument.first + lastArgument.second, supplier);
+                                                        lastArgument.first + lastArgument.second, supplier,
+                                                        suggester.isOpenEnded());
     }
 
     /**
@@ -254,6 +255,7 @@ public class CAP
         final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggester.getLastArgumentData();
 
         return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, suggester.getArgs(),
-                                                             lastArgument.first + lastArgument.second, supplier);
+                                                             lastArgument.first + lastArgument.second, supplier,
+                                                             suggester.isOpenEnded());
     }
 }

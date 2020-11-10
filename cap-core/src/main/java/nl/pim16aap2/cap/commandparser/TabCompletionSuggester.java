@@ -1,5 +1,6 @@
 package nl.pim16aap2.cap.commandparser;
 
+import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
@@ -10,10 +11,8 @@ import nl.pim16aap2.cap.util.TabCompletionRequest;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Represents a class that can generate suggestions based on some input.
@@ -22,6 +21,20 @@ import java.util.stream.Collectors;
  */
 public class TabCompletionSuggester extends CommandParser
 {
+    /**
+     * Keeps track of whether the commandline input is open ended.
+     * <p>
+     * This means that no partial values are present. This happens when
+     * <p>
+     * 1) No unmatched quotation marks are present (see {@link CommandLineInput#isCompleteQuotationMarks()} (if there
+     * were, point 2 would be meaningless).
+     * <p>
+     * 2) The raw input (see {@link CommandLineInput#getRawInput()}) ends with a space. This indicates the previous
+     * value was completed (provided point 1 is true).
+     */
+    @Getter
+    protected final boolean openEnded;
+
     /**
      * @param cap           The {@link CAP} instance that owns this object..
      * @param commandSender The {@link ICommandSender} that issued the command.
@@ -33,30 +46,266 @@ public class TabCompletionSuggester extends CommandParser
                                   final @NonNull String input, final char separator)
     {
         super(cap, commandSender, new CommandLineInput(input), separator);
+        openEnded = super.input.isCompleteQuotationMarks() && super.input.getRawInput().endsWith(" ");
+    }
+
+    /**
+     * Gets a list of suggestions for tab complete based on the current {@link #input}.
+     *
+     * @param async Whether or not this method was called asynchronously or not.
+     * @return A list of tab completion suggestions.
+     */
+    public @NonNull List<@NonNull String> getTabCompleteOptions(final boolean async)
+    {
+        final @NonNull List<@NonNull String> ret = new ArrayList<>(0);
+        final @NonNull String lastVal = input.getArgs().get(input.getArgs().size() - 1);
+        try
+        {
+            final @NonNull CommandParser.ParsedCommand parsedCommand = getLastCommand();
+            // The index after the last argument.
+            // E.g., when no arguments are provided (i.e. the last value is a (sub)command), this will be 0.
+            final int argumentIndex = input.size() - parsedCommand.getIndex() - 1;
+            final int positionalArgCount = parsedCommand.getCommand().getArgumentManager()
+                                                        .getPositionalArguments().size();
+
+            // If the argumentIndex is 0 or 1, we also have to look at subcommands of the current command
+            // Or siblings of the current command (if it has a super command).
+            if (argumentIndex == 0)
+            {
+                // If the command is not open ended, it means that the user typing the input is still working on the
+                // last (sub)command. As such, we return the names of all sibling commands.
+                if (!openEnded)
+                {
+                    // If the command we found has a super command, its siblings are that super command's other
+                    // subcommands. If it does not have a super command, it means that it is a top-level command,
+                    // in which case, its siblings are the other top-level commands.
+                    return parsedCommand.getCommand().getSuperCommand()
+                                        .map(command -> getSubCommandSuggestions(command, lastVal))
+                                        .orElseGet(() -> getTopLevelCommandSuggestions(lastVal));
+                }
+
+                // When the input is not open ended, we know the user is working on the next input, so we can get
+                // all the current command's subcommands.
+                ret.addAll(getSubCommandSuggestions(parsedCommand.getCommand(), ""));
+            }
+            else if (argumentIndex == 1 && !openEnded)
+                ret.addAll(getSubCommandSuggestions(parsedCommand.getCommand(), lastVal));
+
+            // If there are any positional arguments that haven't been processed yet, just add those.
+            if (argumentIndex < positionalArgCount || (!openEnded && argumentIndex == positionalArgCount))
+            {
+                // First get the real index of the positional input argument.
+                // When the command is open ended, we're looking at the current index.
+                // When it isn't, we're still working on the previous one.
+                final int positionalArgumentIndex = argumentIndex - (openEnded ? 0 : 1);
+                ret.addAll(getPositionalArgumentSuggestions(parsedCommand.getCommand(),
+                                                            positionalArgumentIndex, openEnded ? "" : lastVal, async));
+            }
+            else
+                ret.addAll(getFreeArgumentSuggestions(parsedCommand.getCommand(), lastVal, async));
+
+        }
+        catch (CommandNotFoundException e)
+        {
+            return getTopLevelCommandSuggestions(lastVal);
+        }
+        return ret;
+    }
+
+    /**
+     * Gets a list of names of all sub{@link Command}s of the provided {@link Command} that start with a specific
+     * partial name.
+     *
+     * @param command     The {@link Command} for which to analyze all the sub{@link Command}s.
+     * @param partialName The partial name that all subcommands must start with for them to be added to the list.
+     * @return A list of names of sub{@link Command}s that start with the provided partial name.
+     */
+    protected @NonNull List<@NonNull String> getSubCommandSuggestions(final @NonNull Command command,
+                                                                      final @NonNull String partialName)
+    {
+        final @NonNull List<@NonNull String> ret = new ArrayList<>();
+        command.getSubCommands().forEach(subCommand ->
+                                         {
+                                             if (subCommand.getName().startsWith(partialName))
+                                                 ret.add(subCommand.getName());
+                                         });
+        return ret;
+    }
+
+    /**
+     * Gets the suggestions for all top-level {@link Command} (i.e. {@link Command}s that do not have their own
+     * super{@link Command}) that start with a specific partial name.
+     *
+     * @param partialName The name a top-level {@link Command} has to start with for it to be added to the list.
+     * @return A list containing the names of all top-level {@link Command}s that start with the provided partial name.
+     */
+    protected @NonNull List<@NonNull String> getTopLevelCommandSuggestions(final @NonNull String partialName)
+    {
+        final @NonNull List<@NonNull String> ret = new ArrayList<>();
+        cap.getTopLevelCommandMap().forEach((name, cmd) ->
+                                            {
+                                                if (name.startsWith(partialName))
+                                                    ret.add(name);
+                                            });
+        return ret;
     }
 
 
     /**
-     * Selects a list of {@link Command}s that start with a certain string from a superset of {@link Command}s.
+     * Gets the tab complete suggestions from {@link Argument#getTabCompleteFunction()}.
      *
-     * @param partialName The base of a {@link Command#getName()}. See {@link String#startsWith(String)}.
-     * @param commands    The {@link Command}s to choose from.
-     * @return The subset of {@link Command}s whose names start with the provided partial name.
+     * @param command  The {@link Command} that owns the {@link Argument}.
+     * @param argument The {@link Argument} that will be used to get the tab complete suggestions.
+     * @param value    The current value to compare the results against.
+     * @param prefix   The prefix to use for all suggestions.
+     * @param async    Whether this request was made on the main thread.
+     * @return The list of tab complete suggestions.
      */
-    protected @NonNull List<String> selectCommandsPartialMatch(final @NonNull String partialName,
-                                                               final @NonNull Collection<Command> commands)
+    protected @NonNull List<String> getTabArgumentFunctionSuggestions(final @NonNull Command command,
+                                                                      final @NonNull Argument<?> argument,
+                                                                      final @NonNull String value,
+                                                                      final @NonNull String prefix,
+                                                                      final boolean async)
     {
-        final List<String> ret = new ArrayList<>(0);
-        commands.forEach(
-            subCommand ->
-            {
-                if (!subCommand.hasPermission(commandSender))
-                    return;
+        final List<String> options = new ArrayList<>(0);
+        final @Nullable Argument.ITabCompleteFunction argumentValueCompletion = argument.getTabCompleteFunction();
+        if (argumentValueCompletion == null)
+            return options;
 
-                if (subCommand.getName().startsWith(partialName))
-                    ret.add(subCommand.getName());
-            });
-        return ret;
+        argumentValueCompletion
+            .apply(new TabCompletionRequest(command, argument, commandSender, value, async, cap))
+            .forEach(entry ->
+                     {
+                         if (entry.startsWith(value))
+                         {
+                             if (entry.contains(" "))
+                                 options.add(prefix + "\"" + entry + "\"");
+                             else
+                                 options.add(prefix + entry);
+                         }
+                     });
+
+        return options;
+    }
+
+    /**
+     * Gets the tab-completion suggestions for the positional {@link Argument} at the provided index.
+     *
+     * @param command                 The {@link Command} for which to get the positional {@link Argument}.
+     * @param positionalArgumentIndex The index of the positional {@link Argument}.
+     * @param partialValue            The name an {@link Argument} has to start with for it to be added to the list.
+     * @param async                   Whether this request was made on the main thread.
+     * @return A list of strings generated by {@link Argument#getTabCompleteFunction()} that start with the provided
+     * partial match.
+     */
+    protected @NonNull List<@NonNull String> getPositionalArgumentSuggestions(final @NonNull Command command,
+                                                                              final int positionalArgumentIndex,
+                                                                              final @NonNull String partialValue,
+                                                                              final boolean async)
+    {
+        final @NonNull Argument<?> positionalArgument =
+            command.getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIndex)
+                   .orElseThrow(() -> new RuntimeException(String.format(
+                       "Failed to get positional argument at index %d for command %s with input: \"%s\"",
+                       positionalArgumentIndex, command.getName(), input.getRawInput())));
+
+        return getTabArgumentFunctionSuggestions(command, positionalArgument, partialValue, "", async);
+    }
+
+    /**
+     * Gets all the tab-completion suggestions for a free {@link Argument}.
+     * <p>
+     * If the {@link Argument} hasn't been completed yet, the names of free {@link Argument}s will be suggested.
+     * <p>
+     * If the last {@link Argument} was completed (i.e. it has a separator),
+     *
+     * @param async Whether this request was made on the main thread.
+     * @return A list of tab-completion suggestions for a free {@link Argument}.
+     */
+    protected @NonNull List<@NonNull String> getFreeArgumentSuggestions(final @NonNull Command command,
+                                                                        final @NonNull String lastVal,
+                                                                        final boolean async)
+    {
+        final @Nullable Argument<?> argument;
+        String value;
+        String prefix = "";
+
+        if (spaceSeparated)
+        {
+            // Space-separated, so if the input is not open-ended, we know that we're still typing
+            // the free argument's name, otherwise, we're starting the value.
+            final @NonNull Optional<String> freeArgumentOpt = lStripArgumentPrefix(lastVal);
+            if (freeArgumentOpt.isPresent())
+            {
+                if (!openEnded)
+                    return getFreeArgumentNames(command, freeArgumentOpt.get());
+
+                argument = command.getArgumentManager().getArgument(freeArgumentOpt.get().trim()).orElse(null);
+                value = "";
+            }
+            // No argument prefixes, so the previous entry is the argument and the current one is the
+            else
+            {
+                argument = lStripArgumentPrefix(input.getArgs().get(input.getArgs().size() - 2))
+                    .flatMap(previousName -> command.getArgumentManager().getArgument(previousName.trim()))
+                    .orElse(null);
+
+                value = lastVal;
+
+                if (argument != null && argument.isValuesLess())
+                {
+                    if (cap.isDebug())
+                        System.out.printf("Argument %s is valueless, but a value is provided in input: \"%s\"!\n",
+                                          argument.getIdentifier(), input.getRawInput());
+                    return new ArrayList<>(0);
+                }
+            }
+        }
+        else
+        {
+            if (openEnded)
+                return getFreeArgumentNames(command, "");
+
+            final @NonNull String freeArgument = lStripArgumentPrefix(lastVal).orElseThrow(
+                () -> new RuntimeException(
+                    String.format("Could not find free argument from lastVal \"%s\" in input: \"%s\"",
+                                  lastVal, input.getRawInput())));
+
+            // If there is no separator, suggest some options to complete the name of the argument.
+            // If the separator does exist, figure out which argument it is from the name and treat everything after the
+            // separator as the value.
+            final String[] parts = separatorPattern.split(freeArgument, 2);
+            final String argumentName = parts[0].trim();
+            value = parts.length == 2 ? parts[1].trim() : "";
+            argument = command.getArgumentManager().getArgument(argumentName).orElse(null);
+
+            // If the argument is present (and therefore completed) and valueless, there's nothing to complete
+            // As such, we can get all arguments.
+            if (argument != null && argument.isValuesLess())
+                return getFreeArgumentNames(command, "");
+
+            // If the argument does not have a separator (otherwise there would be 2 parts)
+            // Get all arguments starting with the current name.
+            if (parts.length == 1)
+                return getFreeArgumentNames(command, freeArgument);
+
+            // If the argument exists and is complete, construct the prefix.
+            if (argument != null)
+            {
+                if (argument.getShortName().equals(argumentName))
+                    prefix = String.format("%c%s%s", ARGUMENT_PREFIX, argument.getShortName(), separator);
+                else if (argument.getLongName() == null)
+                    prefix = "";
+                else
+                    prefix = String.format("%c%c%s%s",
+                                           ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName(), separator);
+            }
+        }
+
+        if (argument == null)
+            return new ArrayList<>(0);
+
+        return getTabArgumentFunctionSuggestions(command, argument, value, prefix, async);
     }
 
     /**
@@ -70,8 +319,8 @@ public class TabCompletionSuggester extends CommandParser
      * @return The list of {@link Argument#getShortName()}s and {@link Argument#getLongName()}s that can be used to
      * complete the current {@link #input}.
      */
-    protected @NonNull List<@NonNull String> getTabCompleteArgumentNames(final @NonNull Command command,
-                                                                         final @NonNull String lastArg)
+    protected @NonNull List<@NonNull String> getFreeArgumentNames(final @NonNull Command command,
+                                                                  final @NonNull String lastArg)
     {
         final @NonNull List<@NonNull String> ret = new ArrayList<>(0);
         command.getArgumentManager().getArguments().forEach(
@@ -101,222 +350,5 @@ public class TabCompletionSuggester extends CommandParser
                     ret.add(longName);
             });
         return ret;
-    }
-
-    /**
-     * Gets the tab complete suggestions if there is no value at all. I.e. the last value in args is a (sub){@link
-     * Command}.
-     * <p>
-     * If the {@link Command} has any positional {@link Argument}s, {@link #getTabCompleteFromArgumentFunction(Command,
-     * Argument, String, String, boolean)} will be used for the first one (and an empty String as value, so every entry
-     * will be accepted).
-     * <p>
-     * If the {@link Command} only has free {@link Argument}s, a list of those will be returned instead.
-     * <p>
-     * If the {@link Command} has any sub{@link Command}s, then those will be added to the result as well.
-     *
-     * @param command The {@link Command} for which to get the tab complete suggestions.
-     * @return The list of tab complete suggestions.
-     */
-    protected @NonNull List<String> getTabCompleteWithoutValue(final @NonNull Command command, final boolean async)
-    {
-        final List<String> ret = new ArrayList<>(0);
-
-        command.getSubCommands().forEach(
-            subCommand ->
-            {
-                if (subCommand.hasPermission(commandSender))
-                    ret.add(subCommand.getName());
-            });
-
-        if (command.getArgumentManager().getPositionalArguments().isEmpty())
-        {
-            command.getArgumentManager().getArguments().forEach(
-                argument ->
-                {
-                    ret.add(argument.getShortName());
-                    if (argument.getLongName() != null)
-                        ret.add(argument.getLongName());
-                });
-        }
-        else
-            command.getArgumentManager().getPositionalArgumentAtIdx(0).ifPresent(
-                arg -> ret.addAll(getTabCompleteFromArgumentFunction(command, arg, "", "", async)));
-
-        return ret;
-    }
-
-
-    /**
-     * Gets the tab complete suggestions from {@link Argument#getTabCompleteFunction()}.
-     *
-     * @param command  The {@link Command} that owns the {@link Argument}.
-     * @param argument The {@link Argument} that will be used to get the tab complete suggestions.
-     * @param value    The current value to compare the results against.
-     * @param prefix   The prefix to use for all suggestions.
-     * @param async    Whether this request was made on the main thread.
-     * @return The list of tab complete suggestions.
-     */
-    protected @NonNull List<String> getTabCompleteFromArgumentFunction(final @NonNull Command command,
-                                                                       final @NonNull Argument<?> argument,
-                                                                       final @NonNull String value,
-                                                                       final @NonNull String prefix,
-                                                                       final boolean async)
-    {
-        final List<String> options = new ArrayList<>(0);
-        final @Nullable Argument.ITabCompleteFunction argumentValueCompletion = argument.getTabCompleteFunction();
-        if (argumentValueCompletion == null)
-            return options;
-
-        argumentValueCompletion
-            .apply(new TabCompletionRequest(command, argument, commandSender, value, async, cap))
-            .forEach(entry ->
-                     {
-                         if (entry.startsWith(value))
-                         {
-                             if (entry.contains(" "))
-                                 options.add(prefix + "\"" + entry + "\"");
-                             else
-                                 options.add(prefix + entry);
-                         }
-                     });
-
-        return options;
-    }
-
-    /**
-     * Gets the tab complete options for the {@link Argument}s of a {@link Command}.
-     *
-     * @param command The {@link Command} to get the tab complete options for.
-     * @param async   Whether or not this method was called asynchronously.
-     * @return The list of Strings suggested for the next parameter.
-     */
-    protected @NonNull List<String> getTabCompleteArguments(final @NonNull CommandParser.ParsedCommand command,
-                                                            final boolean async)
-    {
-        final String lastVal = input.getArgs().get(input.size() - 1);
-
-        // If the arguments are NOT separated by spaces, there's no point in looking at the before-last argument
-        // So simply set the previous value to null and it'll be ignored.
-        final @Nullable String previousVal =
-            (spaceSeparated && input.size() > 2) ? input.getArgs().get(input.size() - 2) : null;
-
-        // Get the before-last argument (which will be complete) if the previous value isn't null
-        // which can be the case if it simply doesn't exist or if the arguments aren't space-separated.
-        final @NonNull Optional<Argument<?>> previousArgument =
-            previousVal == null ? Optional.empty() :
-            lstripArgumentPrefix(previousVal).flatMap(previousName ->
-                                                          command.getCommand().getArgumentManager()
-                                                                 .getArgument(previousName.trim()));
-
-        final @Nullable Argument<?> argument;
-        String value;
-
-        // The potential prefix of the suggestion. When the separator is a non-space, just providing the value of an
-        // argument would override the argument on some platforms. As such "--player=pim" should not suggest "pim16aap2",
-        // but rather "--player=pim16aap2".
-        String prefix = "";
-
-        if (previousArgument.isPresent() && !previousArgument.get().isValuesLess() &&
-            !previousArgument.get().isPositional())
-        {
-            argument = previousArgument.orElse(null);
-            value = lastVal;
-        }
-        else
-        {
-            final @NonNull Optional<String> freeArgumentOpt = lstripArgumentPrefix(lastVal);
-
-            // If the argument is a free argument (i.e. '--player=playerName'), try to complete the name of
-            // the argument (in this case 'player') if there is no separator ('=' in this case) in the string.
-            //
-            // If the separator does exist, find the argument from the name and treat everything after the
-            // separator as the value.
-            if (freeArgumentOpt.isPresent())
-            {
-                final String freeArgument = freeArgumentOpt.get();
-
-                final String[] parts = separatorPattern.split(freeArgument, 2);
-                final String argumentName = parts[0].trim();
-                value = parts.length == 2 ? parts[1].trim() : "";
-                argument = command.getCommand().getArgumentManager().getArgument(argumentName).orElse(null);
-
-                // If the argument is present (and therefore completed) and valueless, there's nothing to complete
-                // As such, we can get all arguments.
-                if (argument != null && argument.isValuesLess())
-                    return getTabCompleteArgumentNames(command.getCommand(), "");
-
-                // If the argument does not have a separator (otherwise there would be 2 parts)
-                // Get all arguments starting with the current name.
-                if (parts.length == 1)
-                    return getTabCompleteArgumentNames(command.getCommand(), freeArgument);
-
-                // If the argument exists and is complete, construct the prefix.
-                if (argument != null)
-                {
-                    if (argument.getShortName().equals(argumentName))
-                        prefix = String.format("%c%s%s", ARGUMENT_PREFIX, argument.getShortName(), separator);
-                    else if (argument.getLongName() == null)
-                        prefix = "";
-                    else
-                        prefix = String.format("%c%c%s%s",
-                                               ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName(), separator);
-                }
-            }
-            // If the argument is a positional argument (i.e. it doesn't start with the prefix and you don't have to
-            // specify the name to use it), simply get the positional argument based on the position in the string.
-            // As value, use the string that was found.
-            else
-            {
-                // Subtract the command's index from the total size because the command and its supercommands don't
-                // count towards positional indices.
-                final int positionalArgumentIdx = input.size() - command.getIndex() - 2;
-                argument = command.getCommand().getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIdx)
-                                  .orElse(null);
-                value = lastVal;
-            }
-        }
-
-        if (argument == null)
-            return new ArrayList<>(0);
-
-        return getTabCompleteFromArgumentFunction(command.getCommand(), argument, value, prefix, async);
-    }
-
-    /**
-     * Gets a list of suggestions for tab complete based on the current {@link #input}.
-     *
-     * @param async Whether or not this method was called asynchronously or not.
-     * @return A list of tab completion suggestions.
-     */
-    public @NonNull List<String> getTabCompleteOptions(final boolean async)
-    {
-        try
-        {
-            final @NonNull CommandParser.ParsedCommand parsedCommand = getLastCommand();
-            if (parsedCommand.getIndex() >= (input.size() - 1))
-                return getTabCompleteWithoutValue(parsedCommand.getCommand(), async);
-
-            final List<String> suggestions = new ArrayList<>();
-            // Check if the found index is the before-last argument.
-            // If it's further back than that, we know it cannot be subcommand,
-            // and it has to be an argument.
-            if (parsedCommand.getIndex() == (input.size() - 2) &&
-                parsedCommand.getCommand().getSubCommands().size() > 0)
-                suggestions.addAll(selectCommandsPartialMatch(input.getArgs().get(input.size() - 1),
-                                                              parsedCommand.getCommand().getSubCommands()));
-
-            if (parsedCommand.getCommand().getArgumentManager().getArguments().size() > 0)
-                suggestions.addAll(getTabCompleteArguments(parsedCommand, async));
-
-            return suggestions;
-        }
-        catch (CommandNotFoundException e)
-        {
-            return selectCommandsPartialMatch(input.getArgs().get(0),
-                                              cap.getCommands().stream().filter(
-                                                  command -> !command.getSuperCommand().isPresent())
-                                                 .collect(Collectors.toList()));
-        }
     }
 }

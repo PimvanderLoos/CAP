@@ -42,6 +42,8 @@ import java.util.List;
 // TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
 //       or "-a" for "--a".
 // TODO: Positional arguments don't really need a short name right? Just a label.
+// TODO: For the Spigot platform, we should probably ensure that the package isn't the default one to avoid
+//       people not shading this dependency properly.
 
 
 // TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
@@ -50,22 +52,16 @@ import java.util.List;
 //       Currently, the positional arguments are counted separately, but this breaks the tab completion.
 // TODO: Make sure that autocomplete works if all the current string is empty and all positional arguments
 //       have already been filled (just return args list).
+// TODO: Consider synchronizing some stuff in the TabCompletionCache to make sure that it's all thread-safe.
+
+/*
+ * Unit tests:
+ */
+// TODO: Text/Component/Type + ColorScheme system
+// TODO: Exlicitly test open-ended caching.
 
 public class Main
 {
-    private static @NonNull String arrToString(final @NonNull String... args)
-    {
-        StringBuilder sb = new StringBuilder();
-        StringBuilder sb2 = new StringBuilder();
-        sb.append("=============\n").append("Arguments:");
-        for (String arg : args)
-        {
-            sb.append(" \"").append(arg).append("\"");
-            sb2.append(" ").append(arg);
-        }
-        return sb.append(", total: \"/").toString() + sb2.append("\"").substring(1);
-    }
-
     private static void tabComplete(final @NonNull CAP cap, final @NonNull String command)
     {
         System.out.println(command + ":\n");
@@ -103,7 +99,7 @@ public class Main
     public static void main(final String... args)
     {
 //        testTextComponents();
-        final CAP cap = initCommandManager();
+        final @NonNull CAP cap = initCommandManager();
 //        testHelpRenderer(commandManager);
 //        testSubStrings();
 
@@ -126,6 +122,7 @@ public class Main
         tabComplete(cap, "bigdoors h");
         tabComplete(cap, "bigdoors subcomma");
         tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 -");
+        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 ");
         tabComplete(cap, "bigdoors addowner myDoor --play");
         tabComplete(cap, "bigdoors addowner mydoor --admin ");
         tabComplete(cap, "bigdoors addowner \"tes");
@@ -226,6 +223,7 @@ public class Main
                           .name("p")
                           .longName("player")
                           .label("player")
+                          .tabCompleteFunction(request -> Arrays.asList("pim", "pim16aap2", "mip"))
                           .summary("The name of the player(s) to add as owner")
                           .build())
             .argument(new StringArgument()

@@ -145,7 +145,7 @@ public class CommandParser
      * @param argument The name of the argument with one or more {@link #ARGUMENT_PREFIX}es.
      * @return The argument without the first 1 or 2 leading {@link #ARGUMENT_PREFIX}es if the argument contained any.
      */
-    static @NonNull Optional<String> lstripArgumentPrefix(final @NonNull String argument)
+    static @NonNull Optional<String> lStripArgumentPrefix(final @NonNull String argument)
     {
         if (argument.length() > 0 && argument.charAt(0) != ARGUMENT_PREFIX)
             return Optional.empty();
