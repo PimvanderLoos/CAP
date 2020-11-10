@@ -21,6 +21,7 @@ import java.util.List;
 //       suggestions generation, the permissions are checked asynchronously. That may or may not be problematic.
 // TODO: Let the Spigot module load async-generated tab-completion suggestions into the cache for synchronized usage
 //       (as Spigot doesn't have an async tab-complete event).
+//       Perhaps store the command buffer. Then use packets to send the suggestions async ourselves.
 // TODO: Support ResourceBundle.
 // TODO: For the long help, maybe fall back to the summary if no description is available?
 // TODO: Add more unit tests.
@@ -39,8 +40,6 @@ import java.util.List;
 //       confusing and bug-prone very fast.
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
-// TODO: Maybe keep track of the number of argument prefixes? So the CommandParser knows that it should suggest "--admin"
-//       or "-a" for "--a".
 // TODO: For the Spigot platform, we should probably ensure that the package isn't the default one to avoid
 //       people not shading this dependency properly.
 
