@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -127,6 +128,50 @@ public class TimedCache<K, V>
             if (refresh)
                 value.refresh();
             return value;
+        }).getValue());
+    }
+
+    /**
+     * See {@link ConcurrentHashMap#computeIfPresent(Object, BiFunction)}.
+     */
+    public @NonNull Optional<V> computeIfPresent(final @NonNull K key,
+                                                 final @NonNull BiFunction<@NonNull K, V, @NonNull V> remappingFunction)
+    {
+        return Optional.ofNullable(cache.compute(key, (k, timedValue)
+            ->
+        {
+            if (timedValue != null && !timedValue.timedOut())
+            {
+                V value = timedValue.getValue();
+                if (refresh)
+                    timedValue.refresh();
+                return timedValueCreator.apply(remappingFunction.apply(k, value));
+            }
+
+            return null;
+        })).map(AbstractTimedValue::getValue);
+    }
+
+    /**
+     * See {@link ConcurrentHashMap#compute(Object, BiFunction)}.
+     */
+    public @NonNull V compute(final @NonNull K key,
+                              final @NonNull BiFunction<K, V, @NonNull V> mappingFunction)
+    {
+        return Objects.requireNonNull(cache.compute(key, (k, timedValue)
+            ->
+        {
+            final @Nullable V value;
+            if (timedValue == null || timedValue.timedOut())
+                value = null;
+            else
+            {
+                value = timedValue.getValue();
+                if (refresh)
+                    timedValue.refresh();
+            }
+
+            return timedValueCreator.apply(mappingFunction.apply(k, value));
         }).getValue());
     }
 

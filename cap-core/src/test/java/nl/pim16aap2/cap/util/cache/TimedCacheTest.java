@@ -128,6 +128,40 @@ class TimedCacheTest
         Assertions.assertEquals("newVal", returned);
     }
 
+    @Test
+    void computeIfPresent()
+    {
+        @NonNull TimedCache<String, String> timedCache = new TimedCache<>(clock, Duration.ofMillis(100),
+                                                                          null, false, false);
+        timedCache.put("key", "value");
+
+        UtilsForTesting.optionalEquals(timedCache.computeIfPresent("key", (k, v) -> "newValue"), "newValue");
+
+        Assertions.assertFalse(timedCache.computeIfPresent("key2", (k, v) -> "newValue").isPresent());
+        
+        clock.setCurrentMillis(110);
+
+        Assertions.assertFalse(timedCache.computeIfPresent("key", (k, v) -> "newValue").isPresent());
+    }
+
+    @Test
+    void compute()
+    {
+        @NonNull TimedCache<String, String> timedCache = new TimedCache<>(clock, Duration.ofMillis(100),
+                                                                          null, false, false);
+        @NonNull String returned = timedCache.compute("key", (k, v) -> v == null ? "value" : (v + v));
+        Assertions.assertTrue(timedCache.get("key").isPresent());
+        Assertions.assertEquals(1, timedCache.getSize());
+        Assertions.assertEquals("value", returned);
+
+        returned = timedCache.compute("key", (k, v) -> v == null ? "value" : (v + v));
+        Assertions.assertEquals("valuevalue", returned);
+
+        clock.setCurrentMillis(110);
+        returned = timedCache.compute("key", (k, v) -> v == null ? "newVal" : (v + v));
+        Assertions.assertEquals("newVal", returned);
+    }
+
     /**
      * Ensure that removing keys from the cache works as intended.
      */
