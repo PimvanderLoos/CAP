@@ -211,6 +211,17 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         return renderLongCommand(commandSender, colorScheme, subCommand.get());
     }
 
+    /**
+     * Adds the header for the long help menu of a {@link Command}.
+     *
+     * @param command The {@link Command} for which to render the long help menu header.
+     * @param text    The {@link Text} instance to add it to.
+     */
+    protected void renderLongHelpHeader(final @NonNull Command command, final @NonNull Text text)
+    {
+        text.add("\n--- " + command.getSectionTitle() + " ---\n", TextType.SECTION);
+    }
+
     @Override
     public @NonNull Text renderLongCommand(final @NonNull ICommandSender commandSender,
                                            final @NonNull ColorScheme colorScheme, final @NonNull Command command)
@@ -218,8 +229,9 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (!command.hasPermission(commandSender))
             return new Text(colorScheme);
 
-        final @NonNull Text text = new Text(colorScheme)
-            .add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
+        final @NonNull Text text = new Text(colorScheme);
+        renderLongHelpHeader(command, text);
+        text.add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
         if (!command.getDescription(commandSender).equals(""))

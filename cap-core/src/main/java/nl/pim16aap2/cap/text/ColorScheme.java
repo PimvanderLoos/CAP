@@ -308,6 +308,15 @@ public class ColorScheme
         }
 
         /**
+         * See {@link TextType#SECTION}.
+         */
+        public ColorSchemeBuilder sectionStyle(final @NonNull TextComponent style)
+        {
+            styleMap.put(TextType.SECTION, style);
+            return this;
+        }
+
+        /**
          * See {@link TextType#FOOTER}.
          */
         public ColorSchemeBuilder footerStyle(final @NonNull TextComponent style)

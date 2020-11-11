@@ -16,7 +16,7 @@ public interface IHelpCommandRenderer
      * Renders the help text for a {@link Command}.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
-     *                      they do not have access to are not included. See {@link ICommandSender#hasPermission(Command)}.
+     *                      they do not have access to are not included. See {@link Command#hasPermission(ICommandSender)}.
      * @param colorScheme   The {@link ColorScheme} to use for rendering the help command.
      * @param command       The {@link Command} to get the help menu for.
      * @param page          The page number to display.
@@ -37,7 +37,7 @@ public interface IHelpCommandRenderer
      * provided {@link Command}.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
-     *                      they do not have access to are not included. See {@link ICommandSender#hasPermission(Command)}.
+     *                      they do not have access to are not included. See {@link Command#hasPermission(ICommandSender)}.
      * @param colorScheme   The {@link ColorScheme} to use for rendering the help text.
      * @param command       The {@link Command} for which to render a help page or whose {@link CAP} to use to look up
      *                      the (sub){@link Command} for which to print the long help menu.
@@ -57,7 +57,7 @@ public interface IHelpCommandRenderer
      * Renders the long help menu for a {@link Command}.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
-     *                      they do not have access to are not included. See {@link ICommandSender#hasPermission(Command)}.
+     *                      they do not have access to are not included. See {@link Command#hasPermission(ICommandSender)}.
      * @param colorScheme   The {@link ColorScheme} to use for rendering the help command.
      * @param command       The {@link Command} for which to render the long help menu.
      * @return The rendered long help menu for the given command.
@@ -69,7 +69,7 @@ public interface IHelpCommandRenderer
      * Renders the first page of the help menu for the given {@link Command} with all its sub{@link Command}s.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
-     *                      they do not have access to are not included. See {@link ICommandSender#hasPermission(Command)}.
+     *                      they do not have access to are not included. See {@link Command#hasPermission(ICommandSender)}.
      * @param colorScheme   The {@link ColorScheme} to use for rendering the help text.
      * @param command       The {@link Command} for which to render a help page or whose {@link CAP} to use to look up
      *                      the (sub){@link Command} for which to print the long help menu.

@@ -351,6 +351,7 @@ public class Main
             .summaryStyle(new TextComponent(MinecraftStyle.AQUA.getStringValue()))
             .regularTextStyle(new TextComponent(MinecraftStyle.DARK_PURPLE.getStringValue()))
             .headerStyle(new TextComponent(MinecraftStyle.GREEN.getStringValue()))
+            .sectionStyle(new TextComponent(MinecraftStyle.AQUA.getStringValue()))
             .footerStyle(new TextComponent(MinecraftStyle.DARK_RED.getStringValue()))
             .build();
     }

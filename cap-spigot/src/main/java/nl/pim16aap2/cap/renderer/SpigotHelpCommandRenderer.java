@@ -38,6 +38,12 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
     }
 
     @Override
+    protected void renderLongHelpHeader(final @NonNull Command command, final @NonNull Text text)
+    {
+        text.add(" ", TextType.REGULAR_TEXT).add("\n--- " + command.getSectionTitle() + " ---\n", TextType.SECTION);
+    }
+
+    @Override
     protected void renderPageCountHeader(final @NonNull Text text, final int page, final int pageCount,
                                          @NonNull Command command)
     {

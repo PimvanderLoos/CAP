@@ -100,6 +100,7 @@ public class SpigotCAP extends CAP
             .addStyle(TextType.DESCRIPTION, ChatColor.GREEN)
             .addStyle(TextType.REGULAR_TEXT, ChatColor.DARK_PURPLE)
             .addStyle(TextType.HEADER, ChatColor.GREEN)
+            .addStyle(TextType.SECTION, ChatColor.AQUA)
             .addStyle(TextType.FOOTER, ChatColor.DARK_RED)
             .addStyle(TextType.ERROR, ChatColor.DARK_RED, ChatColor.BOLD)
             .build();

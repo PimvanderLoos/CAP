@@ -92,6 +92,12 @@ public class Command
     protected @Nullable String header;
 
     /**
+     * The title of the section for the command-specific help menu.
+     */
+    @Getter
+    protected @NonNull String sectionTitle;
+
+    /**
      * The supplier that is used to build the description. Note that this isn't used in case the {@link #description} is
      * not null.
      */
@@ -169,6 +175,7 @@ public class Command
      *                                 this command.
      * @param headerSupplier           The supplier that is used to build the header. Note that this isn't used in case
      *                                 a header is provided.
+     * @param sectionTitle             The title of the section for the command-specific help menu.
      * @param subCommands              The list of subcommands this command will be the supercommand of.
      * @param helpCommand              The helpcommand to use. This is used in case of '/command help [subcommand]'. If
      *                                 no subcommands are provided, this will not be used.
@@ -193,12 +200,11 @@ public class Command
     @Builder(builderMethodName = "commandBuilder")
     protected Command(final @NonNull String name, final @Nullable String description,
                       final @Nullable Function<ICommandSender, String> descriptionSupplier,
-                      final @Nullable String summary,
-                      final @Nullable Function<ICommandSender, String> summarySupplier, final @Nullable String header,
-                      final @Nullable Function<ICommandSender, String> headerSupplier,
-                      final @Nullable @Singular List<Command> subCommands, final @Nullable Command helpCommand,
-                      final @Nullable Boolean addDefaultHelpSubCommand, @Nullable Argument<?> helpArgument,
-                      final @Nullable Boolean addDefaultHelpArgument,
+                      final @Nullable String summary, final @Nullable Function<ICommandSender, String> summarySupplier,
+                      final @Nullable String header, final @Nullable Function<ICommandSender, String> headerSupplier,
+                      final @Nullable String sectionTitle, final @Nullable @Singular List<Command> subCommands,
+                      final @Nullable Command helpCommand, final @Nullable Boolean addDefaultHelpSubCommand,
+                      @Nullable Argument<?> helpArgument, final @Nullable Boolean addDefaultHelpArgument,
                       final @Nullable CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                       @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
                       final boolean virtual, final @NonNull CAP cap,
@@ -208,6 +214,8 @@ public class Command
             throw new IllegalArgumentException("CommandExecutor may not be null for non-virtual commands!");
 
         this.name = name;
+
+        this.sectionTitle = Util.valOrDefault(sectionTitle, this.name);
 
         this.description = description;
         this.descriptionSupplier = descriptionSupplier;

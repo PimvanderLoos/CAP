@@ -77,6 +77,11 @@ public enum TextType
     HEADER,
 
     /**
+     * The section header. Used for command-specific section headers.
+     */
+    SECTION,
+
+    /**
      * UNUSED for now.
      */
     FOOTER,
