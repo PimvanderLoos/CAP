@@ -30,12 +30,17 @@ public abstract class LocalizedMap<T>
      */
     private final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull T>> localizedMap = new LinkedHashMap<>();
 
-    protected LocalizedMap(final @NonNull CAP cap)
+    protected LocalizedMap(final @NonNull CAP cap, final int initialCapacity)
     {
         this.cap = cap;
 
         for (final @NonNull Locale locale : cap.getLocales())
-            localizedMap.put(locale, new HashMap<>());
+            localizedMap.put(locale, new HashMap<>(initialCapacity));
+    }
+
+    protected LocalizedMap(final @NonNull CAP cap)
+    {
+        this(cap, 16); // 16 is the default HashMap size.
     }
 
     /**
