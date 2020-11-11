@@ -34,6 +34,16 @@ import java.util.Optional;
  */
 public class SpigotCAP extends CAP
 {
+    // Make sure this package was relocated properly.
+    static
+    {
+        final String defaultPackage = new String(
+            new byte[]{'n', 'l', '.', 'p', 'i', 'm', '1', '6', 'a', 'a', 'p', '2', '.', 'c', 'a', 'p'});
+
+        if (CAP.class.getPackage().getName().equals(defaultPackage))
+            throw new IllegalStateException("CAP was not relocated properly!");
+    }
+
     @Getter
     private final @NonNull JavaPlugin plugin;
 

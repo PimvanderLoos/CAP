@@ -40,8 +40,6 @@ import java.util.List;
 //       confusing and bug-prone very fast.
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
-// TODO: For the Spigot platform, we should probably ensure that the package isn't the default one to avoid
-//       people not shading this dependency properly.
 
 /*
  * Unit tests:
@@ -142,6 +140,8 @@ public class Main
 
         tryArgs(cap, "bigdoors required my_door 12");
 //        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
+
+        tryArgs(cap, "bigdoors addowner flag --admin --group --player pim16aap2");
     }
 
     private static CAP initCommandManager()
