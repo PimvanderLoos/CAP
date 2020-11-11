@@ -38,7 +38,7 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
     }
 
     @Override
-    protected void renderLongHelpHeader(final @NonNull Command command, final @NonNull Text text)
+    protected void renderHelpHeader(final @NonNull Command command, final @NonNull Text text)
     {
         text.add(" ", TextType.REGULAR_TEXT).add("\n--- " + command.getSectionTitle() + " ---\n", TextType.SECTION);
     }

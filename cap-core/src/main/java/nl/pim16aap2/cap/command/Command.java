@@ -383,7 +383,7 @@ public class Command
     public @NonNull Text getHelp(final @NonNull ICommandSender commandSender)
     {
         return cap.getHelpCommandRenderer()
-                  .renderLongCommand(commandSender, commandSender.getColorScheme(), this);
+                  .renderHelpMenu(commandSender, commandSender.getColorScheme(), this);
     }
 
     /**

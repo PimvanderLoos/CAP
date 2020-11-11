@@ -67,8 +67,8 @@ public class CommandResult
     }
 
     /**
-     * Sends the text rendered by {@link IHelpCommandRenderer#renderLongCommand(ICommandSender, ColorScheme, Command)}
-     * to the {@link #commandSender} for the {@link #command}.
+     * Sends the text rendered by {@link IHelpCommandRenderer#renderHelpMenu(ICommandSender, ColorScheme, Command)} to
+     * the {@link #commandSender} for the {@link #command}.
      * <p>
      * See {@link Command#sendHelp(ICommandSender)}.
      */
@@ -89,8 +89,9 @@ public class CommandResult
     }
 
     /**
-     * Sends the text rendered by {@link IHelpCommandRenderer#render(ICommandSender, ColorScheme, Command, int)}
-     * (ColorScheme, Command)} to the {@link #commandSender} for the {@link #command}. It will send the first page.
+     * Sends the text rendered by {@link IHelpCommandRenderer#renderOverviewPage(ICommandSender, ColorScheme, Command,
+     * int)} (ColorScheme, Command)} to the {@link #commandSender} for the {@link #command}. It will send the first
+     * page.
      */
     public void sendSubcommandHelp()
         throws IllegalValueException
@@ -99,8 +100,9 @@ public class CommandResult
     }
 
     /**
-     * Sends the text rendered by {@link IHelpCommandRenderer#render(ICommandSender, ColorScheme, Command, int)}
-     * (ColorScheme, Command)} to the {@link #commandSender} for the {@link #command}. It will send the first page.
+     * Sends the text rendered by {@link IHelpCommandRenderer#renderOverviewPage(ICommandSender, ColorScheme, Command,
+     * int)} (ColorScheme, Command)} to the {@link #commandSender} for the {@link #command}. It will send the first
+     * page.
      *
      * @param page The number of the page to send. Note that counting starts at 1, not 0!
      */
@@ -108,7 +110,8 @@ public class CommandResult
         throws IllegalValueException
     {
         commandSender.sendMessage(command.getCap().getHelpCommandRenderer()
-                                         .render(commandSender, commandSender.getColorScheme(), command, page));
+                                         .renderOverviewPage(commandSender, commandSender.getColorScheme(), command,
+                                                             page));
     }
 
     /**

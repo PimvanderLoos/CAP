@@ -30,7 +30,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 {
     protected static final @NonNull IArgumentRenderer DEFAULT_ARGUMENT_RENDERER = DefaultArgumentRenderer.getDefault();
 
-    // TODO: Make this configurable
+    // TODO: Make this configurable?
     protected static final String COMMAND_PREFIX = "/";
 
     /**
@@ -135,7 +135,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      *                      Command#hasPermission(ICommandSender)}.
      * @return The total number of help pages available for the {@link Command}.
      */
-    protected int getPageCount(final @NonNull Command command, final @NonNull ICommandSender commandSender)
+    public int getPageCount(final @NonNull Command command, final @NonNull ICommandSender commandSender)
     {
         final int commandCount = getCommandCount(command, commandSender);
 
@@ -172,8 +172,9 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     }
 
     @Override
-    public @NonNull Text render(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
-                                final @NonNull Command command, final int page)
+    public @NonNull Text renderOverviewPage(final @NonNull ICommandSender commandSender,
+                                            final @NonNull ColorScheme colorScheme,
+                                            final @NonNull Command command, final int page)
         throws IllegalValueException
     {
         final int pageCount = getPageCount(command, commandSender);
@@ -198,17 +199,17 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         throws IllegalValueException, CommandNotFoundException
     {
         if (val == null)
-            return render(commandSender, colorScheme, command, 1);
+            return renderOverviewPage(commandSender, colorScheme, command, 1);
 
         final @NonNull OptionalInt pageOpt = Util.parseInt(val);
         if (pageOpt.isPresent())
-            return render(commandSender, colorScheme, command, pageOpt.getAsInt() - 1);
+            return renderOverviewPage(commandSender, colorScheme, command, pageOpt.getAsInt() - 1);
 
         final @NonNull Optional<Command> subCommand = command.getCap().getCommand(val);
         if (!subCommand.isPresent())
             throw new CommandNotFoundException(val, command.getCap().isDebug());
 
-        return renderLongCommand(commandSender, colorScheme, subCommand.get());
+        return renderHelpMenu(commandSender, colorScheme, subCommand.get());
     }
 
     /**
@@ -217,20 +218,20 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * @param command The {@link Command} for which to render the long help menu header.
      * @param text    The {@link Text} instance to add it to.
      */
-    protected void renderLongHelpHeader(final @NonNull Command command, final @NonNull Text text)
+    protected void renderHelpHeader(final @NonNull Command command, final @NonNull Text text)
     {
         text.add("\n--- " + command.getSectionTitle() + " ---\n", TextType.SECTION);
     }
 
     @Override
-    public @NonNull Text renderLongCommand(final @NonNull ICommandSender commandSender,
-                                           final @NonNull ColorScheme colorScheme, final @NonNull Command command)
+    public @NonNull Text renderHelpMenu(final @NonNull ICommandSender commandSender,
+                                        final @NonNull ColorScheme colorScheme, final @NonNull Command command)
     {
         if (!command.hasPermission(commandSender))
             return new Text(colorScheme);
 
         final @NonNull Text text = new Text(colorScheme);
-        renderLongHelpHeader(command, text);
+        renderHelpHeader(command, text);
         text.add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 

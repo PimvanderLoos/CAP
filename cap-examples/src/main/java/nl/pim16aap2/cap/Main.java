@@ -33,9 +33,6 @@ import java.util.List;
 //       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
 //       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
 //       could not be validated.
-// TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
-//       and the command's list of subcommands. Maybe help text and help menu?
-//       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
 // TODO: Add some safeguards for required optional parameters. If it's '/command [pos0] [pos1] <pos2> [pos3]',
 //       you cannot know which arguments were provided from "/command val val". So if 1 optional positional argument is
 //       provided, no other positional arguments should be allowed.

@@ -13,7 +13,9 @@ import org.jetbrains.annotations.Nullable;
 public interface IHelpCommandRenderer
 {
     /**
-     * Renders the help text for a {@link Command}.
+     * Renders the help overview page for a {@link Command}.
+     * <p>
+     * This is the menu showing all a command's subcommands.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
      *                      they do not have access to are not included. See {@link Command#hasPermission(ICommandSender)}.
@@ -22,8 +24,9 @@ public interface IHelpCommandRenderer
      * @param page          The page number to display.
      * @return The {@link Text} of the help message for the command.
      */
-    @NonNull Text render(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
-                         final @NonNull Command command, final int page)
+    @NonNull Text renderOverviewPage(final @NonNull ICommandSender commandSender,
+                                     final @NonNull ColorScheme colorScheme,
+                                     final @NonNull Command command, final int page)
         throws IllegalValueException;
 
     /**
@@ -32,7 +35,7 @@ public interface IHelpCommandRenderer
      * <p>
      * If the input value is an int, the page represented by that int is rendered for the provided {@link Command}.
      * <p>
-     * If the input value is not an int, {@link #renderLongCommand(ICommandSender, ColorScheme, Command)} will be called
+     * If the input value is not an int, {@link #renderHelpMenu(ICommandSender, ColorScheme, Command)} will be called
      * for the {@link Command} with the name of the value if one exists and is registered in the {@link CAP} of the
      * provided {@link Command}.
      *
@@ -55,6 +58,8 @@ public interface IHelpCommandRenderer
 
     /**
      * Renders the long help menu for a {@link Command}.
+     * <p>
+     * This shows all the arguments and their explanations for this command.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
      *                      they do not have access to are not included. See {@link Command#hasPermission(ICommandSender)}.
@@ -62,11 +67,11 @@ public interface IHelpCommandRenderer
      * @param command       The {@link Command} for which to render the long help menu.
      * @return The rendered long help menu for the given command.
      */
-    @NonNull Text renderLongCommand(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
-                                    final @NonNull Command command);
+    @NonNull Text renderHelpMenu(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
+                                 final @NonNull Command command);
 
     /**
-     * Renders the first page of the help menu for the given {@link Command} with all its sub{@link Command}s.
+     * Renders the first page of the help overview for the given {@link Command} with all its sub{@link Command}s.
      *
      * @param commandSender The {@link ICommandSender} that is used to check for permissions. Any (sub){@link Command}s
      *                      they do not have access to are not included. See {@link Command#hasPermission(ICommandSender)}.

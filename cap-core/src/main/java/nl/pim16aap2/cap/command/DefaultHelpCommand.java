@@ -208,7 +208,7 @@ public class DefaultHelpCommand extends Command
 
         final @NonNull OptionalInt intOpt = Util.parseInt(val);
         if (intOpt.isPresent())
-            return helpCommandRenderer.render(commandSender, colorScheme, superCommand, intOpt.getAsInt());
+            return helpCommandRenderer.renderOverviewPage(commandSender, colorScheme, superCommand, intOpt.getAsInt());
 
         final @NonNull Command command = superCommand.getCap().getCommand(val).orElse(superCommand);
         return helpCommandRenderer.render(commandSender, colorScheme, command, val);
