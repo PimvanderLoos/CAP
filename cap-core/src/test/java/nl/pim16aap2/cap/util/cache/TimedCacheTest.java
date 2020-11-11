@@ -121,11 +121,11 @@ class TimedCacheTest
         Assertions.assertEquals(1, timedCache.getSize());
 
         @NonNull String returned = timedCache.computeIfAbsent("key", (k) -> "newVal");
-        Assertions.assertEquals(returned, "value");
+        Assertions.assertEquals("value", returned);
 
         clock.setCurrentMillis(110);
         returned = timedCache.computeIfAbsent("key", (k) -> "newVal");
-        Assertions.assertEquals(returned, "newVal");
+        Assertions.assertEquals("newVal", returned);
     }
 
     /**

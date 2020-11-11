@@ -8,6 +8,7 @@ import java.lang.ref.SoftReference;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -118,21 +119,15 @@ public class TimedCache<K, V>
      */
     public @NonNull V computeIfAbsent(final @NonNull K key, final @NonNull Function<K, @NonNull V> mappingFunction)
     {
-        // We can't use ConcurrentHashMap#computeIfAbsent(Object, Function) because we don't just want the value to be
-        // present, we want it to be available (i.e. does not exceed time limit).
-        final @Nullable AbstractTimedValue<V> current = cache.get(key);
-        if (current != null)
+        return Objects.requireNonNull(cache.compute(key, (k, value)
+            ->
         {
-            final @Nullable V currentValue = current.getValue();
-            if (currentValue != null)
-            {
-                if (refresh)
-                    current.refresh();
-                return currentValue;
-            }
-        }
-
-        return put(key, mappingFunction.apply(key));
+            if (value == null || value.timedOut())
+                return timedValueCreator.apply(mappingFunction.apply(k));
+            if (refresh)
+                value.refresh();
+            return value;
+        }).getValue());
     }
 
     /**
