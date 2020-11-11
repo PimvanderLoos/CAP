@@ -138,7 +138,7 @@ class TimedCacheTest
         UtilsForTesting.optionalEquals(timedCache.computeIfPresent("key", (k, v) -> "newValue"), "newValue");
 
         Assertions.assertFalse(timedCache.computeIfPresent("key2", (k, v) -> "newValue").isPresent());
-        
+
         clock.setCurrentMillis(110);
 
         Assertions.assertFalse(timedCache.computeIfPresent("key", (k, v) -> "newValue").isPresent());
@@ -160,6 +160,38 @@ class TimedCacheTest
         clock.setCurrentMillis(110);
         returned = timedCache.compute("key", (k, v) -> v == null ? "newVal" : (v + v));
         Assertions.assertEquals("newVal", returned);
+    }
+
+    @Test
+    void putIfAbsent()
+    {
+        @NonNull TimedCache<String, String> timedCache = new TimedCache<>(clock, Duration.ofMillis(100),
+                                                                          null, false, false);
+
+        UtilsForTesting.optionalEquals(timedCache.putIfAbsent("key", "value"), "value");
+
+        Assertions.assertFalse(timedCache.putIfAbsent("key", "value").isPresent());
+
+        clock.setCurrentMillis(110);
+
+        UtilsForTesting.optionalEquals(timedCache.putIfAbsent("key", "newValue"), "newValue");
+    }
+
+    @Test
+    void putIfPresent()
+    {
+        @NonNull TimedCache<String, String> timedCache = new TimedCache<>(clock, Duration.ofMillis(100),
+                                                                          null, false, false);
+
+        timedCache.put("key", "value");
+
+        UtilsForTesting.optionalEquals(timedCache.putIfPresent("key", "newValue"), "newValue");
+
+        Assertions.assertFalse(timedCache.putIfPresent("key2", "value").isPresent());
+
+        clock.setCurrentMillis(110);
+
+        Assertions.assertFalse(timedCache.putIfPresent("key", "value").isPresent());
     }
 
     /**

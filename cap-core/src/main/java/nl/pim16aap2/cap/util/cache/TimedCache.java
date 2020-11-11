@@ -101,7 +101,6 @@ public class TimedCache<K, V>
         this(Clock.systemUTC(), duration, cleanup, softReference, refresh);
     }
 
-
     /**
      * Puts a new key/value pair in the cache.
      *
@@ -116,12 +115,41 @@ public class TimedCache<K, V>
     }
 
     /**
+     * Updates a value if it currently exists in the cache.
+     *
+     * @param key   The key with which the specified value is to be associated.
+     * @param value The value to be associated with the specified key.
+     * @return The updated value. If no value was updated, an empty Optional.
+     */
+    public @NonNull Optional<V> putIfPresent(final @NonNull K key, final @NonNull V value)
+    {
+        return Optional.ofNullable(cache.compute(key, (k, tValue) ->
+        {
+            if (tValue == null || tValue.timedOut())
+                return null;
+            return timedValueCreator.apply(value);
+        })).map(AbstractTimedValue::getValue);
+    }
+
+    /**
+     * See {@link ConcurrentHashMap#putIfAbsent(Object, Object)}.
+     */
+    public @NonNull Optional<V> putIfAbsent(final @NonNull K key, final @NonNull V value)
+    {
+        return Optional.ofNullable(cache.compute(key, (k, tValue) ->
+        {
+            if (tValue == null || tValue.timedOut())
+                return timedValueCreator.apply(value);
+            return null;
+        })).map(AbstractTimedValue::getValue);
+    }
+
+    /**
      * See {@link ConcurrentHashMap#computeIfAbsent(Object, Function)}.
      */
     public @NonNull V computeIfAbsent(final @NonNull K key, final @NonNull Function<K, @NonNull V> mappingFunction)
     {
-        return Objects.requireNonNull(cache.compute(key, (k, value)
-            ->
+        return Objects.requireNonNull(cache.compute(key, (k, value) ->
         {
             if (value == null || value.timedOut())
                 return timedValueCreator.apply(mappingFunction.apply(k));
@@ -137,8 +165,7 @@ public class TimedCache<K, V>
     public @NonNull Optional<V> computeIfPresent(final @NonNull K key,
                                                  final @NonNull BiFunction<@NonNull K, V, @NonNull V> remappingFunction)
     {
-        return Optional.ofNullable(cache.compute(key, (k, timedValue)
-            ->
+        return Optional.ofNullable(cache.compute(key, (k, timedValue) ->
         {
             if (timedValue != null && !timedValue.timedOut())
             {
