@@ -46,6 +46,9 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
      */
     public static @NonNull RangeValidator<Integer> integerRangeValidator(final int lowerLimit, final int upperLimit)
     {
+        if (lowerLimit > upperLimit)
+            throw new IllegalArgumentException(String.format("The lower limit of %d exceeds the upper limit of %d!",
+                                                             lowerLimit, upperLimit));
         return new RangeValidator<>((t1, t2) -> t1 < t2,
                                     (t1, t2) -> t1 > t2,
                                     lowerLimit, upperLimit);
@@ -60,6 +63,9 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
      */
     public static @NonNull RangeValidator<Double> doubleRangeValidator(final double lowerLimit, final double upperLimit)
     {
+        if (lowerLimit > upperLimit)
+            throw new IllegalArgumentException(String.format("The lower limit of %f exceeds the upper limit of %f!",
+                                                             lowerLimit, upperLimit));
         return new RangeValidator<>((t1, t2) -> t1 < t2,
                                     (t1, t2) -> t1 > t2,
                                     lowerLimit, upperLimit);
@@ -75,7 +81,6 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
     {
         return input != null && lessThan.apply(input, max);
     }
-
 
     /**
      * Checks if the provided value is more than {@link #min}.

@@ -36,7 +36,6 @@ import java.util.List;
 // TODO: Be more consistent in naming help menus. There should be a clear distinction between the command-specific long help
 //       and the command's list of subcommands. Maybe help text and help menu?
 //       Alternatively, don't make a distinction at all. The help text could just be page 0 of the help menu?
-// TODO: IllegalValueException is only used for OOB page values, so maybe rename it to something more specific to that?
 // TODO: Add some safeguards for required optional parameters. If it's '/command [pos0] [pos1] <pos2> [pos3]',
 //       you cannot know which arguments were provided from "/command val val". So if 1 optional positional argument is
 //       provided, no other positional arguments should be allowed.
@@ -46,6 +45,10 @@ import java.util.List;
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 // TODO: For the Spigot platform, we should probably ensure that the package isn't the default one to avoid
 //       people not shading this dependency properly.
+// TODO: Add dynamic minimum/maximum/range validators that obtain the min/max values using a functional interface.
+//       This should also be used for validating the page number of the help command.
+// TODO: IllegalValueException is only used for OOB page values, so remove that once the dynamic range validator is
+//       implemented.
 
 /*
  * Unit tests:
