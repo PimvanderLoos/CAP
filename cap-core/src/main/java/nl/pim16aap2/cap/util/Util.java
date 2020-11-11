@@ -2,6 +2,7 @@ package nl.pim16aap2.cap.util;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -24,7 +25,8 @@ public class Util
      * @param <T>      The type of the value.
      * @return The value if it is not null, otherwise the fallback.
      */
-    public @NonNull <T> T valOrDefault(final @Nullable T value, final @NonNull T fallback)
+    @Contract("_, !null -> !null")
+    public <T> T valOrDefault(final @Nullable T value, final T fallback)
     {
         return value == null ? fallback : value;
     }

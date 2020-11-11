@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 public class CAP
 {
     @Getter
-    private final @NonNull Locale defaultLocale;
+    private final @Nullable Locale defaultLocale;
 
     private final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
 
@@ -97,7 +97,7 @@ public class CAP
     @Getter
     protected final boolean caseSensitive;
 
-    protected final @NonNull Locale[] locales;
+    protected final Locale[] locales;
 
     /**
      * The localization to use. When set to null, the raw values will be used instead.
@@ -121,7 +121,8 @@ public class CAP
 
         if (localizationSpecification == null)
         {
-            defaultLocale = Locale.ENGLISH;
+            // Use null, so the hashcode is 0 (and fast!), minimizing the overhead.
+            defaultLocale = null;
             locales = new Locale[]{getDefaultLocale()};
         }
         else
@@ -219,7 +220,7 @@ public class CAP
      *
      * @param command The {@link Command} to register.
      */
-    private void addCommand(final @NonNull Command command, final @NonNull Locale locale)
+    private void addCommand(final @NonNull Command command, final Locale locale)
     {
         final @NonNull String name = getCommandNameCaseCheck(getMessage(command.getName(), locale));
         commandMap.get(locale).put(name, command);
@@ -270,9 +271,18 @@ public class CAP
         return getFromMap(commandMap, Util.valOrDefault(locale, getDefaultLocale()), getCommandNameCaseCheck(name));
     }
 
+    /**
+     * Gets an entry from a localized map.
+     *
+     * @param map    The {@link Map} to retrieve the entry from.
+     * @param locale The {@link Locale} to search in.
+     * @param key    The key to search for in the locale.
+     * @param <T>    The type of the value to search for.
+     * @return The value if it could be found.
+     */
     private @NonNull <T> Optional<T> getFromMap(
         final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull T>> map,
-        final @NonNull Locale locale, final @NonNull String key)
+        final Locale locale, final @NonNull String key)
     {
         return Optional.ofNullable(map.get(locale)).map(entry -> entry.get(key));
     }
@@ -368,7 +378,7 @@ public class CAP
      * @param locale The {@link Locale} for which to get the {@link Command}.
      * @return All the top-level {@link Command}s
      */
-    public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap(final @NonNull Locale locale)
+    public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap(final Locale locale)
     {
         final @NonNull Map<@NonNull String, @NonNull Command> map = topLevelCommandMap.get(locale);
         return map;
