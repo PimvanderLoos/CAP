@@ -33,6 +33,18 @@ public class MinimumValidator<T extends Number> implements IArgumentValidator<T>
     }
 
     /**
+     * Gets a minimum validator for integer values that uses {@link RangeValidator.ValueRequest}s to obtain the limit.
+     *
+     * @param minimumRequester The function to use to retrieve the minimum value.
+     * @return A new {@link RangeValidator} for integer values.
+     */
+    public static @NonNull MinimumValidator<Integer> integerMinimumValidator(
+        final @NonNull RangeValidator.ValueRequest<Integer> minimumRequester)
+    {
+        return new MinimumValidator<>(RangeValidator.integerRangeValidator(minimumRequester, minimumRequester));
+    }
+
+    /**
      * Gets a minimum validator for double values.
      *
      * @param minimum The lower limit (not inclusive!)
@@ -43,12 +55,24 @@ public class MinimumValidator<T extends Number> implements IArgumentValidator<T>
         return new MinimumValidator<>(RangeValidator.doubleRangeValidator(minimum, minimum));
     }
 
+    /**
+     * Gets a minimum validator for double values that uses {@link RangeValidator.ValueRequest}s to obtain the limit.
+     *
+     * @param minimumRequester The function to use to retrieve the minimum value.
+     * @return A new {@link RangeValidator} for double values.
+     */
+    public static @NonNull MinimumValidator<Double> doubleMinimumValidator(
+        final @NonNull RangeValidator.ValueRequest<Double> minimumRequester)
+    {
+        return new MinimumValidator<>(RangeValidator.doubleRangeValidator(minimumRequester, minimumRequester));
+    }
+
     @Override
     public void validate(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                         final @NonNull Argument<T> argument, final @Nullable T input)
+                         final @NonNull Argument<?> argument, final @Nullable T input)
         throws ValidationFailureException
     {
-        if (input == null || !rangeValidator.moreThanMin(input))
+        if (input == null || !rangeValidator.moreThanMin(cap, commandSender, argument, input))
             throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), cap.isDebug());
     }
 }

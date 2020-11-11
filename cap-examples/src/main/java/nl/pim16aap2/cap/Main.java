@@ -45,8 +45,6 @@ import java.util.List;
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 // TODO: For the Spigot platform, we should probably ensure that the package isn't the default one to avoid
 //       people not shading this dependency properly.
-// TODO: Add dynamic minimum/maximum/range validators that obtain the min/max values using a functional interface.
-//       This should also be used for validating the page number of the help command.
 // TODO: IllegalValueException is only used for OOB page values, so remove that once the dynamic range validator is
 //       implemented.
 

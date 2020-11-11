@@ -33,6 +33,18 @@ public class MaximumValidator<T extends Number> implements IArgumentValidator<T>
     }
 
     /**
+     * Gets a maximum validator for integer values that uses {@link RangeValidator.ValueRequest}s to obtain the limit.
+     *
+     * @param maximumRequester The function to use to retrieve the maximum value.
+     * @return A new {@link RangeValidator} for integer values.
+     */
+    public static @NonNull MaximumValidator<Integer> integerMaximumValidator(
+        final @NonNull RangeValidator.ValueRequest<Integer> maximumRequester)
+    {
+        return new MaximumValidator<>(RangeValidator.integerRangeValidator(maximumRequester, maximumRequester));
+    }
+
+    /**
      * Gets a maximum validator for double values.
      *
      * @param maximum The lower limit (not inclusive!)
@@ -43,12 +55,24 @@ public class MaximumValidator<T extends Number> implements IArgumentValidator<T>
         return new MaximumValidator<>(RangeValidator.doubleRangeValidator(maximum, maximum));
     }
 
+    /**
+     * Gets a maximum validator for double values that uses {@link RangeValidator.ValueRequest}s to obtain the limit.
+     *
+     * @param maximumRequester The function to use to retrieve the maximum value.
+     * @return A new {@link RangeValidator} for double values.
+     */
+    public static @NonNull MaximumValidator<Double> doubleMaximumValidator(
+        final @NonNull RangeValidator.ValueRequest<Double> maximumRequester)
+    {
+        return new MaximumValidator<>(RangeValidator.doubleRangeValidator(maximumRequester, maximumRequester));
+    }
+
     @Override
     public void validate(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                         final @NonNull Argument<T> argument, final @Nullable T input)
+                         final @NonNull Argument<?> argument, final @Nullable T input)
         throws ValidationFailureException
     {
-        if (input == null || !rangeValidator.lessThanMax(input))
+        if (input == null || !rangeValidator.lessThanMax(cap, commandSender, argument, input))
             throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), cap.isDebug());
     }
 }

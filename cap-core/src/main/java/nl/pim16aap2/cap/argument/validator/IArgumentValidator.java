@@ -27,6 +27,6 @@ public interface IArgumentValidator<T>
      * @throws ValidationFailureException When the input variable is invalid.
      */
     void validate(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                  final @NonNull Argument<T> argument, final @Nullable T input)
+                  final @NonNull Argument<?> argument, final @Nullable T input)
         throws ValidationFailureException;
 }
