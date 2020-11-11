@@ -33,6 +33,9 @@ import java.util.regex.Pattern;
  */
 public class TabCompletionCache
 {
+    /**
+     * Matches zero or one leading quotation marks in a String.
+     */
     private static final Pattern LEADING_QUOTATION_MARK = Pattern.compile("^[\"]?");
 
     private final @NonNull TimedCache<ICommandSender, CacheEntry> tabCompletionCache =
@@ -54,21 +57,21 @@ public class TabCompletionCache
      * @param openEnded     Whether the cached results are openEnded or not. See {@link TabCompletionSuggester#isOpenEnded()}.
      * @return The list of suggested tab completions.
      */
-    public @NonNull List<String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
-                                                       final @NonNull List<String> args, final @NonNull String lastArg,
-                                                       final @NonNull Supplier<List<String>> fun,
-                                                       final boolean openEnded)
+    public @NonNull List<@NonNull String> getTabCompleteOptions(final @NonNull ICommandSender commandSender,
+                                                                final @NonNull List<@NonNull String> args,
+                                                                final @NonNull String lastArg,
+                                                                final @NonNull Supplier<List<@NonNull String>> fun,
+                                                                final boolean openEnded)
     {
-        final @NonNull CacheEntry cacheEntry =
-            tabCompletionCache.get(commandSender)
-                              .orElseGet(() -> tabCompletionCache.put(commandSender, new CacheEntry()));
+        final @NonNull CacheEntry cacheEntry = tabCompletionCache.computeIfAbsent(commandSender, k -> new CacheEntry());
 
-        final @NonNull Optional<List<String>> suggestions = cacheEntry.suggestionsSubSelection(args.size(), lastArg,
-                                                                                               openEnded);
+        final @NonNull Optional<List<@NonNull String>> suggestions =
+            cacheEntry.suggestionsSubSelection(args.size(), lastArg, openEnded);
+
         if (suggestions.isPresent())
             return suggestions.get();
 
-        final @NonNull List<String> newSuggestions = fun.get();
+        final @NonNull List<@NonNull String> newSuggestions = fun.get();
         cacheEntry.reset(newSuggestions, args.size(), lastArg, openEnded);
         return newSuggestions;
     }
@@ -87,11 +90,11 @@ public class TabCompletionCache
      * @param openEnded     Whether the cached results are openEnded or not. See {@link TabCompletionSuggester#isOpenEnded()}.
      * @return The {@link CompletableFuture} of the list of suggested tab completions.
      */
-    public @NonNull CompletableFuture<List<String>> getTabCompleteOptionsAsync(
-        final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
-        final @NonNull Supplier<List<String>> fun, final boolean openEnded)
+    public @NonNull CompletableFuture<List<@NonNull String>> getTabCompleteOptionsAsync(
+        final @NonNull ICommandSender commandSender, final @NonNull List<@NonNull String> args,
+        final @NonNull String lastArg, final @NonNull Supplier<List<@NonNull String>> fun, final boolean openEnded)
     {
-        final @NonNull Pair<List<String>, CompletableFuture<List<String>>> result =
+        final @NonNull Pair<List<@NonNull String>, CompletableFuture<List<@NonNull String>>> result =
             getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun, openEnded);
 
         if (result.first != null)
@@ -121,11 +124,11 @@ public class TabCompletionCache
      * @return The list of suggested tab completions if one could be found. If no results are in the cache yet an empty
      * list is returned.
      */
-    public @NonNull List<String> getDelayedTabCompleteOptions(
-        final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
-        final @NonNull Supplier<List<String>> fun, final boolean openEnded)
+    public @NonNull List<@NonNull String> getDelayedTabCompleteOptions(
+        final @NonNull ICommandSender commandSender, final @NonNull List<@NonNull String> args,
+        final @NonNull String lastArg, final @NonNull Supplier<List<@NonNull String>> fun, final boolean openEnded)
     {
-        final @NonNull Pair<List<String>, CompletableFuture<List<String>>> result =
+        final @NonNull Pair<List<@NonNull String>, CompletableFuture<List<@NonNull String>>> result =
             getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun, openEnded);
 
         if (result.first != null)
@@ -154,23 +157,25 @@ public class TabCompletionCache
      * and null for the future one. If no list of suggestions could be found, the future suggestions will be returned
      * and the list will be null.
      */
-    private @NonNull Pair<List<String>, CompletableFuture<List<String>>> getAsyncCachedEntrySuggestions(
-        final @NonNull ICommandSender commandSender, final @NonNull List<String> args, final @NonNull String lastArg,
-        final @NonNull Supplier<List<String>> fun, final boolean openEnded)
+    private @NonNull Pair<List<@NonNull String>, CompletableFuture<List<@NonNull String>>> getAsyncCachedEntrySuggestions(
+        final @NonNull ICommandSender commandSender, final @NonNull List<@NonNull String> args,
+        final @NonNull String lastArg, final @NonNull Supplier<List<@NonNull String>> fun, final boolean openEnded)
     {
-        final @NonNull AsyncCacheEntry cacheEntry;
-        final @NonNull Optional<CacheEntry> entryOpt = tabCompletionCache.get(commandSender);
-        if (!entryOpt.isPresent() || !(entryOpt.get() instanceof AsyncCacheEntry))
-            cacheEntry = (AsyncCacheEntry) tabCompletionCache.put(commandSender, new AsyncCacheEntry());
-        else
-            cacheEntry = (AsyncCacheEntry) entryOpt.get();
+        final @NonNull AsyncCacheEntry cacheEntry =
+            (AsyncCacheEntry) tabCompletionCache.compute(commandSender, (key, entry) ->
+            {
+                if (!(entry instanceof AsyncCacheEntry))
+                    return new AsyncCacheEntry();
+                return entry;
+            });
 
-        final @NonNull Optional<List<String>> suggestions = cacheEntry.suggestionsSubSelection(args.size(), lastArg,
-                                                                                               openEnded);
+        final @NonNull Optional<List<@NonNull String>> suggestions =
+            cacheEntry.suggestionsSubSelection(args.size(), lastArg, openEnded);
+
         if (suggestions.isPresent())
             return new Pair<>(suggestions.get(), null);
 
-        final @NonNull CompletableFuture<List<String>> newSuggestions = CompletableFuture.supplyAsync(fun);
+        final @NonNull CompletableFuture<List<@NonNull String>> newSuggestions = CompletableFuture.supplyAsync(fun);
         cacheEntry.prepare(newSuggestions, args.size(), lastArg, openEnded);
 
         return new Pair<>(null, newSuggestions);
@@ -194,7 +199,7 @@ public class TabCompletionCache
         /**
          * The cached list of suggestions.
          */
-        protected @Nullable List<String> suggestions = null;
+        protected @Nullable List<@NonNull String> suggestions = null;
 
         /**
          * The cached last argument.
@@ -221,8 +226,8 @@ public class TabCompletionCache
          * @param lastArg     The last argument in the commandline input.
          * @param openEnded   Whether the cached results are openEnded or not. See {@link TabCompletionSuggester#isOpenEnded()}.
          */
-        public void reset(final @NonNull List<String> suggestions, final int argCount, final @NonNull String lastArg,
-                          final boolean openEnded)
+        public void reset(final @NonNull List<@NonNull String> suggestions, final int argCount,
+                          final @NonNull String lastArg, final boolean openEnded)
         {
             this.suggestions = new ArrayList<>(suggestions);
             this.argCount = argCount;
@@ -238,9 +243,9 @@ public class TabCompletionCache
          * @param openEnded   Whether the cached results are openEnded or not. See {@link TabCompletionSuggester#isOpenEnded()}.
          * @return The list of the narrowed-down suggestions list.
          */
-        public @NonNull Optional<List<String>> suggestionsSubSelection(final int newArgCount,
-                                                                       final @NonNull String lastArg,
-                                                                       final boolean openEnded)
+        public @NonNull Optional<List<@NonNull String>> suggestionsSubSelection(final int newArgCount,
+                                                                                final @NonNull String lastArg,
+                                                                                final boolean openEnded)
         {
             if (suggestions == null || newArgCount != argCount || openEnded && !this.openEnded)
             {
@@ -274,7 +279,7 @@ public class TabCompletionCache
             final int newCutoff = Math.max(0, lastArg.length() - CUTOFF_DELTA);
             suggestions.removeIf(val -> val.length() < newCutoff);
 
-            final @NonNull ArrayList<String> newSuggestions;
+            final @NonNull ArrayList<@NonNull String> newSuggestions;
 
             newSuggestions = new ArrayList<>(suggestions.size());
             final Pattern search = Pattern.compile(LEADING_QUOTATION_MARK + Pattern.quote(lastArg));
@@ -303,7 +308,7 @@ public class TabCompletionCache
     {
         protected @NonNull ENTRY_STATUS entryStatus = ENTRY_STATUS.NULL;
 
-        public void prepare(final @NonNull CompletableFuture<List<String>> newSuggestions, final int argCount,
+        public void prepare(final @NonNull CompletableFuture<List<@NonNull String>> newSuggestions, final int argCount,
                             final @NonNull String lastArg, final boolean openEnded)
         {
             entryStatus = ENTRY_STATUS.PENDING;
@@ -311,17 +316,17 @@ public class TabCompletionCache
         }
 
         @Override
-        public void reset(final @NonNull List<String> suggestions, final int argCount, final @NonNull String lastArg,
-                          final boolean openEnded)
+        public void reset(final @NonNull List<@NonNull String> suggestions, final int argCount,
+                          final @NonNull String lastArg, final boolean openEnded)
         {
             entryStatus = ENTRY_STATUS.AVAILABLE;
             super.reset(suggestions, argCount, lastArg, openEnded);
         }
 
         @Override
-        public @NonNull Optional<List<String>> suggestionsSubSelection(final int newArgCount,
-                                                                       final @NonNull String lastArg,
-                                                                       final boolean openEnded)
+        public @NonNull Optional<List<@NonNull String>> suggestionsSubSelection(final int newArgCount,
+                                                                                final @NonNull String lastArg,
+                                                                                final boolean openEnded)
         {
             // If the data isn't available yet, return an empty list (not an empty optional).
             if (entryStatus == ENTRY_STATUS.PENDING)

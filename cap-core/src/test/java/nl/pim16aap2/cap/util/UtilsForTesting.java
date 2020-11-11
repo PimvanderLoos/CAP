@@ -38,7 +38,6 @@ public class UtilsForTesting
     public <T> void optionalEquals(final @NonNull Optional<T> optional, final @NonNull T val)
     {
         Assertions.assertTrue(optional.isPresent());
-        System.out.println(optional.get());
         Assertions.assertEquals(val, optional.get());
     }
 }

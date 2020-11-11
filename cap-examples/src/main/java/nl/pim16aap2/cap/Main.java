@@ -50,13 +50,12 @@ import java.util.List;
 //       Currently, the positional arguments are counted separately, but this breaks the tab completion.
 // TODO: Make sure that autocomplete works if all the current string is empty and all positional arguments
 //       have already been filled (just return args list).
-// TODO: Consider synchronizing some stuff in the TabCompletionCache to make sure that it's all thread-safe.
 
 /*
  * Unit tests:
  */
 // TODO: Text/Component/Type + ColorScheme system
-// TODO: Exlicitly test open-ended caching.
+// TODO: Explicitly test open-ended caching.
 
 public class Main
 {

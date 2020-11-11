@@ -348,7 +348,6 @@ public class TabCompletionSuggester extends CommandParser
     protected @NonNull List<@NonNull String> getFreeArgumentNames(final @NonNull Command command,
                                                                   final @NonNull String lastArg)
     {
-        System.out.println("Checking lastArg: " + lastArg);
         final @NonNull List<@NonNull String> ret = new ArrayList<>(0);
         command.getArgumentManager().getArguments().forEach(
             argument ->
