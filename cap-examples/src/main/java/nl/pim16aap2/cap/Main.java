@@ -140,8 +140,6 @@ public class Main
 
         tryArgs(cap, "bigdoors required my_door 12");
 //        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
-
-        tryArgs(cap, "bigdoors addowner flag --admin --group --player pim16aap2");
     }
 
     private static CAP initCommandManager()
@@ -164,6 +162,8 @@ public class Main
                                               .handler(nl.pim16aap2.cap.exception.ValidationFailureException.class,
                                                        (sender, ex) -> ex.printStackTrace())
                                               .handler(nl.pim16aap2.cap.exception.UnmatchedQuoteException.class,
+                                                       (sender, ex) -> ex.printStackTrace())
+                                              .handler(nl.pim16aap2.cap.exception.MissingValueException.class,
                                                        (sender, ex) -> ex.printStackTrace())
                                               .build())
             .helpCommandRenderer(DefaultHelpCommandRenderer

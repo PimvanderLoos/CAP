@@ -14,6 +14,7 @@ import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.exception.IllegalValueException;
+import nl.pim16aap2.cap.exception.MissingValueException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.GenericCommand;
 import nl.pim16aap2.cap.util.UtilsForTesting;
@@ -182,6 +183,38 @@ class CommandParserTest
         Assertions.assertEquals(expected, result.get().getParsedArgument(identifier));
     }
 
+    private void testInvalidInput(final @NonNull CAP cap, final char sep)
+    {
+        assertWrappedThrows(MissingValueException.class, () -> cap
+            .parseInput(commandSender,
+                        String.format("bigdoors addowner mydoor --admin --group --player%cpim16aap2", sep)));
+
+        assertWrappedThrows(MissingValueException.class, () -> cap
+            .parseInput(commandSender, String.format("bigdoors addowner mydoor --admin --group%c --player%cpim16aap2",
+                                                     sep, sep)));
+
+        assertWrappedThrows(MissingValueException.class, () -> cap
+            .parseInput(commandSender, String.format("bigdoors addowner mydoor --admin --player%c ", sep)));
+
+        assertWrappedThrows(MissingValueException.class, () -> cap
+            .parseInput(commandSender, String.format("bigdoors addowner mydoor --admin --player%c", sep)));
+
+        assertWrappedThrows(MissingValueException.class, () -> cap
+            .parseInput(commandSender, "bigdoors addowner mydoor --admin --player"));
+    }
+
+    @Test
+    void testInvalidInput()
+    {
+        testInvalidInput(setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator('=').build()), '=');
+    }
+
+    @Test
+    void testInvalidInputSpaceSeparator()
+    {
+        testInvalidInput(setUp(CAP.getDefault().toBuilder().exceptionHandler(null).build()), ' ');
+    }
+
     @SneakyThrows
     void testNumericalInput(final @NonNull CAP cap)
     {
@@ -261,6 +294,23 @@ class CommandParserTest
     {
         final @NonNull CommandParser commandParser = new CommandParser(cap, commandSender, input, cap.getSeparator());
         Assertions.assertEquals(commandName, commandParser.getLastCommand().getCommand().getName());
+    }
+
+    @Test
+    void isFreeArgumentName()
+    {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).build());
+
+        final @NonNull Command addowner = cap.getCommand("addowner").orElseThrow(
+            () -> new RuntimeException("Failed to find command \"addowner\"!!"));
+
+        // TODO: Maybe check the number of argument prefixes? "-".
+        Assertions.assertTrue(CommandParser.isFreeArgumentName(addowner, "--group"));
+        Assertions.assertTrue(CommandParser.isFreeArgumentName(addowner, "-g"));
+        Assertions.assertFalse(CommandParser.isFreeArgumentName(addowner, "aaaaa"));
+        Assertions.assertFalse(CommandParser.isFreeArgumentName(addowner, "--groups"));
+        Assertions.assertFalse(CommandParser.isFreeArgumentName(addowner, "-groups"));
+        Assertions.assertFalse(CommandParser.isFreeArgumentName(addowner, "-z"));
     }
 
     @Test

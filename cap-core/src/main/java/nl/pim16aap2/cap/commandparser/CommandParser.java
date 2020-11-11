@@ -12,6 +12,7 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.MissingArgumentException;
+import nl.pim16aap2.cap.exception.MissingValueException;
 import nl.pim16aap2.cap.exception.NoPermissionException;
 import nl.pim16aap2.cap.exception.NonExistingArgumentException;
 import nl.pim16aap2.cap.exception.UnmatchedQuoteException;
@@ -170,7 +171,7 @@ public class CommandParser
     // TODO: What's the difference between an IllegalValue and a ValidationFailure, exactly?
     public @NonNull CommandResult parse()
         throws CommandNotFoundException, NonExistingArgumentException, MissingArgumentException, NoPermissionException,
-               ValidationFailureException, IllegalValueException
+               ValidationFailureException, IllegalValueException, MissingValueException
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
         if (!parsedCommand.getCommand().hasPermission(commandSender))
@@ -183,6 +184,25 @@ public class CommandParser
         return new CommandResult(commandSender, parsedCommand.getCommand(),
                                  parseArguments(parsedCommand.getCommand(),
                                                 parsedCommand.getIndex()));
+    }
+
+    /**
+     * Checks if a String is the name of a free argument. For this to be true, 2 requirements have to be met:
+     * <p>
+     * 1) The String has to start with at least 1 {@link #ARGUMENT_PREFIX}.
+     * <p>
+     * 2) The String (with up to two leading {@link #ARGUMENT_PREFIX}es stripped) has to be an {@link Argument}
+     * registered with the {@link Command}.
+     *
+     * @param command The {@link Command} to check for a registered {@link Argument}.
+     * @param name    The string that may contain the name of an {@link Argument}.
+     * @return True if the provided name is the name of a free {@link Argument}.
+     */
+    protected static boolean isFreeArgumentName(final @NonNull Command command, final @NonNull String name)
+    {
+        return lStripArgumentPrefix(name)
+            .map(stripped -> command.getArgumentManager().getArgument(stripped).isPresent())
+            .orElse(false);
     }
 
     /**
@@ -203,7 +223,8 @@ public class CommandParser
      */
     private @Nullable Map<@NonNull String, Argument.IParsedArgument<?>> parseArguments(final @NonNull Command command,
                                                                                        final int idx)
-        throws NonExistingArgumentException, MissingArgumentException, ValidationFailureException, IllegalValueException
+        throws NonExistingArgumentException, MissingArgumentException, ValidationFailureException,
+               IllegalValueException, MissingValueException
     {
         final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> results = new HashMap<>();
 
@@ -221,7 +242,8 @@ public class CommandParser
                 final int argNameStartIdx = nextArg.charAt(1) == ARGUMENT_PREFIX ? 2 : 1;
                 final String[] parts = separatorPattern.split(nextArg, 2);
 
-                final @NonNull String argumentName = parts[0].substring(argNameStartIdx);
+                final @NonNull String argumentName = parts[0].substring(argNameStartIdx).trim();
+
                 argument = command.getArgumentManager().getArgument(argumentName)
                                   .orElseThrow(
                                       () -> new NonExistingArgumentException(command, argumentName,
@@ -236,13 +258,29 @@ public class CommandParser
                     // So, we get the next arg and increment the current position by 1 to indicated we've
                     // just processed it.
                     final int nextPos = pos + 1;
+
+                    @Nullable String foundValue;
                     if (spaceSeparated)
                     {
-                        value = input.size() >= nextPos ? input.getArgs().get(nextPos) : "";
+                        foundValue = nextPos >= input.size() ? null : input.getArgs().get(nextPos).trim();
+                        // If the next value is another argument, then we can conclude that the
+                        // value we found is not a value (it's an argument).
+                        if (foundValue != null)
+                            foundValue = isFreeArgumentName(command, foundValue) ? null : foundValue;
                         pos += 1;
                     }
                     else
-                        value = parts[1];
+                    {
+                        foundValue = parts.length == 1 ? null : parts[1].trim();
+                        // If the value is empty, there was no value, so set it to null.
+                        foundValue = (foundValue != null && foundValue.isEmpty()) ? null : foundValue;
+                    }
+
+                    // If no value is found, or if the value is another argument specification,
+                    // we can conclude that this argument did not have a value.
+                    if (foundValue == null)
+                        throw new MissingValueException(command, argument, cap.isDebug());
+                    value = foundValue;
                 }
             }
             else
@@ -250,10 +288,9 @@ public class CommandParser
                 final int currentRequiredArgumentIdx = requiredArgumentIdx;
                 argument = command.getArgumentManager().getPositionalArgumentAtIdx(currentRequiredArgumentIdx)
                                   .orElseThrow(
-                                      () -> new NonExistingArgumentException(command,
-                                                                             "Missing required argument at pos: " +
-                                                                                 currentRequiredArgumentIdx,
-                                                                             cap.isDebug()));
+                                      () -> new NonExistingArgumentException(
+                                          command, "Missing required argument at pos: " + currentRequiredArgumentIdx,
+                                          cap.isDebug()));
                 ++requiredArgumentIdx;
                 value = nextArg;
             }

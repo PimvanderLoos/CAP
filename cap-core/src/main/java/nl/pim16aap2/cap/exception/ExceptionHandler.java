@@ -99,6 +99,7 @@ public class ExceptionHandler
             .handler(MissingArgumentException.class, ExceptionHandler::handleMissingArgumentException)
             .handler(IllegalValueException.class, ExceptionHandler::handleIllegalValueException)
             .handler(UnmatchedQuoteException.class, ExceptionHandler::handleUnmatchedQuoteException)
+            .handler(MissingValueException.class, ExceptionHandler::handleMissingValueException)
             .build();
     }
 
@@ -151,6 +152,16 @@ public class ExceptionHandler
                                                      final @NonNull UnmatchedQuoteException e)
     {
         sendError(commandSender, "Incomplete input! Make sure all quotation marks are matched!");
+    }
+
+    public static void handleMissingValueException(final @NonNull ICommandSender commandSender,
+                                                   final @NonNull MissingValueException e)
+    {
+        // Prefer the long name, because it's usually more descriptive.
+        final @NonNull String argumentName = e.getArgument().getLongName() == null ?
+                                             e.getArgument().getShortName() : e.getArgument().getLongName();
+
+        sendError(commandSender, "Missing value for argument: " + argumentName);
     }
 
     // Delombok:
