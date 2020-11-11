@@ -17,7 +17,9 @@ import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -57,8 +59,7 @@ public class Command
     /**
      * The list of subcommands this command has.
      */
-    @Getter
-    protected final @NonNull List<@NonNull Command> subCommands;
+    protected final @NonNull CommandMap subCommands;
 
     /**
      * The {@link ArgumentManager} that manages all the arguments this command has.
@@ -226,8 +227,7 @@ public class Command
         this.header = header;
         this.headerSupplier = headerSupplier;
 
-        // If there are no subcommands, make an empty list. If there are subcommands, put them in a modifiable list.
-        this.subCommands = subCommands == null ? new ArrayList<>(0) : new ArrayList<>(subCommands);
+        this.subCommands = new CommandMap(cap);
         this.commandExecutor = virtual ? Command::virtualCommandExecutor : commandExecutor;
         this.virtual = virtual;
 
@@ -237,9 +237,12 @@ public class Command
         if (helpCommand == null && Util.valOrDefault(addDefaultHelpSubCommand, false))
             this.helpCommand = DefaultHelpCommand.getDefault(cap);
         if (this.helpCommand != null)
-            this.subCommands.add(0, this.helpCommand);
+            this.subCommands.addCommand(this.helpCommand);
 
-        this.subCommands.forEach(subCommand -> subCommand.superCommand = Optional.of(this));
+        if (subCommands != null)
+            subCommands.forEach(this.subCommands::addCommand);
+
+        this.subCommands.get().values().forEach(subCommand -> subCommand.superCommand = Optional.of(this));
         this.cap = cap;
 
         this.helpArgument = helpArgument;
@@ -303,7 +306,7 @@ public class Command
     private int calculateSubCommandCount()
     {
         int count = 0;
-        for (final @NonNull Command command : subCommands)
+        for (final @NonNull Command command : subCommands.get().values())
             count += command.getSubCommandCount() + 1;
         return count;
     }
@@ -397,18 +400,6 @@ public class Command
     }
 
     /**
-     * Searches for a sub{@link Command} of a given type.
-     *
-     * @param clazz The {@link Class} to search for.
-     * @param <T>   The Type of the sub{@link Command} to find.
-     * @return An {@link Optional} containing the sub{@link Command}.
-     */
-    public @NonNull <T> Optional<Command> getSubCommand(final @NonNull Class<T> clazz)
-    {
-        return Util.searchIterable(subCommands, (val) -> clazz.isAssignableFrom(val.getClass()));
-    }
-
-    /**
      * Searches for a sub{@link Command} with a given name.
      *
      * @param name The name of the sub{@link Command} to look for.
@@ -417,9 +408,20 @@ public class Command
      */
     public @NonNull Optional<Command> getSubCommand(final @Nullable String name)
     {
-        if (name == null)
-            return Optional.empty();
-        return Util.searchIterable(subCommands, (val) -> val.getName().equals(name));
+        return getSubCommand(name, null);
+    }
+
+    /**
+     * Searches for a sub{@link Command} with a given name.
+     *
+     * @param name   The name of the sub{@link Command} to look for.
+     * @param locale The {@link Locale} for which to get the {@link Command}.
+     * @return An optional containing the sub{@link Command} with the given name, if it exists, otherwise {@link
+     * Optional#empty()}.
+     */
+    public @NonNull Optional<Command> getSubCommand(final @Nullable String name, final @Nullable Locale locale)
+    {
+        return subCommands.getCommand(name, locale);
     }
 
     /**
@@ -435,5 +437,10 @@ public class Command
         if (permission == null)
             return true;
         return permission.apply(commandSender, this);
+    }
+
+    public @NonNull Collection<@NonNull Command> getSubCommands()
+    {
+        return subCommands.get().values();
     }
 }

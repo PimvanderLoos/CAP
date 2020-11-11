@@ -59,7 +59,22 @@ public class DefaultHelpCommand extends Command
     private List<String> suggestions = null;
 
     /**
-     * @param shortName           The name of the command.
+     * The default help argument.
+     */
+    public static final @NonNull Argument<@NonNull String> DEFAULT_HELP_ARGUMENT =
+        new StringArgument()
+            .getOptionalPositional()
+//            .shortName("default.helpCommand.helpArgument.shortName")
+//            .summary("default.helpCommand.helpArgument.summary")
+//            .identifier("helpArg")
+            .shortName("page/command")
+            .summary("A page number of the name of a command.")
+            .identifier("helpArg")
+            .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
+            .build();
+
+    /**
+     * @param name                The name of the command.
      * @param description         The description of the command. This is the longer description shown in the help menu
      *                            for this command.
      * @param descriptionSupplier The supplier that is used to build the description. Note that this isn't used in case
@@ -75,32 +90,25 @@ public class DefaultHelpCommand extends Command
      * @param commandExecutor     The function that will be executed by {@link CommandResult#run()}.
      * @param cap                 The {@link CAP} instance that manages this command.
      */
-    protected DefaultHelpCommand(final @Nullable String shortName, final @Nullable String description,
+    protected DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
                                  final @Nullable Function<ICommandSender, String> descriptionSupplier,
                                  final @Nullable String summary,
                                  final @Nullable Function<ICommandSender, String> summarySupplier,
                                  final @Nullable String header,
                                  final @Nullable Function<ICommandSender, String> headerSupplier,
                                  final @Nullable String sectionTitle,
+                                 final @Nullable Argument<?> helpArgument,
                                  final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                                  final @NonNull CAP cap,
                                  final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
-//        super(Util.valOrDefault(shortName, "default.helpCommand.shortName"), description, descriptionSupplier, summary,
-        super(Util.valOrDefault(shortName, "help"), description, descriptionSupplier, summary,
+        super(Util.valOrDefault(name, "default.helpCommand.name"), description, descriptionSupplier, summary,
+//        super(Util.valOrDefault(shortName, "help"), description, descriptionSupplier, summary,
               summarySupplier, header,
               headerSupplier, sectionTitle, SUB_COMMANDS, HELP_COMMAND, ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT,
               ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
-              Collections.singletonList(new StringArgument()
-                                            .getOptionalPositional()
-//                                            .shortName("default.helpCommand.helpArgument.shortName")
-//                                            .summary("default.helpCommand.helpArgument.summary")
-//                                            .identifier("helpArg")
-                                            .shortName("page/command")
-                                            .summary("A page number of the name of a command.")
-                                            .identifier("helpArg")
-                                            .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
-                                            .build()), VIRTUAL, cap, ((commandSender, command) -> true));
+              Collections.singletonList(Util.valOrDefault(helpArgument, DEFAULT_HELP_ARGUMENT)), VIRTUAL, cap,
+              ((commandSender, command) -> true));
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, cap.getHelpCommandRenderer());
     }
@@ -172,11 +180,12 @@ public class DefaultHelpCommand extends Command
                               final @Nullable String header,
                               final @Nullable Function<ICommandSender, String> headerSupplier,
                               final @Nullable String sectionTitle,
+                              final @Nullable Argument<?> helpArgument,
                               final @NonNull CAP cap,
                               final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
         this(name, description, descriptionSupplier, summary, summarySupplier, header, headerSupplier, sectionTitle,
-             DefaultHelpCommand::defaultHelpCommandExecutor, cap, helpCommandRenderer);
+             helpArgument, DefaultHelpCommand::defaultHelpCommandExecutor, cap, helpCommandRenderer);
     }
 
     /**

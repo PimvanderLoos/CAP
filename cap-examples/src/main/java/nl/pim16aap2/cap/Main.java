@@ -43,12 +43,15 @@ import java.util.Locale;
 //       confusing and bug-prone very fast.
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
+// TODO: Add both non-localized and localized versions of all default stuff, so using either localized or non-localized
+//       setup is easy.
 
 /*
  * Unit tests:
  */
 // TODO: Text/Component/Type + ColorScheme system
 // TODO: Explicitly test open-ended caching.
+// TODO: Test CommandMap + localization system in general.
 
 public class Main
 {

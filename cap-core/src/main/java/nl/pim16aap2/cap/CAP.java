@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.command.CommandMap;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandparser.CommandParser;
 import nl.pim16aap2.cap.commandparser.TabCompletionSuggester;
@@ -19,7 +20,6 @@ import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,13 +43,13 @@ public class CAP
     /**
      * The map containing all registered commands, with their names as key.
      */
-    protected final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull Command>> commandMap = new HashMap<>();
+    protected final @NonNull CommandMap commandMap;
 
     /**
-     * The map containing all registered top-level commands (i.e. commands without a supercommand of their own), with
+     * The map containing all registered top-level commands (i.e. commands without a super command of their own), with
      * their names as key.
      */
-    protected final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull Command>> topLevelCommandMap = new HashMap<>();
+    protected final @NonNull CommandMap topLevelCommandMap;
 
     /**
      * The {@link DefaultHelpCommandRenderer} to use to render help messages.
@@ -97,6 +97,7 @@ public class CAP
     @Getter
     protected final boolean caseSensitive;
 
+    @Getter
     protected final Locale[] locales;
 
     /**
@@ -131,19 +132,8 @@ public class CAP
             defaultLocale = localizationSpecification.getDefaultLocale();
         }
 
-        setupLocales();
-    }
-
-    /**
-     * Instantiates the maps for all the registered {@link #locales}.
-     */
-    private void setupLocales()
-    {
-        for (final @NonNull Locale locale : locales)
-        {
-            commandMap.put(locale, new HashMap<>());
-            topLevelCommandMap.put(locale, new HashMap<>());
-        }
+        commandMap = new CommandMap(this);
+        topLevelCommandMap = new CommandMap(this);
     }
 
     /**
@@ -210,22 +200,12 @@ public class CAP
      */
     public @NonNull CAP addCommand(final @NonNull Command command)
     {
-        for (final @NonNull Locale locale : locales)
-            addCommand(command, locale);
-        return this;
-    }
+        commandMap.addCommand(command);
 
-    /**
-     * Adds the provided command for every locale.
-     *
-     * @param command The {@link Command} to register.
-     */
-    private void addCommand(final @NonNull Command command, final Locale locale)
-    {
-        final @NonNull String name = getCommandNameCaseCheck(getMessage(command.getName(), locale));
-        commandMap.get(locale).put(name, command);
         if (!command.getSuperCommand().isPresent())
-            topLevelCommandMap.get(locale).put(name, command);
+            topLevelCommandMap.addCommand(command);
+
+        return this;
     }
 
     /**
@@ -237,7 +217,7 @@ public class CAP
      * @return The name of the command, made all lower case if needed.
      */
     @Contract("!null -> !null")
-    protected String getCommandNameCaseCheck(final @Nullable String commandName)
+    public String getCommandNameCaseCheck(final @Nullable String commandName)
     {
         if (commandName == null)
             return null;
@@ -262,29 +242,9 @@ public class CAP
      * @param locale The {@link Locale} for which to get the {@link Command}.
      * @return The {@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
      */
-    public @NonNull Optional<Command> getCommand(final @Nullable String name, @Nullable Locale locale)
+    public @NonNull Optional<Command> getCommand(@Nullable String name, @Nullable Locale locale)
     {
-        locale = Util.valOrDefault(locale, getDefaultLocale());
-        if (name == null)
-            return Optional.empty();
-
-        return getFromMap(commandMap, Util.valOrDefault(locale, getDefaultLocale()), getCommandNameCaseCheck(name));
-    }
-
-    /**
-     * Gets an entry from a localized map.
-     *
-     * @param map    The {@link Map} to retrieve the entry from.
-     * @param locale The {@link Locale} to search in.
-     * @param key    The key to search for in the locale.
-     * @param <T>    The type of the value to search for.
-     * @return The value if it could be found.
-     */
-    private @NonNull <T> Optional<T> getFromMap(
-        final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull T>> map,
-        final Locale locale, final @NonNull String key)
-    {
-        return Optional.ofNullable(map.get(locale)).map(entry -> entry.get(key));
+        return commandMap.getCommand(name, locale);
     }
 
     /**
@@ -294,9 +254,9 @@ public class CAP
      * @param name The name of the super{@link Command}. See {@link Command#getName()}.
      * @return The super{@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
      */
-    public @NonNull Optional<Command> getSuperCommand(final @Nullable String name)
+    public @NonNull Optional<Command> getTopLevelCommand(final @Nullable String name)
     {
-        return getSuperCommand(name, null);
+        return getTopLevelCommand(name, null);
     }
 
     /**
@@ -306,12 +266,9 @@ public class CAP
      * @param locale The {@link Locale} for which to get the {@link Command}.
      * @return The super{@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
      */
-    public @NonNull Optional<Command> getSuperCommand(final @Nullable String name, final @Nullable Locale locale)
+    public @NonNull Optional<Command> getTopLevelCommand(final @Nullable String name, final @Nullable Locale locale)
     {
-        if (name == null)
-            return Optional.empty();
-        return getFromMap(topLevelCommandMap, Util.valOrDefault(locale, getDefaultLocale()),
-                          getCommandNameCaseCheck(name));
+        return topLevelCommandMap.getCommand(name, locale);
     }
 
     /**
@@ -378,10 +335,9 @@ public class CAP
      * @param locale The {@link Locale} for which to get the {@link Command}.
      * @return All the top-level {@link Command}s
      */
-    public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap(final Locale locale)
+    public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap(final @Nullable Locale locale)
     {
-        final @NonNull Map<@NonNull String, @NonNull Command> map = topLevelCommandMap.get(locale);
-        return map;
+        return topLevelCommandMap.get(locale);
     }
 
     public static class CAPBuilder

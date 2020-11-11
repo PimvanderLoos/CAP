@@ -32,7 +32,7 @@ class CommandListener implements Listener
         try
         {
             final String superCommand = SPACE_PATTERN.split(message, 2)[0];
-            return cap.getSuperCommand(superCommand).isPresent();
+            return cap.getTopLevelCommand(superCommand).isPresent();
         }
         catch (Throwable t)
         {

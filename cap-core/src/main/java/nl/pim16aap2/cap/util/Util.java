@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -165,12 +165,25 @@ public class Util
      * @param lst The list to convert to a String.
      * @return The list represented by a String.
      */
-    public static <T> @NonNull String listToString(final @NonNull List<T> lst)
+    public static <T> @NonNull String listToString(final @NonNull Collection<T> lst)
+    {
+        return listToString(lst, Object::toString);
+    }
+
+    /**
+     * Converts a list to a single String.
+     *
+     * @param lst    The list to convert to a String.
+     * @param mapper the Function to use to convert each to a string.
+     * @return The list represented by a String.
+     */
+    public static <T> @NonNull String listToString(final @NonNull Collection<T> lst,
+                                                   final @NonNull Function<T, String> mapper)
     {
         StringBuilder sb = new StringBuilder();
         for (T arg : lst)
         {
-            sb.append("\"").append(arg.toString()).append("\", ");
+            sb.append("\"").append(mapper.apply(arg)).append("\", ");
         }
         String res = sb.toString();
         if (res.length() > 2)

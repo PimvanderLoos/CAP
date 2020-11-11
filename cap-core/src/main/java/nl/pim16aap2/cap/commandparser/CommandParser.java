@@ -275,15 +275,11 @@ public class CommandParser
                         // If the value is empty, there was no value, so set it to null.
                         foundValue = (foundValue != null && foundValue.isEmpty()) ? null : foundValue;
                     }
-                    System.out.println("foundValue: " + foundValue);
 
                     // If no value is found, or if the value is another argument specification,
                     // we can conclude that this argument did not have a value.
                     if (foundValue == null)
-                    {
-                        System.out.println("THROWING MissingValueException!!!");
                         throw new MissingValueException(command, argument, cap.isDebug());
-                    }
                     value = foundValue;
                 }
             }
