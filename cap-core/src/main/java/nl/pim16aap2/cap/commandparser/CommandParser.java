@@ -164,7 +164,7 @@ public class CommandParser
      * @throws NoPermissionException        If the {@link ICommandSender} does not have permission to use this command.
      *                                      See {@link Command#hasPermission(ICommandSender)}.
      * @throws ValidationFailureException   If the value of an {@link Argument} could not be validated. See {@link
-     *                                      IArgumentValidator#validate(Object)}.
+     *                                      IArgumentValidator#validate(CAP, ICommandSender, Argument, Object)}.
      * @throws IllegalValueException        If the specified value of an {@link Argument} is illegal.
      */
     // TODO: What's the difference between an IllegalValue and a ValidationFailure, exactly?
@@ -198,7 +198,7 @@ public class CommandParser
      * @throws NonExistingArgumentException If one of the specified arguments does not exist.
      * @throws MissingArgumentException     If a required argument was not specified.
      * @throws ValidationFailureException   If the value of an {@link Argument} could not be validated. See {@link
-     *                                      IArgumentValidator#validate(Object)}.
+     *                                      IArgumentValidator#validate(CAP, ICommandSender, Argument, Object)}
      * @throws IllegalValueException        If the specified value of an {@link Argument} is illegal.
      */
     private @Nullable Map<@NonNull String, Argument.IParsedArgument<?>> parseArguments(final @NonNull Command command,
@@ -261,7 +261,8 @@ public class CommandParser
             value = value.trim();
             try
             {
-                final @NonNull Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, cap);
+                final @NonNull Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, cap,
+                                                                                                       commandSender);
 
                 // If the argument was already parsed before, update the value (in case of a repeatable argument,
                 // the value is added to the list).

@@ -1,5 +1,10 @@
 package nl.pim16aap2.cap.argument.validator;
 
+import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.exception.ValidationFailureException;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -13,8 +18,15 @@ public interface IArgumentValidator<T>
     /**
      * Validates input.
      *
-     * @param input The input to validate.
+     * @param cap           The {@link CAP} instance for which to validate the input.
+     * @param commandSender The {@link ICommandSender} for which to validate the input.
+     * @param argument      The {@link Argument} to validate the input for.
+     * @param input         The input to validate.
      * @return True if the input is valid, otherwise false.
+     *
+     * @throws ValidationFailureException When the input variable is invalid.
      */
-    boolean validate(final @Nullable T input);
+    void validate(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                  final @NonNull Argument<T> argument, final @Nullable T input)
+        throws ValidationFailureException;
 }

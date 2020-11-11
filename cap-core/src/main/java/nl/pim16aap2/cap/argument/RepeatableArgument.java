@@ -6,6 +6,7 @@ import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
+import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,14 +32,14 @@ public class RepeatableArgument<T> extends Argument<T>
     }
 
     @Override
-    public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value,
-                                                         final @NonNull CAP cap)
+    public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value, final @NonNull CAP cap,
+                                                         final @NonNull ICommandSender commandSender)
         throws ValidationFailureException
     {
         final ParsedRepeatableArgument<T> ret = new ParsedRepeatableArgument<>();
         if (value != null)
         {
-            final @Nullable T parsed = parseArgument(value, cap);
+            final @Nullable T parsed = parseArgument(value, cap, commandSender);
             if (parsed == null)
                 throw new ValidationFailureException(this, value, cap.isDebug());
             ret.addValue(parsed);

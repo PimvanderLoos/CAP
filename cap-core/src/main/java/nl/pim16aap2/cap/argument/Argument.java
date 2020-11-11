@@ -263,33 +263,43 @@ public class Argument<T>
     /**
      * Parses the input using {@link #parser} and validates it using the {@link #argumentValidator} if it is provided.
      *
-     * @param value The value to parse and validate.
-     * @param cap   The {@link CAP} that requested the argument to be parsed.
+     * @param value         The value to parse and validate.
+     * @param cap           The {@link CAP} that requested the argument to be parsed.
+     * @param commandSender The {@link ICommandSender} for which to parse validate the argument.
      * @return The parsed value.
      *
-     * @throws ValidationFailureException If the value was not valid. See {@link IArgumentValidator#validate(Object)}.
+     * @throws ValidationFailureException If the value was not valid. See {@link IArgumentValidator#validate(CAP,
+     *                                    ICommandSender, Argument, Object)}.
      */
     @Nullable
-    protected T parseArgument(final @NonNull String value, final @NonNull CAP cap)
+    protected T parseArgument(final @NonNull String value, final @NonNull CAP cap,
+                              final @NonNull ICommandSender commandSender)
         throws ValidationFailureException
     {
         final T parsed = parser.parseArgument(value);
 
-        if (argumentValidator != null && !argumentValidator.validate(parsed))
-            throw new ValidationFailureException(this, value, cap.isDebug());
+        if (argumentValidator != null)
+            argumentValidator.validate(cap, commandSender, this, parsed);
 
         return parsed;
     }
 
     /**
-     * Parses the input and stores the result in an {@link IParsedArgument}. See {@link #parseArgument(String, CAP)}.
+     * Parses the input and stores the result in an {@link IParsedArgument}. See {@link #parseArgument(String, CAP,
+     * ICommandSender)}
+     *
+     * @param value         The value to parse and validate.
+     * @param cap           The {@link CAP} that requested the argument to be parsed.
+     * @param commandSender The {@link ICommandSender} for which to parse validate the argument.
+     * @return The parsed argument.
      */
-    public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value, final @NonNull CAP cap)
+    public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value, final @NonNull CAP cap,
+                                                         final @NonNull ICommandSender commandSender)
         throws ValidationFailureException
     {
         if (value == null)
             return new ParsedArgument<>(defaultValue);
-        return new ParsedArgument<>(parseArgument(value, cap));
+        return new ParsedArgument<>(parseArgument(value, cap, commandSender));
     }
 
     /**

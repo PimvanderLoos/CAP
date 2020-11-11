@@ -3,7 +3,11 @@ package nl.pim16aap2.cap.argument.validator.number;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
+import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.exception.ValidationFailureException;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -40,10 +44,11 @@ public class MinimumValidator<T extends Number> implements IArgumentValidator<T>
     }
 
     @Override
-    public boolean validate(final @Nullable T input)
+    public void validate(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                         final @NonNull Argument<T> argument, final @Nullable T input)
+        throws ValidationFailureException
     {
-        if (input == null)
-            return false;
-        return rangeValidator.moreThan.apply(input, rangeValidator.min);
+        if (input == null || !rangeValidator.moreThanMin(input))
+            throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), cap.isDebug());
     }
 }
