@@ -13,10 +13,12 @@ import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextComponent;
 import nl.pim16aap2.cap.text.TextType;
+import nl.pim16aap2.cap.util.LocalizationSpecification;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 // TODO: Allow specifying an annotated class as a command. Parse everything we need from the annotations into
 //       our own Command representation. The class should implement callable, so we can run it.
@@ -27,6 +29,7 @@ import java.util.List;
 //       (as Spigot doesn't have an async tab-complete event).
 //       Perhaps store the command buffer. Then use packets to send the suggestions async ourselves.
 // TODO: Support ResourceBundle.
+// TODO: Allow setting a locale for error logging. This would make the dev's lifes a lot easier (to see what the users are doing).
 // TODO: For the long help, maybe fall back to the summary if no description is available?
 // TODO: Add more unit tests.
 // TODO: ValidationFailureException should get the received value and the instance of the validator.
@@ -102,50 +105,52 @@ public class Main
         System.out.println(textD.add(textC));
         System.out.println(textE.add(textE));
 
-        tabComplete(cap, "big");
-        tabComplete(cap, "add");
-        tabComplete(cap, "bigdoors a");
-        tabComplete(cap, "bigdoors \"a");
-        tabComplete(cap, "bigdoors h");
-        tabComplete(cap, "bigdoors subcomma");
-        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 -");
-        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 ");
-        tabComplete(cap, "bigdoors addowner myDoor --play");
-        tabComplete(cap, "bigdoors addowner mydoor --admin ");
-        tabComplete(cap, "bigdoors addowner \"tes");
-
-        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2");
-        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4");
-        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2");
-        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2 --admin");
-        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -a");
-        tryArgs(cap, "bigdoors addowner myD\\\"oor -p=pim16aap2 -a");
-        tryArgs(cap, "bigdoors addowner \"myD\\\"oor\" -p=pim16aap2 -a");
-        tryArgs(cap, "bigdoors addowner \"myD\\\" oor\" -p=\"pim16\"aap2 -a");
-        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
-        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
-        tryArgs(cap, "bigdoors addowner -h");
-        tryArgs(cap, "bigdoors addowner myDoor -p=\"pim16 \"aap2 -a");
-
-        tryArgs(cap, "bigdoors help addowner");
+//        tabComplete(cap, "big");
+//        tabComplete(cap, "add");
+//        tabComplete(cap, "bigdoors a");
+//        tabComplete(cap, "bigdoors \"a");
+//        tabComplete(cap, "bigdoors h");
+//        tabComplete(cap, "bigdoors subcomma");
+//        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 -");
+//        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 ");
+//        tabComplete(cap, "bigdoors addowner myDoor --play");
+//        tabComplete(cap, "bigdoors addowner mydoor --admin ");
+//        tabComplete(cap, "bigdoors addowner \"tes");
+//
+//        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2");
+//        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4");
+//        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2");
+//        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2 --admin");
+//        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -a");
+//        tryArgs(cap, "bigdoors addowner myD\\\"oor -p=pim16aap2 -a");
+//        tryArgs(cap, "bigdoors addowner \"myD\\\"oor\" -p=pim16aap2 -a");
+//        tryArgs(cap, "bigdoors addowner \"myD\\\" oor\" -p=\"pim16\"aap2 -a");
+//        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
+//        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
+//        tryArgs(cap, "bigdoors addowner -h");
+//        tryArgs(cap, "bigdoors addowner myDoor -p=\"pim16 \"aap2 -a");
+//
+//        tryArgs(cap, "bigdoors help addowner");
         tryArgs(cap, "bigdoors help");
-        tryArgs(cap, "bigdoors help 1");
-        tryArgs(cap, "bigdoors help 2");
-        tryArgs(cap, "bigdoors help 6");
-        tryArgs(cap, "bigdoors help");
-        tryArgs(cap, "bigdoors addowner");
-        tryArgs(cap, "bigdoors");
-        tryArgs(cap, "bigdoors 1");
-        tryArgs(cap, "bigdoors 2");
-
-        tryArgs(cap, "bigdoors required my_door 12");
-//        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
+//        tryArgs(cap, "bigdoors help 1");
+//        tryArgs(cap, "bigdoors help 2");
+//        tryArgs(cap, "bigdoors help 6");
+//        tryArgs(cap, "bigdoors help");
+//        tryArgs(cap, "bigdoors addowner");
+//        tryArgs(cap, "bigdoors");
+//        tryArgs(cap, "bigdoors 1");
+//        tryArgs(cap, "bigdoors 2");
+//
+//        tryArgs(cap, "bigdoors required my_door 12");
+////        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
     }
 
     private static CAP initCommandManager()
     {
         final CAP cap = CAP
             .builder()
+            .localizationSpecification(new LocalizationSpecification("CAPBundle",
+                                                                     Locale.getDefault(), new Locale("nl", "NL")))
             .separator('=')
             .debug(true)
             .exceptionHandler(ExceptionHandler.getDefault().toBuilder()

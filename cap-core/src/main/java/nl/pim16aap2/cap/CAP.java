@@ -1,12 +1,9 @@
 package nl.pim16aap2.cap;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandparser.CommandParser;
@@ -15,16 +12,19 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
+import nl.pim16aap2.cap.util.LocalizationSpecification;
 import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.TabCompletionCache;
+import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -33,39 +33,36 @@ import java.util.function.Supplier;
  *
  * @author Pim
  */
-@SuperBuilder(toBuilder = true)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CAP
 {
-    // Ideally, we wouldn't construct this at all if not needed, but Lombok won't allow me to use a constructor :(
+    @Getter
+    private final @NonNull Locale defaultLocale;
+
     private final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
 
     /**
      * The map containing all registered commands, with their names as key.
      */
-    protected final @NonNull Map<@NonNull String, @NonNull Command> commandMap = new HashMap<>();
+    protected final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull Command>> commandMap = new HashMap<>();
 
     /**
      * The map containing all registered top-level commands (i.e. commands without a supercommand of their own), with
      * their names as key.
      */
-    @Getter
-    protected final @NonNull Map<@NonNull String, @NonNull Command> topLevelCommandMap = new HashMap<>();
+    protected final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull Command>> topLevelCommandMap = new HashMap<>();
 
     /**
      * The {@link DefaultHelpCommandRenderer} to use to render help messages.
      */
     @Getter
-    @Builder.Default
-    protected final @NonNull DefaultHelpCommandRenderer helpCommandRenderer = DefaultHelpCommandRenderer.getDefault();
+    protected final @NonNull DefaultHelpCommandRenderer helpCommandRenderer;
 
     /**
      * Whether or not to cache tab-completion suggestions using a {@link TabCompletionCache}.
      */
     @Getter
     @Setter
-    @Builder.Default
-    protected boolean cacheTabCompletionSuggestions = true;
+    protected boolean cacheTabCompletionSuggestions;
 
     /**
      * The {@link ExceptionHandler} that is used to handle CAP-related exceptions.
@@ -73,16 +70,14 @@ public class CAP
      * When null, all exceptions will be rethrown as {@link RuntimeException}s.
      */
     @Getter
-    @Builder.Default
-    protected final @Nullable ExceptionHandler exceptionHandler = ExceptionHandler.getDefault();
+    protected final @Nullable ExceptionHandler exceptionHandler;
 
     /**
      * The separator between a free argument's name and it's value. In the case of "--player=pim16aap2", this would be
      * "=". Default: " ".
      */
     @Getter
-    @Builder.Default
-    protected final char separator = ' ';
+    protected final char separator;
 
     /**
      * Whether or not to enable debug mode. In debug mode, {@link CAPException}s will generate stacktraces, when it is
@@ -90,8 +85,7 @@ public class CAP
      */
     @Getter
     @Setter
-    @Builder.Default
-    protected boolean debug = false;
+    protected boolean debug;
 
     /**
      * Whether to enable case sensitivity. Default: False.
@@ -101,8 +95,57 @@ public class CAP
      * Note that this only applies to command and argument names, not argument values.
      */
     @Getter
-    @Builder.Default
-    protected final boolean caseSensitive = false;
+    protected final boolean caseSensitive;
+
+    protected final @NonNull Locale[] locales;
+
+    /**
+     * The localization to use. When set to null, the raw values will be used instead.
+     */
+    protected final @Nullable LocalizationSpecification localizationSpecification;
+
+    @Builder(toBuilder = true)
+    protected CAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer,
+                  final @Nullable Boolean cacheTabCompletionSuggestions,
+                  final @Nullable ExceptionHandler exceptionHandler, final @Nullable Character separator,
+                  final boolean debug, final boolean caseSensitive,
+                  final @Nullable LocalizationSpecification localizationSpecification)
+    {
+        this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
+        this.cacheTabCompletionSuggestions = Util.valOrDefault(cacheTabCompletionSuggestions, true);
+        this.exceptionHandler = exceptionHandler;
+        this.separator = Util.valOrDefault(separator, ' ');
+        this.debug = debug;
+        this.caseSensitive = caseSensitive;
+        this.localizationSpecification = localizationSpecification;
+
+        if (localizationSpecification == null)
+        {
+            defaultLocale = Locale.ENGLISH;
+            locales = new Locale[]{getDefaultLocale()};
+//            System.out.println("0: Locale[0] " + locales[0]);
+        }
+        else
+        {
+            locales = localizationSpecification.getLocales();
+            defaultLocale = localizationSpecification.getDefaultLocale();
+//            System.out.println("1: Locale[0] " + locales[0]);
+        }
+
+        setupLocales();
+    }
+
+    /**
+     * Instantiates the maps for all the registered {@link #locales}.
+     */
+    private void setupLocales()
+    {
+        for (final @NonNull Locale locale : locales)
+        {
+            commandMap.put(locale, new HashMap<>());
+            topLevelCommandMap.put(locale, new HashMap<>());
+        }
+    }
 
     /**
      * Gets a new instance of this {@link CAP} using the default values.
@@ -114,6 +157,27 @@ public class CAP
     public static @NonNull CAP getDefault()
     {
         return CAP.builder().build();
+    }
+
+    /**
+     * Gets the translated message for a locale.
+     * <p>
+     * If {@link #localizationSpecification} is not available, the key itself is used.
+     * <p>
+     * If the value for the key cannot be found, it returns the key as well.
+     *
+     * @param key    The key.
+     * @param locale The locale to use. Leave null to use the {@link #getDefaultLocale()}.
+     * @return The localized message, if it can be found.
+     */
+    public @NonNull String getMessage(final @NonNull String key, @Nullable Locale locale)
+    {
+        if (localizationSpecification == null)
+            return key;
+        locale = Util.valOrDefault(locale, Locale.getDefault());
+        final @NonNull ResourceBundle bundle = ResourceBundle
+            .getBundle(localizationSpecification.getBaseName(), locale);
+        return bundle.containsKey(key) ? bundle.getString(key) : key;
     }
 
     /**
@@ -132,8 +196,13 @@ public class CAP
         }
         catch (CAPException exception)
         {
+            System.out.println("CAUGHT CAPEXCEPTION!!");
             if (exceptionHandler == null)
+            {
+                System.out.println("RETHROWING EXCEPTION AS RuntimeException!!");
                 throw new RuntimeException(exception);
+            }
+            System.out.println("HANDLING Exception!!");
             exceptionHandler.handleException(commandSender, exception);
         }
         return Optional.empty();
@@ -147,10 +216,25 @@ public class CAP
      */
     public @NonNull CAP addCommand(final @NonNull Command command)
     {
-        commandMap.put(getCommandNameCaseCheck(command.getName()), command);
-        if (!command.getSuperCommand().isPresent())
-            topLevelCommandMap.put(getCommandNameCaseCheck(command.getName()), command);
+        for (final @NonNull Locale locale : locales)
+        {
+//            System.out.println("Processing locale: " + locale);
+            addCommand(command, locale);
+        }
         return this;
+    }
+
+    /**
+     * Adds the provided command for every locale.
+     *
+     * @param command The {@link Command} to register.
+     */
+    private void addCommand(final @NonNull Command command, final @NonNull Locale locale)
+    {
+        final @NonNull String name = getCommandNameCaseCheck(getMessage(command.getName(), locale));
+        commandMap.get(locale).put(name, command);
+        if (!command.getSuperCommand().isPresent())
+            topLevelCommandMap.get(locale).put(name, command);
     }
 
     /**
@@ -170,39 +254,64 @@ public class CAP
     }
 
     /**
-     * Gets a {@link Command} from its name.
+     * Gets a {@link Command} from its name for the {@link #getDefaultLocale()}.
      *
      * @param name The name of the {@link Command}. See {@link Command#getName()}.
      * @return The {@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
      */
     public @NonNull Optional<Command> getCommand(final @Nullable String name)
     {
-        if (name == null)
-            return Optional.empty();
-        return Optional.ofNullable(commandMap.get(getCommandNameCaseCheck(name)));
+        return getCommand(name, getDefaultLocale());
     }
 
     /**
-     * Gets a super{@link Command} from its name (i.e. a {@link Command} without any supers of its own).
+     * Gets a {@link Command} from its name.
+     *
+     * @param name   The name of the {@link Command}. See {@link Command#getName()}.
+     * @param locale The {@link Locale} for which to get the {@link Command}.
+     * @return The {@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
+     */
+    public @NonNull Optional<Command> getCommand(final @Nullable String name, @Nullable Locale locale)
+    {
+        locale = Util.valOrDefault(locale, getDefaultLocale());
+        if (name == null)
+            return Optional.empty();
+
+        return getFromMap(commandMap, Util.valOrDefault(locale, getDefaultLocale()), getCommandNameCaseCheck(name));
+    }
+
+    private @NonNull <T> Optional<T> getFromMap(
+        final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull T>> map,
+        final @NonNull Locale locale, final @NonNull String key)
+    {
+        return Optional.ofNullable(map.get(locale)).map(entry -> entry.get(key));
+    }
+
+    /**
+     * Gets a super{@link Command} from its name (i.e. a {@link Command} without any supers of its own) for the {@link
+     * #getDefaultLocale()}.
      *
      * @param name The name of the super{@link Command}. See {@link Command#getName()}.
      * @return The super{@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
      */
     public @NonNull Optional<Command> getSuperCommand(final @Nullable String name)
     {
-        if (name == null)
-            return Optional.empty();
-        return Optional.ofNullable(topLevelCommandMap.get(getCommandNameCaseCheck(name)));
+        return getSuperCommand(name, null);
     }
 
     /**
-     * Gets all the {@link Command}s registered in this {@link CAP}.
+     * Gets a super{@link Command} from its name (i.e. a {@link Command} without any supers of its own).
      *
-     * @return All the {@link Command}s registered in this {@link CAP}.
+     * @param name   The name of the super{@link Command}. See {@link Command#getName()}.
+     * @param locale The {@link Locale} for which to get the {@link Command}.
+     * @return The super{@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
      */
-    public @NonNull Collection<@NonNull Command> getCommands()
+    public @NonNull Optional<Command> getSuperCommand(final @Nullable String name, final @Nullable Locale locale)
     {
-        return commandMap.values();
+        if (name == null)
+            return Optional.empty();
+        return getFromMap(topLevelCommandMap, Util.valOrDefault(locale, getDefaultLocale()),
+                          getCommandNameCaseCheck(name));
     }
 
     /**
@@ -251,5 +360,38 @@ public class CAP
         return tabCompletionCache.getTabCompleteOptionsAsync(commandSender, suggester.getArgs(),
                                                              lastArgument.first + lastArgument.second, supplier,
                                                              suggester.isOpenEnded());
+    }
+
+    /**
+     * Gets all the top-level {@link Command}s for the provided {@link Locale} for the {@link #getDefaultLocale()}.
+     *
+     * @return All the top-level {@link Command}s
+     */
+    public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap()
+    {
+        return getTopLevelCommandMap(getDefaultLocale());
+    }
+
+    /**
+     * Gets all the top-level {@link Command}s for the provided {@link Locale}.
+     *
+     * @param locale The {@link Locale} for which to get the {@link Command}.
+     * @return All the top-level {@link Command}s
+     */
+    public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap(final @NonNull Locale locale)
+    {
+        final @NonNull Map<@NonNull String, @NonNull Command> map = topLevelCommandMap.get(locale);
+        return map;
+    }
+
+    public static class CAPBuilder
+    {
+        private DefaultHelpCommandRenderer helpCommandRenderer;
+        private Boolean cacheTabCompletionSuggestions;
+        private ExceptionHandler exceptionHandler = ExceptionHandler.getDefault();
+        private Character separator;
+        private boolean debug;
+        private boolean caseSensitive;
+        private LocalizationSpecification localizationSpecification;
     }
 }

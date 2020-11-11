@@ -86,12 +86,19 @@ public class DefaultHelpCommand extends Command
                                  final @NonNull CAP cap,
                                  final @Nullable IHelpCommandRenderer helpCommandRenderer)
     {
-        super(Util.valOrDefault(shortName, "help"), description, descriptionSupplier, summary, summarySupplier, header,
+//        super(Util.valOrDefault(shortName, "default.helpCommand.shortName"), description, descriptionSupplier, summary,
+        super(Util.valOrDefault(shortName, "help"), description, descriptionSupplier, summary,
+              summarySupplier, header,
               headerSupplier, sectionTitle, SUB_COMMANDS, HELP_COMMAND, ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT,
               ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
               Collections.singletonList(new StringArgument()
-                                            .getOptionalPositional().shortName("page/command")
-                                            .summary("A page number of the name of a command.").longName("help")
+                                            .getOptionalPositional()
+//                                            .shortName("default.helpCommand.helpArgument.shortName")
+//                                            .summary("default.helpCommand.helpArgument.summary")
+//                                            .identifier("helpArg")
+                                            .shortName("page/command")
+                                            .summary("A page number of the name of a command.")
+                                            .identifier("helpArg")
                                             .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
                                             .build()), VIRTUAL, cap, ((commandSender, command) -> true));
 
@@ -183,9 +190,8 @@ public class DefaultHelpCommand extends Command
     {
         return DefaultHelpCommand
             .helpCommandBuilder().cap(cap)
-            .summary("Displays help information for this plugin and specific commands.")
-            .header("When no command or a page number is given, the usage help for the main command is displayed.\n" +
-                        "If a command is specified, the help for that command is shown.")
+            .summary("default.helpCommand.summary")
+            .header("default.helpCommand.header")
             .build();
     }
 
@@ -242,6 +248,6 @@ public class DefaultHelpCommand extends Command
 
         commandSender.sendMessage(renderHelpText(commandSender, commandSender.getColorScheme(), superCommand,
                                                  helpCommand.helpCommandRenderer,
-                                                 commandResult.getParsedArgument("page/command")));
+                                                 commandResult.getParsedArgument("helpArg")));
     }
 }

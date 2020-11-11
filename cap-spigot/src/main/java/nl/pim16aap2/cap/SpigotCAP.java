@@ -17,6 +17,7 @@ import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.SpigotColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextType;
+import nl.pim16aap2.cap.util.LocalizationSpecification;
 import nl.pim16aap2.cap.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -56,12 +57,13 @@ public class SpigotCAP extends CAP
                         final @NonNull JavaPlugin plugin, final @Nullable ColorScheme colorScheme,
                         final @Nullable ExceptionHandler exceptionHandler,
                         final @Nullable Character separator, final @Nullable Boolean cacheTabCompletionSuggestions,
-                        final boolean caseSensitive)
+                        final boolean caseSensitive,
+                        final @Nullable LocalizationSpecification localizationSpecification)
     {
         super(Util.valOrDefault(helpCommandRenderer, SpigotHelpCommandRenderer.getDefault()),
               Util.valOrDefault(cacheTabCompletionSuggestions, true),
               Util.valOrDefault(exceptionHandler, ExceptionHandler.getDefault()),
-              Util.valOrDefault(separator, ' '), debug, caseSensitive);
+              Util.valOrDefault(separator, ' '), debug, caseSensitive, localizationSpecification);
 
         this.plugin = plugin;
         this.colorScheme = Util.valOrDefault(colorScheme, generateColorScheme());
