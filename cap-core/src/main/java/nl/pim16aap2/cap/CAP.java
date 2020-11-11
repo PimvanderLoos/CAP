@@ -20,7 +20,6 @@ import nl.pim16aap2.cap.util.TabCompletionCache;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.EOFException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -136,11 +135,6 @@ public class CAP
             if (exceptionHandler == null)
                 throw new RuntimeException(exception);
             exceptionHandler.handleException(commandSender, exception);
-        }
-        // TODO: Use our own exception
-        catch (EOFException exception)
-        {
-            throw new RuntimeException(exception);
         }
         return Optional.empty();
     }

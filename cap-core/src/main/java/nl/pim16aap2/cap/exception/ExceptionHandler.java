@@ -98,6 +98,7 @@ public class ExceptionHandler
             .handler(NonExistingArgumentException.class, ExceptionHandler::handleNonExistingArgumentException)
             .handler(MissingArgumentException.class, ExceptionHandler::handleMissingArgumentException)
             .handler(IllegalValueException.class, ExceptionHandler::handleIllegalValueException)
+            .handler(UnmatchedQuoteException.class, ExceptionHandler::handleUnmatchedQuoteException)
             .build();
     }
 
@@ -144,6 +145,12 @@ public class ExceptionHandler
     {
         sendError(commandSender, "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" +
             e.getCommand().getName() + "\"");
+    }
+
+    public static void handleUnmatchedQuoteException(final @NonNull ICommandSender commandSender,
+                                                     final @NonNull UnmatchedQuoteException e)
+    {
+        sendError(commandSender, "Incomplete input! Make sure all quotation marks are matched!");
     }
 
     // Delombok:

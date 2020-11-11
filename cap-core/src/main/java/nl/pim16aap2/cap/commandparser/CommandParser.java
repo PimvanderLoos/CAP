@@ -14,11 +14,11 @@ import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.MissingArgumentException;
 import nl.pim16aap2.cap.exception.NoPermissionException;
 import nl.pim16aap2.cap.exception.NonExistingArgumentException;
+import nl.pim16aap2.cap.exception.UnmatchedQuoteException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.EOFException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,12 +102,12 @@ public class CommandParser
      */
     public CommandParser(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
                          final @NonNull String input, final char separator)
-        throws EOFException
+        throws UnmatchedQuoteException
     {
         this(cap, commandSender, new CommandLineInput(input), separator);
 
         if (!this.input.isCompleteQuotationMarks())
-            throw new EOFException();
+            throw new UnmatchedQuoteException(input, cap.isDebug());
     }
 
     /**
