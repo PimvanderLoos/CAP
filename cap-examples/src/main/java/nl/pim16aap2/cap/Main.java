@@ -42,8 +42,6 @@ import java.util.List;
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 // TODO: For the Spigot platform, we should probably ensure that the package isn't the default one to avoid
 //       people not shading this dependency properly.
-// TODO: IllegalValueException is only used for OOB page values, so remove that once the dynamic range validator is
-//       implemented.
 
 /*
  * Unit tests:
