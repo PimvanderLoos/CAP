@@ -123,13 +123,11 @@ public class CAP
         {
             defaultLocale = Locale.ENGLISH;
             locales = new Locale[]{getDefaultLocale()};
-//            System.out.println("0: Locale[0] " + locales[0]);
         }
         else
         {
             locales = localizationSpecification.getLocales();
             defaultLocale = localizationSpecification.getDefaultLocale();
-//            System.out.println("1: Locale[0] " + locales[0]);
         }
 
         setupLocales();
@@ -196,13 +194,8 @@ public class CAP
         }
         catch (CAPException exception)
         {
-            System.out.println("CAUGHT CAPEXCEPTION!!");
             if (exceptionHandler == null)
-            {
-                System.out.println("RETHROWING EXCEPTION AS RuntimeException!!");
                 throw new RuntimeException(exception);
-            }
-            System.out.println("HANDLING Exception!!");
             exceptionHandler.handleException(commandSender, exception);
         }
         return Optional.empty();
@@ -217,10 +210,7 @@ public class CAP
     public @NonNull CAP addCommand(final @NonNull Command command)
     {
         for (final @NonNull Locale locale : locales)
-        {
-//            System.out.println("Processing locale: " + locale);
             addCommand(command, locale);
-        }
         return this;
     }
 
