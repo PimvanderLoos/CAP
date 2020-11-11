@@ -2,6 +2,7 @@ package nl.pim16aap2.cap;
 
 import lombok.NonNull;
 import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
@@ -17,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+// TODO: Allow specifying an annotated class as a command. Parse everything we need from the annotations into
+//       our own Command representation. The class should implement callable, so we can run it.
+//       The annotations can be used to instantiate the values properly.
 // TODO: Make sure that async permission checking is allowed for Spigot. Currently, when using async tab-completion
 //       suggestions generation, the permissions are checked asynchronously. That may or may not be problematic.
 // TODO: Let the Spigot module load async-generated tab-completion suggestions into the cache for synchronized usage
@@ -42,14 +46,6 @@ import java.util.List;
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 // TODO: For the Spigot platform, we should probably ensure that the package isn't the default one to avoid
 //       people not shading this dependency properly.
-
-
-// TODO: Make sure that positional arguments fed in the wrong order gets handled gracefully
-//       (there are probably going to be some casting issues).
-//       Also, be more strict in the positional argument parsing. All positional arguments must come before any free ones.
-//       Currently, the positional arguments are counted separately, but this breaks the tab completion.
-// TODO: Make sure that autocomplete works if all the current string is empty and all positional arguments
-//       have already been filled (just return args list).
 
 /*
  * Unit tests:
@@ -147,6 +143,9 @@ public class Main
         tryArgs(cap, "bigdoors");
         tryArgs(cap, "bigdoors 1");
         tryArgs(cap, "bigdoors 2");
+
+        tryArgs(cap, "bigdoors required my_door 12");
+//        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
     }
 
     private static CAP initCommandManager()
@@ -238,6 +237,31 @@ public class Main
                                  commandResult.getParsedArgument("a")).runCommand())
             .build();
 
+        final Command required = Command
+            .commandBuilder()
+            .cap(cap)
+            .name("required")
+            .addDefaultHelpArgument(true)
+            .argument(new StringArgument()
+                          .getRequired()
+                          .shortName("doorID")
+                          .identifier("ID")
+                          .summary("The name or UID of the door")
+                          .tabCompleteFunction(request -> Arrays.asList("test a", "test_b"))
+                          .build())
+            .argument(new IntegerArgument()
+                          .getRequired()
+                          .shortName("doorUID")
+                          .identifier("UID")
+                          .summary("The UID of the door")
+                          .tabCompleteFunction(request -> Arrays.asList("0", "1", "1", "2", "3", "5", "8", "13", "21"))
+                          .build())
+            .commandExecutor(
+                commandResult -> new GenericCommand("required", String
+                    .format("ID: \"%s\", UID: %d", commandResult.getParsedArgument("ID"),
+                            commandResult.<Integer>getParsedArgument("UID"))).runCommand())
+            .build();
+
         final int subCommandCount = 20;
         final List<Command> subcommands = new ArrayList<>(subCommandCount);
         for (int idx = 0; idx < subCommandCount; ++idx)
@@ -288,13 +312,14 @@ public class Main
                 .toString())
 
             .subCommand(addOwner)
+            .subCommand(required)
             .subCommands(subcommands)
             .virtual(true)
             .build();
 
         subcommands.forEach(cap::addCommand);
         subsubcommands.forEach(cap::addCommand);
-        cap.addCommand(addOwner).addCommand(bigdoors);
+        cap.addCommand(addOwner).addCommand(bigdoors).addCommand(required);
 
         return cap;
     }
