@@ -161,7 +161,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         else
             text.add("<<", TextType.COMMAND);
 
-        text.add(String.format("----- Page (%2d / %2d) ----", page, pageCount), TextType.REGULAR_TEXT);
+        text.add(String.format("----- Page (%2d / %2d) -----", page, pageCount), TextType.REGULAR_TEXT);
 
         if (page == pageCount)
             text.add("--", TextType.REGULAR_TEXT);
