@@ -153,10 +153,10 @@ public class Main
                                                        (sender, ex) -> ex.printStackTrace())
                                               .handler(nl.pim16aap2.cap.exception.IllegalValueException.class,
                                                        (sender, ex) -> ex.printStackTrace())
-                                              .handler(nl.pim16aap2.cap.exception.CommandNotFoundException.class,
-                                                       (sender, ex) -> ex.printStackTrace())
-                                              .handler(nl.pim16aap2.cap.exception.MissingArgumentException.class,
-                                                       (sender, ex) -> ex.printStackTrace())
+//                                              .handler(nl.pim16aap2.cap.exception.CommandNotFoundException.class,
+//                                                       (sender, ex) -> ex.printStackTrace())
+//                                              .handler(nl.pim16aap2.cap.exception.MissingArgumentException.class,
+//                                                       (sender, ex) -> ex.printStackTrace())
                                               .handler(nl.pim16aap2.cap.exception.NoPermissionException.class,
                                                        (sender, ex) -> ex.printStackTrace())
 //                                              .handler(nl.pim16aap2.cap.exception.ValidationFailureException.class,

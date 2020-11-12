@@ -136,9 +136,7 @@ public class ExceptionHandler
     public static void handleMissingArgumentException(final @NonNull ICommandSender commandSender,
                                                       final @NonNull MissingArgumentException e)
     {
-        sendError(commandSender, "Failed to find value for argument: \"" +
-            e.getMissingArgument().getIdentifier() + "\" for command: \"" +
-            e.getCommand().getName(commandSender.getLocale()) + "\"");
+        sendError(commandSender, e.getLocalizedMessage());
     }
 
     public static void handleIllegalValueException(final @NonNull ICommandSender commandSender,

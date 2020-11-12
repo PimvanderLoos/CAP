@@ -327,7 +327,12 @@ public class CommandParser
 
             // Ensure every required argument is present.
             if (argument.isRequired() && missing)
-                throw new MissingArgumentException(command, argument, cap.isDebug());
+            {
+                final @NonNull String localizedMessage =
+                    MessageFormat.format(cap.getMessage("error.exception.missingArgument", commandSender.getLocale()),
+                                         argument.getLongName(cap, commandSender.getLocale()));
+                throw new MissingArgumentException(command, argument, localizedMessage, cap.isDebug());
+            }
 
             // Add default values for missing optional parameters.
             if (missing)
