@@ -1,6 +1,5 @@
 package nl.pim16aap2.cap.command;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
@@ -20,35 +19,34 @@ import java.util.Optional;
  *
  * @author Pim
  */
-@Getter
 public class ArgumentManager
 {
     /**
      * An (unsorted) map containing all {@link Argument}s, with their {@link Argument#getIdentifier()} as key.
      */
-//    protected final @NonNull Map<@NonNull String, @NonNull Argument<?>> argumentsMap;
     protected final @NonNull ArgumentMap argumentsMap;
 
     /**
      * A list of all {@link Argument}s, sorted by {@link #COMPARATOR}.
      */
-    @Getter(AccessLevel.PRIVATE)
     protected final @NonNull List<@NonNull Argument<?>> argumentsList;
 
     /**
      * A list of required {@link Argument}s.
      */
+    @Getter
     protected final @NonNull List<@NonNull Argument<?>> requiredArguments = new ArrayList<>(0);
-//    protected final @NonNull ArgumentMap requiredArguments;
 
     /**
      * A list of positional {@link Argument}s. The position depends on insertion order.
      */
+    @Getter
     protected final @NonNull List<@NonNull Argument<?>> positionalArguments = new ArrayList<>(0);
 
     /**
      * A list of optional {@link Argument}s.
      */
+    @Getter
     protected final @NonNull ArrayList<@NonNull Argument<?>> optionalArguments = new ArrayList<>(0);
 
     /**

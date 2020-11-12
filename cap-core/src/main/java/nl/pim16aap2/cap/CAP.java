@@ -161,9 +161,9 @@ public class CAP
      */
     public @NonNull String getMessage(final @NonNull String key, @Nullable Locale locale)
     {
-        if (localizationSpecification == null)
+        if (localizationSpecification == null || defaultLocale == null)
             return key;
-        locale = Util.valOrDefault(locale, Locale.getDefault());
+        locale = Util.valOrDefault(locale, defaultLocale);
         final @NonNull ResourceBundle bundle = ResourceBundle
             .getBundle(localizationSpecification.getBaseName(), locale);
         return bundle.containsKey(key) ? bundle.getString(key) : key;

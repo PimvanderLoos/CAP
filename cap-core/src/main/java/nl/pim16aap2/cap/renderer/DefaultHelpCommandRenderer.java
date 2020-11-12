@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -79,13 +80,11 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      *                                  Default = False.
      * @param argumentRenderer          The {@link IArgumentRenderer} renderer that will be used to render arguments.
      *                                  When this value is not provided, {@link DefaultArgumentRenderer} will be used.
-     * @param startAt1                  Whether to start counting pages at 0 (<it>false</it>) or 1 (<it>true</it>).
-     *                                  Default = true.
      */
     protected DefaultHelpCommandRenderer(final int pageSize, final int firstPageSize, final boolean displayHeader,
                                          final @NonNull String descriptionIndent,
                                          final boolean displayArgumentsForSimple,
-                                         final @NonNull IArgumentRenderer argumentRenderer, final boolean startAt1)
+                                         final @NonNull IArgumentRenderer argumentRenderer)
     {
         this.pageSize = pageSize;
         this.firstPageSize = firstPageSize;
@@ -230,6 +229,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (!command.hasPermission(commandSender))
             return new Text(colorScheme);
 
+        final @NonNull CAP cap = command.getCap();
+
         final @NonNull Text text = new Text(colorScheme);
         renderHelpHeader(command, text);
         text.add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
@@ -254,8 +255,10 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      */
     protected @NonNull String getBaseSuperCommand(final @NonNull Optional<Command> command)
     {
-        return command.map(value -> getBaseSuperCommand(value.getSuperCommand()) + value.getName() + " ")
-                      .orElse(COMMAND_PREFIX);
+        return command.map(
+            value ->
+                getBaseSuperCommand(value.getSuperCommand()) + value.getCap().getMessage(value.getName(), null) + " "
+        ).orElse(COMMAND_PREFIX);
     }
 
     /**
@@ -298,10 +301,9 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
             return text;
 
         if (displayHeader && !command.getHeader(commandSender).equals(""))
-            text.add(command.getHeader(commandSender), TextType.HEADER).add("\n");
+            text.add(command.getCap().getMessage(command.getHeader(commandSender), null), TextType.HEADER).add("\n");
 
-        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command),
-                       command, firstPageSize, 0);
+        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command), command, firstPageSize, 0);
 
         return text;
     }
@@ -353,7 +355,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 
         // The current command has to be appended to the super commands, because the
         // current command is the super command of all its sub commands (by definition).
-        final String newSuperCommands = superCommands + command.getName() + " ";
+        final String newSuperCommands = superCommands + command.getCap().getMessage(command.getName(), null) + " ";
 
         for (final Command subCommand : command.getSubCommands())
         {
@@ -383,11 +385,12 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
                                  final @NonNull Text text, final @NonNull Command command,
                                  final @NonNull String superCommands)
     {
-        text.add(superCommands + command.getName(), TextType.COMMAND);
+        text.add(superCommands + command.getCap().getMessage(command.getName(), null), TextType.COMMAND);
         renderArgumentsShort(colorScheme, text, command);
 
         if (!command.getSummary(commandSender).equals(""))
-            text.add("\n").add(descriptionIndent).add(command.getSummary(commandSender), TextType.SUMMARY);
+            text.add("\n").add(descriptionIndent)
+                .add(command.getCap().getMessage(command.getSummary(commandSender), null), TextType.SUMMARY);
     }
 
     /**

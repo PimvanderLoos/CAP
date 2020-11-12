@@ -134,10 +134,20 @@ public class Main
 //        tryArgs(cap, "bigdoors addowner myDoor -p=\"pim16 \"aap2 -a");
 //
 //        tryArgs(cap, "bigdoors help addowner");
-        tryArgs(cap, "bigdoors help");
+//        tryArgs(cap, "bigdoors help");
 //        tryArgs(cap, "bigdoors help 1");
 //        tryArgs(cap, "bigdoors help 2");
+//        tryArgs(cap, "bigdoors help 3");
+//        tryArgs(cap, "bigdoors help 4");
+//        tryArgs(cap, "bigdoors help 5");
 //        tryArgs(cap, "bigdoors help 6");
+        tryArgs(cap, "grotedeuren help");
+        tryArgs(cap, "grotedeuren help 1");
+        tryArgs(cap, "grotedeuren help 2");
+        tryArgs(cap, "grotedeuren help 3");
+        tryArgs(cap, "grotedeuren help 4");
+        tryArgs(cap, "grotedeuren help 5");
+        tryArgs(cap, "grotedeuren help 6");
 //        tryArgs(cap, "bigdoors help");
 //        tryArgs(cap, "bigdoors addowner");
 //        tryArgs(cap, "bigdoors");
@@ -150,10 +160,13 @@ public class Main
 
     private static CAP initCommandManager()
     {
+        final @NonNull Locale dutch = new Locale("nl", "NL");
+        final @NonNull Locale english = Locale.US;
+
         final CAP cap = CAP
             .builder()
-            .localizationSpecification(new LocalizationSpecification("CAPBundle",
-                                                                     Locale.getDefault(), new Locale("nl", "NL")))
+//            .localizationSpecification(new LocalizationSpecification("CAPExample", english, dutch))
+            .localizationSpecification(new LocalizationSpecification(dutch, "CAPExample", english, dutch))
             .separator('=')
             .debug(true)
             .exceptionHandler(ExceptionHandler.getDefault().toBuilder()
@@ -180,31 +193,41 @@ public class Main
                                      .build())
             .build();
 
-        final int subsubCommandCount = 5;
-        final List<Command> subsubcommands = new ArrayList<>(subsubCommandCount);
-        for (int idx = 0; idx < subsubCommandCount; ++idx)
+        final int subSubCommandCount = 5;
+        final List<Command> subsubcommands = new ArrayList<>(subSubCommandCount);
+        for (int idx = 0; idx < subSubCommandCount; ++idx)
         {
-            final String command = "subsubcommand_" + idx;
+            final String base = "example.sub.sub.command." + idx;
+            final String commandName = base + ".name";
+
             final Command generic = Command
-                .commandBuilder().name(command)
+                .commandBuilder().name(commandName)
                 .addDefaultHelpArgument(true)
                 .cap(cap)
-                .summary("This is the summary for subsubcommand_" + idx)
+                .summary(base + ".summary")
                 .argument(
                     new StringArgument().getRequired().shortName("value").summary("random value").build())
                 .commandExecutor(commandResult ->
-                                     new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
+                                     new GenericCommand(commandName, commandResult.getParsedArgument("value"))
+                                         .runCommand())
                 .build();
             subsubcommands.add(generic);
         }
 
+//        System.out.println("Addowner name en: " + ResourceBundle.getBundle("CAPExample", english)
+//                                                                .getString("example.command.addowner.name"));
+//        System.out.println("Addowner name nl: " + ResourceBundle.getBundle("CAPExample", dutch)
+//                                                                .getString("example.command.addowner.name"));
+        System.out.println("\n================================");
+        System.out.println("Addowner name DEFAULT: " + cap.getMessage("example.command.addowner.name", null));
+
         final Command addOwner = Command
             .commandBuilder()
             .cap(cap)
-            .name("addowner")
+            .name("example.command.addowner.name")
             .addDefaultHelpArgument(true)
-            .description("Add 1 or more players or groups of players as owners of a door.")
-            .summary("Add another owner to a door.")
+            .description("example.command.addowner.description")
+            .summary("example.command.addowner.summary")
             .subCommands(subsubcommands)
             .permission(((commandSender, command) -> true))
             .argument(new StringArgument()
@@ -289,7 +312,7 @@ public class Main
             .commandBuilder()
             .cap(cap)
             .addDefaultHelpSubCommand(true)
-            .name("bigdoors")
+            .name("example.command.bigdoors")
             .headerSupplier(commandSender -> new Text(commandSender.getColorScheme())
                 .add("Parameters in angled brackets are required: ", TextType.HEADER)
                 .add("<", TextType.REQUIRED_PARAMETER)

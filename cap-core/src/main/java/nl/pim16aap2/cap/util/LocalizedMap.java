@@ -28,14 +28,14 @@ public abstract class LocalizedMap<T>
     /**
      * The map containing all registered items, with their names as key.
      */
-    private final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull T>> localizedMap = new LinkedHashMap<>();
+    private final @NonNull Map<@NonNull Locale, Map<@NonNull String, @NonNull T>> localizedMap = new HashMap<>();
 
     protected LocalizedMap(final @NonNull CAP cap, final int initialCapacity)
     {
         this.cap = cap;
 
         for (final @NonNull Locale locale : cap.getLocales())
-            localizedMap.put(locale, new HashMap<>(initialCapacity));
+            localizedMap.put(locale, new LinkedHashMap<>(initialCapacity));
     }
 
     protected LocalizedMap(final @NonNull CAP cap)

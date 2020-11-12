@@ -85,13 +85,6 @@
 
 
     <build>
-        <resources>
-            <resource>
-                <!--                <directory>${project.basedir}/src/main/resources</directory>-->
-                <directory>/home/pim/Documents/workspace/CommandParser/cap-core/src/main/resources</directory>
-            </resource>
-        </resources>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
