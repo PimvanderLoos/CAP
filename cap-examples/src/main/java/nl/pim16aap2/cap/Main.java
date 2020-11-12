@@ -20,41 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-// TODO: Allow specifying an annotated class as a command. Parse everything we need from the annotations into
-//       our own Command representation. The class should implement callable, so we can run it.
-//       The annotations can be used to instantiate the values properly.
-// TODO: Make sure that async permission checking is allowed for Spigot. Currently, when using async tab-completion
-//       suggestions generation, the permissions are checked asynchronously. That may or may not be problematic.
-// TODO: Let the Spigot module load async-generated tab-completion suggestions into the cache for synchronized usage
-//       (as Spigot doesn't have an async tab-complete event).
-//       Perhaps store the command buffer. Then use packets to send the suggestions async ourselves.
-// TODO: Support ResourceBundle.
-// TODO: Allow setting a locale for error logging. This would make the dev's lifes a lot easier (to see what the users are doing).
-// TODO: For the long help, maybe fall back to the summary if no description is available?
-// TODO: Add more unit tests.
-// TODO: ValidationFailureException should get the received value and the instance of the validator.
-//       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
-//       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
-//       could not be validated.
-// TODO: Add some safeguards for required optional parameters. If it's '/command [pos0] [pos1] <pos2> [pos3]',
-//       you cannot know which arguments were provided from "/command val val". So if 1 optional positional argument is
-//       provided, no other positional arguments should be allowed.
-//       It is possible to have some way of mixing this stuff, but that would require too many rules and just get
-//       confusing and bug-prone very fast.
-// TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
-// TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
-// TODO: Add an ICommandSender factory. This makes it easier to set the per-user locales.
-// TODO: For Spigot, maybe we can keep track of the user's locales automatically. Just make a locale-provider interface.
-//       Listen to player logins and store them in a weak-valued hashmap with their locale (as long as the
-//       locale-provider is not empty).
-
-/*
- * Unit tests:
- */
-// TODO: Text/Component/Type + ColorScheme system
-// TODO: Explicitly test open-ended caching.
-// TODO: Test CommandMap + localization system in general.
-
 public class Main
 {
     private static final @NonNull Locale LOCALE_DUTCH = new Locale("nl", "NL");
