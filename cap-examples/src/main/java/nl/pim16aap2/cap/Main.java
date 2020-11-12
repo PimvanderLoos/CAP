@@ -59,6 +59,9 @@ import java.util.Locale;
 
 public class Main
 {
+    private static final @NonNull Locale LOCALE_DUTCH = new Locale("nl", "NL");
+    private static final @NonNull Locale LOCALE_ENGLISH = Locale.US;
+
     private static void tabComplete(final @NonNull CAP cap, final @NonNull String command)
     {
         System.out.println(command + ":\n");
@@ -112,66 +115,70 @@ public class Main
         System.out.println(textD.add(textC));
         System.out.println(textE.add(textE));
 
-//        tabComplete(cap, "big");
-//        tabComplete(cap, "add");
-//        tabComplete(cap, "bigdoors a");
-//        tabComplete(cap, "bigdoors \"a");
-//        tabComplete(cap, "bigdoors h");
-//        tabComplete(cap, "bigdoors subcomma");
-//        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 -");
-//        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 ");
-//        tabComplete(cap, "bigdoors addowner myDoor --play");
-//        tabComplete(cap, "bigdoors addowner mydoor --admin ");
-//        tabComplete(cap, "bigdoors addowner \"tes");
-//
-//        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2");
-//        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4");
-//        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2");
-//        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2 --admin");
-//        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -a");
-//        tryArgs(cap, "bigdoors addowner myD\\\"oor -p=pim16aap2 -a");
-//        tryArgs(cap, "bigdoors addowner \"myD\\\"oor\" -p=pim16aap2 -a");
-//        tryArgs(cap, "bigdoors addowner \"myD\\\" oor\" -p=\"pim16\"aap2 -a");
-//        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
-//        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
-//        tryArgs(cap, "bigdoors addowner -h");
-//        tryArgs(cap, "bigdoors addowner myDoor -p=\"pim16 \"aap2 -a");
-//
-//        tryArgs(cap, "bigdoors help addowner");
-//        tryArgs(cap, "bigdoors help");
-//        tryArgs(cap, "bigdoors help 1");
-//        tryArgs(cap, "bigdoors help 2");
-//        tryArgs(cap, "bigdoors help 3");
-//        tryArgs(cap, "bigdoors help 4");
-//        tryArgs(cap, "bigdoors help 5");
-//        tryArgs(cap, "bigdoors help 6");
-//        tryArgs(cap, "grotedeuren help");
-//        tryArgs(cap, "grotedeuren help 1");
-//        tryArgs(cap, "grotedeuren help 2");
-        tryArgs(cap, "grotedeuren help eigenaartoevoegen");
-//        tryArgs(cap, "grotedeuren help 3");
-//        tryArgs(cap, "grotedeuren help 4");
-//        tryArgs(cap, "grotedeuren help 5");
-//        tryArgs(cap, "grotedeuren help 6");
-//        tryArgs(cap, "bigdoors help");
-//        tryArgs(cap, "bigdoors addowner");
-//        tryArgs(cap, "bigdoors");
-//        tryArgs(cap, "bigdoors 1");
-//        tryArgs(cap, "bigdoors 2");
-//
+        tabComplete(cap, "big");
+        tabComplete(cap, "add");
+        tabComplete(cap, "bigdoors a");
+        tabComplete(cap, "bigdoors \"a");
+        tabComplete(cap, "bigdoors h");
+        tabComplete(cap, "bigdoors subcomma");
+        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 -");
+        tabComplete(cap, "bigdoors addowner myDoor -p=pim16aap2 ");
+        tabComplete(cap, "bigdoors addowner myDoor --play");
+        tabComplete(cap, "bigdoors addowner mydoor --admin ");
+        tabComplete(cap, "bigdoors addowner \"tes");
+
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2");
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4");
+        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2");
+        tryArgs(cap, "bigdoors addowner myDoor --player=pim16aap2 --admin");
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner myD\\\"oor -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner \"myD\\\"oor\" -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner \"myD\\\" oor\" -p=\"pim16\"aap2 -a");
+        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner 'myDoor' -p=pim16aap2 -a");
+        tryArgs(cap, "bigdoors addowner -h");
+        tryArgs(cap, "bigdoors addowner myDoor -p=\"pim16 \"aap2 -a");
+
+        tryArgs(cap, "bigdoors help addowner");
+        tryArgs(cap, "bigdoors help");
+        tryArgs(cap, "bigdoors help 1");
+        tryArgs(cap, "bigdoors help 2");
+        tryArgs(cap, "bigdoors help 3");
+        tryArgs(cap, "bigdoors help 4");
+        tryArgs(cap, "bigdoors help 5");
+        tryArgs(cap, "bigdoors help 6");
+        tryArgs(cap, "bigdoors help");
+        tryArgs(cap, "bigdoors addowner");
+        tryArgs(cap, "bigdoors");
+        tryArgs(cap, "bigdoors 1");
+        tryArgs(cap, "bigdoors 2");
+
 //        tryArgs(cap, "bigdoors required my_door 12");
 ////        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
+
+        cap.setDefaultLocale(LOCALE_DUTCH);
+        tryArgs(cap, "grotedeuren help");
+        tryArgs(cap, "grotedeuren help 1");
+        tryArgs(cap, "grotedeuren help 2");
+        tryArgs(cap, "grotedeuren help eigenaartoevoegen");
+        tryArgs(cap, "grotedeuren help 3");
+        tryArgs(cap, "grotedeuren help 4");
+        tryArgs(cap, "grotedeuren help 5");
+        tryArgs(cap, "grotedeuren help 6");
+
+
+        cap.setDefaultLocale(LOCALE_ENGLISH);
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4 --admin");
+        cap.setDefaultLocale(LOCALE_DUTCH);
+        tryArgs(cap, "grotedeuren eigenaartoevoegen myDoor --speler=pim16aap2 --speler=pim16aap3 -s=pim16aap4 --admin");
     }
 
     private static CAP initCommandManager()
     {
-        final @NonNull Locale dutch = new Locale("nl", "NL");
-        final @NonNull Locale english = Locale.US;
-
         final CAP cap = CAP
             .builder()
-//            .localizationSpecification(new LocalizationSpecification("CAPExample", english, dutch))
-            .localizationSpecification(new LocalizationSpecification(dutch, "CAPExample", english, dutch))
+            .localizationSpecification(new LocalizationSpecification("CAPExample", LOCALE_ENGLISH, LOCALE_DUTCH))
             .separator('=')
             .debug(true)
             .exceptionHandler(ExceptionHandler.getDefault().toBuilder()
@@ -211,7 +218,8 @@ public class Main
                 .cap(cap)
                 .summary(base + ".summary")
                 .argument(
-                    new StringArgument().getRequired().shortName("value").summary("random value").build())
+                    new StringArgument().getRequired().shortName("value").identifier("value").summary("random value")
+                                        .build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(commandName, commandResult.getParsedArgument("value"))
                                          .runCommand())
@@ -232,6 +240,7 @@ public class Main
                           .getRequired()
                           .shortName("example.command.addowner.argument.doorid.shortname")
                           .summary("example.command.addowner.argument.doorid.summary")
+                          .identifier("doorID")
                           .tabCompleteFunction(request -> Arrays.asList("test a", "test_b"))
                           .build())
             .argument(Argument.valuesLessBuilder()
@@ -239,7 +248,7 @@ public class Main
                               .shortName("example.command.addowner.argument.admin.shortname")
                               .longName("example.command.addowner.argument.admin.longname")
                               .summary("example.command.addowner.argument.admin.summary")
-
+                              .identifier("admin")
                               .build())
             .argument(new StringArgument()
                           .getRepeatable()
@@ -247,6 +256,7 @@ public class Main
                           .longName("example.command.addowner.argument.player.longname")
                           .label("example.command.addowner.argument.player.label")
                           .summary("example.command.addowner.argument.player.summary")
+                          .identifier("players")
                           .tabCompleteFunction(request -> Arrays.asList("pim", "pim16aap2", "mip"))
                           .build())
             .argument(new StringArgument()
@@ -255,17 +265,14 @@ public class Main
                           .longName("example.command.addowner.argument.group.longname")
                           .label("example.command.addowner.argument.group.label")
                           .summary("example.command.addowner.argument.group.summary")
-//                          .shortName("g")
-//                          .longName("group")
-//                          .label("group")
-//                          .summary("The name of the group(s) to add as owner")
+                          .identifier("groups")
                           .build())
             .commandExecutor(
                 commandResult ->
                     new AddOwner(commandResult.getParsedArgument("doorID"),
-                                 commandResult.getParsedArgument("p"),
-                                 commandResult.<List<String>>getParsedArgument("g"),
-                                 commandResult.getParsedArgument("a")).runCommand())
+                                 commandResult.getParsedArgument("players"),
+                                 commandResult.<List<String>>getParsedArgument("groups"),
+                                 commandResult.getParsedArgument("admin")).runCommand())
             .build();
 
         final Command required = Command
@@ -303,7 +310,8 @@ public class Main
                 .addDefaultHelpArgument(true)
                 .cap(cap)
                 .argument(
-                    new StringArgument().getRequired().shortName("value").summary("random value").build())
+                    new StringArgument().getRequired().shortName("value").identifier("value").summary("random value")
+                                        .build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();

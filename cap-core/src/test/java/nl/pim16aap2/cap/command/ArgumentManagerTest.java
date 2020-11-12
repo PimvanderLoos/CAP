@@ -16,8 +16,10 @@ class ArgumentManagerTest
     void caseSensitive()
     {
         final @NonNull List<Argument<?>> arguments = Arrays.asList(
-            new IntegerArgument().getOptional().shortName("argumenta").label("argumenta").summary("").build(),
-            new IntegerArgument().getOptional().shortName("argumentB").label("argumentB").summary("").build()
+            new IntegerArgument().getOptional().shortName("argumenta").identifier("argumenta")
+                                 .label("argumenta").summary("").build(),
+            new IntegerArgument().getOptional().shortName("argumentB").identifier("argumentB")
+                                 .label("argumentB").summary("").build()
         );
 
         final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, true);
@@ -34,8 +36,10 @@ class ArgumentManagerTest
     void caseInsensitive()
     {
         final @NonNull List<Argument<?>> arguments = Arrays.asList(
-            new IntegerArgument().getOptional().shortName("argumenta").label("argumenta").summary("").build(),
-            new IntegerArgument().getOptional().shortName("argumentB").label("argumentB").summary("").build()
+            new IntegerArgument().getOptional().shortName("argumenta").identifier("argumenta")
+                                 .label("argumenta").summary("").build(),
+            new IntegerArgument().getOptional().shortName("argumentB").identifier("argumentB")
+                                 .label("argumentB").summary("").build()
         );
 
         final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, false);

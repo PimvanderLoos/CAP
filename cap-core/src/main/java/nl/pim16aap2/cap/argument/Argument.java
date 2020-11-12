@@ -119,7 +119,7 @@ public class Argument<T>
     protected final @Nullable IArgumentValidator<T> argumentValidator;
 
     /**
-     * The identifier to use for retrieving results. Defaults: {@link #shortName}.
+     * The identifier to use for retrieving results.
      */
     @Getter
     protected final @NonNull String identifier;
@@ -144,7 +144,7 @@ public class Argument<T>
                        final @NonNull String label, final boolean valuesLess, final boolean repeatable,
                        final boolean positional, final boolean required,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
         this.shortName = shortName;
         this.longName = longName;
@@ -158,7 +158,7 @@ public class Argument<T>
         this.required = required;
         this.tabCompleteFunction = tabCompleteFunction;
         this.argumentValidator = argumentValidator;
-        this.identifier = Util.valOrDefault(identifier, shortName);
+        this.identifier = identifier;
     }
 
     /**
@@ -176,7 +176,7 @@ public class Argument<T>
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
         this(shortName, longName, summary, parser, null, "", false, false, true, true, tabCompleteFunction,
              argumentValidator, identifier);
@@ -197,7 +197,7 @@ public class Argument<T>
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @NonNull ArgumentParser<T> parser,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
         this(shortName, longName, summary, parser, null, "", false, false, true, false, tabCompleteFunction,
              argumentValidator, identifier);
@@ -220,7 +220,7 @@ public class Argument<T>
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final @Nullable ITabCompleteFunction tabCompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
         this(shortName, longName, summary, parser, defaultValue, label, false, false, false, false, tabCompleteFunction,
              argumentValidator, identifier);
@@ -238,7 +238,7 @@ public class Argument<T>
     @SuppressWarnings("unchecked")
     @Builder(builderMethodName = "privateValuesLessBuilder", builderClassName = "ValuesLessBuilder")
     private Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
-                     final @Nullable Boolean value, final @Nullable String identifier)
+                     final @Nullable Boolean value, final @NonNull String identifier)
     {
         this(shortName, longName, summary,
              (ArgumentParser<T>) ValuelessParser.create(Util.valOrDefault(value, Boolean.TRUE)),

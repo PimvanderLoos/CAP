@@ -35,8 +35,11 @@ import java.util.function.Supplier;
  */
 public class CAP
 {
+    /**
+     * The default {@link Locale} to use when none is explicitly specified.
+     */
     @Getter
-    private final @Nullable Locale defaultLocale;
+    private @Nullable Locale defaultLocale;
 
     private final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
 
@@ -227,8 +230,8 @@ public class CAP
     /**
      * Gets a {@link Command} from its name for the {@link #getDefaultLocale()}.
      *
-     * @param name The name of the {@link Command}. See {@link Command#getName()}.
-     * @return The {@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
+     * @param name The name of the {@link Command}. See {@link Command#getName(Locale)}.
+     * @return The {@link Command#getName(Locale)} with the given name, if it is registered in the {@link CAP}.
      */
     public @NonNull Optional<Command> getCommand(final @Nullable String name)
     {
@@ -238,9 +241,9 @@ public class CAP
     /**
      * Gets a {@link Command} from its name.
      *
-     * @param name   The name of the {@link Command}. See {@link Command#getName()}.
+     * @param name   The name of the {@link Command}. See {@link Command#getName(Locale)}.
      * @param locale The {@link Locale} for which to get the {@link Command}.
-     * @return The {@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
+     * @return The {@link Command#getName(Locale)} with the given name, if it is registered in the {@link CAP}.
      */
     public @NonNull Optional<Command> getCommand(@Nullable String name, @Nullable Locale locale)
     {
@@ -251,8 +254,8 @@ public class CAP
      * Gets a super{@link Command} from its name (i.e. a {@link Command} without any supers of its own) for the {@link
      * #getDefaultLocale()}.
      *
-     * @param name The name of the super{@link Command}. See {@link Command#getName()}.
-     * @return The super{@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
+     * @param name The name of the super{@link Command}. See {@link Command#getName(Locale)}.
+     * @return The super{@link Command#getName(Locale)} with the given name, if it is registered in the {@link CAP}.
      */
     public @NonNull Optional<Command> getTopLevelCommand(final @Nullable String name)
     {
@@ -262,9 +265,9 @@ public class CAP
     /**
      * Gets a super{@link Command} from its name (i.e. a {@link Command} without any supers of its own).
      *
-     * @param name   The name of the super{@link Command}. See {@link Command#getName()}.
+     * @param name   The name of the super{@link Command}. See {@link Command#getName(Locale)}.
      * @param locale The {@link Locale} for which to get the {@link Command}.
-     * @return The super{@link Command#getName()} with the given name, if it is registered in the {@link CAP}.
+     * @return The super{@link Command#getName(Locale)} with the given name, if it is registered in the {@link CAP}.
      */
     public @NonNull Optional<Command> getTopLevelCommand(final @Nullable String name, final @Nullable Locale locale)
     {
@@ -338,6 +341,34 @@ public class CAP
     public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap(final @Nullable Locale locale)
     {
         return topLevelCommandMap.get(locale);
+    }
+
+    /**
+     * The default {@link Locale} to use when none is explicitly specified.
+     *
+     * @param newDefaultLocale The new default {@link Locale} to use. If this is a non-null value, it needs to be
+     *                         registered in {@link #locales} on initialization!
+     */
+    public void setDefaultLocale(final @Nullable Locale newDefaultLocale)
+    {
+        if (newDefaultLocale == null)
+        {
+            defaultLocale = null;
+            return;
+        }
+
+        // Make sure that the new default locale
+        // is an already-registered one.
+        for (final @NonNull Locale locale : locales)
+            if (locale.equals(newDefaultLocale))
+            {
+                defaultLocale = newDefaultLocale;
+                return;
+            }
+
+        throw new IllegalArgumentException(
+            "Trying to register new default locale: " + newDefaultLocale.toString() +
+                ", but this locale was not registered! Please register all desired locales on CAP initialization");
     }
 
     public static class CAPBuilder
