@@ -41,6 +41,6 @@ random
 tests
 dependency-reduced-pom.xml
 ignoredFiles
-*lombok.config
 TODOList
-
+*lombok.config
+cap-private/*
