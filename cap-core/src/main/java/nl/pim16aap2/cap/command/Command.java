@@ -48,7 +48,6 @@ public class Command
     /**
      * The name of this command.
      */
-    @Getter
     protected final @NonNull String name;
 
     /**
@@ -95,7 +94,6 @@ public class Command
     /**
      * The title of the section for the command-specific help menu.
      */
-    @Getter
     protected @NonNull String sectionTitle;
 
     /**
@@ -322,6 +320,26 @@ public class Command
     }
 
     /**
+     * Gets the localizable key for the name of this {@link Command}. For example "example.command.name".
+     *
+     * @return THe localizable key for the name.
+     */
+    public @NonNull String getNameKey()
+    {
+        return name;
+    }
+
+    /**
+     * Gets the name of this command.
+     *
+     * @return The name of this command.
+     */
+    public @NonNull String getName(final @Nullable Locale locale)
+    {
+        return cap.getMessage(name, locale);
+    }
+
+    /**
      * Gets the description for this command.
      * <p>
      * First, it tries to return {@link #description}. If that is null, {@link #descriptionSupplier} is used instead. If
@@ -333,9 +351,9 @@ public class Command
     public @NonNull String getDescription(final @NonNull ICommandSender commandSender)
     {
         if (description != null)
-            return description;
+            return cap.getMessage(description, null);
         if (descriptionSupplier != null)
-            return descriptionSupplier.apply(commandSender);
+            return cap.getMessage(descriptionSupplier.apply(commandSender), null);
         return "";
     }
 
@@ -351,9 +369,9 @@ public class Command
     public @NonNull String getSummary(final @NonNull ICommandSender commandSender)
     {
         if (summary != null)
-            return summary;
+            return cap.getMessage(summary, commandSender.getLocale());
         if (summarySupplier != null)
-            return summarySupplier.apply(commandSender);
+            return cap.getMessage(summarySupplier.apply(commandSender), commandSender.getLocale());
         return "";
     }
 
@@ -369,10 +387,21 @@ public class Command
     public @NonNull String getHeader(final @NonNull ICommandSender commandSender)
     {
         if (header != null)
-            return header;
+            return cap.getMessage(header, commandSender.getLocale());
         if (headerSupplier != null)
-            return headerSupplier.apply(commandSender);
+            return cap.getMessage(headerSupplier.apply(commandSender), commandSender.getLocale());
         return "";
+    }
+
+    /**
+     * The title of the section for the command-specific help menu.
+     *
+     * @param commandSender The {@link ICommandSender} to use (for localization)
+     * @return The section title for this {@link Command}.
+     */
+    public @NonNull String getSectionTitle(final @NonNull ICommandSender commandSender)
+    {
+        return cap.getMessage(sectionTitle, commandSender.getLocale());
     }
 
     /**

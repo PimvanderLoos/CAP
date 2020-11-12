@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
@@ -133,7 +134,8 @@ public class DefaultHelpCommand extends Command
         if (helpCommand.suggestions == null || helpCommand.getSubCommandCount() != helpCommand.lastSubCommandCount)
         {
             helpCommand.suggestions = new ArrayList<>(helpCommand.getSubCommandCount());
-            addAllSubCommands(helpCommand.suggestions, superCommand, helpCommand);
+            addAllSubCommands(request.getCommandSender().getLocale(), helpCommand.suggestions,
+                              superCommand, helpCommand);
             helpCommand.suggestions = Collections.unmodifiableList(helpCommand.suggestions);
         }
 
@@ -143,17 +145,19 @@ public class DefaultHelpCommand extends Command
     /**
      * Recursively adds all sub{@link Command}s of a {@link Command} to a target list.
      *
+     * @param locale       The {@link Locale} to use for the name localization.
      * @param target       The target list to add all sub{@link Command}s to.
      * @param superCommand The super{@link Command} whose sub{@link Command}s to add to the target list.
      * @param helpCommand  The {@link DefaultHelpCommand} that will be ignored for the target list.
      */
-    private static void addAllSubCommands(final @NonNull List<String> target, final @NonNull Command superCommand,
+    private static void addAllSubCommands(final @Nullable Locale locale, final @NonNull List<String> target,
+                                          final @NonNull Command superCommand,
                                           final @NonNull DefaultHelpCommand helpCommand)
     {
-        if (superCommand.getName().equals(helpCommand.getName()))
+        if (superCommand.getName(locale).equals(helpCommand.getName(locale)))
             return;
-        target.add(superCommand.getName());
-        superCommand.getSubCommands().forEach(subCommand -> addAllSubCommands(target, subCommand, helpCommand));
+        target.add(superCommand.getName(locale));
+        superCommand.getSubCommands().forEach(subCommand -> addAllSubCommands(locale, target, subCommand, helpCommand));
     }
 
     /**
@@ -243,14 +247,16 @@ public class DefaultHelpCommand extends Command
     protected static void defaultHelpCommandExecutor(final @NonNull CommandResult commandResult)
         throws IllegalValueException, CommandNotFoundException
     {
+        final @Nullable Locale locale = commandResult.getCommandSender().getLocale();
+
         if (!(commandResult.getCommand() instanceof DefaultHelpCommand))
-            throw new CommandNotFoundException(commandResult.getCommand().getName(),
-                                               commandResult.getCommand().getName() + " is not a help command!",
+            throw new CommandNotFoundException(commandResult.getCommand().getName(locale),
+                                               commandResult.getCommand().getName(locale) + " is not a help command!",
                                                commandResult.getCommand().getCap().isDebug());
 
         final @NonNull DefaultHelpCommand helpCommand = (DefaultHelpCommand) commandResult.getCommand();
         final @NonNull Command superCommand = helpCommand.getSuperCommand().orElseThrow(
-            () -> new CommandNotFoundException("Super command of: " + helpCommand.getName(),
+            () -> new CommandNotFoundException("Super command of: " + helpCommand.getName(locale),
                                                commandResult.getCommand().getCap().isDebug()));
 
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();

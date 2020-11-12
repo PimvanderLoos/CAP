@@ -118,7 +118,7 @@ public class ExceptionHandler
                                                         final @NonNull ValidationFailureException e)
     {
         sendError(commandSender, "Failed to validate value: \"" + e.getValue() +
-            "\" for argument: \"" + e.getArgument().getShortName() + "\"");
+            "\" for argument: \"" + e.getArgument().getIdentifier() + "\"");
     }
 
     public static void handleNoPermissionException(final @NonNull ICommandSender commandSender,
@@ -131,21 +131,22 @@ public class ExceptionHandler
                                                           final @NonNull NonExistingArgumentException e)
     {
         sendError(commandSender, "Failed to find argument: \"" + e.getNonExistingArgument() + "\" for command: \"" +
-            e.getCommand().getName() + "\"");
+            e.getCommand().getName(commandSender.getLocale()) + "\"");
     }
 
     public static void handleMissingArgumentException(final @NonNull ICommandSender commandSender,
                                                       final @NonNull MissingArgumentException e)
     {
         sendError(commandSender, "Failed to find value for argument: \"" +
-            e.getMissingArgument().getShortName() + "\" for command: \"" + e.getCommand().getName() + "\"");
+            e.getMissingArgument().getIdentifier() + "\" for command: \"" +
+            e.getCommand().getName(commandSender.getLocale()) + "\"");
     }
 
     public static void handleIllegalValueException(final @NonNull ICommandSender commandSender,
                                                    final @NonNull IllegalValueException e)
     {
         sendError(commandSender, "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" +
-            e.getCommand().getName() + "\"");
+            e.getCommand().getName(commandSender.getLocale()) + "\"");
     }
 
     public static void handleUnmatchedQuoteException(final @NonNull ICommandSender commandSender,
@@ -157,11 +158,7 @@ public class ExceptionHandler
     public static void handleMissingValueException(final @NonNull ICommandSender commandSender,
                                                    final @NonNull MissingValueException e)
     {
-        // Prefer the long name, because it's usually more descriptive.
-        final @NonNull String argumentName = e.getArgument().getLongName() == null ?
-                                             e.getArgument().getShortName() : e.getArgument().getLongName();
-
-        sendError(commandSender, "Missing value for argument: " + argumentName);
+        sendError(commandSender, "Missing value for argument: " + e.getArgument().getIdentifier());
     }
 
     // Delombok:

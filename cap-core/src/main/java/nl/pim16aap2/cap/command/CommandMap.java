@@ -28,13 +28,13 @@ public class CommandMap extends LocalizedMap<Command>
     /**
      * Gets a {@link Command} from its name.
      *
-     * @param name   The name of the {@link Command}. See {@link Command#getName()}.
-     * @param locale The {@link Locale} for which to get the {@link Command}.
+     * @param nameKey The key for the name of the {@link Command}. See {@link Command#getNameKey()}.
+     * @param locale  The {@link Locale} for which to get the {@link Command}.
      * @return The {@link Command)} with the given name, if it is registered here.
      */
-    public @NonNull Optional<Command> getCommand(@Nullable String name, @Nullable Locale locale)
+    public @NonNull Optional<Command> getCommand(@Nullable String nameKey, @Nullable Locale locale)
     {
-        return getEntry(name, locale, cap::getCommandNameCaseCheck);
+        return getEntry(nameKey, locale, cap::getCommandNameCaseCheck);
     }
 
     /**
@@ -44,6 +44,6 @@ public class CommandMap extends LocalizedMap<Command>
      */
     public void addCommand(final @NonNull Command command)
     {
-        addEntry(command.getName(), command, cap::getCommandNameCaseCheck);
+        addEntry(command.getNameKey(), command, cap::getCommandNameCaseCheck);
     }
 }

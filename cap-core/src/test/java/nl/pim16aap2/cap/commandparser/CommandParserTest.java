@@ -108,7 +108,7 @@ class CommandParserTest
                               .build())
             .argument(new StringArgument()
                           .getRepeatable()
-                          .name("p")
+                          .shortName("p")
                           .longName("player")
                           .label("player")
                           .tabCompleteFunction((request) -> playerNames)
@@ -116,7 +116,7 @@ class CommandParserTest
                           .build())
             .argument(new StringArgument()
                           .getRepeatable()
-                          .name("g")
+                          .shortName("g")
                           .longName("group")
                           .label("player")
                           .summary("The name of the group to add as owner")
@@ -294,7 +294,7 @@ class CommandParserTest
                                     final @NonNull String commandName)
     {
         final @NonNull CommandParser commandParser = new CommandParser(cap, commandSender, input, cap.getSeparator());
-        Assertions.assertEquals(commandName, commandParser.getLastCommand().getCommand().getName());
+        Assertions.assertEquals(commandName, commandParser.getLastCommand().getCommand().getName(null));
     }
 
     @Test

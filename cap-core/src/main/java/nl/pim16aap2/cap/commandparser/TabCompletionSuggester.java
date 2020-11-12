@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -36,6 +37,12 @@ public class TabCompletionSuggester extends CommandParser
     protected final boolean openEnded;
 
     /**
+     * The {@link Locale} to use. See {@link ICommandSender#getLocale()}.
+     */
+    @Getter
+    protected final @Nullable Locale locale;
+
+    /**
      * @param cap           The {@link CAP} instance that owns this object..
      * @param commandSender The {@link ICommandSender} that issued the command.
      * @param input         The string that may contain a set of commands and arguments.
@@ -47,6 +54,7 @@ public class TabCompletionSuggester extends CommandParser
     {
         super(cap, commandSender, new CommandLineInput(input), separator);
         openEnded = super.input.isCompleteQuotationMarks() && super.input.getRawInput().endsWith(" ");
+        locale = commandSender.getLocale();
     }
 
     /**
@@ -126,8 +134,8 @@ public class TabCompletionSuggester extends CommandParser
         final @NonNull List<@NonNull String> ret = new ArrayList<>();
         command.getSubCommands().forEach(subCommand ->
                                          {
-                                             if (subCommand.getName().startsWith(partialName))
-                                                 ret.add(subCommand.getName());
+                                             if (subCommand.getName(commandSender.getLocale()).startsWith(partialName))
+                                                 ret.add(subCommand.getName(commandSender.getLocale()));
                                          });
         return ret;
     }
@@ -207,7 +215,7 @@ public class TabCompletionSuggester extends CommandParser
             command.getArgumentManager().getPositionalArgumentAtIdx(positionalArgumentIndex)
                    .orElseThrow(() -> new RuntimeException(String.format(
                        "Failed to get positional argument at index %d for command %s with input: \"%s\"",
-                       positionalArgumentIndex, command.getName(), input.getRawInput())));
+                       positionalArgumentIndex, command.getName(commandSender.getLocale()), input.getRawInput())));
 
         return getTabArgumentFunctionSuggestions(command, positionalArgument, partialValue, "", async);
     }
@@ -292,13 +300,14 @@ public class TabCompletionSuggester extends CommandParser
             // If the argument exists and is complete, construct the prefix.
             if (argument != null)
             {
-                if (argument.getShortName().equals(argumentName))
-                    prefix = String.format("%c%s%s", ARGUMENT_PREFIX, argument.getShortName(), separator);
-                else if (argument.getLongName() == null)
+                if (argument.getShortName(cap, locale).equals(argumentName))
+                    prefix = String.format("%c%s%s", ARGUMENT_PREFIX, argument.getShortName(cap, locale), separator);
+                else if (argument.getLongName(cap, locale) == null)
                     prefix = "";
                 else
                     prefix = String.format("%c%c%s%s",
-                                           ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName(), separator);
+                                           ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName(cap, locale),
+                                           separator);
             }
         }
 
@@ -309,41 +318,43 @@ public class TabCompletionSuggester extends CommandParser
     }
 
     /**
-     * Formats the {@link Argument#getShortName()} using the correct argument prefix and the provided suffix.
+     * Formats the {@link Argument#getShortName(CAP, Locale)} using the correct argument prefix and the provided
+     * suffix.
      *
      * @param argument The argument whose short name to format.
      * @param suffix   The suffix to use. E.g. '=' for the format "-argument_shortName="
-     * @return The formatted {@link Argument#getShortName()}.
+     * @return The formatted {@link Argument#getShortName(CAP, Locale)}.
      */
     protected @NonNull String getFormattedShortName(final @NonNull Argument<?> argument, final @NonNull String suffix)
     {
-        return String.format("%c%s%s", ARGUMENT_PREFIX, argument.getShortName(), suffix);
+        return String.format("%c%s%s", ARGUMENT_PREFIX, argument.getShortName(cap, locale), suffix);
     }
 
     /**
-     * Formats the {@link Argument#getLongName()} using the correct argument prefixes and the provided suffix.
+     * Formats the {@link Argument#getLongName(CAP, Locale)} using the correct argument prefixes and the provided
+     * suffix.
      *
      * @param argument The argument whose long name to format.
      * @param suffix   The suffix to use. E.g. '=' for the format "--argument_longName="
-     * @return The formatted {@link Argument#getLongName()} if the {@link Argument#getLongName()} exists, otherwise
-     * null.
+     * @return The formatted {@link Argument#getLongName(CAP, Locale)} if the {@link Argument#getLongName(CAP, Locale)}
+     * exists, otherwise null.
      */
     protected @Nullable String getFormattedLongName(final @NonNull Argument<?> argument, final @NonNull String suffix)
     {
-        return argument.getLongName() == null ? null :
-               String.format("%c%s%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName(), suffix);
+        return argument.getLongName(cap, locale) == null ? null :
+               String.format("%c%s%s%s", ARGUMENT_PREFIX, ARGUMENT_PREFIX, argument.getLongName(cap, locale), suffix);
     }
 
     /**
-     * Gets a list of {@link Argument#getShortName()}s and {@link Argument#getLongName()}s that can be used to complete
-     * the current {@link #input}.
+     * Gets a list of {@link Argument#getShortName(CAP, Locale)}s and {@link Argument#getLongName(CAP, Locale)}s that
+     * can be used to complete the current {@link #input}.
      *
      * @param command The {@link Command} for which to check the {@link Argument}s.
      * @param lastArg The last value in {@link #input} that will be used as a base for the auto suggestions. E.g. when
      *                supplied "a", it will suggest "admin" but it won't suggest "player" (provided "admin" is a
      *                registered {@link Argument} for the given {@link Command}.
-     * @return The list of {@link Argument#getShortName()}s and {@link Argument#getLongName()}s that can be used to
-     * complete the current {@link #input}.
+     * @return The list of {@link Argument#getShortName(CAP, Locale)}s and {@link Argument#getLongName(CAP, Locale)}s
+     * that can be used to complete the current {@link #input}.
      */
     protected @NonNull List<@NonNull String> getFreeArgumentNames(final @NonNull Command command,
                                                                   final @NonNull String lastArg)
@@ -368,14 +379,16 @@ public class TabCompletionSuggester extends CommandParser
                     // When checking if the value has already been provided, we prepaend and append some spaces.
                     // This makes sure that it doesn't match something like "--adventure for "-a"
                     if (input.getRawInput().contains(" " + shortName + " ") ||
-                        (argument.getLongName() != null && input.getRawInput().contains(" " + longName + " ")))
+                        (argument.getLongName(cap, locale) != null &&
+                            input.getRawInput().contains(" " + longName + " ")))
                         return;
                 }
 
-                if (argument.getShortName().startsWith(lastArg))
+                if (argument.getShortName(cap, locale).startsWith(lastArg))
                     ret.add(shortName);
 
-                if (argument.getLongName() != null && longName != null && argument.getLongName().startsWith(lastArg))
+                final @Nullable String localizedLongName = argument.getLongName(cap, locale);
+                if (localizedLongName != null && longName != null && localizedLongName.startsWith(lastArg))
                     ret.add(longName);
             });
         return ret;

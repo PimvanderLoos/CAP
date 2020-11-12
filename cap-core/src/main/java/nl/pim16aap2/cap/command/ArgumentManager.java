@@ -94,7 +94,7 @@ public class ArgumentManager
     }
 
     /**
-     * Gets an argument from its name. See {@link Argument#getShortName()}.
+     * Gets an argument from its name. See {@link Argument#getShortNameKey()}.
      *
      * @param argumentName The name of the {@link Argument}.
      * @return The {@link Argument}, if one is registered by the provided name.
@@ -105,7 +105,7 @@ public class ArgumentManager
     }
 
     /**
-     * Gets an argument from its name. See {@link Argument#getShortName()}.
+     * Gets an argument from its name. See {@link Argument#getShortNameKey()}.
      *
      * @param argumentName The name of the {@link Argument}.
      * @param locale       The {@link Locale} for which to get the {@link Command}.
@@ -180,9 +180,9 @@ public class ArgumentManager
          */
         public void addArgument(final @NonNull Argument<?> argument)
         {
-            addEntry(argument.getShortName(), argument, argumentManager::getArgumentNameCaseCheck);
-            if (argument.getLongName() != null)
-                addEntry(argument.getLongName(), argument, argumentManager::getArgumentNameCaseCheck);
+            addEntry(argument.getShortNameKey(), argument, argumentManager::getArgumentNameCaseCheck);
+            if (argument.getLongNameKey() != null)
+                addEntry(argument.getLongNameKey(), argument, argumentManager::getArgumentNameCaseCheck);
         }
 
         /**
@@ -199,8 +199,8 @@ public class ArgumentManager
         /**
          * Gets a {@link Argument} from its name.
          *
-         * @param name   The name of the {@link Argument}. See {@link Argument#getShortName()} and {@link
-         *               Argument#getLongName()}.
+         * @param name   The name of the {@link Argument}. See {@link Argument#getShortNameKey()} and {@link
+         *               Argument#getLongNameKey()}.
          * @param locale The {@link Locale} for which to get the {@link Argument}.
          * @return The {@link Argument} with the given name, if it is registered.
          */

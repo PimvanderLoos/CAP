@@ -45,6 +45,10 @@ import java.util.Locale;
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
 // TODO: Add both non-localized and localized versions of all default stuff, so using either localized or non-localized
 //       setup is easy.
+// TODO: Add an ICommandSender factory. This makes it easier to set the per-user locales.
+// TODO: For Spigot, maybe we can keep track of the user's locales automatically. Just make a locale-provider interface.
+//       Listen to player logins and store them in a weak-valued hashmap with their locale (as long as the
+//       locale-provider is not empty).
 
 /*
  * Unit tests:
@@ -141,13 +145,14 @@ public class Main
 //        tryArgs(cap, "bigdoors help 4");
 //        tryArgs(cap, "bigdoors help 5");
 //        tryArgs(cap, "bigdoors help 6");
-        tryArgs(cap, "grotedeuren help");
-        tryArgs(cap, "grotedeuren help 1");
-        tryArgs(cap, "grotedeuren help 2");
-        tryArgs(cap, "grotedeuren help 3");
-        tryArgs(cap, "grotedeuren help 4");
-        tryArgs(cap, "grotedeuren help 5");
-        tryArgs(cap, "grotedeuren help 6");
+//        tryArgs(cap, "grotedeuren help");
+//        tryArgs(cap, "grotedeuren help 1");
+//        tryArgs(cap, "grotedeuren help 2");
+        tryArgs(cap, "grotedeuren help eigenaartoevoegen");
+//        tryArgs(cap, "grotedeuren help 3");
+//        tryArgs(cap, "grotedeuren help 4");
+//        tryArgs(cap, "grotedeuren help 5");
+//        tryArgs(cap, "grotedeuren help 6");
 //        tryArgs(cap, "bigdoors help");
 //        tryArgs(cap, "bigdoors addowner");
 //        tryArgs(cap, "bigdoors");
@@ -214,13 +219,6 @@ public class Main
             subsubcommands.add(generic);
         }
 
-//        System.out.println("Addowner name en: " + ResourceBundle.getBundle("CAPExample", english)
-//                                                                .getString("example.command.addowner.name"));
-//        System.out.println("Addowner name nl: " + ResourceBundle.getBundle("CAPExample", dutch)
-//                                                                .getString("example.command.addowner.name"));
-        System.out.println("\n================================");
-        System.out.println("Addowner name DEFAULT: " + cap.getMessage("example.command.addowner.name", null));
-
         final Command addOwner = Command
             .commandBuilder()
             .cap(cap)
@@ -232,31 +230,35 @@ public class Main
             .permission(((commandSender, command) -> true))
             .argument(new StringArgument()
                           .getRequired()
-                          .shortName("doorID")
-                          .summary("The name or UID of the door")
+                          .shortName("example.command.addowner.argument.doorid.shortname")
+                          .summary("example.command.addowner.argument.doorid.summary")
                           .tabCompleteFunction(request -> Arrays.asList("test a", "test_b"))
                           .build())
             .argument(Argument.valuesLessBuilder()
                               .value(true)
-                              .shortName("a")
-                              .longName("admin")
-                              .summary("Makes all the supplied users admins for the given door. " +
-                                           "Only applies to players.")
+                              .shortName("example.command.addowner.argument.admin.shortname")
+                              .longName("example.command.addowner.argument.admin.longname")
+                              .summary("example.command.addowner.argument.admin.summary")
+
                               .build())
             .argument(new StringArgument()
                           .getRepeatable()
-                          .name("p")
-                          .longName("player")
-                          .label("player")
+                          .shortName("example.command.addowner.argument.player.shortname")
+                          .longName("example.command.addowner.argument.player.longname")
+                          .label("example.command.addowner.argument.player.label")
+                          .summary("example.command.addowner.argument.player.summary")
                           .tabCompleteFunction(request -> Arrays.asList("pim", "pim16aap2", "mip"))
-                          .summary("The name of the player(s) to add as owner")
                           .build())
             .argument(new StringArgument()
                           .getRepeatable()
-                          .name("g")
-                          .longName("group")
-                          .label("group")
-                          .summary("The name of the group(s) to add as owner")
+                          .shortName("example.command.addowner.argument.group.shortname")
+                          .longName("example.command.addowner.argument.group.longname")
+                          .label("example.command.addowner.argument.group.label")
+                          .summary("example.command.addowner.argument.group.summary")
+//                          .shortName("g")
+//                          .longName("group")
+//                          .label("group")
+//                          .summary("The name of the group(s) to add as owner")
                           .build())
             .commandExecutor(
                 commandResult ->
