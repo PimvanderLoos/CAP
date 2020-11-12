@@ -20,6 +20,7 @@ import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -375,7 +376,13 @@ public class CommandParser
             // Gets the first argument in the arguments list.
             final Command baseCommand =
                 cap.getTopLevelCommand(commandName)
-                   .orElseThrow(() -> new CommandNotFoundException(commandName, cap.isDebug()));
+                   .orElseThrow(() ->
+                                {
+                                    final @NonNull String localizedMessage =
+                                        MessageFormat.format(cap.getMessage("error.exception.commandNotFound",
+                                                                            commandSender.getLocale()), commandName);
+                                    return new CommandNotFoundException(commandName, localizedMessage, cap.isDebug());
+                                });
 
             return getLastCommand(baseCommand, 0);
         }

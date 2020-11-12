@@ -111,7 +111,7 @@ public class ExceptionHandler
     public static void handleCommandNotFoundException(final @NonNull ICommandSender commandSender,
                                                       final @NonNull CommandNotFoundException e)
     {
-        sendError(commandSender, "Failed to find command: \"" + e.getMissingCommand() + "\"");
+        sendError(commandSender, e.getLocalizedMessage());
     }
 
     public static void handleValidationFailureException(final @NonNull ICommandSender commandSender,

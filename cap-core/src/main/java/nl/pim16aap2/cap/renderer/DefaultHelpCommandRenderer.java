@@ -17,6 +17,7 @@ import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -209,7 +210,12 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 
         final @NonNull Optional<Command> subCommand = command.getCap().getCommand(val);
         if (!subCommand.isPresent())
-            throw new CommandNotFoundException(val, command.getCap().isDebug());
+        {
+            final @NonNull String localizedMessage =
+                MessageFormat.format(command.getCap().getMessage("error.exception.commandNotFound",
+                                                                 commandSender.getLocale()), val);
+            throw new CommandNotFoundException(val, localizedMessage, command.getCap().isDebug());
+        }
 
         return renderHelpMenu(commandSender, colorScheme, subCommand.get());
     }
