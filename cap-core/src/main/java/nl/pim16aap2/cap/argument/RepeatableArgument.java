@@ -20,14 +20,14 @@ public class RepeatableArgument<T> extends Argument<T>
     private static final boolean POSITION = false;
 
     @Builder(builderMethodName = "repeatableBuilder")
-    private RepeatableArgument(final @NonNull String name, final @Nullable String longName,
+    private RepeatableArgument(final @NonNull String shortName, final @Nullable String longName,
                                final @NonNull String summary, final @NonNull ArgumentParser<T> parser,
                                final @NonNull String label, final boolean required,
                                final @Nullable ITabCompleteFunction tabCompleteFunction,
                                final @Nullable IArgumentValidator<T> argumentValidator,
-                               final @Nullable String identifier)
+                               final @NonNull String identifier)
     {
-        super(name, longName, summary, parser, null, label, VALUE_LESS, REPEATABLE, POSITION, required,
+        super(shortName, longName, summary, parser, null, label, VALUE_LESS, REPEATABLE, POSITION, required,
               tabCompleteFunction, argumentValidator, identifier);
     }
 

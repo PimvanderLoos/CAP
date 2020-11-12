@@ -38,14 +38,16 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
     }
 
     @Override
-    protected void renderHelpHeader(final @NonNull Command command, final @NonNull Text text)
+    protected void renderHelpHeader(final @NonNull ICommandSender commandSender, final @NonNull Command command,
+                                    final @NonNull Text text)
     {
-        text.add(" ", TextType.REGULAR_TEXT).add("\n--- " + command.getSectionTitle() + " ---\n", TextType.SECTION);
+        text.add(" ", TextType.REGULAR_TEXT)
+            .add("\n--- " + command.getSectionTitle(commandSender) + " ---\n", TextType.SECTION);
     }
 
     @Override
-    protected void renderPageCountHeader(final @NonNull Text text, final int page, final int pageCount,
-                                         @NonNull Command command)
+    protected void renderPageCountHeader(final @NonNull ICommandSender commandSender, final @NonNull Text text,
+                                         final int page, final int pageCount, @NonNull Command command)
     {
         @Nullable Command helpCommand = command.getHelpCommand();
         if (helpCommand == null)
@@ -54,7 +56,7 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
             // When that's the case, just let the default renderer take care of the header.
             if (!(command instanceof DefaultHelpCommand))
             {
-                super.renderPageCountHeader(text, page, pageCount, command);
+                super.renderPageCountHeader(commandSender, text, page, pageCount, command);
                 return;
             }
 
@@ -69,7 +71,8 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
             text.add("---", TextType.REGULAR_TEXT);
         else
             SpigotTextUtility.addClickableCommandText(text, "<<<", TextType.COMMAND, String
-                                                          .format("/%s %s %d", command.getName(), helpCommand.getName(), page - 1),
+                                                          .format("/%s %s %d", command.getName(commandSender.getLocale()),
+                                                                  helpCommand.getName(commandSender.getLocale()), page - 1),
                                                       "§cPrevious help page");
 
         text.add(String.format("---- Page (%2d / %2d) ----", page, pageCount), TextType.REGULAR_TEXT);
@@ -78,7 +81,8 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
             text.add("---", TextType.REGULAR_TEXT);
         else
             SpigotTextUtility.addClickableCommandText(text, ">>>", TextType.COMMAND, String
-                .format("/%s %s %d", command.getName(), helpCommand.getName(), page + 1), "§cNext help page");
+                .format("/%s %s %d", command.getName(commandSender.getLocale()),
+                        helpCommand.getName(commandSender.getLocale()), page + 1), "§cNext help page");
 
         text.add("\n");
     }
@@ -93,15 +97,17 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
 
         final @NonNull Text commandText = new Text(text.getColorScheme());
 
-        commandText.add(superCommands + command.getName(), TextType.COMMAND);
-        renderArgumentsShort(colorScheme, commandText, command);
+        commandText.add(superCommands + command.getName(commandSender.getLocale()), TextType.COMMAND);
+        renderArgumentsShort(commandSender.getLocale(), colorScheme, commandText, command);
 
         if (helpCommand != null)
         {
             final String commandName =
-                command.getName().equals(helpCommand.getName()) ? "" : " " + command.getName();
+                command.getName(commandSender.getLocale()).equals(helpCommand.getName(commandSender.getLocale())) ? "" :
+                " " + command.getName(commandSender.getLocale());
             final String clickableCommand =
-                "/" + topCommand.getName() + " " + helpCommand.getName() + commandName;
+                "/" + topCommand.getName(commandSender.getLocale()) + " " +
+                    helpCommand.getName(commandSender.getLocale()) + commandName;
             SpigotTextUtility.makeClickableCommand(commandText, clickableCommand, "§cClick me for more information!");
         }
         text.add(commandText);

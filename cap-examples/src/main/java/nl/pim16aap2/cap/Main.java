@@ -13,42 +13,18 @@ import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextComponent;
 import nl.pim16aap2.cap.text.TextType;
+import nl.pim16aap2.cap.util.LocalizationSpecification;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-// TODO: Allow specifying an annotated class as a command. Parse everything we need from the annotations into
-//       our own Command representation. The class should implement callable, so we can run it.
-//       The annotations can be used to instantiate the values properly.
-// TODO: Make sure that async permission checking is allowed for Spigot. Currently, when using async tab-completion
-//       suggestions generation, the permissions are checked asynchronously. That may or may not be problematic.
-// TODO: Let the Spigot module load async-generated tab-completion suggestions into the cache for synchronized usage
-//       (as Spigot doesn't have an async tab-complete event).
-//       Perhaps store the command buffer. Then use packets to send the suggestions async ourselves.
-// TODO: Support ResourceBundle.
-// TODO: For the long help, maybe fall back to the summary if no description is available?
-// TODO: Add more unit tests.
-// TODO: ValidationFailureException should get the received value and the instance of the validator.
-//       The validator will need a (localizable) toString method (or something) to indicate what would be valid values.
-//       For the range validator, a validator of [10 20] should return "[10 20]" so inform the user why their value
-//       could not be validated.
-// TODO: Add some safeguards for required optional parameters. If it's '/command [pos0] [pos1] <pos2> [pos3]',
-//       you cannot know which arguments were provided from "/command val val". So if 1 optional positional argument is
-//       provided, no other positional arguments should be allowed.
-//       It is possible to have some way of mixing this stuff, but that would require too many rules and just get
-//       confusing and bug-prone very fast.
-// TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
-// TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
-
-/*
- * Unit tests:
- */
-// TODO: Text/Component/Type + ColorScheme system
-// TODO: Explicitly test open-ended caching.
+import java.util.Locale;
 
 public class Main
 {
+    private static final @NonNull Locale LOCALE_DUTCH = new Locale("nl", "NL");
+    private static final @NonNull Locale LOCALE_ENGLISH = Locale.US;
+
     private static void tabComplete(final @NonNull CAP cap, final @NonNull String command)
     {
         System.out.println(command + ":\n");
@@ -131,6 +107,9 @@ public class Main
         tryArgs(cap, "bigdoors help");
         tryArgs(cap, "bigdoors help 1");
         tryArgs(cap, "bigdoors help 2");
+        tryArgs(cap, "bigdoors help 3");
+        tryArgs(cap, "bigdoors help 4");
+        tryArgs(cap, "bigdoors help 5");
         tryArgs(cap, "bigdoors help 6");
         tryArgs(cap, "bigdoors help");
         tryArgs(cap, "bigdoors addowner");
@@ -138,14 +117,31 @@ public class Main
         tryArgs(cap, "bigdoors 1");
         tryArgs(cap, "bigdoors 2");
 
-        tryArgs(cap, "bigdoors required my_door 12");
-//        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
+//        tryArgs(cap, "bigdoors required my_door 12");
+////        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
+
+        cap.setDefaultLocale(LOCALE_DUTCH);
+        tryArgs(cap, "grotedeuren help");
+        tryArgs(cap, "grotedeuren help 1");
+        tryArgs(cap, "grotedeuren help 2");
+        tryArgs(cap, "grotedeuren help eigenaartoevoegen");
+        tryArgs(cap, "grotedeuren help 3");
+        tryArgs(cap, "grotedeuren help 4");
+        tryArgs(cap, "grotedeuren help 5");
+        tryArgs(cap, "grotedeuren help 6");
+
+
+        cap.setDefaultLocale(LOCALE_ENGLISH);
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4 --admin");
+        cap.setDefaultLocale(LOCALE_DUTCH);
+        tryArgs(cap, "grotedeuren eigenaartoevoegen myDoor --speler=pim16aap2 --speler=pim16aap3 -s=pim16aap4 --admin");
     }
 
     private static CAP initCommandManager()
     {
         final CAP cap = CAP
             .builder()
+            .localizationSpecification(new LocalizationSpecification("CAPExample", LOCALE_ENGLISH, LOCALE_DUTCH))
             .separator('=')
             .debug(true)
             .exceptionHandler(ExceptionHandler.getDefault().toBuilder()
@@ -172,20 +168,24 @@ public class Main
                                      .build())
             .build();
 
-        final int subsubCommandCount = 5;
-        final List<Command> subsubcommands = new ArrayList<>(subsubCommandCount);
-        for (int idx = 0; idx < subsubCommandCount; ++idx)
+        final int subSubCommandCount = 5;
+        final List<Command> subsubcommands = new ArrayList<>(subSubCommandCount);
+        for (int idx = 0; idx < subSubCommandCount; ++idx)
         {
-            final String command = "subsubcommand_" + idx;
+            final String base = "example.sub.sub.command." + idx;
+            final String commandName = base + ".name";
+
             final Command generic = Command
-                .commandBuilder().name(command)
+                .commandBuilder().name(commandName)
                 .addDefaultHelpArgument(true)
                 .cap(cap)
-                .summary("This is the summary for subsubcommand_" + idx)
+                .summary(base + ".summary")
                 .argument(
-                    new StringArgument().getRequired().shortName("value").summary("random value").build())
+                    new StringArgument().getRequired().shortName("value").identifier("value").summary("random value")
+                                        .build())
                 .commandExecutor(commandResult ->
-                                     new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
+                                     new GenericCommand(commandName, commandResult.getParsedArgument("value"))
+                                         .runCommand())
                 .build();
             subsubcommands.add(generic);
         }
@@ -193,46 +193,49 @@ public class Main
         final Command addOwner = Command
             .commandBuilder()
             .cap(cap)
-            .name("addowner")
+            .name("example.command.addowner.name")
             .addDefaultHelpArgument(true)
-            .description("Add 1 or more players or groups of players as owners of a door.")
-            .summary("Add another owner to a door.")
+            .description("example.command.addowner.description")
+            .summary("example.command.addowner.summary")
             .subCommands(subsubcommands)
             .permission(((commandSender, command) -> true))
             .argument(new StringArgument()
                           .getRequired()
-                          .shortName("doorID")
-                          .summary("The name or UID of the door")
+                          .shortName("example.command.addowner.argument.doorid.shortname")
+                          .summary("example.command.addowner.argument.doorid.summary")
+                          .identifier("doorID")
                           .tabCompleteFunction(request -> Arrays.asList("test a", "test_b"))
                           .build())
             .argument(Argument.valuesLessBuilder()
                               .value(true)
-                              .shortName("a")
-                              .longName("admin")
-                              .summary("Makes all the supplied users admins for the given door. " +
-                                           "Only applies to players.")
+                              .shortName("example.command.addowner.argument.admin.shortname")
+                              .longName("example.command.addowner.argument.admin.longname")
+                              .summary("example.command.addowner.argument.admin.summary")
+                              .identifier("admin")
                               .build())
             .argument(new StringArgument()
                           .getRepeatable()
-                          .name("p")
-                          .longName("player")
-                          .label("player")
+                          .shortName("example.command.addowner.argument.player.shortname")
+                          .longName("example.command.addowner.argument.player.longname")
+                          .label("example.command.addowner.argument.player.label")
+                          .summary("example.command.addowner.argument.player.summary")
+                          .identifier("players")
                           .tabCompleteFunction(request -> Arrays.asList("pim", "pim16aap2", "mip"))
-                          .summary("The name of the player(s) to add as owner")
                           .build())
             .argument(new StringArgument()
                           .getRepeatable()
-                          .name("g")
-                          .longName("group")
-                          .label("group")
-                          .summary("The name of the group(s) to add as owner")
+                          .shortName("example.command.addowner.argument.group.shortname")
+                          .longName("example.command.addowner.argument.group.longname")
+                          .label("example.command.addowner.argument.group.label")
+                          .summary("example.command.addowner.argument.group.summary")
+                          .identifier("groups")
                           .build())
             .commandExecutor(
                 commandResult ->
                     new AddOwner(commandResult.getParsedArgument("doorID"),
-                                 commandResult.getParsedArgument("p"),
-                                 commandResult.<List<String>>getParsedArgument("g"),
-                                 commandResult.getParsedArgument("a")).runCommand())
+                                 commandResult.getParsedArgument("players"),
+                                 commandResult.<List<String>>getParsedArgument("groups"),
+                                 commandResult.getParsedArgument("admin")).runCommand())
             .build();
 
         final Command required = Command
@@ -270,7 +273,8 @@ public class Main
                 .addDefaultHelpArgument(true)
                 .cap(cap)
                 .argument(
-                    new StringArgument().getRequired().shortName("value").summary("random value").build())
+                    new StringArgument().getRequired().shortName("value").identifier("value").summary("random value")
+                                        .build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
@@ -281,7 +285,7 @@ public class Main
             .commandBuilder()
             .cap(cap)
             .addDefaultHelpSubCommand(true)
-            .name("bigdoors")
+            .name("example.command.bigdoors")
             .headerSupplier(commandSender -> new Text(commandSender.getColorScheme())
                 .add("Parameters in angled brackets are required: ", TextType.HEADER)
                 .add("<", TextType.REQUIRED_PARAMETER)

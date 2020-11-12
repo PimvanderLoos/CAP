@@ -12,7 +12,8 @@ import org.junit.jupiter.api.Test;
 class RangeValidatorTest
 {
     public static final @NonNull ICommandSender commandSender = new DefaultCommandSender();
-    public static final @NonNull Argument<?> argument = Argument.valuesLessBuilder().shortName("a").summary("").build();
+    public static final @NonNull Argument<?> argument = Argument.valuesLessBuilder().shortName("a").summary("")
+                                                                .identifier("a").build();
     public static final @NonNull CAP cap = CAP.getDefault();
 
     @Test

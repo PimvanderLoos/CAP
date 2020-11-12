@@ -18,6 +18,7 @@ import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,7 +29,6 @@ import java.util.function.Supplier;
  * @param <T> The type of object the argument input is parsed into. This can be an integer, or a string, or anything
  *            else that can be parsed from a String.
  */
-@Getter
 public class Argument<T>
 {
     /**
@@ -66,6 +66,7 @@ public class Argument<T>
      * If this {@link Argument} is required, this will not be used. If it is optional, this is the value that will be
      * returned in case the argument input did not have a value for this {@link Argument}.
      */
+    @Getter
     protected final @Nullable T defaultValue;
 
     /**
@@ -73,6 +74,7 @@ public class Argument<T>
      *
      * @see RepeatableArgument
      */
+    @Getter
     protected final boolean repeatable;
 
     /**
@@ -82,6 +84,7 @@ public class Argument<T>
      * <p>
      * An example of a valueless argument would be '--staged' in 'git diff --staged'
      */
+    @Getter
     protected final boolean valuesLess;
 
     /**
@@ -89,11 +92,13 @@ public class Argument<T>
      * <p>
      * The position is determined by the order in which the {@link Argument}s are added to the {@link Command}.
      */
+    @Getter
     protected final boolean positional;
 
     /**
      * Whether or not this {@link Argument} is required.
      */
+    @Getter
     protected final boolean required;
 
     /**
@@ -101,6 +106,7 @@ public class Argument<T>
      * <p>
      * For example, if this {@link Argument} requires a playername, it could provide a list of names of nearby players.
      */
+    @Getter
     protected final @Nullable ITabCompleteFunction tabCompleteFunction;
 
     /**
@@ -109,11 +115,13 @@ public class Argument<T>
      * For example, this can be used to make sure some integer is in the range of [10, 20] (see {@link
      * RangeValidator#integerRangeValidator(int, int)}).
      */
+    @Getter
     protected final @Nullable IArgumentValidator<T> argumentValidator;
 
     /**
-     * The identifier to use for retrieving results. Defaults: {@link #shortName}.
+     * The identifier to use for retrieving results.
      */
+    @Getter
     protected final @NonNull String identifier;
 
     /**
@@ -136,7 +144,7 @@ public class Argument<T>
                        final @NonNull String label, final boolean valuesLess, final boolean repeatable,
                        final boolean positional, final boolean required,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
         this.shortName = shortName;
         this.longName = longName;
@@ -150,7 +158,7 @@ public class Argument<T>
         this.required = required;
         this.tabCompleteFunction = tabCompleteFunction;
         this.argumentValidator = argumentValidator;
-        this.identifier = Util.valOrDefault(identifier, shortName);
+        this.identifier = identifier;
     }
 
     /**
@@ -168,7 +176,7 @@ public class Argument<T>
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
         this(shortName, longName, summary, parser, null, "", false, false, true, true, tabCompleteFunction,
              argumentValidator, identifier);
@@ -189,7 +197,7 @@ public class Argument<T>
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @NonNull ArgumentParser<T> parser,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
         this(shortName, longName, summary, parser, null, "", false, false, true, false, tabCompleteFunction,
              argumentValidator, identifier);
@@ -212,7 +220,7 @@ public class Argument<T>
     protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
                        final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
                        final @NonNull String label, final @Nullable ITabCompleteFunction tabCompleteFunction,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @Nullable String identifier)
+                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
         this(shortName, longName, summary, parser, defaultValue, label, false, false, false, false, tabCompleteFunction,
              argumentValidator, identifier);
@@ -230,7 +238,7 @@ public class Argument<T>
     @SuppressWarnings("unchecked")
     @Builder(builderMethodName = "privateValuesLessBuilder", builderClassName = "ValuesLessBuilder")
     private Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
-                     final @Nullable Boolean value, final @Nullable String identifier)
+                     final @Nullable Boolean value, final @NonNull String identifier)
     {
         this(shortName, longName, summary,
              (ArgumentParser<T>) ValuelessParser.create(Util.valOrDefault(value, Boolean.TRUE)),
@@ -258,6 +266,78 @@ public class Argument<T>
     public static @NonNull ValuesLessBuilder<Boolean> valuesLessBuilder()
     {
         return Argument.privateValuesLessBuilder();
+    }
+
+    /**
+     * Gets the short name of this {@link Argument}.
+     *
+     * @param cap    The {@link CAP} instance to use for localization.
+     * @param locale The {@link Locale} to use.
+     * @return The localized short name.
+     */
+    public final @NonNull String getShortName(final @NonNull CAP cap, final @Nullable Locale locale)
+    {
+        return cap.getMessage(shortName, locale);
+    }
+
+    /**
+     * Gets the (optional) long name of this {@link Argument}. For example, a help command usually has the short name
+     * '-h' and the long name '--help'.
+     *
+     * @param cap    The {@link CAP} instance to use for localization.
+     * @param locale The {@link Locale} to use.
+     * @return The localized long name.
+     */
+    public final @Nullable String getLongName(final @NonNull CAP cap, final @Nullable Locale locale)
+    {
+        return longName == null ? null : cap.getMessage(longName, locale);
+    }
+
+    /**
+     * Gets the key for the short name of this {@link Argument}.
+     *
+     * @return The key for the short name.
+     */
+    public final @NonNull String getShortNameKey()
+    {
+        return shortName;
+    }
+
+    /**
+     * Gets the key for the long name of this {@link Argument}.
+     *
+     * @return The key for the long name.
+     */
+    public final @Nullable String getLongNameKey()
+    {
+        return longName;
+    }
+
+    /**
+     * Gets the short summary to describe what this argument does and/or how it is used.
+     *
+     * @param cap    The {@link CAP} instance to use for localization.
+     * @param locale The {@link Locale} to use.
+     * @return The localized summary.
+     */
+    public final @NonNull String getSummary(final @NonNull CAP cap, final @Nullable Locale locale)
+    {
+        return cap.getMessage(summary, locale);
+    }
+
+    /**
+     * Gets the label of the this {@link Argument}. For example, in the case of '[-p=player]', "player" would be the
+     * label.
+     * <p>
+     * This is also the name by which this Argument's result can be retrieved.
+     *
+     * @param cap    The {@link CAP} instance to use for localization.
+     * @param locale The {@link Locale} to use.
+     * @return The localized label.
+     */
+    public final @NonNull String getLabel(final @NonNull CAP cap, final @Nullable Locale locale)
+    {
+        return cap.getMessage(label, locale);
     }
 
     /**

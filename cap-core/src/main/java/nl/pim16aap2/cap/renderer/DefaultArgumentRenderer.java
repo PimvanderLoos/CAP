@@ -2,6 +2,7 @@ package nl.pim16aap2.cap.renderer;
 
 import lombok.Builder;
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
@@ -9,6 +10,8 @@ import nl.pim16aap2.cap.text.TextType;
 import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
 
 /**
  * Implements the default implementation of the {@link IArgumentRenderer}.
@@ -56,40 +59,44 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
     }
 
     @Override
-    public @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument)
+    public @NonNull Text render(final @NonNull CAP cap, final @Nullable Locale locale,
+                                final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument)
     {
-        return render(colorScheme, argument, false);
+        return render(cap, locale, colorScheme, argument, false);
     }
 
     @Override
-    public @NonNull Text renderLongFormat(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
+    public @NonNull Text renderLongFormat(final @NonNull CAP cap, final @Nullable Locale locale,
+                                          final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                           final @NonNull String summaryIndent)
     {
-        final Text text = render(colorScheme, argument);
-        if (argument.getLongName() != null)
-            text.add(", ").add(render(colorScheme, argument, true));
+        final Text text = render(cap, locale, colorScheme, argument);
+        if (argument.getLongName(cap, locale) != null)
+            text.add(", ").add(render(cap, locale, colorScheme, argument, true));
 
-        if (!argument.getSummary().equals(""))
-            text.add("\n").add(summaryIndent).add(argument.getSummary(), TextType.SUMMARY);
+        if (!argument.getSummary(cap, locale).equals(""))
+            text.add("\n").add(summaryIndent)
+                .add(cap.getMessage(argument.getSummary(cap, locale), locale), TextType.SUMMARY);
         return text;
     }
 
     /**
-     * Renders an argument. See {@link #render(ColorScheme, Argument)}.
+     * Renders an argument. See {@link #render(CAP, Locale, ColorScheme, Argument)}.
      *
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
-     * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
-     *                    long name before using this! When this value is false, {@link Argument#getShortName()} is
-     *                    used.
+     * @param useLongName Whether to use {@link Argument#getLongName(CAP, Locale)}. Please ensure that the {@link
+     *                    Argument} has a long name before using this! When this value is false, {@link
+     *                    Argument#getShortName(CAP, Locale)} is used.
      * @return The {@link Text} representing the {@link Argument}.
      */
-    protected @NonNull Text render(final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
+    protected @NonNull Text render(final @NonNull CAP cap, final @Nullable Locale locale,
+                                   final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                    final boolean useLongName)
     {
         return argument.isRequired() ?
-               renderRequired(colorScheme, argument, useLongName) :
-               renderOptional(colorScheme, argument, useLongName);
+               renderRequired(cap, locale, colorScheme, argument, useLongName) :
+               renderOptional(cap, locale, colorScheme, argument, useLongName);
     }
 
     /**
@@ -97,18 +104,18 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      *
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
-     * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
-     *                    long name before using this! When this value is false, {@link Argument#getShortName()} is
-     *                    used.
+     * @param useLongName Whether to use {@link Argument#getLongName(CAP, Locale)}. Please ensure that the {@link
+     *                    Argument} has a long name before using this! When this value is false, {@link
+     *                    Argument#getShortName(CAP, Locale)} is used.
      * @return The {@link Text} representing an optional {@link Argument}.
      */
-    protected @NonNull Text renderOptional(final @NonNull ColorScheme colorScheme,
-                                           final @NonNull Argument<?> argument,
+    protected @NonNull Text renderOptional(final @NonNull CAP cap, final @Nullable Locale locale,
+                                           final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                            final boolean useLongName)
     {
         final String suffix = argument.isRepeatable() ? "+" : "";
         return new Text(colorScheme).add(optionalBrackets.first, TextType.OPTIONAL_PARAMETER)
-                                    .add(renderArgument(colorScheme, argument, useLongName))
+                                    .add(renderArgument(cap, locale, colorScheme, argument, useLongName))
                                     .add(optionalBrackets.second + suffix, TextType.OPTIONAL_PARAMETER);
     }
 
@@ -117,18 +124,18 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      *
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
-     * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
-     *                    long name before using this! When this value is false, {@link Argument#getShortName()} is
-     *                    used.
+     * @param useLongName Whether to use {@link Argument#getLongName(CAP, Locale)}. Please ensure that the {@link
+     *                    Argument} has a long name before using this! When this value is false, {@link
+     *                    Argument#getShortName(CAP, Locale)} is used.
      * @return The {@link Text} representing a required {@link Argument}.
      */
-    protected @NonNull Text renderRequired(final @NonNull ColorScheme colorScheme,
-                                           final @NonNull Argument<?> argument,
+    protected @NonNull Text renderRequired(final @NonNull CAP cap, final @Nullable Locale locale,
+                                           final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                            final boolean useLongName)
     {
         final String suffix = argument.isRepeatable() ? "+" : "";
         return new Text(colorScheme).add(requiredBrackets.first, TextType.REQUIRED_PARAMETER)
-                                    .add(renderArgument(colorScheme, argument, useLongName))
+                                    .add(renderArgument(cap, locale, colorScheme, argument, useLongName))
                                     .add(requiredBrackets.second + suffix, TextType.REQUIRED_PARAMETER);
     }
 
@@ -138,17 +145,19 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      *
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
-     * @param useLongName Whether to use {@link Argument#getLongName()}. Please ensure that the {@link Argument} has a
-     *                    long name before using this! When this value is false, {@link Argument#getShortName()} is
-     *                    used.
+     * @param useLongName Whether to use {@link Argument#getLongName(CAP, Locale)}. Please ensure that the {@link
+     *                    Argument} has a long name before using this! When this value is false, {@link
+     *                    Argument#getShortName(CAP, Locale)}  is used.
      * @return The {@link Text} representing the {@link Argument}.
      */
-    protected @NonNull Text renderArgument(final @NonNull ColorScheme colorScheme,
-                                           final @NonNull Argument<?> argument,
+    protected @NonNull Text renderArgument(final @NonNull CAP cap, final @Nullable Locale locale,
+                                           final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                            final boolean useLongName)
     {
-        final Text text = new Text(colorScheme);
-        final String argLabel = argument.getLabel().equals("") ? argument.getShortName() : argument.getLabel();
+        final @NonNull Text text = new Text(colorScheme);
+        @NonNull String argLabel = argument.getLabel(cap, locale).equals("") ? argument.getShortName(cap, locale) :
+                                   argument.getLabel(cap, locale);
+        argLabel = cap.getMessage(argLabel, locale);
 
         if (argument.isPositional())
             return text.add(argLabel, (argument.isRequired() ?
@@ -170,9 +179,11 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
         }
 
         // TODO: The '-' should be configurable, right?
-        final @NonNull String argumentName = useLongName ?
-                                             ("--" + argument.getLongName()) :
-                                             ("-" + argument.getShortName());
+        @NonNull String argumentName = useLongName ?
+                                       ("--" + argument.getLongName(cap, locale)) :
+                                       ("-" + argument.getShortName(cap, locale));
+        argumentName = cap.getMessage(argumentName, locale);
+
         text.add(argumentName, name);
 
         if (argument.isValuesLess())

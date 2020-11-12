@@ -1,6 +1,7 @@
 package nl.pim16aap2.cap.command;
 
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import org.junit.jupiter.api.Assertions;
@@ -15,11 +16,13 @@ class ArgumentManagerTest
     void caseSensitive()
     {
         final @NonNull List<Argument<?>> arguments = Arrays.asList(
-            new IntegerArgument().getOptional().shortName("argumenta").label("argumenta").summary("").build(),
-            new IntegerArgument().getOptional().shortName("argumentB").label("argumentB").summary("").build()
+            new IntegerArgument().getOptional().shortName("argumenta").identifier("argumenta")
+                                 .label("argumenta").summary("").build(),
+            new IntegerArgument().getOptional().shortName("argumentB").identifier("argumentB")
+                                 .label("argumentB").summary("").build()
         );
 
-        final @NonNull ArgumentManager argumentManager = new ArgumentManager(arguments, true);
+        final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, true);
         Assertions.assertEquals("caseSensitive", argumentManager.getArgumentNameCaseCheck("caseSensitive"));
 
         Assertions.assertTrue(argumentManager.getArgument("argumenta").isPresent());
@@ -33,11 +36,13 @@ class ArgumentManagerTest
     void caseInsensitive()
     {
         final @NonNull List<Argument<?>> arguments = Arrays.asList(
-            new IntegerArgument().getOptional().shortName("argumenta").label("argumenta").summary("").build(),
-            new IntegerArgument().getOptional().shortName("argumentB").label("argumentB").summary("").build()
+            new IntegerArgument().getOptional().shortName("argumenta").identifier("argumenta")
+                                 .label("argumenta").summary("").build(),
+            new IntegerArgument().getOptional().shortName("argumentB").identifier("argumentB")
+                                 .label("argumentB").summary("").build()
         );
 
-        final @NonNull ArgumentManager argumentManager = new ArgumentManager(arguments, false);
+        final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, false);
         Assertions.assertEquals("caseinsensitive", argumentManager.getArgumentNameCaseCheck("caseInsensitive"));
 
         Assertions.assertTrue(argumentManager.getArgument("argumenta").isPresent());

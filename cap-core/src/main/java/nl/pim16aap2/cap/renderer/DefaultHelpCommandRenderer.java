@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -16,6 +17,7 @@ import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -79,13 +81,11 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      *                                  Default = False.
      * @param argumentRenderer          The {@link IArgumentRenderer} renderer that will be used to render arguments.
      *                                  When this value is not provided, {@link DefaultArgumentRenderer} will be used.
-     * @param startAt1                  Whether to start counting pages at 0 (<it>false</it>) or 1 (<it>true</it>).
-     *                                  Default = true.
      */
     protected DefaultHelpCommandRenderer(final int pageSize, final int firstPageSize, final boolean displayHeader,
                                          final @NonNull String descriptionIndent,
                                          final boolean displayArgumentsForSimple,
-                                         final @NonNull IArgumentRenderer argumentRenderer, final boolean startAt1)
+                                         final @NonNull IArgumentRenderer argumentRenderer)
     {
         this.pageSize = pageSize;
         this.firstPageSize = firstPageSize;
@@ -148,13 +148,14 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * Renders the page count header that shows the current page you're viewing and the total number of available
      * pages.
      *
-     * @param text      The {@link Text} instance to add the page count header to.
-     * @param page      The current page number.
-     * @param pageCount The total number of available pages.
-     * @param command   The command for which to render the page count header.
+     * @param commandSender The {@link ICommandSender} for which to render the page count header.
+     * @param text          The {@link Text} instance to add the page count header to.
+     * @param page          The current page number.
+     * @param pageCount     The total number of available pages.
+     * @param command       The command for which to render the page count header.
      */
-    protected void renderPageCountHeader(final @NonNull Text text, final int page, final int pageCount,
-                                         final @NonNull Command command)
+    protected void renderPageCountHeader(final @NonNull ICommandSender commandSender, final @NonNull Text text,
+                                         final int page, final int pageCount, final @NonNull Command command)
     {
         if (page == 1)
             text.add("--", TextType.REGULAR_TEXT);
@@ -182,14 +183,15 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
             throw new IllegalValueException(command, Integer.toString(page), command.getCap().isDebug());
 
         final @NonNull Text text = new Text(colorScheme);
-        renderPageCountHeader(text, page, pageCount, command);
+        renderPageCountHeader(commandSender, text, page, pageCount, command);
         if (page == 1)
             return renderFirstPage(commandSender, colorScheme, text, command);
 
         // Subtract 2, because we start counting at 1 and because we want to know
         // how many commands were printed up to the previous page.
         final int skip = firstPageSize + (page - 2) * pageSize;
-        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command), command, pageSize, skip);
+        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command, commandSender.getLocale()),
+                       command, pageSize, skip);
         return text;
     }
 
@@ -215,12 +217,14 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     /**
      * Adds the header for the long help menu of a {@link Command}.
      *
-     * @param command The {@link Command} for which to render the long help menu header.
-     * @param text    The {@link Text} instance to add it to.
+     * @param commandSender The {@link ICommandSender} that is used for localization.
+     * @param command       The {@link Command} for which to render the long help menu header.
+     * @param text          The {@link Text} instance to add it to.
      */
-    protected void renderHelpHeader(final @NonNull Command command, final @NonNull Text text)
+    protected void renderHelpHeader(final @NonNull ICommandSender commandSender, final @NonNull Command command,
+                                    final @NonNull Text text)
     {
-        text.add("\n--- " + command.getSectionTitle() + " ---\n", TextType.SECTION);
+        text.add("\n--- " + command.getSectionTitle(commandSender) + " ---\n", TextType.SECTION);
     }
 
     @Override
@@ -231,13 +235,14 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
             return new Text(colorScheme);
 
         final @NonNull Text text = new Text(colorScheme);
-        renderHelpHeader(command, text);
-        text.add(getBaseSuperCommand(command) + command.getName(), TextType.COMMAND);
-        renderArgumentsShort(colorScheme, text, command);
+        renderHelpHeader(commandSender, command, text);
+        text.add(getBaseSuperCommand(command, commandSender.getLocale()) +
+                     command.getName(commandSender.getLocale()), TextType.COMMAND);
+        renderArgumentsShort(commandSender.getLocale(), colorScheme, text, command);
 
         if (!command.getDescription(commandSender).equals(""))
             text.add("\n").add(descriptionIndent).add(command.getDescription(commandSender), TextType.DESCRIPTION);
-        renderArgumentsLong(colorScheme, text, command);
+        renderArgumentsLong(commandSender.getLocale(), colorScheme, text, command);
         return text;
     }
 
@@ -250,12 +255,15 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      * @param command The {@link Optional} {@link Command} whose super commands to add to the text. If it has no super
      *                commands (or isn't {{@link Optional#isPresent()}}), it will only append {@link #COMMAND_PREFIX}
      *                and the name of this command itself (if possible).
+     * @param locale  The {@link Locale} to use for rendering the {@link Command}.
      * @return The String with all the super {@link Command}s of the provided {@link Command}.
      */
-    protected @NonNull String getBaseSuperCommand(final @NonNull Optional<Command> command)
+    protected @NonNull String getBaseSuperCommand(final @NonNull Optional<Command> command,
+                                                  final @Nullable Locale locale)
     {
-        return command.map(value -> getBaseSuperCommand(value.getSuperCommand()) + value.getName() + " ")
-                      .orElse(COMMAND_PREFIX);
+        return command.map(
+            value -> getBaseSuperCommand(value.getSuperCommand(), locale) + value.getName(locale) + " "
+        ).orElse(COMMAND_PREFIX);
     }
 
     /**
@@ -265,11 +273,12 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
      *
      * @param command The {@link Command} whose super commands to add to the text. If it has no super commands, it will
      *                only append {@link #COMMAND_PREFIX}.
+     * @param locale  The {@link Locale} to use for rendering the {@link Command}.
      * @return The String with all the super {@link Command}s of the provided {@link Command}.
      */
-    protected @NonNull String getBaseSuperCommand(final @NonNull Command command)
+    protected @NonNull String getBaseSuperCommand(final @NonNull Command command, final @Nullable Locale locale)
     {
-        return getBaseSuperCommand(command.getSuperCommand());
+        return getBaseSuperCommand(command.getSuperCommand(), locale);
     }
 
     @Override
@@ -300,8 +309,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (displayHeader && !command.getHeader(commandSender).equals(""))
             text.add(command.getHeader(commandSender), TextType.HEADER).add("\n");
 
-        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command),
-                       command, firstPageSize, 0);
+        renderCommands(commandSender, colorScheme, text, getBaseSuperCommand(command, null), command, firstPageSize, 0);
 
         return text;
     }
@@ -353,7 +361,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 
         // The current command has to be appended to the super commands, because the
         // current command is the super command of all its sub commands (by definition).
-        final String newSuperCommands = superCommands + command.getName() + " ";
+        final String newSuperCommands = superCommands + command.getName(null) + " ";
 
         for (final Command subCommand : command.getSubCommands())
         {
@@ -383,43 +391,47 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
                                  final @NonNull Text text, final @NonNull Command command,
                                  final @NonNull String superCommands)
     {
-        text.add(superCommands + command.getName(), TextType.COMMAND);
-        renderArgumentsShort(colorScheme, text, command);
+        text.add(superCommands + command.getName(commandSender.getLocale()), TextType.COMMAND);
+        renderArgumentsShort(commandSender.getLocale(), colorScheme, text, command);
 
         if (!command.getSummary(commandSender).equals(""))
             text.add("\n").add(descriptionIndent).add(command.getSummary(commandSender), TextType.SUMMARY);
     }
 
     /**
-     * Renders the arguments in short format, see {@link IArgumentRenderer#render(ColorScheme, Argument)}.
+     * Renders the arguments in short format, see {@link IArgumentRenderer#render(CAP, Locale, ColorScheme, Argument)}.
      * <p>
      * The arguments are separated by spaces.
      *
+     * @param locale      The {@link Locale} to use for rendering the {@link Command}.
      * @param colorScheme The {@link ColorScheme} to use to render the {@link Text}.
      * @param text        The {@link Text} to append the rendered {@link Argument}s to.
      * @param command     The {@link Command} for which to render the {@link Argument}s.
      */
-    protected void renderArgumentsShort(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
-                                        final @NonNull Command command)
+    protected void renderArgumentsShort(final @Nullable Locale locale, final @NonNull ColorScheme colorScheme,
+                                        final @NonNull Text text, final @NonNull Command command)
     {
         for (final Argument<?> argument : command.getArgumentManager().getArguments())
-            text.add(" ").add(argumentRenderer.render(colorScheme, argument));
+            text.add(" ").add(argumentRenderer.render(command.getCap(), locale, colorScheme, argument));
     }
 
     /**
-     * Renders the arguments in short format, see {@link IArgumentRenderer#renderLongFormat(ColorScheme, Argument,
-     * String)}.
+     * Renders the arguments in short format, see {@link IArgumentRenderer#renderLongFormat(CAP, Locale, ColorScheme,
+     * Argument, String)}.
      * <p>
      * The arguments (and their summaries) are separated by newlines.
      *
+     * @param locale      The {@link Locale} to use for rendering the {@link Command}.
      * @param colorScheme The {@link ColorScheme} to use to render the {@link Text}.
      * @param text        The {@link Text} to append the rendered {@link Argument}s to.
      * @param command     The {@link Command} for which to render the {@link Argument}s.
      */
-    protected void renderArgumentsLong(final @NonNull ColorScheme colorScheme, final @NonNull Text text,
-                                       final @NonNull Command command)
+    protected void renderArgumentsLong(final @Nullable Locale locale, final @NonNull ColorScheme colorScheme,
+                                       final @NonNull Text text, final @NonNull Command command)
     {
         for (final Argument<?> argument : command.getArgumentManager().getArguments())
-            text.add("\n").add(argumentRenderer.renderLongFormat(colorScheme, argument, descriptionIndent));
+            text.add("\n")
+                .add(argumentRenderer
+                         .renderLongFormat(command.getCap(), locale, colorScheme, argument, descriptionIndent));
     }
 }

@@ -377,7 +377,7 @@ public class CommandParser
 
             // If the command has a super command, it cannot possible be right to be the first argument.
             if (baseCommand.getSuperCommand().isPresent())
-                throw new CommandNotFoundException(baseCommand.getName(), cap.isDebug());
+                throw new CommandNotFoundException(baseCommand.getName(commandSender.getLocale()), cap.isDebug());
 
             return getLastCommand(baseCommand, 0);
         }
@@ -400,7 +400,8 @@ public class CommandParser
 
         if (!subCommand.getSuperCommand().isPresent() || subCommand.getSuperCommand().get() != command)
             // TODO: More specific exception.
-            throw new CommandNotFoundException("super command of: " + subCommand.getName(), cap.isDebug());
+            throw new CommandNotFoundException("super command of: " + subCommand.getName(commandSender.getLocale()),
+                                               cap.isDebug());
 
         return new ParsedCommand(subCommand, nextIdx);
     }

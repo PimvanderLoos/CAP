@@ -1,17 +1,17 @@
 package nl.pim16aap2.cap.command;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.util.LocalizedMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -19,33 +19,34 @@ import java.util.Optional;
  *
  * @author Pim
  */
-@Getter
 public class ArgumentManager
 {
     /**
      * An (unsorted) map containing all {@link Argument}s, with their {@link Argument#getIdentifier()} as key.
      */
-    protected final @NonNull Map<@NonNull String, @NonNull Argument<?>> argumentsMap;
+    protected final @NonNull ArgumentMap argumentsMap;
 
     /**
      * A list of all {@link Argument}s, sorted by {@link #COMPARATOR}.
      */
-    @Getter(AccessLevel.PRIVATE)
     protected final @NonNull List<@NonNull Argument<?>> argumentsList;
 
     /**
      * A list of required {@link Argument}s.
      */
+    @Getter
     protected final @NonNull List<@NonNull Argument<?>> requiredArguments = new ArrayList<>(0);
 
     /**
      * A list of positional {@link Argument}s. The position depends on insertion order.
      */
+    @Getter
     protected final @NonNull List<@NonNull Argument<?>> positionalArguments = new ArrayList<>(0);
 
     /**
      * A list of optional {@link Argument}s.
      */
+    @Getter
     protected final @NonNull ArrayList<@NonNull Argument<?>> optionalArguments = new ArrayList<>(0);
 
     /**
@@ -53,10 +54,10 @@ public class ArgumentManager
      */
     protected final boolean caseSensitive;
 
-    ArgumentManager(final @NonNull List<Argument<?>> arguments, final boolean caseSensitive)
+    ArgumentManager(final @NonNull CAP cap, final @NonNull List<Argument<?>> arguments, final boolean caseSensitive)
     {
         this.caseSensitive = caseSensitive;
-        argumentsMap = new HashMap<>(arguments.size());
+        argumentsMap = new ArgumentMap(this, cap, arguments.size());
         argumentsList = new ArrayList<>(arguments);
 
         // First sort the arguments we received so they are put in the arguments map in the right order.
@@ -64,9 +65,7 @@ public class ArgumentManager
 
         for (final @NonNull Argument<?> argument : argumentsList)
         {
-            argumentsMap.put(getArgumentNameCaseCheck(argument.getShortName()), argument);
-            if (argument.getLongName() != null)
-                argumentsMap.put(getArgumentNameCaseCheck(argument.getLongName()), argument);
+            argumentsMap.addArgument(argument);
 
             if (argument.isRequired())
                 requiredArguments.add(argument);
@@ -95,14 +94,27 @@ public class ArgumentManager
     }
 
     /**
-     * Gets an argument from its name. See {@link Argument#getShortName()}.
+     * Gets an argument from its name. See {@link Argument#getShortNameKey()}.
      *
      * @param argumentName The name of the {@link Argument}.
      * @return The {@link Argument}, if one is registered by the provided name.
      */
     public @NonNull Optional<Argument<?>> getArgument(final @Nullable String argumentName)
     {
-        return Optional.ofNullable(argumentsMap.get(getArgumentNameCaseCheck(argumentName)));
+        return getArgument(argumentName, null);
+    }
+
+    /**
+     * Gets an argument from its name. See {@link Argument#getShortNameKey()}.
+     *
+     * @param argumentName The name of the {@link Argument}.
+     * @param locale       The {@link Locale} for which to get the {@link Command}.
+     * @return The {@link Argument}, if one is registered by the provided name.
+     */
+    public @NonNull Optional<Argument<?>> getArgument(final @Nullable String argumentName,
+                                                      final @Nullable Locale locale)
+    {
+        return argumentsMap.getArgument(argumentName, locale);
     }
 
     /**
@@ -143,4 +155,58 @@ public class ArgumentManager
             return argument.isRepeatable() ? 1 : -1;
         return 0;
     };
+
+    private static final class ArgumentMap extends LocalizedMap<Argument<?>>
+    {
+        protected final @NonNull ArgumentManager argumentManager;
+
+        protected ArgumentMap(final @NonNull ArgumentManager argumentManager, final @NonNull CAP cap,
+                              final int initialCapacity)
+        {
+            super(cap, initialCapacity);
+            this.argumentManager = argumentManager;
+        }
+
+        protected ArgumentMap(final @NonNull ArgumentManager argumentManager, final @NonNull CAP cap)
+        {
+            super(cap);
+            this.argumentManager = argumentManager;
+        }
+
+        /**
+         * Adds the provided command for every locale.
+         *
+         * @param argument The {@link Argument} to register.
+         */
+        public void addArgument(final @NonNull Argument<?> argument)
+        {
+            addEntry(argument.getShortNameKey(), argument, argumentManager::getArgumentNameCaseCheck);
+            if (argument.getLongNameKey() != null)
+                addEntry(argument.getLongNameKey(), argument, argumentManager::getArgumentNameCaseCheck);
+        }
+
+        /**
+         * Adds the provided command for every locale.
+         *
+         * @param name     The (long or short) name to use as the key for the {@link Argument}.
+         * @param argument The {@link Argument} to register.
+         */
+        public void addEntry(final @NonNull String name, final @NonNull Argument<?> argument)
+        {
+            addEntry(name, argument, argumentManager::getArgumentNameCaseCheck);
+        }
+
+        /**
+         * Gets a {@link Argument} from its name.
+         *
+         * @param name   The name of the {@link Argument}. See {@link Argument#getShortNameKey()} and {@link
+         *               Argument#getLongNameKey()}.
+         * @param locale The {@link Locale} for which to get the {@link Argument}.
+         * @return The {@link Argument} with the given name, if it is registered.
+         */
+        public @NonNull Optional<Argument<?>> getArgument(@Nullable String name, @Nullable Locale locale)
+        {
+            return getEntry(name, locale, argumentManager::getArgumentNameCaseCheck);
+        }
+    }
 }

@@ -17,7 +17,9 @@ import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -30,23 +32,42 @@ import java.util.function.Function;
 public class Command
 {
     /**
-     * The default help argument to use in case that is required.
+     * The default help argument to use in case that is required. This is the non-localized version. If you want to
+     * enable localization, see {@link #DEFAULT_HELP_ARGUMENT_LOCALIZED}.
      */
     static final @NonNull Argument<Boolean> DEFAULT_HELP_ARGUMENT =
         Argument.valuesLessBuilder().shortName("h").longName("help").identifier("help")
                 .summary("Displays the help menu for this command.").build();
 
     /**
-     * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s.
+     * The default help argument to use in case that is required. This is the localized version. If you want to get a
+     * non-localized version, see {@link #DEFAULT_VIRTUAL_ARGUMENT}.
+     */
+    static final @NonNull Argument<Boolean> DEFAULT_HELP_ARGUMENT_LOCALIZED =
+        Argument.valuesLessBuilder().identifier("help")
+                .shortName("default.helpArgument.shortName")
+                .longName("default.helpArgument.longName")
+                .summary("default.helpArgument.summary").build();
+
+    /**
+     * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s. This is the non-localized
+     * version. If you want to * enable localization, see {@link #DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED}.
      */
     static final @NonNull Argument<Integer> DEFAULT_VIRTUAL_ARGUMENT =
         new IntegerArgument().getOptionalPositional().shortName("page").identifier("page")
                              .summary("The page number of the help menu to display").build();
 
     /**
+     * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s. This is the localized version.
+     * If you want to get a * non-localized version, see {@link #DEFAULT_VIRTUAL_ARGUMENT}.
+     */
+    static final @NonNull Argument<Integer> DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED =
+        new IntegerArgument().getOptionalPositional().shortName("default.virtualArgument.shortName").identifier("page")
+                             .summary("default.virtualArgument.summary").build();
+
+    /**
      * The name of this command.
      */
-    @Getter
     protected final @NonNull String name;
 
     /**
@@ -57,8 +78,7 @@ public class Command
     /**
      * The list of subcommands this command has.
      */
-    @Getter
-    protected final @NonNull List<@NonNull Command> subCommands;
+    protected final @NonNull CommandMap subCommands;
 
     /**
      * The {@link ArgumentManager} that manages all the arguments this command has.
@@ -94,7 +114,6 @@ public class Command
     /**
      * The title of the section for the command-specific help menu.
      */
-    @Getter
     protected @NonNull String sectionTitle;
 
     /**
@@ -226,8 +245,7 @@ public class Command
         this.header = header;
         this.headerSupplier = headerSupplier;
 
-        // If there are no subcommands, make an empty list. If there are subcommands, put them in a modifiable list.
-        this.subCommands = subCommands == null ? new ArrayList<>(0) : new ArrayList<>(subCommands);
+        this.subCommands = new CommandMap(cap);
         this.commandExecutor = virtual ? Command::virtualCommandExecutor : commandExecutor;
         this.virtual = virtual;
 
@@ -235,16 +253,19 @@ public class Command
 
         this.helpCommand = helpCommand;
         if (helpCommand == null && Util.valOrDefault(addDefaultHelpSubCommand, false))
-            this.helpCommand = DefaultHelpCommand.getDefault(cap);
+            this.helpCommand = DefaultHelpCommand.getDefault(cap, cap.localizationEnabled());
         if (this.helpCommand != null)
-            this.subCommands.add(0, this.helpCommand);
+            this.subCommands.addCommand(this.helpCommand);
 
-        this.subCommands.forEach(subCommand -> subCommand.superCommand = Optional.of(this));
+        if (subCommands != null)
+            subCommands.forEach(this.subCommands::addCommand);
+
+        this.subCommands.get().values().forEach(subCommand -> subCommand.superCommand = Optional.of(this));
         this.cap = cap;
 
         this.helpArgument = helpArgument;
         if (helpArgument == null && Util.valOrDefault(addDefaultHelpArgument, false))
-            this.helpArgument = DEFAULT_HELP_ARGUMENT;
+            this.helpArgument = cap.localizationEnabled() ? DEFAULT_HELP_ARGUMENT_LOCALIZED : DEFAULT_HELP_ARGUMENT;
 
         // If there are no arguments, make an empty list. If there are arguments, put them in a modifiable list.
         arguments = arguments == null ? new ArrayList<>(0) : new ArrayList<>(arguments);
@@ -252,9 +273,9 @@ public class Command
         if (this.helpArgument != null)
             arguments.add(this.helpArgument);
         if (this.virtual)
-            arguments.add(Command.DEFAULT_VIRTUAL_ARGUMENT);
+            arguments.add(cap.localizationEnabled() ? DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED : DEFAULT_VIRTUAL_ARGUMENT);
 
-        argumentManager = new ArgumentManager(arguments, cap.isCaseSensitive());
+        argumentManager = new ArgumentManager(cap, arguments, cap.isCaseSensitive());
     }
 
     /**
@@ -303,7 +324,7 @@ public class Command
     private int calculateSubCommandCount()
     {
         int count = 0;
-        for (final @NonNull Command command : subCommands)
+        for (final @NonNull Command command : subCommands.get().values())
             count += command.getSubCommandCount() + 1;
         return count;
     }
@@ -319,6 +340,26 @@ public class Command
     }
 
     /**
+     * Gets the localizable key for the name of this {@link Command}. For example "example.command.name".
+     *
+     * @return THe localizable key for the name.
+     */
+    public @NonNull String getNameKey()
+    {
+        return name;
+    }
+
+    /**
+     * Gets the name of this command.
+     *
+     * @return The name of this command.
+     */
+    public @NonNull String getName(final @Nullable Locale locale)
+    {
+        return cap.getMessage(name, locale);
+    }
+
+    /**
      * Gets the description for this command.
      * <p>
      * First, it tries to return {@link #description}. If that is null, {@link #descriptionSupplier} is used instead. If
@@ -330,9 +371,9 @@ public class Command
     public @NonNull String getDescription(final @NonNull ICommandSender commandSender)
     {
         if (description != null)
-            return description;
+            return cap.getMessage(description, null);
         if (descriptionSupplier != null)
-            return descriptionSupplier.apply(commandSender);
+            return cap.getMessage(descriptionSupplier.apply(commandSender), null);
         return "";
     }
 
@@ -348,9 +389,9 @@ public class Command
     public @NonNull String getSummary(final @NonNull ICommandSender commandSender)
     {
         if (summary != null)
-            return summary;
+            return cap.getMessage(summary, commandSender.getLocale());
         if (summarySupplier != null)
-            return summarySupplier.apply(commandSender);
+            return cap.getMessage(summarySupplier.apply(commandSender), commandSender.getLocale());
         return "";
     }
 
@@ -366,10 +407,21 @@ public class Command
     public @NonNull String getHeader(final @NonNull ICommandSender commandSender)
     {
         if (header != null)
-            return header;
+            return cap.getMessage(header, commandSender.getLocale());
         if (headerSupplier != null)
-            return headerSupplier.apply(commandSender);
+            return cap.getMessage(headerSupplier.apply(commandSender), commandSender.getLocale());
         return "";
+    }
+
+    /**
+     * The title of the section for the command-specific help menu.
+     *
+     * @param commandSender The {@link ICommandSender} to use (for localization)
+     * @return The section title for this {@link Command}.
+     */
+    public @NonNull String getSectionTitle(final @NonNull ICommandSender commandSender)
+    {
+        return cap.getMessage(sectionTitle, commandSender.getLocale());
     }
 
     /**
@@ -397,18 +449,6 @@ public class Command
     }
 
     /**
-     * Searches for a sub{@link Command} of a given type.
-     *
-     * @param clazz The {@link Class} to search for.
-     * @param <T>   The Type of the sub{@link Command} to find.
-     * @return An {@link Optional} containing the sub{@link Command}.
-     */
-    public @NonNull <T> Optional<Command> getSubCommand(final @NonNull Class<T> clazz)
-    {
-        return Util.searchIterable(subCommands, (val) -> clazz.isAssignableFrom(val.getClass()));
-    }
-
-    /**
      * Searches for a sub{@link Command} with a given name.
      *
      * @param name The name of the sub{@link Command} to look for.
@@ -417,9 +457,20 @@ public class Command
      */
     public @NonNull Optional<Command> getSubCommand(final @Nullable String name)
     {
-        if (name == null)
-            return Optional.empty();
-        return Util.searchIterable(subCommands, (val) -> val.getName().equals(name));
+        return getSubCommand(name, null);
+    }
+
+    /**
+     * Searches for a sub{@link Command} with a given name.
+     *
+     * @param name   The name of the sub{@link Command} to look for.
+     * @param locale The {@link Locale} for which to get the {@link Command}.
+     * @return An optional containing the sub{@link Command} with the given name, if it exists, otherwise {@link
+     * Optional#empty()}.
+     */
+    public @NonNull Optional<Command> getSubCommand(final @Nullable String name, final @Nullable Locale locale)
+    {
+        return subCommands.getCommand(name, locale);
     }
 
     /**
@@ -435,5 +486,10 @@ public class Command
         if (permission == null)
             return true;
         return permission.apply(commandSender, this);
+    }
+
+    public @NonNull Collection<@NonNull Command> getSubCommands()
+    {
+        return subCommands.get().values();
     }
 }
