@@ -43,8 +43,6 @@ import java.util.Locale;
 //       confusing and bug-prone very fast.
 // TODO: Combining short flags into single argument. E.g. '/command -a -b -c' would be equivalent to '/command -abc'
 // TODO: Optional repeating positional?? `/bigdoors opendoor door_0 door_1 ... door_x`?
-// TODO: Add both non-localized and localized versions of all default stuff, so using either localized or non-localized
-//       setup is easy.
 // TODO: Add an ICommandSender factory. This makes it easier to set the per-user locales.
 // TODO: For Spigot, maybe we can keep track of the user's locales automatically. Just make a locale-provider interface.
 //       Listen to player logins and store them in a weak-valued hashmap with their locale (as long as the

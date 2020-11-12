@@ -12,7 +12,6 @@ import nl.pim16aap2.cap.argument.validator.number.MinimumValidator;
 import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
-import nl.pim16aap2.cap.command.DefaultHelpCommand;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.MissingValueException;
@@ -136,7 +135,7 @@ class CommandParserTest
         final Command bigdoors = Command
             .commandBuilder()
             .cap(cap)
-            .helpCommand(DefaultHelpCommand.getDefault(cap).toBuilder().name("help").build())
+            .addDefaultHelpSubCommand(true)
             .name("bigdoors")
             .subCommand(addOwner)
             .subCommand(numerical)

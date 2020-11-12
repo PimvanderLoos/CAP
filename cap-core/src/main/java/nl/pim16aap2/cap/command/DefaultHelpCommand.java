@@ -59,17 +59,31 @@ public class DefaultHelpCommand extends Command
     @Getter(AccessLevel.PRIVATE)
     private List<String> suggestions = null;
 
+    @Getter(AccessLevel.PRIVATE)
+    private final boolean enableLocalization;
+
     /**
-     * The default help argument.
+     * The default help argument. This is the non-localized version. If you want to enable localization, see {@link
+     * #DEFAULT_HELP_ARGUMENT_LOCALIZED}.
      */
     public static final @NonNull Argument<@NonNull String> DEFAULT_HELP_ARGUMENT =
         new StringArgument()
             .getOptionalPositional()
-//            .shortName("default.helpCommand.helpArgument.shortName")
-//            .summary("default.helpCommand.helpArgument.summary")
-//            .identifier("helpArg")
             .shortName("page/command")
             .summary("A page number of the name of a command.")
+            .identifier("helpArg")
+            .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
+            .build();
+
+    /**
+     * The default help argument. This is the localized version. If you want to get a non-localized version, see {@link
+     * #DEFAULT_HELP_ARGUMENT}.
+     */
+    public static final @NonNull Argument<@NonNull String> DEFAULT_HELP_ARGUMENT_LOCALIZED =
+        new StringArgument()
+            .getOptionalPositional()
+            .shortName("default.helpCommand.helpArgument.shortName")
+            .summary("default.helpCommand.helpArgument.summary")
             .identifier("helpArg")
             .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
             .build();
@@ -90,6 +104,10 @@ public class DefaultHelpCommand extends Command
      *                            header is provided.
      * @param commandExecutor     The function that will be executed by {@link CommandResult#run()}.
      * @param cap                 The {@link CAP} instance that manages this command.
+     * @param enableLocalization  Set to true to use localized names for this help command and its arguments. When set
+     *                            to true, the name will be 'default.helpCommand.name', when false it will be 'help'.
+     *                            <p>
+     *                            For the command name, this doesn't apply if the name was explicitly specified.
      */
     protected DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
                                  final @Nullable Function<ICommandSender, String> descriptionSupplier,
@@ -101,17 +119,20 @@ public class DefaultHelpCommand extends Command
                                  final @Nullable Argument<?> helpArgument,
                                  final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                                  final @NonNull CAP cap,
-                                 final @Nullable IHelpCommandRenderer helpCommandRenderer)
+                                 final @Nullable IHelpCommandRenderer helpCommandRenderer,
+                                 final boolean enableLocalization)
     {
-        super(Util.valOrDefault(name, "default.helpCommand.name"), description, descriptionSupplier, summary,
-//        super(Util.valOrDefault(shortName, "help"), description, descriptionSupplier, summary,
-              summarySupplier, header,
+        super(Util.valOrDefault(name, enableLocalization ? "default.helpCommand.name" : "help"), description,
+              descriptionSupplier, summary, summarySupplier, header,
               headerSupplier, sectionTitle, SUB_COMMANDS, HELP_COMMAND, ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT,
               ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
-              Collections.singletonList(Util.valOrDefault(helpArgument, DEFAULT_HELP_ARGUMENT)), VIRTUAL, cap,
+              Collections.singletonList(Util.valOrDefault(helpArgument,
+                                                          enableLocalization ? DEFAULT_HELP_ARGUMENT_LOCALIZED :
+                                                          DEFAULT_HELP_ARGUMENT)), VIRTUAL, cap,
               ((commandSender, command) -> true));
 
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, cap.getHelpCommandRenderer());
+        this.enableLocalization = enableLocalization;
     }
 
     /**
@@ -175,6 +196,10 @@ public class DefaultHelpCommand extends Command
      * @param headerSupplier      The supplier that is used to build the header. Note that this isn't used in case a
      *                            header is provided.
      * @param cap                 The {@link CAP} instance that manages this command.
+     * @param enableLocalization  Set to true to use localized names for this help command and its arguments. When set
+     *                            to true, the name will be 'default.helpCommand.name', when false it will be 'help'.
+     *                            <p>
+     *                            For the command name, this doesn't apply if the name was explicitly specified.
      */
     @Builder(builderMethodName = "helpCommandBuilder", toBuilder = true)
     public DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
@@ -186,10 +211,12 @@ public class DefaultHelpCommand extends Command
                               final @Nullable String sectionTitle,
                               final @Nullable Argument<?> helpArgument,
                               final @NonNull CAP cap,
-                              final @Nullable IHelpCommandRenderer helpCommandRenderer)
+                              final @Nullable IHelpCommandRenderer helpCommandRenderer,
+                              final boolean enableLocalization)
     {
         this(name, description, descriptionSupplier, summary, summarySupplier, header, headerSupplier, sectionTitle,
-             helpArgument, DefaultHelpCommand::defaultHelpCommandExecutor, cap, helpCommandRenderer);
+             helpArgument, DefaultHelpCommand::defaultHelpCommandExecutor, cap, helpCommandRenderer,
+             enableLocalization);
     }
 
     /**
@@ -201,8 +228,25 @@ public class DefaultHelpCommand extends Command
      */
     public static @NonNull DefaultHelpCommand getDefault(final @NonNull CAP cap)
     {
+        return getDefault(cap, false);
+    }
+
+    /**
+     * Gets a new {@link DefaultHelpCommand} with all the default settings. Use {@link #toBuilder()} if you wish to
+     * modify these settings (or just create a new one).
+     *
+     * @param cap                The {@link CAP} that manages this command.
+     * @param enableLocalization Set to true to use localized names for this help command and its arguments. When set to
+     *                           true, the name will be 'default.helpCommand.name', when false it will be 'help'.
+     *                           <p>
+     *                           For the command name, this doesn't apply if the name was explicitly specified.
+     * @return A new {@link DefaultHelpCommand}.
+     */
+    public static @NonNull DefaultHelpCommand getDefault(final @NonNull CAP cap, final boolean enableLocalization)
+    {
         return DefaultHelpCommand
             .helpCommandBuilder().cap(cap)
+            .enableLocalization(enableLocalization)
             .summary("default.helpCommand.summary")
             .header("default.helpCommand.header")
             .build();

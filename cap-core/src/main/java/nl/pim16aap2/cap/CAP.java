@@ -100,6 +100,9 @@ public class CAP
     @Getter
     protected final boolean caseSensitive;
 
+    /**
+     * The array of registered locales.
+     */
     @Getter
     protected final Locale[] locales;
 
@@ -149,6 +152,16 @@ public class CAP
     public static @NonNull CAP getDefault()
     {
         return CAP.builder().build();
+    }
+
+    /**
+     * Checks if localization is enabled.
+     *
+     * @return True if localization is enabled.
+     */
+    public boolean localizationEnabled()
+    {
+        return localizationSpecification != null;
     }
 
     /**

@@ -32,18 +32,38 @@ import java.util.function.Function;
 public class Command
 {
     /**
-     * The default help argument to use in case that is required.
+     * The default help argument to use in case that is required. This is the non-localized version. If you want to
+     * enable localization, see {@link #DEFAULT_HELP_ARGUMENT_LOCALIZED}.
      */
     static final @NonNull Argument<Boolean> DEFAULT_HELP_ARGUMENT =
         Argument.valuesLessBuilder().shortName("h").longName("help").identifier("help")
                 .summary("Displays the help menu for this command.").build();
 
     /**
-     * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s.
+     * The default help argument to use in case that is required. This is the localized version. If you want to get a
+     * non-localized version, see {@link #DEFAULT_VIRTUAL_ARGUMENT}.
+     */
+    static final @NonNull Argument<Boolean> DEFAULT_HELP_ARGUMENT_LOCALIZED =
+        Argument.valuesLessBuilder().identifier("help")
+                .shortName("default.helpArgument.shortName")
+                .longName("default.helpArgument.longName")
+                .summary("default.helpArgument.summary").build();
+
+    /**
+     * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s. This is the non-localized
+     * version. If you want to * enable localization, see {@link #DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED}.
      */
     static final @NonNull Argument<Integer> DEFAULT_VIRTUAL_ARGUMENT =
         new IntegerArgument().getOptionalPositional().shortName("page").identifier("page")
                              .summary("The page number of the help menu to display").build();
+
+    /**
+     * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s. This is the localized version.
+     * If you want to get a * non-localized version, see {@link #DEFAULT_VIRTUAL_ARGUMENT}.
+     */
+    static final @NonNull Argument<Integer> DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED =
+        new IntegerArgument().getOptionalPositional().shortName("default.virtualArgument.shortName").identifier("page")
+                             .summary("default.virtualArgument.summary").build();
 
     /**
      * The name of this command.
@@ -233,7 +253,7 @@ public class Command
 
         this.helpCommand = helpCommand;
         if (helpCommand == null && Util.valOrDefault(addDefaultHelpSubCommand, false))
-            this.helpCommand = DefaultHelpCommand.getDefault(cap);
+            this.helpCommand = DefaultHelpCommand.getDefault(cap, cap.localizationEnabled());
         if (this.helpCommand != null)
             this.subCommands.addCommand(this.helpCommand);
 
@@ -245,7 +265,7 @@ public class Command
 
         this.helpArgument = helpArgument;
         if (helpArgument == null && Util.valOrDefault(addDefaultHelpArgument, false))
-            this.helpArgument = DEFAULT_HELP_ARGUMENT;
+            this.helpArgument = cap.localizationEnabled() ? DEFAULT_HELP_ARGUMENT_LOCALIZED : DEFAULT_HELP_ARGUMENT;
 
         // If there are no arguments, make an empty list. If there are arguments, put them in a modifiable list.
         arguments = arguments == null ? new ArrayList<>(0) : new ArrayList<>(arguments);
@@ -253,7 +273,7 @@ public class Command
         if (this.helpArgument != null)
             arguments.add(this.helpArgument);
         if (this.virtual)
-            arguments.add(Command.DEFAULT_VIRTUAL_ARGUMENT);
+            arguments.add(cap.localizationEnabled() ? DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED : DEFAULT_VIRTUAL_ARGUMENT);
 
         argumentManager = new ArgumentManager(cap, arguments, cap.isCaseSensitive());
     }
