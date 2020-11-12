@@ -176,7 +176,11 @@ public class CommandParser
     {
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
         if (!parsedCommand.getCommand().hasPermission(commandSender))
-            throw new NoPermissionException(commandSender, parsedCommand.getCommand(), cap.isDebug());
+        {
+            final @NonNull String localizedMessage = cap.getMessage("error.exception.noPermission",
+                                                                    commandSender.getLocale());
+            throw new NoPermissionException(commandSender, parsedCommand.getCommand(), localizedMessage, cap.isDebug());
+        }
 
         if (parsedCommand.getIndex() == (input.size() - 1) &&
             parsedCommand.getCommand().getArgumentManager().getRequiredArguments().size() > 0)

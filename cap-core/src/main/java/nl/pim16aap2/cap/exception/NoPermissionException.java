@@ -10,12 +10,14 @@ public class NoPermissionException extends CAPException
 {
     private final @NonNull ICommandSender commandSender;
     private final @NonNull Command command;
+    private final @NonNull String localizedMessage;
 
     public NoPermissionException(final @NonNull ICommandSender commandSender, final @NonNull Command command,
-                                 final boolean stacktraceEnabled)
+                                 final @NonNull String localizedMessage, final boolean stacktraceEnabled)
     {
         super(stacktraceEnabled);
         this.commandSender = commandSender;
         this.command = command;
+        this.localizedMessage = localizedMessage;
     }
 }

@@ -123,7 +123,7 @@ public class ExceptionHandler
     public static void handleNoPermissionException(final @NonNull ICommandSender commandSender,
                                                    final @NonNull NoPermissionException e)
     {
-        sendError(commandSender, "You do not have permission to use this command!");
+        sendError(commandSender, e.getLocalizedMessage());
     }
 
     public static void handleNonExistingArgumentException(final @NonNull ICommandSender commandSender,
