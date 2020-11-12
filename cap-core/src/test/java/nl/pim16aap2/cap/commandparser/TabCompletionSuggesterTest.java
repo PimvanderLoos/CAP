@@ -143,8 +143,9 @@ class TabCompletionSuggesterTest
         Assertions.assertEquals("\"my Portcullis\"", doorIDSuggestions.get(1));
 
         doorIDSuggestions = cap.getTabCompleteOptions(commandSender, "bigdoors addowner ");
-        Assertions.assertEquals(4, doorIDSuggestions.size());
-        Assertions.assertEquals("myDoor", doorIDSuggestions.get(0));
-        Assertions.assertEquals("42", doorIDSuggestions.get(1));
+        Assertions.assertEquals(5, doorIDSuggestions.size());
+        Assertions.assertEquals("subsubcommand", doorIDSuggestions.get(0));
+        Assertions.assertEquals("myDoor", doorIDSuggestions.get(1));
+        Assertions.assertEquals("42", doorIDSuggestions.get(2));
     }
 }

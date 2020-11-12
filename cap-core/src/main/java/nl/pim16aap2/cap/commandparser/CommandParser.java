@@ -368,16 +368,14 @@ public class CommandParser
         if (command == null)
         {
             if (idx != 0)
-                throw new CommandNotFoundException(null, cap.isDebug());
+                throw new IllegalStateException(
+                    String.format("Command was null at idx %d for inupt: \n%s", idx, input.toString()));
 
             final @Nullable String commandName = input.size() > idx ? input.getArgs().get(idx).trim() : null;
+            // Gets the first argument in the arguments list.
             final Command baseCommand =
-                cap.getCommand(commandName)
+                cap.getTopLevelCommand(commandName)
                    .orElseThrow(() -> new CommandNotFoundException(commandName, cap.isDebug()));
-
-            // If the command has a super command, it cannot possible be right to be the first argument.
-            if (baseCommand.getSuperCommand().isPresent())
-                throw new CommandNotFoundException(baseCommand.getName(commandSender.getLocale()), cap.isDebug());
 
             return getLastCommand(baseCommand, 0);
         }
@@ -396,14 +394,7 @@ public class CommandParser
         if (!subCommandOpt.isPresent())
             return new ParsedCommand(command, idx);
 
-        final @NonNull Command subCommand = subCommandOpt.get();
-
-        if (!subCommand.getSuperCommand().isPresent() || subCommand.getSuperCommand().get() != command)
-            // TODO: More specific exception.
-            throw new CommandNotFoundException("super command of: " + subCommand.getName(commandSender.getLocale()),
-                                               cap.isDebug());
-
-        return new ParsedCommand(subCommand, nextIdx);
+        return getLastCommand(subCommandOpt.get(), nextIdx);
     }
 
     /**

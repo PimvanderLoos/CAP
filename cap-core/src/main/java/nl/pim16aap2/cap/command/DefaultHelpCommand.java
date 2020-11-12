@@ -291,17 +291,14 @@ public class DefaultHelpCommand extends Command
     protected static void defaultHelpCommandExecutor(final @NonNull CommandResult commandResult)
         throws IllegalValueException, CommandNotFoundException
     {
-        final @Nullable Locale locale = commandResult.getCommandSender().getLocale();
-
         if (!(commandResult.getCommand() instanceof DefaultHelpCommand))
-            throw new CommandNotFoundException(commandResult.getCommand().getName(locale),
-                                               commandResult.getCommand().getName(locale) + " is not a help command!",
-                                               commandResult.getCommand().getCap().isDebug());
+            throw new IllegalArgumentException("Command " + commandResult.getCommand().getNameKey() +
+                                                   " is not a help command!");
 
         final @NonNull DefaultHelpCommand helpCommand = (DefaultHelpCommand) commandResult.getCommand();
         final @NonNull Command superCommand = helpCommand.getSuperCommand().orElseThrow(
-            () -> new CommandNotFoundException("Super command of: " + helpCommand.getName(locale),
-                                               commandResult.getCommand().getCap().isDebug()));
+            () -> new IllegalStateException(
+                "HelpCommand " + helpCommand.getNameKey() + " does not have a supercommand!"));
 
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 

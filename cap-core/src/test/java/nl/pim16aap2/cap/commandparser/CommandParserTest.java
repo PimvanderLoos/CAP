@@ -61,6 +61,11 @@ class CommandParserTest
             subcommands.add(generic);
         }
 
+        final Command subSubSubCommand = Command.commandBuilder().name("subsubsubcommand").cap(cap).virtual(true)
+                                                .build();
+        final Command subSubCommand = Command.commandBuilder().name("subsubcommand").cap(cap).virtual(true)
+                                             .subCommand(subSubSubCommand).build();
+
         final Command numerical = Command
             .commandBuilder().name("numerical")
             .cap(cap)
@@ -129,6 +134,7 @@ class CommandParserTest
                           .label("player")
                           .summary("The name of the group to add as owner")
                           .build())
+            .subCommand(subSubCommand)
             .commandExecutor(CommandResult::sendHelpMenu)
             .build();
 
@@ -144,7 +150,8 @@ class CommandParserTest
             .build();
 
         subcommands.forEach(cap::addCommand);
-        cap.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical);
+        cap.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical).addCommand(subSubCommand)
+           .addCommand(subSubSubCommand);
 
         return cap;
     }
@@ -339,5 +346,6 @@ class CommandParserTest
     {
         final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
         assertLastArgument(cap, "bigdoors addowner ", "addowner");
+        assertLastArgument(cap, "bigdoors addowner subsubcommand subsubsubcommand aaaa ", "subsubsubcommand");
     }
 }
