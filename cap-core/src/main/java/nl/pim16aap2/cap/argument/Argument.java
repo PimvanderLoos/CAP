@@ -351,12 +351,11 @@ public class Argument<T>
      * @throws ValidationFailureException If the value was not valid. See {@link IArgumentValidator#validate(CAP,
      *                                    ICommandSender, Argument, Object)}.
      */
-    @Nullable
-    protected T parseArgument(final @NonNull String value, final @NonNull CAP cap,
-                              final @NonNull ICommandSender commandSender)
+    protected @NonNull T parseArgument(final @NonNull String value, final @NonNull CAP cap,
+                                       final @NonNull ICommandSender commandSender)
         throws ValidationFailureException
     {
-        final T parsed = parser.parseArgument(value);
+        final @NonNull T parsed = parser.parseArgument(value);
 
         if (argumentValidator != null)
             argumentValidator.validate(cap, commandSender, this, parsed);

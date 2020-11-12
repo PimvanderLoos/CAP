@@ -6,15 +6,21 @@ import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
+import nl.pim16aap2.cap.util.LocalizationSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Locale;
 
 class RangeValidatorTest
 {
     public static final @NonNull ICommandSender commandSender = new DefaultCommandSender();
     public static final @NonNull Argument<?> argument = Argument.valuesLessBuilder().shortName("a").summary("")
                                                                 .identifier("a").build();
-    public static final @NonNull CAP cap = CAP.getDefault();
+    public static final @NonNull CAP cap =
+        CAP.getDefault().toBuilder()
+           .localizationSpecification(new LocalizationSpecification("CAPCore", Locale.US))
+           .build();
 
     @Test
     void validateRangeInteger()
@@ -35,11 +41,20 @@ class RangeValidatorTest
     {
         final @NonNull RangeValidator<Double> rangeValidator = RangeValidator.doubleRangeValidator(10, 20);
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, 10.0));
+        @NonNull ValidationFailureException exception =
+            Assertions.assertThrows(ValidationFailureException.class,
+                                    () -> rangeValidator.validate(cap, commandSender, argument, 10.0));
+        Assertions.assertEquals("Value 10 is outside of range (10, 20)!", exception.getLocalizedMessage());
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, 20.0));
+        exception =
+            Assertions.assertThrows(ValidationFailureException.class,
+                                    () -> rangeValidator.validate(cap, commandSender, argument, 9.9));
+        Assertions.assertEquals("Value 9.9 is outside of range (10, 20)!", exception.getLocalizedMessage());
+
+        exception =
+            Assertions.assertThrows(ValidationFailureException.class,
+                                    () -> rangeValidator.validate(cap, commandSender, argument, 20.0));
+        Assertions.assertEquals("Value 20 is outside of range (10, 20)!", exception.getLocalizedMessage());
 
         Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 11.0));
     }

@@ -11,6 +11,7 @@ import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.Functional.TriFunction;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.MessageFormat;
 import java.util.function.BiFunction;
 
 /**
@@ -135,13 +136,9 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
      * @return True if the input value is a non-null numerical value less than {@link #max}.
      */
     protected boolean lessThanMax(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                                  final @NonNull Argument<?> argument, final @Nullable T input)
+                                  final @NonNull Argument<?> argument, final @NonNull T max, final @Nullable T input)
     {
-        if (input == null)
-            return false;
-
-        final @NonNull T max = this.max == null ? maxRequest.apply(cap, commandSender, argument) : this.max;
-        return lessThan.apply(input, max);
+        return input != null && lessThan.apply(input, max);
     }
 
     /**
@@ -153,26 +150,55 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
      * @return True if the input value is a non-null numerical value more than {@link #min}.
      */
     protected boolean moreThanMin(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                                  final @NonNull Argument<?> argument, final @Nullable T input)
+                                  final @NonNull Argument<?> argument, final @NonNull T min, final @Nullable T input)
     {
-        if (input == null)
-            return false;
 
-        final @NonNull T min = this.min == null ? minRequest.apply(cap, commandSender, argument) : this.min;
-        return moreThan.apply(input, min);
+        return input != null && moreThan.apply(input, min);
     }
 
     /**
-     * Checks if both {@link #moreThanMin(CAP, ICommandSender, Argument, Number)} and {@link #lessThanMax(CAP,
-     * ICommandSender, Argument, Number)} are true.
+     * Gets the minimum value. This is either {@link #min} (if it was supplied) and otherwise the result of {@link
+     * #minRequest}.
+     *
+     * @param cap           The {@link CAP} instance for which to validate the input.
+     * @param commandSender The {@link ICommandSender} for which to validate the input.
+     * @param argument      The {@link Argument} to validate the input for.
+     * @return The lower bound value.
+     */
+    protected @NonNull T getMin(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                                final @NonNull Argument<?> argument)
+    {
+        return min == null ? minRequest.apply(cap, commandSender, argument) : min;
+    }
+
+    /**
+     * Gets the maximum value. This is either {@link #max} (if it was supplied) and otherwise the result of {@link
+     * #maxRequest}.
+     *
+     * @param cap           The {@link CAP} instance for which to validate the input.
+     * @param commandSender The {@link ICommandSender} for which to validate the input.
+     * @param argument      The {@link Argument} to validate the input for.
+     * @return The upper bound value.
+     */
+    protected @NonNull T getMax(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                                final @NonNull Argument<?> argument)
+    {
+        return max == null ? maxRequest.apply(cap, commandSender, argument) : max;
+    }
+
+    /**
+     * Checks if both {@link #moreThanMin(CAP, ICommandSender, Argument, Number, Number)} and {@link #lessThanMax(CAP,
+     * ICommandSender, Argument, Number, Number)} are true.
      *
      * @param input The value to check.
      * @return True if the value is both less than {@link #max} and more than {@link #min}.
      */
     protected boolean inRange(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
-                              final @NonNull Argument<?> argument, final @Nullable T input)
+                              final @NonNull Argument<?> argument, final @NonNull T min, final @NonNull T max,
+                              final @Nullable T input)
     {
-        return lessThanMax(cap, commandSender, argument, input) && moreThanMin(cap, commandSender, argument, input);
+        return lessThanMax(cap, commandSender, argument, max, input) &&
+            moreThanMin(cap, commandSender, argument, min, input);
     }
 
     @Override
@@ -180,8 +206,16 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
                          final @NonNull Argument<?> argument, final @Nullable T input)
         throws ValidationFailureException
     {
-        if (input == null || !inRange(cap, commandSender, argument, input))
-            throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), cap.isDebug());
+        final @NonNull T min = getMin(cap, commandSender, argument);
+        final @NonNull T max = getMax(cap, commandSender, argument);
+
+        if (input == null || !inRange(cap, commandSender, argument, min, max, input))
+        {
+            final @NonNull String localizedMessage = MessageFormat
+                .format(cap.getMessage("error.validation.range", commandSender.getLocale()), input, min, max);
+            throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), localizedMessage,
+                                                 cap.isDebug());
+        }
     }
 
     @FunctionalInterface

@@ -9,23 +9,14 @@ public class ValidationFailureException extends CAPException
 {
     private final @NonNull Argument<?> argument;
     private final @NonNull String value;
-    //    private final @NonNull String failureReason;
-    private String failureReason;
+    private final @NonNull String localizedMessage;
 
     public ValidationFailureException(final @NonNull Argument<?> argument, final @NonNull String value,
-                                      final boolean stacktraceEnabled)
+                                      final @NonNull String localizedMessage, final boolean stacktraceEnabled)
     {
         super(stacktraceEnabled);
         this.argument = argument;
         this.value = value;
-    }
-
-    public ValidationFailureException(final @NonNull Argument<?> argument, final @NonNull String value,
-                                      final @NonNull String failureReason, final boolean stacktraceEnabled)
-    {
-        super(stacktraceEnabled);
-        this.argument = argument;
-        this.value = value;
-        this.failureReason = failureReason;
+        this.localizedMessage = localizedMessage;
     }
 }

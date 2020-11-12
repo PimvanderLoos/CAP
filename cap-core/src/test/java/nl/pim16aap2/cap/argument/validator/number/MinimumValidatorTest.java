@@ -6,15 +6,21 @@ import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
+import nl.pim16aap2.cap.util.LocalizationSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Locale;
 
 class MinimumValidatorTest
 {
     public static final @NonNull ICommandSender commandSender = new DefaultCommandSender();
     public static final @NonNull Argument<?> argument = Argument.valuesLessBuilder().shortName("a").summary("")
                                                                 .identifier("a").build();
-    public static final @NonNull CAP cap = CAP.getDefault();
+    public static final @NonNull CAP cap =
+        CAP.getDefault().toBuilder()
+           .localizationSpecification(new LocalizationSpecification("CAPCore", Locale.US))
+           .build();
 
     @Test
     void validateRangeInteger()
@@ -53,12 +59,19 @@ class MinimumValidatorTest
     @Test
     void validateDynamic()
     {
-        final @NonNull Integer minimum = 10;
+        final int minimum = 10;
         final @NonNull MinimumValidator<Integer> minimumSupplier = MinimumValidator.integerMinimumValidator(
             (cap1, commandSender1, argument1) -> minimumSupplier(minimum, cap1, commandSender1, argument1));
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> minimumSupplier.validate(cap, commandSender, argument, minimum));
+        @NonNull ValidationFailureException exception =
+            Assertions.assertThrows(ValidationFailureException.class,
+                                    () -> minimumSupplier.validate(cap, commandSender, argument, minimum));
+        Assertions.assertEquals("Value 10 should be more than 10!", exception.getLocalizedMessage());
+
+        exception =
+            Assertions.assertThrows(ValidationFailureException.class,
+                                    () -> minimumSupplier.validate(cap, commandSender, argument, minimum - 2));
+        Assertions.assertEquals("Value 8 should be more than 10!", exception.getLocalizedMessage());
 
         Assertions.assertDoesNotThrow(() -> minimumSupplier.validate(cap, commandSender, argument, minimum + 1));
     }

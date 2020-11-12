@@ -10,6 +10,8 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.MessageFormat;
+
 /**
  * Represents a validator for maximum values. This can be used to set a lower limit for numerical input arguments.
  *
@@ -72,7 +74,13 @@ public class MaximumValidator<T extends Number> implements IArgumentValidator<T>
                          final @NonNull Argument<?> argument, final @Nullable T input)
         throws ValidationFailureException
     {
-        if (input == null || !rangeValidator.lessThanMax(cap, commandSender, argument, input))
-            throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), cap.isDebug());
+        final @NonNull T max = rangeValidator.getMax(cap, commandSender, argument);
+        if (input == null || !rangeValidator.lessThanMax(cap, commandSender, argument, max, input))
+        {
+            final @NonNull String localizedMessage = MessageFormat
+                .format(cap.getMessage("error.validation.maximum", commandSender.getLocale()), input, max);
+            throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), localizedMessage,
+                                                 cap.isDebug());
+        }
     }
 }

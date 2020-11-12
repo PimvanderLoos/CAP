@@ -38,12 +38,7 @@ public class RepeatableArgument<T> extends Argument<T>
     {
         final ParsedRepeatableArgument<T> ret = new ParsedRepeatableArgument<>();
         if (value != null)
-        {
-            final @Nullable T parsed = parseArgument(value, cap, commandSender);
-            if (parsed == null)
-                throw new ValidationFailureException(this, value, cap.isDebug());
-            ret.addValue(parsed);
-        }
+            ret.addValue(parseArgument(value, cap, commandSender));
         return ret;
     }
 

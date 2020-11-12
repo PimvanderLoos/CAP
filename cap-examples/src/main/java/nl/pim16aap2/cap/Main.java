@@ -4,6 +4,7 @@ import lombok.NonNull;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
+import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
@@ -117,8 +118,11 @@ public class Main
         tryArgs(cap, "bigdoors 1");
         tryArgs(cap, "bigdoors 2");
 
-//        tryArgs(cap, "bigdoors required my_door 12");
-////        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4 --admin -i=100");
+        tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4 --admin -i=5");
+
+        tryArgs(cap, "bigdoors required my_door 12");
+//        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
 
         cap.setDefaultLocale(LOCALE_DUTCH);
         tryArgs(cap, "grotedeuren help");
@@ -155,8 +159,8 @@ public class Main
                                                        (sender, ex) -> ex.printStackTrace())
                                               .handler(nl.pim16aap2.cap.exception.NoPermissionException.class,
                                                        (sender, ex) -> ex.printStackTrace())
-                                              .handler(nl.pim16aap2.cap.exception.ValidationFailureException.class,
-                                                       (sender, ex) -> ex.printStackTrace())
+//                                              .handler(nl.pim16aap2.cap.exception.ValidationFailureException.class,
+//                                                       (sender, ex) -> ex.printStackTrace())
                                               .handler(nl.pim16aap2.cap.exception.UnmatchedQuoteException.class,
                                                        (sender, ex) -> ex.printStackTrace())
                                               .handler(nl.pim16aap2.cap.exception.MissingValueException.class,
@@ -229,6 +233,15 @@ public class Main
                           .label("example.command.addowner.argument.group.label")
                           .summary("example.command.addowner.argument.group.summary")
                           .identifier("groups")
+                          .build())
+            .argument(new IntegerArgument()
+                          .getOptional()
+                          .shortName("example.command.addowner.argument.range.shortname")
+                          .longName("example.command.addowner.argument.range.longname")
+                          .label("example.command.addowner.argument.range.label")
+                          .summary("example.command.addowner.argument.range.summary")
+                          .identifier("range")
+                          .argumentValidator(RangeValidator.integerRangeValidator(10, 20))
                           .build())
             .commandExecutor(
                 commandResult ->

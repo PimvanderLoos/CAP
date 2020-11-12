@@ -117,8 +117,7 @@ public class ExceptionHandler
     public static void handleValidationFailureException(final @NonNull ICommandSender commandSender,
                                                         final @NonNull ValidationFailureException e)
     {
-        sendError(commandSender, "Failed to validate value: \"" + e.getValue() +
-            "\" for argument: \"" + e.getArgument().getIdentifier() + "\"");
+        sendError(commandSender, e.getLocalizedMessage());
     }
 
     public static void handleNoPermissionException(final @NonNull ICommandSender commandSender,
