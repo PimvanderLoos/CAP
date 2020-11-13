@@ -28,12 +28,14 @@ class RangeValidatorTest
         final @NonNull RangeValidator<Integer> rangeValidator = RangeValidator.integerRangeValidator(10, 20);
 
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, 10));
+                                () -> rangeValidator.validate(cap, commandSender, argument, 9));
 
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, 20));
+                                () -> rangeValidator.validate(cap, commandSender, argument, 21));
 
+        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 10));
         Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 11));
+        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 20));
     }
 
     @Test
@@ -43,20 +45,17 @@ class RangeValidatorTest
 
         @NonNull ValidationFailureException exception =
             Assertions.assertThrows(ValidationFailureException.class,
-                                    () -> rangeValidator.validate(cap, commandSender, argument, 10.0));
-        Assertions.assertEquals("Value 10 is outside of range (10, 20)!", exception.getLocalizedMessage());
-
-        exception =
-            Assertions.assertThrows(ValidationFailureException.class,
                                     () -> rangeValidator.validate(cap, commandSender, argument, 9.9));
-        Assertions.assertEquals("Value 9.9 is outside of range (10, 20)!", exception.getLocalizedMessage());
+        Assertions.assertEquals("Value 9.9 is outside of range [10, 20]!", exception.getLocalizedMessage());
 
         exception =
             Assertions.assertThrows(ValidationFailureException.class,
-                                    () -> rangeValidator.validate(cap, commandSender, argument, 20.0));
-        Assertions.assertEquals("Value 20 is outside of range (10, 20)!", exception.getLocalizedMessage());
+                                    () -> rangeValidator.validate(cap, commandSender, argument, 20.1));
+        Assertions.assertEquals("Value 20.1 is outside of range [10, 20]!", exception.getLocalizedMessage());
 
+        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 10.0));
         Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 11.0));
+        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 20.0));
     }
 
     /**
@@ -81,11 +80,15 @@ class RangeValidatorTest
             (cap1, commandSender1, argument1) -> valueSupplier(maximum, cap1, commandSender1, argument1));
 
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, maximum));
+                                () -> rangeValidator.validate(cap, commandSender, argument, maximum + 1));
 
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, minimum));
+                                () -> rangeValidator.validate(cap, commandSender, argument, minimum - 1));
 
         Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, maximum - 1));
+        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, minimum + 1));
+        
+        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, maximum));
+        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, minimum));
     }
 }

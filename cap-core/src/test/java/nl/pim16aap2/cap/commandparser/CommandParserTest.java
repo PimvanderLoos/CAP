@@ -239,33 +239,33 @@ class CommandParserTest
         assertWrappedThrows(IllegalValueException.class,
                             () -> cap
                                 .parseInput(commandSender, String.format("bigdoors numerical -max%cpim16aap2", sep)));
-        // The max value is set to 10, so 10 will be illegal.
+        // The max value is set to 10, so 11 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -max%c10", sep)));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -max%c11", sep)));
         // With a max value of 10, 9 is perfect!
         assertParseResult(cap, String.format("bigdoors numerical -max%c9", sep), "max", 9);
 
 
-        // The maxd value is set to 10.0, so 10.0 will be illegal.
+        // The maxd value is set to 10.0, so 10.1 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -maxd%c10.0", sep)));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -maxd%c10.1", sep)));
         // With a maxd value of 10.0, 9.9 is perfect!
         assertParseResult(cap, String.format("bigdoors numerical -maxd%c9.9", sep), "maxd", 9.9);
 
 
-        // The min value is set to 10, so 10 will be illegal.
+        // The min value is set to 10, so 9 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -min%c10", sep)));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -min%c9", sep)));
         // With a min value of 10, 11 is perfect!
         assertParseResult(cap, String.format("bigdoors numerical -min%c11", sep), "min", 11);
 
 
-        // The range is set to [10, 20], so 10 will be illegal.
+        // The range is set to [10, 20], so 9 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c10", sep)));
-        // The range is set to [10, 20], so 20 will be illegal.
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c9", sep)));
+        // The range is set to [10, 20], so 21 will be illegal.
         assertWrappedThrows(ValidationFailureException.class,
-                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c20", sep)));
+                            () -> cap.parseInput(commandSender, String.format("bigdoors numerical -range%c21", sep)));
         // With a range of [10, 20], 11 is perfect!
         assertParseResult(cap, String.format("bigdoors numerical -range%c11", sep), "range", 11);
 

@@ -183,7 +183,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (page > pageCount || page < 1)
         {
             final @NonNull String localizedMessage = MessageFormat
-                .format(command.getCap().getMessage("error.validation.range", commandSender), page, 0, pageCount + 1);
+                .format(command.getCap().getMessage("error.validation.range", commandSender), page, 1, pageCount);
             throw new ValidationFailureException(Integer.toString(page), localizedMessage, command.getCap().isDebug());
         }
 

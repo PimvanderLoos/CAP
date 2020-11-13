@@ -28,8 +28,9 @@ class MaximumValidatorTest
         final @NonNull MaximumValidator<Integer> maximumValidator = MaximumValidator.integerMaximumValidator(10);
 
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> maximumValidator.validate(cap, commandSender, argument, 10));
+                                () -> maximumValidator.validate(cap, commandSender, argument, 11));
 
+        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, 10));
         Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, 9));
     }
 
@@ -39,9 +40,10 @@ class MaximumValidatorTest
         final @NonNull MaximumValidator<Double> maximumValidator = MaximumValidator.doubleMaximumValidator(10);
 
         Assertions.assertThrows(ValidationFailureException.class,
-                                () -> maximumValidator.validate(cap, commandSender, argument, 10.0));
+                                () -> maximumValidator.validate(cap, commandSender, argument, 10.1));
 
         Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, 9.9));
+        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, 10.0));
     }
 
     /**
@@ -65,14 +67,10 @@ class MaximumValidatorTest
 
         @NonNull ValidationFailureException exception =
             Assertions.assertThrows(ValidationFailureException.class,
-                                    () -> maximumValidator.validate(cap, commandSender, argument, maximum));
-        Assertions.assertEquals("Value 10 should be less than 10!", exception.getLocalizedMessage());
+                                    () -> maximumValidator.validate(cap, commandSender, argument, maximum + 1));
+        Assertions.assertEquals("Value 11 should be less than 10!", exception.getLocalizedMessage());
 
-        exception =
-            Assertions.assertThrows(ValidationFailureException.class,
-                                    () -> maximumValidator.validate(cap, commandSender, argument, maximum + 2));
-        Assertions.assertEquals("Value 12 should be less than 10!", exception.getLocalizedMessage());
-
+        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, maximum));
         Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, maximum - 1));
     }
 }

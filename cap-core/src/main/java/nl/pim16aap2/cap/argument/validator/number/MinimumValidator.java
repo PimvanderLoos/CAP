@@ -26,7 +26,7 @@ public class MinimumValidator<T extends Number> implements IArgumentValidator<T>
     /**
      * Gets a minimum validator for integer values.
      *
-     * @param minimum The lower limit (not inclusive!)
+     * @param minimum The lower limit (inclusive!)
      * @return A new {@link MinimumValidator} for integer values.
      */
     public static @NonNull MinimumValidator<Integer> integerMinimumValidator(final int minimum)
@@ -49,7 +49,7 @@ public class MinimumValidator<T extends Number> implements IArgumentValidator<T>
     /**
      * Gets a minimum validator for double values.
      *
-     * @param minimum The lower limit (not inclusive!)
+     * @param minimum The lower limit (inclusive!)
      * @return A new {@link MinimumValidator} for double values.
      */
     public static @NonNull MinimumValidator<Double> doubleMinimumValidator(final double minimum)

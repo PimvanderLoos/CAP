@@ -60,8 +60,8 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
     /**
      * Gets a range validator for integer values.
      *
-     * @param lowerLimit The lower limit (not inclusive!)
-     * @param upperLimit The upper limit (not inclusive!)
+     * @param lowerLimit The lower limit (inclusive!)
+     * @param upperLimit The upper limit (inclusive!)
      * @return A new {@link RangeValidator} for integer values.
      */
     public static @NonNull RangeValidator<Integer> integerRangeValidator(final int lowerLimit, final int upperLimit)
@@ -69,8 +69,8 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
         if (lowerLimit > upperLimit)
             throw new IllegalArgumentException(String.format("The lower limit of %d exceeds the upper limit of %d!",
                                                              lowerLimit, upperLimit));
-        return new RangeValidator<>((t1, t2) -> t1 < t2,
-                                    (t1, t2) -> t1 > t2,
+        return new RangeValidator<>((t1, t2) -> t1 <= t2,
+                                    (t1, t2) -> t1 >= t2,
                                     lowerLimit, upperLimit,
                                     null, null);
     }
@@ -86,8 +86,8 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
         final @NonNull ValueRequest<Integer> lowerLimitRequester,
         final @NonNull ValueRequest<Integer> upperLimitRequester)
     {
-        return new RangeValidator<>((t1, t2) -> t1 < t2,
-                                    (t1, t2) -> t1 > t2,
+        return new RangeValidator<>((t1, t2) -> t1 <= t2,
+                                    (t1, t2) -> t1 >= t2,
                                     null, null,
                                     lowerLimitRequester, upperLimitRequester);
     }
@@ -95,8 +95,8 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
     /**
      * Gets a range validator for double values.
      *
-     * @param lowerLimit The lower limit (not inclusive!)
-     * @param upperLimit The upper limit (not inclusive!)
+     * @param lowerLimit The lower limit (inclusive!)
+     * @param upperLimit The upper limit (inclusive!)
      * @return A new {@link RangeValidator} for double values.
      */
     public static @NonNull RangeValidator<Double> doubleRangeValidator(final double lowerLimit, final double upperLimit)
@@ -104,8 +104,8 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
         if (lowerLimit > upperLimit)
             throw new IllegalArgumentException(String.format("The lower limit of %f exceeds the upper limit of %f!",
                                                              lowerLimit, upperLimit));
-        return new RangeValidator<>((t1, t2) -> t1 < t2,
-                                    (t1, t2) -> t1 > t2,
+        return new RangeValidator<>((t1, t2) -> t1 <= t2,
+                                    (t1, t2) -> t1 >= t2,
                                     lowerLimit, upperLimit,
                                     null, null);
     }
@@ -121,8 +121,8 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
         final @NonNull ValueRequest<Double> lowerLimitRequester,
         final @NonNull ValueRequest<Double> upperLimitRequester)
     {
-        return new RangeValidator<>((t1, t2) -> t1 < t2,
-                                    (t1, t2) -> t1 > t2,
+        return new RangeValidator<>((t1, t2) -> t1 <= t2,
+                                    (t1, t2) -> t1 >= t2,
                                     null, null,
                                     lowerLimitRequester, upperLimitRequester);
     }

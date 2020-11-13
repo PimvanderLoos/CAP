@@ -26,7 +26,7 @@ public class MaximumValidator<T extends Number> implements IArgumentValidator<T>
     /**
      * Gets a maximum validator for integer values.
      *
-     * @param maximum The lower limit (not inclusive!)
+     * @param maximum The lower limit (inclusive!)
      * @return A new {@link MaximumValidator} for integer values.
      */
     public static @NonNull MaximumValidator<Integer> integerMaximumValidator(final int maximum)
@@ -49,7 +49,7 @@ public class MaximumValidator<T extends Number> implements IArgumentValidator<T>
     /**
      * Gets a maximum validator for double values.
      *
-     * @param maximum The lower limit (not inclusive!)
+     * @param maximum The lower limit (inclusive!)
      * @return A new {@link MaximumValidator} for double values.
      */
     public static @NonNull MaximumValidator<Double> doubleMaximumValidator(final double maximum)
