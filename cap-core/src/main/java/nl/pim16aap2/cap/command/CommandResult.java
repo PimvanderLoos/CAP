@@ -162,5 +162,38 @@ public class CommandResult
                 throw new RuntimeException(exception);
             exceptionHandler.handleException(commandSender, exception);
         }
+        catch (Throwable t)
+        {
+            if (command.getCap().getExceptionHandler() != null)
+                command.getCap().getExceptionHandler().handleException(
+                    commandSender,
+                    new CAPException(command.getCap().getMessage("error.exception.generic", commandSender),
+                                     command.getCap().isDebug()));
+
+            throw new RuntimeException("An error occurred trying to execute a command!\n" + toString(), t);
+        }
+    }
+
+    @Override
+    public String toString()
+    {
+        final @NonNull StringBuilder sb = new StringBuilder("CommandResult for command: \"")
+            .append(command.getNameKey()).append("\"").append("\n")
+            .append("CommandSender: ").append(commandSender.toString()).append("\n");
+
+        if (helpRequired())
+            sb.append("Help required!");
+        else if (parsedArguments == null)
+            sb.append("Arguments:\nNULL");
+        else
+        {
+            sb.append("Arguments:\n");
+
+            for (@NonNull Map.Entry<@NonNull String, Argument.IParsedArgument<?>> argument : parsedArguments.entrySet())
+                sb.append(argument.getKey()).append(": ").append(argument.getValue().toString()).append("\n");
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 }

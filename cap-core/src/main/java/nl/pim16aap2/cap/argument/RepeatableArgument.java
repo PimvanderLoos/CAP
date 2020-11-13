@@ -9,10 +9,12 @@ import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
+import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RepeatableArgument<T> extends Argument<T>
 {
@@ -82,6 +84,12 @@ public class RepeatableArgument<T> extends Argument<T>
             if (newValue == null)
                 return;
             value.addAll((List<T>) newValue);
+        }
+
+        @Override
+        public String toString()
+        {
+            return Util.listToString(value, Objects::toString);
         }
     }
 }

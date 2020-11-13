@@ -29,4 +29,10 @@ public class SpigotServerCommandSender implements ICommandSender
         // command completion isn't supported anyway. Right?
         return 0;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Server";
+    }
 }

@@ -13,7 +13,7 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
  *
  * @author Pim
  */
-public abstract class CAPException extends Exception
+public class CAPException extends Exception
 {
     protected final boolean stacktraceEnabled;
 
@@ -24,7 +24,7 @@ public abstract class CAPException extends Exception
     @Getter
     protected final @NonNull String localizedMessage;
 
-    protected CAPException(final @NonNull String localizedMessage, final boolean stacktraceEnabled)
+    public CAPException(final @NonNull String localizedMessage, final boolean stacktraceEnabled)
     {
         this.localizedMessage = localizedMessage;
         this.stacktraceEnabled = stacktraceEnabled;

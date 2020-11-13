@@ -28,4 +28,10 @@ public class SpigotPlayerCommandSender implements ICommandSender
     {
         return player.hashCode();
     }
+
+    @Override
+    public String toString()
+    {
+        return "Player: " + player.getName() + " (" + player.getUniqueId().toString() + ")";
+    }
 }

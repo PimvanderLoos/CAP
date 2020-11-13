@@ -221,6 +221,14 @@ public class CAP
                 throw new RuntimeException(exception);
             exceptionHandler.handleException(commandSender, exception);
         }
+        catch (Throwable t)
+        {
+            if (exceptionHandler != null)
+                exceptionHandler.handleException(commandSender,
+                                                 new CAPException(getMessage("error.exception.generic", commandSender),
+                                                                  debug));
+            throw new RuntimeException("An error occurred parsing input: '" + input + "'", t);
+        }
         return Optional.empty();
     }
 

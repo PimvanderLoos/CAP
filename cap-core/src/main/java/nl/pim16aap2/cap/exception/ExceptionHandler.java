@@ -93,6 +93,7 @@ public class ExceptionHandler
     {
         return ExceptionHandler
             .builder()
+            .handler(CAPException.class, ExceptionHandler::handleCAPException)
             .handler(CommandNotFoundException.class, ExceptionHandler::handleCAPException)
             .handler(ValidationFailureException.class, ExceptionHandler::handleCAPException)
             .handler(NoPermissionException.class, ExceptionHandler::handleCAPException)

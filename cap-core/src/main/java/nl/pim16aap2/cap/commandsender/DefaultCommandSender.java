@@ -33,4 +33,10 @@ public class DefaultCommandSender implements ICommandSender
         // it doesn't matter that this may not cover every use case.
         return 0;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Default Command Sender";
+    }
 }

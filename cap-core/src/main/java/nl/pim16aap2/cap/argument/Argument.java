@@ -439,6 +439,12 @@ public class Argument<T>
         {
             value = (T) newValue;
         }
+
+        @Override
+        public String toString()
+        {
+            return value == null ? "NULL" : ("\"" + value.toString() + "\"");
+        }
     }
 
     /**
