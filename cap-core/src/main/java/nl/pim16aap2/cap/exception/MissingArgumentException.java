@@ -10,16 +10,14 @@ public class MissingArgumentException extends CAPException
 {
     private final Argument<?> missingArgument;
     private final @NonNull Command command;
-    private final @NonNull String localizedMessage;
 
     public MissingArgumentException(final @NonNull Command command, final @NonNull Argument<?> missingArgument,
                                     final @NonNull String localizedMessage, final boolean stacktrace)
     {
-        super("No value found for argument \"" + missingArgument.getIdentifier() +
-                  "\" of command: " + command.getNameKey(), stacktrace);
+        super(localizedMessage, "No value found for argument \"" + missingArgument.getIdentifier() +
+            "\" of command: " + command.getNameKey(), stacktrace);
         this.missingArgument = missingArgument;
         this.command = command;
-        this.localizedMessage = localizedMessage;
     }
 }
 

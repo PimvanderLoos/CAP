@@ -120,6 +120,7 @@ public class Main
 
         tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4 --admin -i=100");
         tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4 --admin -i=5");
+        tryArgs(cap, "bigdoors addowner myDoor -p");
 
         tryArgs(cap, "bigdoors required my_door 12");
 //        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
@@ -163,8 +164,8 @@ public class Main
 //                                                       (sender, ex) -> ex.printStackTrace())
 //                                              .handler(nl.pim16aap2.cap.exception.UnmatchedQuoteException.class,
 //                                                       (sender, ex) -> ex.printStackTrace())
-                                              .handler(nl.pim16aap2.cap.exception.MissingValueException.class,
-                                                       (sender, ex) -> ex.printStackTrace())
+//                                              .handler(nl.pim16aap2.cap.exception.MissingValueException.class,
+//                                                       (sender, ex) -> ex.printStackTrace())
                                               .build())
             .helpCommandRenderer(DefaultHelpCommandRenderer
                                      .builder()

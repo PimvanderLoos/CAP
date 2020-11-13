@@ -82,7 +82,7 @@ public class ExceptionHandler
 
     /**
      * Gets a new {@link ExceptionHandler} using the default Exception handlers. (e.g. {@link
-     * #handleCommandNotFoundException(ICommandSender, CommandNotFoundException)}).
+     * #handleCAPException(ICommandSender, CAPException)}).
      * <p>
      * Use {@link #toBuilder()} if you wish to modify these settings.
      *
@@ -92,14 +92,14 @@ public class ExceptionHandler
     {
         return ExceptionHandler
             .builder()
-            .handler(CommandNotFoundException.class, ExceptionHandler::handleCommandNotFoundException)
-            .handler(ValidationFailureException.class, ExceptionHandler::handleValidationFailureException)
-            .handler(NoPermissionException.class, ExceptionHandler::handleNoPermissionException)
+            .handler(CommandNotFoundException.class, ExceptionHandler::handleCAPException)
+            .handler(ValidationFailureException.class, ExceptionHandler::handleCAPException)
+            .handler(NoPermissionException.class, ExceptionHandler::handleCAPException)
             .handler(NonExistingArgumentException.class, ExceptionHandler::handleNonExistingArgumentException)
-            .handler(MissingArgumentException.class, ExceptionHandler::handleMissingArgumentException)
+            .handler(MissingArgumentException.class, ExceptionHandler::handleCAPException)
             .handler(IllegalValueException.class, ExceptionHandler::handleIllegalValueException)
-            .handler(UnmatchedQuoteException.class, ExceptionHandler::handleUnmatchedQuoteException)
-            .handler(MissingValueException.class, ExceptionHandler::handleMissingValueException)
+            .handler(UnmatchedQuoteException.class, ExceptionHandler::handleCAPException)
+            .handler(MissingValueException.class, ExceptionHandler::handleCAPException)
             .build();
     }
 
@@ -108,22 +108,15 @@ public class ExceptionHandler
         commandSender.sendMessage(new Text(commandSender.getColorScheme()).add(message, TextType.ERROR));
     }
 
-    public static void handleCommandNotFoundException(final @NonNull ICommandSender commandSender,
-                                                      final @NonNull CommandNotFoundException e)
+    /**
+     * The default exception handler. Sends {@link CAPException#getLocalizedMessage()} for the {@link ICommandSender}.
+     *
+     * @param commandSender The {@link ICommandSender}
+     * @param ex            The {@link CAPException}.
+     */
+    public static void handleCAPException(final @NonNull ICommandSender commandSender, final @NonNull CAPException ex)
     {
-        sendError(commandSender, e.getLocalizedMessage());
-    }
-
-    public static void handleValidationFailureException(final @NonNull ICommandSender commandSender,
-                                                        final @NonNull ValidationFailureException e)
-    {
-        sendError(commandSender, e.getLocalizedMessage());
-    }
-
-    public static void handleNoPermissionException(final @NonNull ICommandSender commandSender,
-                                                   final @NonNull NoPermissionException e)
-    {
-        sendError(commandSender, e.getLocalizedMessage());
+        sendError(commandSender, ex.getLocalizedMessage());
     }
 
     public static void handleNonExistingArgumentException(final @NonNull ICommandSender commandSender,
@@ -133,29 +126,11 @@ public class ExceptionHandler
             e.getCommand().getName(commandSender.getLocale()) + "\"");
     }
 
-    public static void handleMissingArgumentException(final @NonNull ICommandSender commandSender,
-                                                      final @NonNull MissingArgumentException e)
-    {
-        sendError(commandSender, e.getLocalizedMessage());
-    }
-
     public static void handleIllegalValueException(final @NonNull ICommandSender commandSender,
                                                    final @NonNull IllegalValueException e)
     {
         sendError(commandSender, "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" +
             e.getCommand().getName(commandSender.getLocale()) + "\"");
-    }
-
-    public static void handleUnmatchedQuoteException(final @NonNull ICommandSender commandSender,
-                                                     final @NonNull UnmatchedQuoteException e)
-    {
-        sendError(commandSender, "Incomplete input! Make sure all quotation marks are matched!");
-    }
-
-    public static void handleMissingValueException(final @NonNull ICommandSender commandSender,
-                                                   final @NonNull MissingValueException e)
-    {
-        sendError(commandSender, "Missing value for argument: " + e.getArgument().getIdentifier());
     }
 
     // Delombok:

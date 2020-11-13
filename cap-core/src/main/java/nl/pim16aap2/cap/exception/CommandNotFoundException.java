@@ -12,7 +12,7 @@ public class CommandNotFoundException extends CAPException
     public CommandNotFoundException(final @NonNull String commandName, final @NonNull String localizedMessage,
                                     final boolean stacktrace)
     {
-        super("Could not find command: \"" + commandName + "\"", stacktrace);
+        super(localizedMessage, "Could not find command: \"" + commandName + "\"", stacktrace);
         missingCommand = commandName;
         this.localizedMessage = localizedMessage;
     }

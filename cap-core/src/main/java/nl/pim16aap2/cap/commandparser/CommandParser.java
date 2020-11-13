@@ -284,7 +284,12 @@ public class CommandParser
                     // If no value is found, or if the value is another argument specification,
                     // we can conclude that this argument did not have a value.
                     if (foundValue == null)
-                        throw new MissingValueException(command, argument, cap.isDebug());
+                    {
+                        final @NonNull String localizedMessage =
+                            MessageFormat.format(cap.getMessage("error.exception.missingValue",
+                                                                commandSender), argumentName);
+                        throw new MissingValueException(command, argument, localizedMessage, cap.isDebug());
+                    }
                     value = foundValue;
                 }
             }
