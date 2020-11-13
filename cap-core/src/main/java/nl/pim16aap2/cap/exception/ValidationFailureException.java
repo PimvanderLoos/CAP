@@ -22,8 +22,6 @@ public class ValidationFailureException extends CAPException
     public ValidationFailureException(final @NonNull String value, final @NonNull String localizedMessage,
                                       final boolean stacktraceEnabled)
     {
-        super(localizedMessage, stacktraceEnabled);
-        argument = null;
-        this.value = value;
+        this(null, value, localizedMessage, stacktraceEnabled);
     }
 }

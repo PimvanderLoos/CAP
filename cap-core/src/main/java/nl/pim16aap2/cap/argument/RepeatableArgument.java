@@ -7,6 +7,7 @@ import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +35,7 @@ public class RepeatableArgument<T> extends Argument<T>
     @Override
     public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value, final @NonNull CAP cap,
                                                          final @NonNull ICommandSender commandSender)
-        throws ValidationFailureException
+        throws ValidationFailureException, IllegalValueException
     {
         final ParsedRepeatableArgument<T> ret = new ParsedRepeatableArgument<>();
         if (value != null)

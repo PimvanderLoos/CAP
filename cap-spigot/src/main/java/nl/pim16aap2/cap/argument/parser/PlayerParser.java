@@ -3,10 +3,15 @@ package nl.pim16aap2.cap.argument.parser;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.exception.IllegalValueException;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.MessageFormat;
 import java.util.UUID;
 
 /**
@@ -18,9 +23,11 @@ import java.util.UUID;
 public class PlayerParser extends ArgumentParser<Player>
 {
     @Override
-    public @NonNull Player parseArgument(final @NonNull String value)
+    public @NonNull Player parseArgument(final @NonNull CAP cap, final @NonNull ICommandSender commandSender,
+                                         final @NonNull Argument<?> argument, final @NonNull String value)
+        throws IllegalValueException
     {
-        @Nullable Player player = null;
+        @Nullable Player player;
         try
         {
             player = Bukkit.getPlayer(UUID.fromString(value));
@@ -31,7 +38,12 @@ public class PlayerParser extends ArgumentParser<Player>
         }
 
         if (player == null)
-            throw new IllegalArgumentException("Player \"" + value + "\" could not be found!!");
+        {
+            // TODO: Spigot-specific error messages.
+            final @NonNull String localizedMessage =
+                MessageFormat.format(cap.getMessage("error.valueParser.integer", commandSender), value);
+            throw new IllegalValueException(argument, value, localizedMessage, cap.isDebug());
+        }
 
         return player;
     }

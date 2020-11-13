@@ -316,28 +316,16 @@ public class CommandParser
                 value = nextArg;
             }
 
-            value = value.trim();
-            try
-            {
-                final @NonNull Argument.IParsedArgument<?> parsedArgument = argument.getParsedArgument(value, cap,
-                                                                                                       commandSender);
+            final @NonNull Argument.IParsedArgument<?> parsedArgument =
+                argument.getParsedArgument(value.trim(), cap, commandSender);
 
-                // If the argument was already parsed before, update the value (in case of a repeatable argument,
-                // the value is added to the list).
-                final @Nullable Argument.IParsedArgument<?> result =
-                    results.putIfAbsent(argument.getIdentifier(), parsedArgument);
+            // If the argument was already parsed before, update the value (in case of a repeatable argument,
+            // the value is added to the list).
+            final @Nullable Argument.IParsedArgument<?> result =
+                results.putIfAbsent(argument.getIdentifier(), parsedArgument);
 
-                if (result != null)
-                    result.updateValue(parsedArgument.getValue());
-            }
-            catch (IllegalArgumentException e)
-            {
-                // TODO: Remove the IllegalArgumentException!
-                final @NonNull String localizedMessage =
-                    MessageFormat.format(cap.getMessage("error.exception.commandNotFound",
-                                                        commandSender), "");
-                throw new IllegalValueException(command, value, e, localizedMessage, cap.isDebug());
-            }
+            if (result != null)
+                result.updateValue(parsedArgument.getValue());
         }
 
         // If the help argument was specified, simply return null, because none of the other arguments matter.

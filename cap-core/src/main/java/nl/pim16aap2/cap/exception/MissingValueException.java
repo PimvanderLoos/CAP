@@ -14,7 +14,8 @@ public class MissingValueException extends CAPException
     public MissingValueException(final @NonNull Command command, final @NonNull Argument<?> argument,
                                  final @NonNull String localizedMessage, final boolean stacktrace)
     {
-        super("Missing value for argument \"" + argument.getIdentifier() + "\" for command: " + command.getNameKey(),
+        super(localizedMessage,
+              "Missing value for argument \"" + argument.getIdentifier() + "\" for command: " + command.getNameKey(),
               stacktrace);
         this.argument = argument;
         this.command = command;

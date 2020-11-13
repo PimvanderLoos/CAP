@@ -12,6 +12,7 @@ import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.TabCompletionRequest;
 import nl.pim16aap2.cap.util.Util;
@@ -350,13 +351,13 @@ public class Argument<T>
      *
      * @throws ValidationFailureException If the value was not valid. See {@link IArgumentValidator#validate(CAP,
      *                                    ICommandSender, Argument, Object)}.
-     * @throws IllegalArgumentException
+     * @throws IllegalValueException      If the value could not be parsed into the desired type.
      */
     protected @NonNull T parseArgument(final @NonNull String value, final @NonNull CAP cap,
                                        final @NonNull ICommandSender commandSender)
-        throws ValidationFailureException, IllegalArgumentException
+        throws ValidationFailureException, IllegalValueException
     {
-        final @NonNull T parsed = parser.parseArgument(value);
+        final @NonNull T parsed = parser.parseArgument(cap, commandSender, this, value);
 
         if (argumentValidator != null)
             argumentValidator.validate(cap, commandSender, this, parsed);
@@ -372,10 +373,14 @@ public class Argument<T>
      * @param cap           The {@link CAP} that requested the argument to be parsed.
      * @param commandSender The {@link ICommandSender} for which to parse validate the argument.
      * @return The parsed argument.
+     *
+     * @throws ValidationFailureException If the value was not valid. See {@link IArgumentValidator#validate(CAP,
+     *                                    ICommandSender, Argument, Object)}.
+     * @throws IllegalValueException      If the value could not be parsed into the desired type.
      */
     public @NonNull IParsedArgument<?> getParsedArgument(final @Nullable String value, final @NonNull CAP cap,
                                                          final @NonNull ICommandSender commandSender)
-        throws ValidationFailureException
+        throws ValidationFailureException, IllegalValueException
     {
         if (value == null)
             return new ParsedArgument<>(defaultValue);
