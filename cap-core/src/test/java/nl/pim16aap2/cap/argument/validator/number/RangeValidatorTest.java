@@ -3,39 +3,32 @@ package nl.pim16aap2.cap.argument.validator.number;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
-import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
-import nl.pim16aap2.cap.util.LocalizationSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Locale;
+import static nl.pim16aap2.cap.util.UtilsForTesting.*;
 
 class RangeValidatorTest
 {
-    public static final @NonNull ICommandSender commandSender = new DefaultCommandSender();
-    public static final @NonNull Argument<?> argument = Argument.valuesLessBuilder().shortName("a").summary("")
-                                                                .identifier("a").build();
-    public static final @NonNull CAP cap =
-        CAP.getDefault().toBuilder()
-           .localizationSpecification(new LocalizationSpecification("CAPCore", Locale.US))
-           .build();
-
     @Test
     void validateRangeInteger()
     {
         final @NonNull RangeValidator<Integer> rangeValidator = RangeValidator.integerRangeValidator(10, 20);
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, 9));
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 9));
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, 21));
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 21));
 
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 10));
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 11));
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 20));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 10));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 11));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 20));
     }
 
     @Test
@@ -44,18 +37,20 @@ class RangeValidatorTest
         final @NonNull RangeValidator<Double> rangeValidator = RangeValidator.doubleRangeValidator(10, 20);
 
         @NonNull ValidationFailureException exception =
-            Assertions.assertThrows(ValidationFailureException.class,
-                                    () -> rangeValidator.validate(cap, commandSender, argument, 9.9));
+            Assertions.assertThrows(ValidationFailureException.class, () ->
+                rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 9.9));
         Assertions.assertEquals("Value 9.9 is outside of range [10, 20]!", exception.getLocalizedMessage());
 
-        exception =
-            Assertions.assertThrows(ValidationFailureException.class,
-                                    () -> rangeValidator.validate(cap, commandSender, argument, 20.1));
+        exception = Assertions.assertThrows(ValidationFailureException.class, () ->
+            rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 20.1));
         Assertions.assertEquals("Value 20.1 is outside of range [10, 20]!", exception.getLocalizedMessage());
 
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 10.0));
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 11.0));
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, 20.0));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 10.0));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 11.0));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 20.0));
     }
 
     /**
@@ -73,22 +68,26 @@ class RangeValidatorTest
     @Test
     void validateDynamic()
     {
-        final @NonNull Integer minimum = 10;
-        final @NonNull Integer maximum = 20;
+        final int minimum = 10;
+        final int maximum = 20;
         final @NonNull RangeValidator<Integer> rangeValidator = RangeValidator.integerRangeValidator(
             (cap1, commandSender1, argument1) -> valueSupplier(minimum, cap1, commandSender1, argument1),
             (cap1, commandSender1, argument1) -> valueSupplier(maximum, cap1, commandSender1, argument1));
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, maximum + 1));
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum + 1));
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> rangeValidator.validate(cap, commandSender, argument, minimum - 1));
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, minimum - 1));
 
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, maximum - 1));
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, minimum + 1));
-        
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, maximum));
-        Assertions.assertDoesNotThrow(() -> rangeValidator.validate(cap, commandSender, argument, minimum));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum - 1));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, minimum + 1));
+
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum));
+        Assertions.assertDoesNotThrow(
+            () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, minimum));
     }
 }

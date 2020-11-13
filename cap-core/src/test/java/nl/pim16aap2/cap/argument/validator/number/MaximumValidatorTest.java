@@ -3,35 +3,27 @@ package nl.pim16aap2.cap.argument.validator.number;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
-import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
-import nl.pim16aap2.cap.util.LocalizationSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Locale;
+import static nl.pim16aap2.cap.util.UtilsForTesting.*;
 
 class MaximumValidatorTest
 {
-    public static final @NonNull ICommandSender commandSender = new DefaultCommandSender();
-    public static final @NonNull Argument<?> argument = Argument.valuesLessBuilder().shortName("a").summary("")
-                                                                .identifier("a").build();
-    public static final @NonNull CAP cap =
-        CAP.getDefault().toBuilder()
-           .localizationSpecification(new LocalizationSpecification("CAPCore", Locale.US))
-           .build();
-
     @Test
     void validateRangeInteger()
     {
         final @NonNull MaximumValidator<Integer> maximumValidator = MaximumValidator.integerMaximumValidator(10);
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> maximumValidator.validate(cap, commandSender, argument, 11));
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 11));
 
-        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, 10));
-        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, 9));
+        Assertions.assertDoesNotThrow(
+            () -> maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 10));
+        Assertions.assertDoesNotThrow(
+            () -> maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 9));
     }
 
     @Test
@@ -39,11 +31,13 @@ class MaximumValidatorTest
     {
         final @NonNull MaximumValidator<Double> maximumValidator = MaximumValidator.doubleMaximumValidator(10);
 
-        Assertions.assertThrows(ValidationFailureException.class,
-                                () -> maximumValidator.validate(cap, commandSender, argument, 10.1));
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 10.1));
 
-        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, 9.9));
-        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, 10.0));
+        Assertions.assertDoesNotThrow(
+            () -> maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 9.9));
+        Assertions.assertDoesNotThrow(
+            () -> maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 10.0));
     }
 
     /**
@@ -66,11 +60,14 @@ class MaximumValidatorTest
             (cap1, commandSender1, argument1) -> maximumSupplier(maximum, cap1, commandSender1, argument1));
 
         @NonNull ValidationFailureException exception =
-            Assertions.assertThrows(ValidationFailureException.class,
-                                    () -> maximumValidator.validate(cap, commandSender, argument, maximum + 1));
+            Assertions.assertThrows(ValidationFailureException.class, () ->
+                maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum + 1));
         Assertions.assertEquals("Value 11 should be less than 10!", exception.getLocalizedMessage());
 
-        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, maximum));
-        Assertions.assertDoesNotThrow(() -> maximumValidator.validate(cap, commandSender, argument, maximum - 1));
+        Assertions.assertDoesNotThrow(
+            () -> maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum));
+        Assertions
+            .assertDoesNotThrow(
+                () -> maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum - 1));
     }
 }
