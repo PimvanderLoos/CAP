@@ -248,14 +248,16 @@ public class TabCompletionSuggester extends CommandParser
                 if (!openEnded)
                     return getFreeArgumentNames(command, freeArgumentOpt.get());
 
-                argument = command.getArgumentManager().getArgument(freeArgumentOpt.get().trim()).orElse(null);
+                argument = command.getArgumentManager().getArgument(freeArgumentOpt.get().trim(), commandSender)
+                                  .orElse(null);
                 value = "";
             }
             // No argument prefixes, so the previous entry is the argument and the current one is the
             else
             {
                 argument = lStripArgumentPrefix(input.getArgs().get(input.getArgs().size() - 2))
-                    .flatMap(previousName -> command.getArgumentManager().getArgument(previousName.trim()))
+                    .flatMap(previousName -> command.getArgumentManager().getArgument(previousName.trim(),
+                                                                                      commandSender))
                     .orElse(null);
 
                 value = lastVal;
@@ -285,7 +287,7 @@ public class TabCompletionSuggester extends CommandParser
             final String[] parts = separatorPattern.split(freeArgument, 2);
             final String argumentName = parts[0].trim();
             value = parts.length == 2 ? parts[1].trim() : "";
-            argument = command.getArgumentManager().getArgument(argumentName).orElse(null);
+            argument = command.getArgumentManager().getArgument(argumentName, commandSender).orElse(null);
 
             // If the argument is present (and therefore completed) and valueless, there's nothing to complete.
             // However, it's not open-ended, so we're still working on the current argument.

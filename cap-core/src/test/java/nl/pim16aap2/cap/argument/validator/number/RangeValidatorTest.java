@@ -36,14 +36,11 @@ class RangeValidatorTest
     {
         final @NonNull RangeValidator<Double> rangeValidator = RangeValidator.doubleRangeValidator(10, 20);
 
-        @NonNull ValidationFailureException exception =
-            Assertions.assertThrows(ValidationFailureException.class, () ->
-                rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 9.9));
-        Assertions.assertEquals("Value 9.9 is outside of range [10, 20]!", exception.getLocalizedMessage());
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 9.9));
 
-        exception = Assertions.assertThrows(ValidationFailureException.class, () ->
+        Assertions.assertThrows(ValidationFailureException.class, () ->
             rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 20.1));
-        Assertions.assertEquals("Value 20.1 is outside of range [10, 20]!", exception.getLocalizedMessage());
 
         Assertions.assertDoesNotThrow(
             () -> rangeValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, 10.0));

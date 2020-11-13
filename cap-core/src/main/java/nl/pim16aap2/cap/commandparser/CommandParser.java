@@ -199,14 +199,16 @@ public class CommandParser
      * 2) The String (with up to two leading {@link #ARGUMENT_PREFIX}es stripped) has to be an {@link Argument}
      * registered with the {@link Command}.
      *
-     * @param command The {@link Command} to check for a registered {@link Argument}.
-     * @param name    The string that may contain the name of an {@link Argument}.
+     * @param commandSender The {@link ICommandSender} for which to check the arguments.
+     * @param command       The {@link Command} to check for a registered {@link Argument}.
+     * @param name          The string that may contain the name of an {@link Argument}.
      * @return True if the provided name is the name of a free {@link Argument}.
      */
-    protected static boolean isFreeArgumentName(final @NonNull Command command, final @NonNull String name)
+    protected static boolean isFreeArgumentName(final @NonNull ICommandSender commandSender,
+                                                final @NonNull Command command, final @NonNull String name)
     {
         return lStripArgumentPrefix(name)
-            .map(stripped -> command.getArgumentManager().getArgument(stripped).isPresent())
+            .map(stripped -> command.getArgumentManager().getArgument(stripped, commandSender.getLocale()).isPresent())
             .orElse(false);
     }
 
@@ -249,7 +251,7 @@ public class CommandParser
 
                 final @NonNull String argumentName = parts[0].substring(argNameStartIdx).trim();
 
-                argument = command.getArgumentManager().getArgument(argumentName)
+                argument = command.getArgumentManager().getArgument(argumentName, commandSender)
                                   .orElseThrow(
                                       () ->
                                       {
@@ -277,7 +279,7 @@ public class CommandParser
                         // If the next value is another argument, then we can conclude that the
                         // value we found is not a value (it's an argument).
                         if (foundValue != null)
-                            foundValue = isFreeArgumentName(command, foundValue) ? null : foundValue;
+                            foundValue = isFreeArgumentName(commandSender, command, foundValue) ? null : foundValue;
                         pos += 1;
                     }
                     else
@@ -390,6 +392,7 @@ public class CommandParser
                     String.format("Command was null at idx %d for inupt: \n%s", idx, input.toString()));
 
             final @Nullable String commandName = input.size() > idx ? input.getArgs().get(idx).trim() : null;
+
             // Gets the first argument in the arguments list.
             final Command baseCommand =
                 cap.getTopLevelCommand(commandName)
@@ -414,7 +417,7 @@ public class CommandParser
         if (nextArg == null)
             return new ParsedCommand(command, idx);
 
-        final @NonNull Optional<Command> subCommandOpt = command.getSubCommand(nextArg);
+        final @NonNull Optional<Command> subCommandOpt = command.getSubCommand(nextArg, commandSender.getLocale());
         if (!subCommandOpt.isPresent())
             return new ParsedCommand(command, idx);
 

@@ -4,14 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
-import nl.pim16aap2.cap.commandsender.SpigotCommandSender;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.TabCompleteEvent;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 @AllArgsConstructor
@@ -27,7 +29,7 @@ class CommandListener implements Listener
      * @param message The message to check.
      * @return True if the first argument is a registered super{@link Command}.
      */
-    private boolean startsWithSuperCommand(final @NonNull String message)
+    private boolean startsWithSuperCommand(final @Nullable Locale locale, final @NonNull String message)
     {
         try
         {
@@ -48,7 +50,7 @@ class CommandListener implements Listener
             return;
 
         final String message = event.getMessage().substring(1);
-        if (!startsWithSuperCommand(message))
+        if (!startsWithSuperCommand(getLocale(event.getPlayer()), message))
             return;
 
         event.setCancelled(true);
@@ -58,7 +60,7 @@ class CommandListener implements Listener
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onServerCommand(final @NonNull ServerCommandEvent event)
     {
-        if (!startsWithSuperCommand(event.getCommand()))
+        if (!startsWithSuperCommand(getLocale(event.getSender()), event.getCommand()))
             return;
 
         event.setCancelled(true);
@@ -72,11 +74,16 @@ class CommandListener implements Listener
             return;
 
         final @NonNull String command = event.getBuffer().substring(1); // Strip leading '/'.
-        if (!startsWithSuperCommand(event.getBuffer().substring(1)))
+        if (!startsWithSuperCommand(getLocale(event.getSender()), event.getBuffer().substring(1)))
             return;
 
-        event.setCompletions(cap.getTabCompleteOptions(SpigotCommandSender.wrapCommandSender(event.getSender(),
-                                                                                             cap.getColorScheme()),
+        event.setCompletions(cap.getTabCompleteOptions(cap.getCommandSenderFactory()
+                                                          .wrapCommandSender(event.getSender(), cap.getColorScheme()),
                                                        command));
+    }
+
+    private @Nullable Locale getLocale(final @NonNull CommandSender commandSender)
+    {
+        return cap.getCommandSenderFactory().getLocale(commandSender);
     }
 }

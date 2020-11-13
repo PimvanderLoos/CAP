@@ -191,7 +191,6 @@ public class CommandResult
 
             for (@NonNull Map.Entry<@NonNull String, Argument.IParsedArgument<?>> argument : parsedArguments.entrySet())
                 sb.append(argument.getKey()).append(": ").append(argument.getValue().toString()).append("\n");
-            sb.append("\n");
         }
 
         return sb.toString();

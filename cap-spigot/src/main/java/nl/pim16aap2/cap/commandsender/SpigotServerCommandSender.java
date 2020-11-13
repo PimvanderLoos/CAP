@@ -1,14 +1,20 @@
 package nl.pim16aap2.cap.commandsender;
 
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
+import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.Nullable;
 
-@RequiredArgsConstructor
-public class SpigotServerCommandSender implements ICommandSender
+import java.util.Locale;
+
+@AllArgsConstructor
+public class SpigotServerCommandSender implements ISpigotCommandSender
 {
     protected static final @NonNull ColorScheme EMPTY_COLOR_SCHEME = ColorScheme.builder().build();
+
+    protected @Nullable Locale locale;
 
     @Override
     public void sendMessage(final @NonNull Text message)
@@ -23,6 +29,12 @@ public class SpigotServerCommandSender implements ICommandSender
     }
 
     @Override
+    public @Nullable Locale getLocale()
+    {
+        return locale;
+    }
+
+    @Override
     public int hashCode()
     {
         // A hashcode of 0 works fine, because we assume there to only be 1 server. Also, I'm pretty sure
@@ -34,5 +46,11 @@ public class SpigotServerCommandSender implements ICommandSender
     public String toString()
     {
         return "Server";
+    }
+
+    @Override
+    public @Nullable CommandSender getCommandSender()
+    {
+        return null;
     }
 }

@@ -7,7 +7,8 @@ import lombok.Setter;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.AllowedCommandSenderType;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
-import nl.pim16aap2.cap.commandsender.SpigotCommandSender;
+import nl.pim16aap2.cap.commandsender.ILocaleProvider;
+import nl.pim16aap2.cap.commandsender.SpigotCommandSenderFactory;
 import nl.pim16aap2.cap.commandsender.SpigotServerCommandSender;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.exception.NoPermissionException;
@@ -52,13 +53,33 @@ public class SpigotCAP extends CAP
     @Setter
     private @NonNull ColorScheme colorScheme;
 
+    @Getter
+    private final @NonNull SpigotCommandSenderFactory commandSenderFactory;
+
+    /**
+     * @param helpCommandRenderer           See {@link CAP#helpCommandRenderer}.
+     * @param debug                         See {@link CAP#debug}.
+     * @param plugin                        The {@link JavaPlugin} that manages this object.
+     * @param colorScheme                   The default {@link ColorScheme} to use for players.
+     * @param exceptionHandler              See {@link CAP#exceptionHandler}.
+     * @param separator                     See {@link CAP#separator}.
+     * @param cacheTabCompletionSuggestions See {@link CAP#cacheTabCompletionSuggestions}.
+     * @param caseSensitive                 See {@link CAP#caseSensitive}.
+     * @param localizationSpecification     See {@link CAP#localizationSpecification}.
+     * @param commandSenderFactory          The factory for creating {@link ICommandSender}s for the Spigot platform.
+     *                                      Defaults to {@link SpigotCommandSenderFactory}.
+     * @param localeProvider                The {@link ILocaleProvider}. When null, all {@link CommandSender}s will use
+     *                                      the default locale.
+     */
     @Builder(builderMethodName = "spigotCAPBuilder")
     protected SpigotCAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer, final boolean debug,
                         final @NonNull JavaPlugin plugin, final @Nullable ColorScheme colorScheme,
                         final @Nullable ExceptionHandler exceptionHandler,
                         final @Nullable Character separator, final @Nullable Boolean cacheTabCompletionSuggestions,
                         final boolean caseSensitive,
-                        final @Nullable LocalizationSpecification localizationSpecification)
+                        final @Nullable LocalizationSpecification localizationSpecification,
+                        final @Nullable SpigotCommandSenderFactory commandSenderFactory,
+                        final @Nullable ILocaleProvider localeProvider)
     {
         super(Util.valOrDefault(helpCommandRenderer, SpigotHelpCommandRenderer.getDefault()),
               Util.valOrDefault(cacheTabCompletionSuggestions, true),
@@ -71,6 +92,10 @@ public class SpigotCAP extends CAP
 
         if (exceptionHandler == null && getExceptionHandler() != null)
             getExceptionHandler().setHandler(NoPermissionException.class, SpigotCAP::handleNoPermissionException);
+
+        this.commandSenderFactory = Util.valOrDefault(commandSenderFactory,
+                                                      new SpigotCommandSenderFactory());
+        this.commandSenderFactory.setLocaleProvider(localeProvider);
     }
 
     /**
@@ -86,7 +111,7 @@ public class SpigotCAP extends CAP
     public @NonNull Optional<CommandResult> parseInput(final @NonNull CommandSender sender,
                                                        final @NonNull String message)
     {
-        final @NonNull ICommandSender commandSender = SpigotCommandSender.wrapCommandSender(sender, colorScheme);
+        final @NonNull ICommandSender commandSender = commandSenderFactory.wrapCommandSender(sender, colorScheme);
         return parseInput(commandSender, message);
     }
 

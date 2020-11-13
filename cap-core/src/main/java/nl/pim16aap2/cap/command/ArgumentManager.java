@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.util.LocalizedMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -96,12 +97,15 @@ public class ArgumentManager
     /**
      * Gets an argument from its name. See {@link Argument#getShortNameKey()}.
      *
-     * @param argumentName The name of the {@link Argument}.
+     * @param argumentName  The name of the {@link Argument}.
+     * @param commandSender The {@link ICommandSender} for which to get the {@link Command}. See {@link
+     *                      ICommandSender#getLocale()}.
      * @return The {@link Argument}, if one is registered by the provided name.
      */
-    public @NonNull Optional<Argument<?>> getArgument(final @Nullable String argumentName)
+    public @NonNull Optional<Argument<?>> getArgument(final @Nullable String argumentName,
+                                                      final @NonNull ICommandSender commandSender)
     {
-        return getArgument(argumentName, null);
+        return getArgument(argumentName, commandSender.getLocale());
     }
 
     /**
@@ -204,7 +208,7 @@ public class ArgumentManager
          * @param locale The {@link Locale} for which to get the {@link Argument}.
          * @return The {@link Argument} with the given name, if it is registered.
          */
-        public @NonNull Optional<Argument<?>> getArgument(@Nullable String name, @Nullable Locale locale)
+        public @NonNull Optional<Argument<?>> getArgument(final @Nullable String name, final @Nullable Locale locale)
         {
             return getEntry(name, locale, argumentManager::getArgumentNameCaseCheck);
         }

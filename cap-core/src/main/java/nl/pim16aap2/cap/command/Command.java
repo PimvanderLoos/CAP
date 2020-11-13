@@ -451,18 +451,6 @@ public class Command
     /**
      * Searches for a sub{@link Command} with a given name.
      *
-     * @param name The name of the sub{@link Command} to look for.
-     * @return An optional containing the sub{@link Command} with the given name, if it exists, otherwise {@link
-     * Optional#empty()}.
-     */
-    public @NonNull Optional<Command> getSubCommand(final @Nullable String name)
-    {
-        return getSubCommand(name, null);
-    }
-
-    /**
-     * Searches for a sub{@link Command} with a given name.
-     *
      * @param name   The name of the sub{@link Command} to look for.
      * @param locale The {@link Locale} for which to get the {@link Command}.
      * @return An optional containing the sub{@link Command} with the given name, if it exists, otherwise {@link
@@ -488,8 +476,23 @@ public class Command
         return permission.apply(commandSender, this);
     }
 
+    /**
+     * Gets all the sub{@link Command}s of this {@link Command}.
+     *
+     * @return All the sub{@link Command}s.
+     */
     public @NonNull Collection<@NonNull Command> getSubCommands()
     {
         return subCommands.get().values();
+    }
+
+    /**
+     * Gets the names of all the sub{@link Command}s of this {@link Command} for a specific locale.
+     *
+     * @return The names of all the sub{@link Command}s.
+     */
+    public @NonNull Collection<@NonNull String> getSubCommandNames(final @Nullable Locale locale)
+    {
+        return subCommands.get(locale).keySet();
     }
 }

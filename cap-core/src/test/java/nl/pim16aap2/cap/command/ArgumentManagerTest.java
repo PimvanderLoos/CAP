@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 class ArgumentManagerTest
 {
@@ -25,11 +26,11 @@ class ArgumentManagerTest
         final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, true);
         Assertions.assertEquals("caseSensitive", argumentManager.getArgumentNameCaseCheck("caseSensitive"));
 
-        Assertions.assertTrue(argumentManager.getArgument("argumenta").isPresent());
-        Assertions.assertFalse(argumentManager.getArgument("argumentA").isPresent());
+        Assertions.assertTrue(argumentManager.getArgument("argumenta", (Locale) null).isPresent());
+        Assertions.assertFalse(argumentManager.getArgument("argumentA", (Locale) null).isPresent());
 
-        Assertions.assertFalse(argumentManager.getArgument("argumentb").isPresent());
-        Assertions.assertTrue(argumentManager.getArgument("argumentB").isPresent());
+        Assertions.assertFalse(argumentManager.getArgument("argumentb", (Locale) null).isPresent());
+        Assertions.assertTrue(argumentManager.getArgument("argumentB", (Locale) null).isPresent());
     }
 
     @Test
@@ -45,10 +46,10 @@ class ArgumentManagerTest
         final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, false);
         Assertions.assertEquals("caseinsensitive", argumentManager.getArgumentNameCaseCheck("caseInsensitive"));
 
-        Assertions.assertTrue(argumentManager.getArgument("argumenta").isPresent());
-        Assertions.assertTrue(argumentManager.getArgument("argumentA").isPresent());
+        Assertions.assertTrue(argumentManager.getArgument("argumenta", (Locale) null).isPresent());
+        Assertions.assertTrue(argumentManager.getArgument("argumentA", (Locale) null).isPresent());
 
-        Assertions.assertTrue(argumentManager.getArgument("argumentb").isPresent());
-        Assertions.assertTrue(argumentManager.getArgument("argumentB").isPresent());
+        Assertions.assertTrue(argumentManager.getArgument("argumentb", (Locale) null).isPresent());
+        Assertions.assertTrue(argumentManager.getArgument("argumentB", (Locale) null).isPresent());
     }
 }

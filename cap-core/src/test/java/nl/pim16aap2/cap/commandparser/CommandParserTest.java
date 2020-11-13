@@ -317,16 +317,16 @@ class CommandParserTest
     {
         final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).build());
 
-        final @NonNull Command addowner = cap.getCommand("addowner").orElseThrow(
+        final @NonNull Command addowner = cap.getCommand("addowner", null).orElseThrow(
             () -> new RuntimeException("Failed to find command \"addowner\"!!"));
 
         // TODO: Maybe check the number of argument prefixes? "-".
-        Assertions.assertTrue(CommandParser.isFreeArgumentName(addowner, "--group"));
-        Assertions.assertTrue(CommandParser.isFreeArgumentName(addowner, "-g"));
-        Assertions.assertFalse(CommandParser.isFreeArgumentName(addowner, "aaaaa"));
-        Assertions.assertFalse(CommandParser.isFreeArgumentName(addowner, "--groups"));
-        Assertions.assertFalse(CommandParser.isFreeArgumentName(addowner, "-groups"));
-        Assertions.assertFalse(CommandParser.isFreeArgumentName(addowner, "-z"));
+        Assertions.assertTrue(CommandParser.isFreeArgumentName(commandSender, addowner, "--group"));
+        Assertions.assertTrue(CommandParser.isFreeArgumentName(commandSender, addowner, "-g"));
+        Assertions.assertFalse(CommandParser.isFreeArgumentName(commandSender, addowner, "aaaaa"));
+        Assertions.assertFalse(CommandParser.isFreeArgumentName(commandSender, addowner, "--groups"));
+        Assertions.assertFalse(CommandParser.isFreeArgumentName(commandSender, addowner, "-groups"));
+        Assertions.assertFalse(CommandParser.isFreeArgumentName(commandSender, addowner, "-z"));
     }
 
     @Test

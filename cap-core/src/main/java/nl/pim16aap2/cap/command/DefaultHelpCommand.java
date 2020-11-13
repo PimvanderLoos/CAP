@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
 
@@ -45,19 +44,6 @@ public class DefaultHelpCommand extends Command
     private static final boolean ADD_DEFAULT_HELP_ARGUMENT = false;
     private static final boolean ADD_DEFAULT_HELP_SUB_COMMAND = false;
     private static final String PERMISSION = null;
-
-    /**
-     * The number of subcommands the super command had the last time we checked. This is used to invalidate {@link
-     * #suggestions} when any subcommands are added, so that they are always up-to-date.
-     */
-    @Getter(AccessLevel.PRIVATE)
-    private int lastSubCommandCount = 0;
-
-    /**
-     * The list of tab-completion suggestions.
-     */
-    @Getter(AccessLevel.PRIVATE)
-    private List<String> suggestions = null;
 
     @Getter(AccessLevel.PRIVATE)
     private final boolean enableLocalization;
@@ -149,19 +135,8 @@ public class DefaultHelpCommand extends Command
             command.getSuperCommand().get().getSubCommandCount() == 0)
             return new ArrayList<>(0);
 
-        final @NonNull DefaultHelpCommand helpCommand = (DefaultHelpCommand) command;
         final @NonNull Command superCommand = command.getSuperCommand().get();
-
-        if (helpCommand.suggestions == null || helpCommand.getSubCommandCount() != helpCommand.lastSubCommandCount)
-        {
-            helpCommand.suggestions = new ArrayList<>(helpCommand.getSubCommandCount());
-            addAllSubCommands(request.getCommandSender().getLocale(), helpCommand.suggestions,
-                              superCommand, helpCommand);
-            helpCommand.suggestions = Collections.unmodifiableList(helpCommand.suggestions);
-        }
-
-        helpCommand.lastSubCommandCount = helpCommand.getSubCommandCount();
-        return helpCommand.suggestions;
+        return new ArrayList<>(superCommand.getSubCommandNames(request.getCommandSender().getLocale()));
     }
 
     /**
@@ -253,12 +228,6 @@ public class DefaultHelpCommand extends Command
             .build();
     }
 
-    @Override
-    public @NonNull Optional<Command> getSubCommand(final @Nullable String name)
-    {
-        return Optional.empty();
-    }
-
     protected static @NonNull Text renderHelpText(final @NonNull ICommandSender commandSender,
                                                   final @NonNull ColorScheme colorScheme,
                                                   final @NonNull Command superCommand,
@@ -274,7 +243,8 @@ public class DefaultHelpCommand extends Command
         if (intOpt.isPresent())
             return helpCommandRenderer.renderOverviewPage(commandSender, colorScheme, superCommand, intOpt.getAsInt());
 
-        final @NonNull Command command = superCommand.getCap().getCommand(val).orElse(superCommand);
+        final @NonNull Command command = superCommand.getCap().getCommand(val, commandSender.getLocale())
+                                                     .orElse(superCommand);
         return helpCommandRenderer.render(commandSender, colorScheme, command, val);
     }
 

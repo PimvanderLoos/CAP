@@ -17,11 +17,11 @@ class CAPTest
         cap.addCommand(Command.commandBuilder().name("commanda").virtual(true).cap(cap).build());
         cap.addCommand(Command.commandBuilder().name("commandB").virtual(true).cap(cap).build());
 
-        Assertions.assertTrue(cap.getCommand("commanda").isPresent());
-        Assertions.assertFalse(cap.getCommand("commandA").isPresent());
+        Assertions.assertTrue(cap.getCommand("commanda", null).isPresent());
+        Assertions.assertFalse(cap.getCommand("commandA", null).isPresent());
 
-        Assertions.assertFalse(cap.getCommand("commandb").isPresent());
-        Assertions.assertTrue(cap.getCommand("commandB").isPresent());
+        Assertions.assertFalse(cap.getCommand("commandb", null).isPresent());
+        Assertions.assertTrue(cap.getCommand("commandB", null).isPresent());
     }
 
     @Test
@@ -34,10 +34,10 @@ class CAPTest
         cap.addCommand(Command.commandBuilder().name("commanda").virtual(true).cap(cap).build());
         cap.addCommand(Command.commandBuilder().name("commandB").virtual(true).cap(cap).build());
 
-        Assertions.assertTrue(cap.getCommand("commanda").isPresent());
-        Assertions.assertTrue(cap.getCommand("commandA").isPresent());
+        Assertions.assertTrue(cap.getCommand("commanda", null).isPresent());
+        Assertions.assertTrue(cap.getCommand("commandA", null).isPresent());
 
-        Assertions.assertTrue(cap.getCommand("commandb").isPresent());
-        Assertions.assertTrue(cap.getCommand("commandB").isPresent());
+        Assertions.assertTrue(cap.getCommand("commandb", null).isPresent());
+        Assertions.assertTrue(cap.getCommand("commandB", null).isPresent());
     }
 }

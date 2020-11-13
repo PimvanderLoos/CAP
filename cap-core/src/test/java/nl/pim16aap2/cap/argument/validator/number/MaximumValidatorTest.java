@@ -59,10 +59,8 @@ class MaximumValidatorTest
         final @NonNull MaximumValidator<Integer> maximumValidator = MaximumValidator.integerMaximumValidator(
             (cap1, commandSender1, argument1) -> maximumSupplier(maximum, cap1, commandSender1, argument1));
 
-        @NonNull ValidationFailureException exception =
-            Assertions.assertThrows(ValidationFailureException.class, () ->
-                maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum + 1));
-        Assertions.assertEquals("Value 11 should be less than 10!", exception.getLocalizedMessage());
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum + 1));
 
         Assertions.assertDoesNotThrow(
             () -> maximumValidator.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, maximum));

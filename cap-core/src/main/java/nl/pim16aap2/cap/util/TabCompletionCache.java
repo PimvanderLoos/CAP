@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -66,13 +68,13 @@ public class TabCompletionCache
         final @NonNull CacheEntry cacheEntry = tabCompletionCache.computeIfAbsent(commandSender, k -> new CacheEntry());
 
         final @NonNull Optional<List<@NonNull String>> suggestions =
-            cacheEntry.suggestionsSubSelection(args.size(), lastArg, openEnded);
+            cacheEntry.suggestionsSubSelection(args.size(), lastArg, openEnded, commandSender.getLocale());
 
         if (suggestions.isPresent())
             return suggestions.get();
 
         final @NonNull List<@NonNull String> newSuggestions = fun.get();
-        cacheEntry.reset(newSuggestions, args.size(), lastArg, openEnded);
+        cacheEntry.reset(newSuggestions, args.size(), lastArg, openEnded, commandSender.getLocale());
         return newSuggestions;
     }
 
@@ -170,13 +172,13 @@ public class TabCompletionCache
             });
 
         final @NonNull Optional<List<@NonNull String>> suggestions =
-            cacheEntry.suggestionsSubSelection(args.size(), lastArg, openEnded);
+            cacheEntry.suggestionsSubSelection(args.size(), lastArg, openEnded, commandSender.getLocale());
 
         if (suggestions.isPresent())
             return new Pair<>(suggestions.get(), null);
 
         final @NonNull CompletableFuture<List<@NonNull String>> newSuggestions = CompletableFuture.supplyAsync(fun);
-        cacheEntry.prepare(newSuggestions, args.size(), lastArg, openEnded);
+        cacheEntry.prepare(newSuggestions, args.size(), lastArg, openEnded, commandSender.getLocale());
 
         return new Pair<>(null, newSuggestions);
     }
@@ -218,6 +220,8 @@ public class TabCompletionCache
          */
         protected boolean openEnded;
 
+        protected @Nullable Locale locale;
+
         /**
          * Updates the current suggestions data.
          *
@@ -227,12 +231,13 @@ public class TabCompletionCache
          * @param openEnded   Whether the cached results are openEnded or not. See {@link TabCompletionSuggester#isOpenEnded()}.
          */
         public void reset(final @NonNull List<@NonNull String> suggestions, final int argCount,
-                          final @NonNull String lastArg, final boolean openEnded)
+                          final @NonNull String lastArg, final boolean openEnded, final @Nullable Locale locale)
         {
             this.suggestions = new ArrayList<>(suggestions);
             this.argCount = argCount;
             previousArg = lastArg;
             this.openEnded = openEnded;
+            this.locale = locale;
         }
 
         /**
@@ -245,20 +250,26 @@ public class TabCompletionCache
          */
         public @NonNull Optional<List<@NonNull String>> suggestionsSubSelection(final int newArgCount,
                                                                                 final @NonNull String lastArg,
-                                                                                final boolean openEnded)
+                                                                                final boolean openEnded,
+                                                                                final @Nullable Locale locale)
         {
-            if (suggestions == null || newArgCount != argCount || openEnded && !this.openEnded)
+            if (suggestions == null || newArgCount != argCount || openEnded && !this.openEnded ||
+                !Objects.equals(this.locale, locale))
             {
                 this.openEnded = openEnded;
+                this.locale = locale;
                 return Optional.empty();
             }
             // When both the cached suggestions were open ended and the current status is also open ended,
             // we can just return the current stuff.
             // At this point this.openEnded has to be true as well.
             else if (openEnded)
+            {
+                this.locale = locale;
                 return Optional.of(new ArrayList<>(suggestions));
-
+            }
             this.openEnded = false;
+
             argCount = newArgCount;
 
             // Get the cutoff for the old argument. This is the base string for every entry in the cached list.
@@ -309,30 +320,34 @@ public class TabCompletionCache
         protected @NonNull ENTRY_STATUS entryStatus = ENTRY_STATUS.NULL;
 
         public void prepare(final @NonNull CompletableFuture<List<@NonNull String>> newSuggestions, final int argCount,
-                            final @NonNull String lastArg, final boolean openEnded)
+                            final @NonNull String lastArg, final boolean openEnded,
+                            final @Nullable Locale locale)
         {
             entryStatus = ENTRY_STATUS.PENDING;
-            newSuggestions.whenComplete((suggestions, throwable) -> reset(suggestions, argCount, lastArg, openEnded));
+            newSuggestions.whenComplete((suggestions, throwable) ->
+                                            reset(suggestions, argCount, lastArg, openEnded, locale));
         }
 
         @Override
         public void reset(final @NonNull List<@NonNull String> suggestions, final int argCount,
-                          final @NonNull String lastArg, final boolean openEnded)
+                          final @NonNull String lastArg, final boolean openEnded,
+                          final @Nullable Locale locale)
         {
             entryStatus = ENTRY_STATUS.AVAILABLE;
-            super.reset(suggestions, argCount, lastArg, openEnded);
+            super.reset(suggestions, argCount, lastArg, openEnded, locale);
         }
 
         @Override
         public @NonNull Optional<List<@NonNull String>> suggestionsSubSelection(final int newArgCount,
                                                                                 final @NonNull String lastArg,
-                                                                                final boolean openEnded)
+                                                                                final boolean openEnded,
+                                                                                final @Nullable Locale locale)
         {
             // If the data isn't available yet, return an empty list (not an empty optional).
             if (entryStatus == ENTRY_STATUS.PENDING)
                 return Optional.of(new ArrayList<>(0));
 
-            return super.suggestionsSubSelection(newArgCount, lastArg, openEnded);
+            return super.suggestionsSubSelection(newArgCount, lastArg, openEnded, locale);
         }
     }
 

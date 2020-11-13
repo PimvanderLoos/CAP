@@ -59,10 +59,8 @@ class MinimumValidatorTest
         final @NonNull MinimumValidator<Integer> minimumSupplier = MinimumValidator.integerMinimumValidator(
             (cap1, commandSender1, argument1) -> minimumSupplier(minimum, cap1, commandSender1, argument1));
 
-        @NonNull ValidationFailureException exception =
-            Assertions.assertThrows(ValidationFailureException.class, () ->
-                minimumSupplier.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, minimum - 1));
-        Assertions.assertEquals("Value 9 should be more than 10!", exception.getLocalizedMessage());
+        Assertions.assertThrows(ValidationFailureException.class, () ->
+            minimumSupplier.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, minimum - 1));
 
         Assertions.assertDoesNotThrow(
             () -> minimumSupplier.validate(LOCALIZED_CAP, DEFAULT_COMMAND_SENDER, DUMMY_ARGUMENT, minimum));

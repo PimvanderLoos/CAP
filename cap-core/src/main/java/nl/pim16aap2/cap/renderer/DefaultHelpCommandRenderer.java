@@ -212,7 +212,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (pageOpt.isPresent())
             return renderOverviewPage(commandSender, colorScheme, command, pageOpt.getAsInt() - 1);
 
-        final @NonNull Optional<Command> subCommand = command.getCap().getCommand(val);
+        final @NonNull Optional<Command> subCommand = command.getCap().getCommand(val, commandSender.getLocale());
         if (!subCommand.isPresent())
         {
             final @NonNull String localizedMessage =

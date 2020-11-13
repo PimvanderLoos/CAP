@@ -265,24 +265,13 @@ public class CAP
     }
 
     /**
-     * Gets a {@link Command} from its name for the {@link #getDefaultLocale()}.
-     *
-     * @param name The name of the {@link Command}. See {@link Command#getName(Locale)}.
-     * @return The {@link Command#getName(Locale)} with the given name, if it is registered in the {@link CAP}.
-     */
-    public @NonNull Optional<Command> getCommand(final @Nullable String name)
-    {
-        return getCommand(name, getDefaultLocale());
-    }
-
-    /**
      * Gets a {@link Command} from its name.
      *
      * @param name   The name of the {@link Command}. See {@link Command#getName(Locale)}.
      * @param locale The {@link Locale} for which to get the {@link Command}.
      * @return The {@link Command#getName(Locale)} with the given name, if it is registered in the {@link CAP}.
      */
-    public @NonNull Optional<Command> getCommand(@Nullable String name, @Nullable Locale locale)
+    public @NonNull Optional<Command> getCommand(final @Nullable String name, final @Nullable Locale locale)
     {
         return commandMap.getCommand(name, locale);
     }
