@@ -371,9 +371,9 @@ public class Command
     public @NonNull String getDescription(final @NonNull ICommandSender commandSender)
     {
         if (description != null)
-            return cap.getMessage(description, null);
+            return cap.getMessage(description, commandSender);
         if (descriptionSupplier != null)
-            return cap.getMessage(descriptionSupplier.apply(commandSender), null);
+            return cap.getMessage(descriptionSupplier.apply(commandSender), commandSender);
         return "";
     }
 
@@ -389,9 +389,9 @@ public class Command
     public @NonNull String getSummary(final @NonNull ICommandSender commandSender)
     {
         if (summary != null)
-            return cap.getMessage(summary, commandSender.getLocale());
+            return cap.getMessage(summary, commandSender);
         if (summarySupplier != null)
-            return cap.getMessage(summarySupplier.apply(commandSender), commandSender.getLocale());
+            return cap.getMessage(summarySupplier.apply(commandSender), commandSender);
         return "";
     }
 
@@ -407,9 +407,9 @@ public class Command
     public @NonNull String getHeader(final @NonNull ICommandSender commandSender)
     {
         if (header != null)
-            return cap.getMessage(header, commandSender.getLocale());
+            return cap.getMessage(header, commandSender);
         if (headerSupplier != null)
-            return cap.getMessage(headerSupplier.apply(commandSender), commandSender.getLocale());
+            return cap.getMessage(headerSupplier.apply(commandSender), commandSender);
         return "";
     }
 
@@ -421,7 +421,7 @@ public class Command
      */
     public @NonNull String getSectionTitle(final @NonNull ICommandSender commandSender)
     {
-        return cap.getMessage(sectionTitle, commandSender.getLocale());
+        return cap.getMessage(sectionTitle, commandSender);
     }
 
     /**

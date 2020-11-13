@@ -186,6 +186,22 @@ public class CAP
     }
 
     /**
+     * Gets the translated message for the locale of an {@link ICommandSender}. See {@link ICommandSender#getLocale()}.
+     * <p>
+     * If {@link #localizationSpecification} is not available, the key itself is used.
+     * <p>
+     * If the value for the key cannot be found, it returns the key as well.
+     *
+     * @param key           The key.
+     * @param commandSender The {@link ICommandSender} for which to get the {@link Locale}.
+     * @return The localized message, if it can be found.
+     */
+    public @NonNull String getMessage(final @NonNull String key, final @NonNull ICommandSender commandSender)
+    {
+        return getMessage(key, commandSender.getLocale());
+    }
+
+    /**
      * Parses a string containing multiple arguments delimited by spaces.
      *
      * @param commandSender The {@link ICommandSender} that issued a command.

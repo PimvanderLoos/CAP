@@ -161,8 +161,8 @@ public class Main
 //                                                       (sender, ex) -> ex.printStackTrace())
 //                                              .handler(nl.pim16aap2.cap.exception.ValidationFailureException.class,
 //                                                       (sender, ex) -> ex.printStackTrace())
-                                              .handler(nl.pim16aap2.cap.exception.UnmatchedQuoteException.class,
-                                                       (sender, ex) -> ex.printStackTrace())
+//                                              .handler(nl.pim16aap2.cap.exception.UnmatchedQuoteException.class,
+//                                                       (sender, ex) -> ex.printStackTrace())
                                               .handler(nl.pim16aap2.cap.exception.MissingValueException.class,
                                                        (sender, ex) -> ex.printStackTrace())
                                               .build())

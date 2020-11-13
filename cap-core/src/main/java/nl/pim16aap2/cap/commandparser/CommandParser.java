@@ -109,7 +109,8 @@ public class CommandParser
         this(cap, commandSender, new CommandLineInput(input), separator);
 
         if (!this.input.isCompleteQuotationMarks())
-            throw new UnmatchedQuoteException(input, cap.isDebug());
+            throw new UnmatchedQuoteException(input, cap.getMessage("error.exception.unmatchedQuotes", commandSender),
+                                              cap.isDebug());
     }
 
     /**
@@ -177,8 +178,7 @@ public class CommandParser
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
         if (!parsedCommand.getCommand().hasPermission(commandSender))
         {
-            final @NonNull String localizedMessage = cap.getMessage("error.exception.noPermission",
-                                                                    commandSender.getLocale());
+            final @NonNull String localizedMessage = cap.getMessage("error.exception.noPermission", commandSender);
             throw new NoPermissionException(commandSender, parsedCommand.getCommand(), localizedMessage, cap.isDebug());
         }
 
@@ -333,7 +333,7 @@ public class CommandParser
             if (argument.isRequired() && missing)
             {
                 final @NonNull String localizedMessage =
-                    MessageFormat.format(cap.getMessage("error.exception.missingArgument", commandSender.getLocale()),
+                    MessageFormat.format(cap.getMessage("error.exception.missingArgument", commandSender),
                                          argument.getLongName(cap, commandSender.getLocale()));
                 throw new MissingArgumentException(command, argument, localizedMessage, cap.isDebug());
             }
@@ -389,7 +389,7 @@ public class CommandParser
                                 {
                                     final @NonNull String localizedMessage =
                                         MessageFormat.format(cap.getMessage("error.exception.commandNotFound",
-                                                                            commandSender.getLocale()), commandName);
+                                                                            commandSender), commandName);
                                     return new CommandNotFoundException(commandName, localizedMessage, cap.isDebug());
                                 });
 

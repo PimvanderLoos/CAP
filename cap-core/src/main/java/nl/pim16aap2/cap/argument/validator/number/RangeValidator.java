@@ -212,7 +212,7 @@ public class RangeValidator<T extends Number> implements IArgumentValidator<T>
         if (input == null || !inRange(cap, commandSender, argument, min, max, input))
         {
             final @NonNull String localizedMessage = MessageFormat
-                .format(cap.getMessage("error.validation.range", commandSender.getLocale()), input, min, max);
+                .format(cap.getMessage("error.validation.range", commandSender), input, min, max);
             throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), localizedMessage,
                                                  cap.isDebug());
         }

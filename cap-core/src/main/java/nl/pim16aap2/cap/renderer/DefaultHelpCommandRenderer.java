@@ -213,7 +213,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         {
             final @NonNull String localizedMessage =
                 MessageFormat.format(command.getCap().getMessage("error.exception.commandNotFound",
-                                                                 commandSender.getLocale()), val);
+                                                                 commandSender), val);
             throw new CommandNotFoundException(val, localizedMessage, command.getCap().isDebug());
         }
 
