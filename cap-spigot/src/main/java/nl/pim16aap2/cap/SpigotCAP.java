@@ -136,6 +136,6 @@ public class SpigotCAP extends CAP
                 new Text(commandSender.getColorScheme()).add("Only players can use this command!", TextType.ERROR));
         }
         else
-            ExceptionHandler.handleNoPermissionException(commandSender, e);
+            ExceptionHandler.handleCAPException(commandSender, e);
     }
 }

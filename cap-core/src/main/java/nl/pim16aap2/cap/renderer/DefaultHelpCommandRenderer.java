@@ -9,7 +9,7 @@ import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
-import nl.pim16aap2.cap.exception.IllegalValueException;
+import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextType;
@@ -177,11 +177,15 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     public @NonNull Text renderOverviewPage(final @NonNull ICommandSender commandSender,
                                             final @NonNull ColorScheme colorScheme,
                                             final @NonNull Command command, final int page)
-        throws IllegalValueException
+        throws ValidationFailureException
     {
         final int pageCount = getPageCount(command, commandSender);
         if (page > pageCount || page < 1)
-            throw new IllegalValueException(command, Integer.toString(page), command.getCap().isDebug());
+        {
+            final @NonNull String localizedMessage = MessageFormat
+                .format(command.getCap().getMessage("error.validation.range", commandSender), page, 0, pageCount + 1);
+            throw new ValidationFailureException(Integer.toString(page), localizedMessage, command.getCap().isDebug());
+        }
 
         final @NonNull Text text = new Text(colorScheme);
         renderPageCountHeader(commandSender, text, page, pageCount, command);
@@ -199,7 +203,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     @Override
     public @NonNull Text render(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
                                 final @NonNull Command command, final @Nullable String val)
-        throws IllegalValueException, CommandNotFoundException
+        throws ValidationFailureException, CommandNotFoundException
     {
         if (val == null)
             return renderOverviewPage(commandSender, colorScheme, command, 1);

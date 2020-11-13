@@ -10,7 +10,7 @@ import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
-import nl.pim16aap2.cap.exception.IllegalValueException;
+import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
@@ -47,7 +47,7 @@ public class DefaultHelpCommand extends Command
     private static final String PERMISSION = null;
 
     /**
-     * The number of subcommands the supercommand had the last time we checked. This is used to invalidate {@link
+     * The number of subcommands the super command had the last time we checked. This is used to invalidate {@link
      * #suggestions} when any subcommands are added, so that they are always up-to-date.
      */
     @Getter(AccessLevel.PRIVATE)
@@ -160,6 +160,7 @@ public class DefaultHelpCommand extends Command
             helpCommand.suggestions = Collections.unmodifiableList(helpCommand.suggestions);
         }
 
+        helpCommand.lastSubCommandCount = helpCommand.getSubCommandCount();
         return helpCommand.suggestions;
     }
 
@@ -263,7 +264,7 @@ public class DefaultHelpCommand extends Command
                                                   final @NonNull Command superCommand,
                                                   final @NonNull IHelpCommandRenderer helpCommandRenderer,
                                                   final @Nullable String val)
-        throws IllegalValueException, CommandNotFoundException
+        throws ValidationFailureException, CommandNotFoundException
     {
         // TODO: Isn't this already handled by the DefaultHelpCommandRenderer?
         if (val == null)
@@ -281,15 +282,15 @@ public class DefaultHelpCommand extends Command
      * Executes the default action: Print the help menu and send it to the {@link ICommandSender}.
      *
      * @param commandResult The {@link CommandResult} to base the help menu on.
-     * @throws IllegalValueException    If the provided value for the help message is invalid. E.g. '/command help 10'
-     *                                  if there are only 8 pages available.
-     * @throws CommandNotFoundException If the specified command could not be found. E.g. '/command help mySubCommand'
-     *                                  if the command called 'mySubCommand' does not exist or is not registered in the
-     *                                  same {@link CAP}.
+     * @throws ValidationFailureException If the provided value for the help message is invalid. E.g. '/command help 10'
+     *                                    if there are only 8 pages available.
+     * @throws CommandNotFoundException   If the specified command could not be found. E.g. '/command help mySubCommand'
+     *                                    if the command called 'mySubCommand' does not exist or is not registered in
+     *                                    the same {@link CAP}.
      * @see ICommandSender#sendMessage(Text)
      */
     protected static void defaultHelpCommandExecutor(final @NonNull CommandResult commandResult)
-        throws IllegalValueException, CommandNotFoundException
+        throws ValidationFailureException, CommandNotFoundException
     {
         if (!(commandResult.getCommand() instanceof DefaultHelpCommand))
             throw new IllegalArgumentException("Command " + commandResult.getCommand().getNameKey() +
@@ -298,7 +299,7 @@ public class DefaultHelpCommand extends Command
         final @NonNull DefaultHelpCommand helpCommand = (DefaultHelpCommand) commandResult.getCommand();
         final @NonNull Command superCommand = helpCommand.getSuperCommand().orElseThrow(
             () -> new IllegalStateException(
-                "HelpCommand " + helpCommand.getNameKey() + " does not have a supercommand!"));
+                "HelpCommand " + helpCommand.getNameKey() + " does not have a super command!"));
 
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 

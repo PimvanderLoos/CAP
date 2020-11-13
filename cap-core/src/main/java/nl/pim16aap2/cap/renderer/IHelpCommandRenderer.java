@@ -5,7 +5,7 @@ import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
-import nl.pim16aap2.cap.exception.IllegalValueException;
+import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ public interface IHelpCommandRenderer
     @NonNull Text renderOverviewPage(final @NonNull ICommandSender commandSender,
                                      final @NonNull ColorScheme colorScheme,
                                      final @NonNull Command command, final int page)
-        throws IllegalValueException;
+        throws ValidationFailureException;
 
     /**
      * Either renders the help menu for a sub{@link Command} or a page of the help menu for the provided {@link
@@ -47,14 +47,14 @@ public interface IHelpCommandRenderer
      * @param val           The value representing either a help page (integer) or the name of a {@link Command}.
      * @return The rendered help menu.
      *
-     * @throws IllegalValueException    If the provided value is an integer that is out of bounds for the provided
-     *                                  number of help pages of the command.
-     * @throws CommandNotFoundException If the provided value is not an integer and no {@link Command} with that String
-     *                                  as name could be found.
+     * @throws ValidationFailureException If the provided value is an integer that is out of bounds for the provided
+     *                                    number of help pages of the command.
+     * @throws CommandNotFoundException   If the provided value is not an integer and no {@link Command} with that
+     *                                    String as name could be found.
      */
     @NonNull Text render(final @NonNull ICommandSender commandSender, final @NonNull ColorScheme colorScheme,
                          final @NonNull Command command, final @Nullable String val)
-        throws IllegalValueException, CommandNotFoundException;
+        throws ValidationFailureException, CommandNotFoundException;
 
     /**
      * Renders the long help menu for a {@link Command}.

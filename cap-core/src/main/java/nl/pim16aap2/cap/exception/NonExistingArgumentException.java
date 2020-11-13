@@ -11,9 +11,9 @@ public class NonExistingArgumentException extends CAPException
     private final @NonNull Command command;
 
     public NonExistingArgumentException(final @NonNull Command command, final @NonNull String nonExistingArgument,
-                                        final boolean stacktrace)
+                                        final @NonNull String localizedMessage, final boolean stacktrace)
     {
-        super("LOCALIZEDMESSAGE",
+        super(localizedMessage,
               "Argument \"" + nonExistingArgument + "\" does not exist for command: " + command.getNameKey(),
               stacktrace);
         this.nonExistingArgument = nonExistingArgument;

@@ -81,12 +81,13 @@ public class ExceptionHandler
     }
 
     /**
-     * Gets a new {@link ExceptionHandler} using the default Exception handlers. (e.g. {@link
-     * #handleCAPException(ICommandSender, CAPException)}).
+     * Gets a new {@link ExceptionHandler} using the default exception handler for all {@link CAPException}s. (See
+     * {@link #handleCAPException(ICommandSender, CAPException)}).
      * <p>
-     * Use {@link #toBuilder()} if you wish to modify these settings.
+     * Use {@link #toBuilder()} if you wish to modify one or more of these handlers.
      *
-     * @return A new {@link ExceptionHandler} using the default Exception handlers.
+     * @return A new {@link ExceptionHandler} using {@link #handleCAPException(ICommandSender, CAPException)} for all
+     * {@link CAPException}s.
      */
     public static @NonNull ExceptionHandler getDefault()
     {
@@ -95,9 +96,9 @@ public class ExceptionHandler
             .handler(CommandNotFoundException.class, ExceptionHandler::handleCAPException)
             .handler(ValidationFailureException.class, ExceptionHandler::handleCAPException)
             .handler(NoPermissionException.class, ExceptionHandler::handleCAPException)
-            .handler(NonExistingArgumentException.class, ExceptionHandler::handleNonExistingArgumentException)
+            .handler(NonExistingArgumentException.class, ExceptionHandler::handleCAPException)
             .handler(MissingArgumentException.class, ExceptionHandler::handleCAPException)
-            .handler(IllegalValueException.class, ExceptionHandler::handleIllegalValueException)
+            .handler(IllegalValueException.class, ExceptionHandler::handleCAPException)
             .handler(UnmatchedQuoteException.class, ExceptionHandler::handleCAPException)
             .handler(MissingValueException.class, ExceptionHandler::handleCAPException)
             .build();
@@ -117,20 +118,6 @@ public class ExceptionHandler
     public static void handleCAPException(final @NonNull ICommandSender commandSender, final @NonNull CAPException ex)
     {
         sendError(commandSender, ex.getLocalizedMessage());
-    }
-
-    public static void handleNonExistingArgumentException(final @NonNull ICommandSender commandSender,
-                                                          final @NonNull NonExistingArgumentException e)
-    {
-        sendError(commandSender, "Failed to find argument: \"" + e.getNonExistingArgument() + "\" for command: \"" +
-            e.getCommand().getName(commandSender.getLocale()) + "\"");
-    }
-
-    public static void handleIllegalValueException(final @NonNull ICommandSender commandSender,
-                                                   final @NonNull IllegalValueException e)
-    {
-        sendError(commandSender, "Illegal argument \"" + e.getIllegalValue() + "\" for command: \"" +
-            e.getCommand().getName(commandSender.getLocale()) + "\"");
     }
 
     // Delombok:

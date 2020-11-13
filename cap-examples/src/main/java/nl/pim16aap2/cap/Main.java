@@ -8,7 +8,6 @@ import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
-import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
@@ -149,28 +148,7 @@ public class Main
             .localizationSpecification(new LocalizationSpecification("CAPExample", LOCALE_ENGLISH, LOCALE_DUTCH))
             .separator('=')
             .debug(true)
-            .exceptionHandler(ExceptionHandler.getDefault().toBuilder()
-                                              .handler(nl.pim16aap2.cap.exception.NonExistingArgumentException.class,
-                                                       (sender, ex) -> ex.printStackTrace())
-                                              .handler(nl.pim16aap2.cap.exception.IllegalValueException.class,
-                                                       (sender, ex) -> ex.printStackTrace())
-//                                              .handler(nl.pim16aap2.cap.exception.CommandNotFoundException.class,
-//                                                       (sender, ex) -> ex.printStackTrace())
-//                                              .handler(nl.pim16aap2.cap.exception.MissingArgumentException.class,
-//                                                       (sender, ex) -> ex.printStackTrace())
-//                                              .handler(nl.pim16aap2.cap.exception.NoPermissionException.class,
-//                                                       (sender, ex) -> ex.printStackTrace())
-//                                              .handler(nl.pim16aap2.cap.exception.ValidationFailureException.class,
-//                                                       (sender, ex) -> ex.printStackTrace())
-//                                              .handler(nl.pim16aap2.cap.exception.UnmatchedQuoteException.class,
-//                                                       (sender, ex) -> ex.printStackTrace())
-//                                              .handler(nl.pim16aap2.cap.exception.MissingValueException.class,
-//                                                       (sender, ex) -> ex.printStackTrace())
-                                              .build())
-            .helpCommandRenderer(DefaultHelpCommandRenderer
-                                     .builder()
-                                     .firstPageSize(1)
-                                     .build())
+            .helpCommandRenderer(DefaultHelpCommandRenderer.builder().firstPageSize(1).build())
             .build();
 
         final int subSubCommandCount = 5;

@@ -6,7 +6,7 @@ import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
-import nl.pim16aap2.cap.exception.IllegalValueException;
+import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.renderer.IHelpCommandRenderer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
@@ -94,7 +94,7 @@ public class CommandResult
      * page.
      */
     public void sendSubcommandHelp()
-        throws IllegalValueException
+        throws ValidationFailureException
     {
         sendSubcommandHelp(1);
     }
@@ -107,7 +107,7 @@ public class CommandResult
      * @param page The number of the page to send. Note that counting starts at 1, not 0!
      */
     public void sendSubcommandHelp(final int page)
-        throws IllegalValueException
+        throws ValidationFailureException
     {
         commandSender.sendMessage(command.getCap().getHelpCommandRenderer()
                                          .renderOverviewPage(commandSender, commandSender.getColorScheme(), command,

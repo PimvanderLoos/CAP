@@ -251,8 +251,14 @@ public class CommandParser
 
                 argument = command.getArgumentManager().getArgument(argumentName)
                                   .orElseThrow(
-                                      () -> new NonExistingArgumentException(command, argumentName,
-                                                                             cap.isDebug()));
+                                      () ->
+                                      {
+                                          final @NonNull String localizedMessage =
+                                              MessageFormat.format(cap.getMessage("error.exception.nonExistingArgument",
+                                                                                  commandSender), argumentName);
+                                          return new NonExistingArgumentException(command, argumentName,
+                                                                                  localizedMessage, cap.isDebug());
+                                      });
 
                 if (argument.isValuesLess())
                     value = "";
@@ -298,9 +304,14 @@ public class CommandParser
                 final int currentRequiredArgumentIdx = requiredArgumentIdx;
                 argument = command.getArgumentManager().getPositionalArgumentAtIdx(currentRequiredArgumentIdx)
                                   .orElseThrow(
-                                      () -> new NonExistingArgumentException(
-                                          command, "Missing required argument at pos: " + currentRequiredArgumentIdx,
-                                          cap.isDebug()));
+                                      () ->
+                                      {
+                                          final @NonNull String localizedMessage =
+                                              MessageFormat.format(cap.getMessage("error.exception.nonExistingArgument",
+                                                                                  commandSender), nextArg);
+                                          return new NonExistingArgumentException(command, nextArg,
+                                                                                  localizedMessage, cap.isDebug());
+                                      });
                 ++requiredArgumentIdx;
                 value = nextArg;
             }
@@ -321,7 +332,11 @@ public class CommandParser
             }
             catch (IllegalArgumentException e)
             {
-                throw new IllegalValueException(command, value, e, cap.isDebug());
+                // TODO: Remove the IllegalArgumentException!
+                final @NonNull String localizedMessage =
+                    MessageFormat.format(cap.getMessage("error.exception.commandNotFound",
+                                                        commandSender), "");
+                throw new IllegalValueException(command, value, e, localizedMessage, cap.isDebug());
             }
         }
 
