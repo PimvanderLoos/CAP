@@ -4,6 +4,7 @@ import lombok.NonNull;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextType;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class ExceptionHandler
      * @param <T>     The type of the {@link CAPException}.
      * @return This {@link ExceptionHandler} instance.
      */
+    @Contract("_,_-> this")
     public <T extends CAPException> ExceptionHandler setHandler(final @NonNull Class<T> clazz,
                                                                 final @NonNull Handler<T> handler)
     {
@@ -150,6 +152,7 @@ public class ExceptionHandler
          * @param <T>          The type of the {@link CAPException}.
          * @return This {@link ExceptionHandlerBuilder} instance.
          */
+        @Contract("_, _-> this")
         public <T extends CAPException> ExceptionHandlerBuilder handler(final @NonNull Class<T> handlerKey,
                                                                         final @NonNull Handler<T> handlerValue)
         {
@@ -169,6 +172,7 @@ public class ExceptionHandler
          * @param handlers The map whose values to copy.
          * @return This {@link ExceptionHandlerBuilder} instance.
          */
+        @Contract("_-> this")
         private ExceptionHandlerBuilder handlers(
             Map<? extends @NonNull Class<? extends CAPException>, ? extends @NonNull Handler<?>> handlers)
         {
@@ -191,6 +195,7 @@ public class ExceptionHandler
          *
          * @return This {@link ExceptionHandlerBuilder} instance.
          */
+        @Contract("-> this")
         public ExceptionHandlerBuilder clearHandlers()
         {
             if (handlers$key != null)

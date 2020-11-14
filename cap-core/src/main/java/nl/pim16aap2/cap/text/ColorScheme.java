@@ -1,6 +1,7 @@
 package nl.pim16aap2.cap.text;
 
 import lombok.NonNull;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -29,6 +30,7 @@ public class ColorScheme
      * @param style The new style to use.
      * @return The current {@link ColorScheme} instance.
      */
+    @Contract("_, _-> this")
     public ColorScheme setStyle(final @NonNull TextType type, @NonNull TextComponent style)
     {
         if (defaultDisable != null && !style.getOn().equals("") && style.getOff().equals(""))
@@ -159,6 +161,7 @@ public class ColorScheme
          * @param str The string that disables all active styles.
          * @return This {@link ColorSchemeBuilder} instance.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder setDefaultDisable(final @Nullable String str)
         {
             defaultDisable = str;
@@ -172,6 +175,7 @@ public class ColorScheme
          * @param style The style to add.
          * @return This {@link ColorSchemeBuilder} instance.
          */
+        @Contract("_, _-> this")
         public ColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull TextComponent style)
         {
             styleMap.put(type, style);
@@ -181,6 +185,7 @@ public class ColorScheme
         /**
          * See {@link TextType#COMMAND}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder commandStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.COMMAND, style);
@@ -190,6 +195,7 @@ public class ColorScheme
         /**
          * See {@link TextType#OPTIONAL_PARAMETER}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder optionalParameterStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.OPTIONAL_PARAMETER, style);
@@ -201,6 +207,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#OPTIONAL_PARAMETER}
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder optionalParameterLabelStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.OPTIONAL_PARAMETER_LABEL, style);
@@ -212,6 +219,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#OPTIONAL_PARAMETER}
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder optionalParameterFlagStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.OPTIONAL_PARAMETER_FLAG, style);
@@ -223,6 +231,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#OPTIONAL_PARAMETER}
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder optionalParameterSeparatorStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.OPTIONAL_PARAMETER_SEPARATOR, style);
@@ -232,6 +241,7 @@ public class ColorScheme
         /**
          * See {@link TextType#REQUIRED_PARAMETER}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder requiredParameterStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.REQUIRED_PARAMETER, style);
@@ -243,6 +253,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#REQUIRED_PARAMETER}
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder requiredParameterLabelStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.REQUIRED_PARAMETER_LABEL, style);
@@ -254,6 +265,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#REQUIRED_PARAMETER}
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder requiredParameterFlagStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.REQUIRED_PARAMETER_FLAG, style);
@@ -265,6 +277,7 @@ public class ColorScheme
          * <p>
          * Defaults to the same value used for {@link TextType#REQUIRED_PARAMETER}
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder requiredParameterSeparatorStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.REQUIRED_PARAMETER_SEPARATOR, style);
@@ -274,6 +287,7 @@ public class ColorScheme
         /**
          * See {@link TextType#SUMMARY}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder summaryStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.SUMMARY, style);
@@ -283,6 +297,7 @@ public class ColorScheme
         /**
          * See {@link TextType#DESCRIPTION}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder descriptionStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.DESCRIPTION, style);
@@ -292,6 +307,7 @@ public class ColorScheme
         /**
          * See {@link TextType#REGULAR_TEXT}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder regularTextStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.REGULAR_TEXT, style);
@@ -301,6 +317,7 @@ public class ColorScheme
         /**
          * See {@link TextType#HEADER}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder headerStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.HEADER, style);
@@ -310,6 +327,7 @@ public class ColorScheme
         /**
          * See {@link TextType#SECTION}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder sectionStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.SECTION, style);
@@ -319,6 +337,7 @@ public class ColorScheme
         /**
          * See {@link TextType#FOOTER}.
          */
+        @Contract("_ -> this")
         public ColorSchemeBuilder footerStyle(final @NonNull TextComponent style)
         {
             styleMap.put(TextType.FOOTER, style);

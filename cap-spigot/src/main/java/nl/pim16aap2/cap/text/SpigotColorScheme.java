@@ -2,6 +2,7 @@ package nl.pim16aap2.cap.text;
 
 import lombok.NonNull;
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -43,6 +44,7 @@ public class SpigotColorScheme extends ColorScheme
          * @param style The String representing a style.
          * @return The instance of this builder.
          */
+        @Contract("_, _ -> this")
         public SpigotColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull TextComponent style)
         {
             styleMap.put(type, style);
@@ -56,6 +58,7 @@ public class SpigotColorScheme extends ColorScheme
          * @param style The String representing a style.
          * @return The instance of this builder.
          */
+        @Contract("_, _ -> this")
         public SpigotColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull String style)
         {
             styleMap.put(type, new TextComponent(style, defaultDisable));
@@ -69,6 +72,7 @@ public class SpigotColorScheme extends ColorScheme
          * @param chatColor The {@link ChatColor} to use as the style for this {@link TextType}.
          * @return The instance of this builder.
          */
+        @Contract("_, _ -> this")
         public SpigotColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull ChatColor chatColor)
         {
             styleMap.put(type, new TextComponent(chatColor.toString(), defaultDisable));
@@ -84,6 +88,7 @@ public class SpigotColorScheme extends ColorScheme
          * @param chatColors The {@link ChatColor}s to use as the style for this {@link TextType}.
          * @return The instance of this builder.
          */
+        @Contract("_, _ -> this")
         public SpigotColorSchemeBuilder addStyle(final @NonNull TextType type, final @NonNull ChatColor... chatColors)
         {
             styleMap.put(type, new TextComponent(flattenChatColors(chatColors), defaultDisable));
@@ -98,7 +103,7 @@ public class SpigotColorScheme extends ColorScheme
             return style;
         }
 
-        public SpigotColorScheme build()
+        public @NonNull SpigotColorScheme build()
         {
             ColorScheme.ColorSchemeBuilder.prepareBuild(styleMap, defaultDisable);
 

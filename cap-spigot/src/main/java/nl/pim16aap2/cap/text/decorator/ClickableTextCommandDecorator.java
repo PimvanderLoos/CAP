@@ -7,6 +7,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import nl.pim16aap2.cap.text.SpigotTextUtility;
 import nl.pim16aap2.cap.text.Text;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -37,6 +38,7 @@ public class ClickableTextCommandDecorator implements ISpigotTextDecorator
     }
 
     @Override
+    @Contract("_ -> this")
     public @NonNull ITextDecorator setStart(int start)
     {
         this.start = start;
@@ -44,6 +46,7 @@ public class ClickableTextCommandDecorator implements ISpigotTextDecorator
     }
 
     @Override
+    @Contract("_ -> this")
     public @NonNull ITextDecorator setEnd(int end)
     {
         this.end = end;
@@ -51,6 +54,7 @@ public class ClickableTextCommandDecorator implements ISpigotTextDecorator
     }
 
     @Override
+    @Contract("_ -> this")
     public @NonNull ITextDecorator shift(int dist)
     {
         start += dist;
@@ -59,6 +63,7 @@ public class ClickableTextCommandDecorator implements ISpigotTextDecorator
     }
 
     @Override
+    @Contract("_ -> this")
     public @NonNull ITextDecorator duplicate()
     {
         return new ClickableTextCommandDecorator(start, end, command, hoverMessage);

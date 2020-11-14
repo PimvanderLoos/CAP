@@ -238,6 +238,7 @@ public class CAP
      * @param command The {@link Command} to register.
      * @return The current instance of this {@link CAP}.
      */
+    @Contract("_-> this")
     public @NonNull CAP addCommand(final @NonNull Command command)
     {
         commandMap.addCommand(command);

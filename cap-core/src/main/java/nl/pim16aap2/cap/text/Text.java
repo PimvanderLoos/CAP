@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import nl.pim16aap2.cap.text.decorator.ITextDecorator;
 import nl.pim16aap2.cap.util.Util;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -97,6 +98,7 @@ public class Text
      * @return The {@link Text} in the given range.
      */
     // TODO: The decorator (and styled?) list(s) should be sorted by startIdx.
+    @Contract("_, _ -> this")
     public @NonNull Text subsection(final int start, final int end)
     {
         if (start == 0 && end == stringBuilder.length())
@@ -160,6 +162,7 @@ public class Text
      * @param newDecorator The {@link ITextDecorator} to append.
      * @return The current {@link Text} instance.
      */
+    @Contract("_, -> this")
     public @NonNull Text addDecorator(final @NonNull ITextDecorator newDecorator)
     {
         for (final @NonNull ITextDecorator decorator : textDecorators)
@@ -180,6 +183,7 @@ public class Text
      * @param text The unstyled text to add.
      * @return The current {@link Text} instance.
      */
+    @Contract("_ -> this")
     public @NonNull Text add(final @NonNull String text)
     {
         stringBuilder.append(text);
@@ -195,6 +199,7 @@ public class Text
      *             associated with the type. See {@link ColorScheme#getStyle(TextType)}.
      * @return The current {@link Text} instance.
      */
+    @Contract("_, _ -> this")
     public @NonNull Text add(final @NonNull String text, final @Nullable TextType type)
     {
         if (type != null)
@@ -214,6 +219,7 @@ public class Text
      * @param other The {@link Text} to insert before the current {@link Text}.
      * @return The current {@link Text} instance.
      */
+    @Contract("_ -> this")
     public @NonNull Text prepend(final @NonNull Text other)
     {
         styledSections = appendSections(other.getLength(), other.styledSections, styledSections,
@@ -257,6 +263,7 @@ public class Text
      * @param other The other {@link Text} instance to append to the current one.
      * @return The current {@link Text} instance.
      */
+    @Contract("_ -> this")
     public @NonNull Text add(final @NonNull Text other)
     {
         if (other.stringBuilder.length() == 0)
