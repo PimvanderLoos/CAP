@@ -66,9 +66,9 @@ public class Command
                              .summary("default.virtualArgument.summary").build();
 
     /**
-     * The name of this command.
+     * The {@link CommandNamingSpec} for this {@link Command}.
      */
-    protected final @NonNull String name;
+    protected final @NonNull CommandNamingSpec nameSpec;
 
     /**
      * The number of subcommands this command has.
@@ -94,45 +94,22 @@ public class Command
     protected final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor;
 
     /**
-     * The description of the command. This is the longer description shown in the help menu for this command.
-     */
-    @Setter
-    protected @Nullable String description;
-
-    /**
-     * The summary of the command. This is the short description shown in the list of commands.
-     */
-    @Setter
-    protected @Nullable String summary;
-
-    /**
-     * The header of the command. This is text shown at the top of the help menu for this command.
-     */
-    @Setter
-    protected @Nullable String header;
-
-    /**
-     * The title of the section for the command-specific help menu.
-     */
-    protected @NonNull String sectionTitle;
-
-    /**
-     * The supplier that is used to build the description. Note that this isn't used in case the {@link #description} is
-     * not null.
+     * The supplier that is used to build the description. Note that this isn't used in case the {@link
+     * CommandNamingSpec#getDescription(CAP, Locale)} is not null.
      */
     @Setter
     protected @Nullable Function<ICommandSender, String> descriptionSupplier;
 
     /**
-     * The supplier that is used to build the summary. Note that this isn't used in case the {@link #summary} is not
-     * null.
+     * The supplier that is used to build the summary. Note that this isn't used in case the {@link
+     * CommandNamingSpec#getSummary(CAP, Locale)} is not null.
      */
     @Setter
     protected @Nullable Function<ICommandSender, String> summarySupplier;
 
     /**
-     * The supplier that is used to build the summary. Note that this isn't used in case the {@link #header} is not
-     * null.
+     * The supplier that is used to build the summary. Note that this isn't used in case the {@link
+     * CommandNamingSpec#getHeader(CAP, Locale)} is not null.
      */
     @Setter
     protected @Nullable Function<ICommandSender, String> headerSupplier;
@@ -168,7 +145,6 @@ public class Command
      * numerical optional positional arguments (see {@link Command#DEFAULT_VIRTUAL_ARGUMENT}) to the help command
      * renderer.
      */
-    @Setter
     @Getter
     protected boolean virtual;
 
@@ -181,20 +157,13 @@ public class Command
     protected @Nullable BiFunction<ICommandSender, Command, Boolean> permission;
 
     /**
-     * @param name                     The shortname of the command.
-     * @param description              The description of the command. This is the longer description shown in the help
-     *                                 menu for this command.
+     * @param nameSpec                 See {@link #nameSpec}.
      * @param descriptionSupplier      The supplier that is used to build the description. Note that this isn't used in
      *                                 case the description is provided.
-     * @param summary                  The summary of the command. This is the short description shown in the list of
-     *                                 commands.
      * @param summarySupplier          The supplier that is used to build the summary. Note that this isn't used in case
      *                                 a summary is provided.
-     * @param header                   The header of the command. This is text shown at the top of the help menu for
-     *                                 this command.
      * @param headerSupplier           The supplier that is used to build the header. Note that this isn't used in case
      *                                 a header is provided.
-     * @param sectionTitle             The title of the section for the command-specific help menu.
      * @param subCommands              The list of subcommands this command will be the supercommand of.
      * @param helpCommand              The helpcommand to use. This is used in case of '/command help [subcommand]'. If
      *                                 no subcommands are provided, this will not be used.
@@ -217,13 +186,13 @@ public class Command
      *                                 access to this command or not.
      */
     @Builder(builderMethodName = "commandBuilder")
-    protected Command(final @NonNull String name, final @Nullable String description,
+    protected Command(final @NonNull CommandNamingSpec nameSpec,
                       final @Nullable Function<ICommandSender, String> descriptionSupplier,
-                      final @Nullable String summary, final @Nullable Function<ICommandSender, String> summarySupplier,
-                      final @Nullable String header, final @Nullable Function<ICommandSender, String> headerSupplier,
-                      final @Nullable String sectionTitle, final @Nullable @Singular List<Command> subCommands,
-                      final @Nullable Command helpCommand, final @Nullable Boolean addDefaultHelpSubCommand,
-                      @Nullable Argument<?> helpArgument, final @Nullable Boolean addDefaultHelpArgument,
+                      final @Nullable Function<ICommandSender, String> summarySupplier,
+                      final @Nullable Function<ICommandSender, String> headerSupplier,
+                      final @Nullable @Singular List<Command> subCommands, final @Nullable Command helpCommand,
+                      final @Nullable Boolean addDefaultHelpSubCommand, @Nullable Argument<?> helpArgument,
+                      final @Nullable Boolean addDefaultHelpArgument,
                       final @Nullable CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                       @Nullable @Singular(ignoreNullCollections = true) List<@NonNull Argument<?>> arguments,
                       final boolean virtual, final @NonNull CAP cap,
@@ -232,17 +201,13 @@ public class Command
         if (commandExecutor == null && !virtual)
             throw new IllegalArgumentException("CommandExecutor may not be null for non-virtual commands!");
 
-        this.name = name;
+        this.nameSpec = nameSpec;
+        nameSpec.verify(cap);
 
-        this.sectionTitle = Util.valOrDefault(sectionTitle, this.name);
-
-        this.description = description;
         this.descriptionSupplier = descriptionSupplier;
 
-        this.summary = summary;
         this.summarySupplier = summarySupplier;
 
-        this.header = header;
         this.headerSupplier = headerSupplier;
 
         this.subCommands = new CommandMap(cap);
@@ -260,7 +225,7 @@ public class Command
         if (subCommands != null)
             subCommands.forEach(this.subCommands::addCommand);
 
-        this.subCommands.get().values().forEach(subCommand -> subCommand.superCommand = Optional.of(this));
+        this.subCommands.getLocaleMap().values().forEach(subCommand -> subCommand.superCommand = Optional.of(this));
         this.cap = cap;
 
         this.helpArgument = helpArgument;
@@ -324,7 +289,7 @@ public class Command
     private int calculateSubCommandCount()
     {
         int count = 0;
-        for (final @NonNull Command command : subCommands.get().values())
+        for (final @NonNull Command command : subCommands.getLocaleMap().values())
             count += command.getSubCommandCount() + 1;
         return count;
     }
@@ -340,13 +305,14 @@ public class Command
     }
 
     /**
-     * Gets the localizable key for the name of this {@link Command}. For example "example.command.name".
+     * Gets the identifier for this {@link Command}. For example "example.command" (when localized) or "mycommand" (when
+     * using raw strings).
      *
-     * @return THe localizable key for the name.
+     * @return THe identifier for this {@link Command}.
      */
-    public @NonNull String getNameKey()
+    public @NonNull String getIdentifier()
     {
-        return name;
+        return nameSpec.getIdentifier();
     }
 
     /**
@@ -356,61 +322,55 @@ public class Command
      */
     public @NonNull String getName(final @Nullable Locale locale)
     {
-        return cap.getMessage(name, locale);
+        return nameSpec.getName(cap, locale);
     }
 
     /**
      * Gets the description for this command.
      * <p>
-     * First, it tries to return {@link #description}. If that is null, {@link #descriptionSupplier} is used instead. If
-     * that is null as well, an empty String is returned.
+     * First, it tries to return {@link CommandNamingSpec#getName(CAP, Locale)}. If that is null, {@link
+     * #descriptionSupplier} is used instead. If that is null as well, an empty String is returned.
      *
      * @param commandSender The {@link ICommandSender} to use in case {@link #descriptionSupplier} is needed.
      * @return The description for this command if it could be found/generated, otherwise an empty String.
      */
     public @NonNull String getDescription(final @NonNull ICommandSender commandSender)
     {
-        if (description != null)
-            return cap.getMessage(description, commandSender);
-        if (descriptionSupplier != null)
-            return cap.getMessage(descriptionSupplier.apply(commandSender), commandSender);
-        return "";
+        return Util.firstNonNull("",
+                                 nameSpec.getDescription(cap, commandSender.getLocale()),
+                                 (descriptionSupplier == null ? null : descriptionSupplier.apply(commandSender)));
     }
 
     /**
      * Gets the summary for this command.
      * <p>
-     * First, it tries to return {@link #summary}. If that is null, {@link #summarySupplier} is used instead. If that is
-     * null as well, an empty String is returned.
+     * First, it tries to return {@link CommandNamingSpec#getSummary(CAP, Locale)}. If that is null, {@link
+     * #summarySupplier} is used instead. If that is null as well, an empty String is returned.
      *
      * @param commandSender The {@link ICommandSender} to use in case {@link #summarySupplier} is needed.
      * @return The summary for this command if it could be found/generated, otherwise an empty String.
      */
     public @NonNull String getSummary(final @NonNull ICommandSender commandSender)
     {
-        if (summary != null)
-            return cap.getMessage(summary, commandSender);
-        if (summarySupplier != null)
-            return cap.getMessage(summarySupplier.apply(commandSender), commandSender);
-        return "";
+        return Util.firstNonNull("",
+                                 nameSpec.getSummary(cap, commandSender.getLocale()),
+                                 (summarySupplier == null ? null : summarySupplier.apply(commandSender)));
     }
 
     /**
      * Gets the header for this command.
      * <p>
-     * First, it tries to return {@link #header}. If that is null, {@link #headerSupplier} is used instead. If that is
-     * null as well, an empty String is returned.
+     * First, it tries to return {@link CommandNamingSpec#getHeader(CAP, Locale)}. If that is null, {@link
+     * #headerSupplier} is used instead. If that is null as well, an empty String is returned.
      *
      * @param commandSender The {@link ICommandSender} to use in case {@link #summarySupplier} is needed.
      * @return The header for this command if it could be found/generated, otherwise an empty String.
      */
     public @NonNull String getHeader(final @NonNull ICommandSender commandSender)
     {
-        if (header != null)
-            return cap.getMessage(header, commandSender);
-        if (headerSupplier != null)
-            return cap.getMessage(headerSupplier.apply(commandSender), commandSender);
-        return "";
+        return Util.firstNonNull("",
+                                 nameSpec.getHeader(cap, commandSender.getLocale()),
+                                 (headerSupplier == null ? null : headerSupplier.apply(commandSender)));
     }
 
     /**
@@ -421,7 +381,7 @@ public class Command
      */
     public @NonNull String getSectionTitle(final @NonNull ICommandSender commandSender)
     {
-        return cap.getMessage(sectionTitle, commandSender);
+        return Util.valOrDefault(nameSpec.getSectionTitle(cap, commandSender.getLocale()), "");
     }
 
     /**
@@ -483,7 +443,7 @@ public class Command
      */
     public @NonNull Collection<@NonNull Command> getSubCommands()
     {
-        return subCommands.get().values();
+        return subCommands.getLocaleMap().values();
     }
 
     /**
@@ -493,6 +453,6 @@ public class Command
      */
     public @NonNull Collection<@NonNull String> getSubCommandNames(final @Nullable Locale locale)
     {
-        return subCommands.get(locale).keySet();
+        return subCommands.getLocaleMap(locale).keySet();
     }
 }

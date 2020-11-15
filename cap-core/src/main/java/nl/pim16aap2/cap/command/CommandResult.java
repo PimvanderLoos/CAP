@@ -178,7 +178,7 @@ public class CommandResult
     public String toString()
     {
         final @NonNull StringBuilder sb = new StringBuilder("CommandResult for command: \"")
-            .append(command.getNameKey()).append("\"").append("\n")
+            .append(command.getIdentifier()).append("\"").append("\n")
             .append("CommandSender: ").append(commandSender.toString()).append("\n");
 
         if (helpRequired())

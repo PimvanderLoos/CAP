@@ -11,6 +11,7 @@ import nl.pim16aap2.cap.argument.validator.number.MaximumValidator;
 import nl.pim16aap2.cap.argument.validator.number.MinimumValidator;
 import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.command.CommandNamingSpec;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.exception.IllegalValueException;
@@ -50,7 +51,8 @@ class CommandParserTest
         {
             final String command = "subcommand_" + idx;
             final Command generic = Command
-                .commandBuilder().name(command)
+                .commandBuilder()
+                .nameSpec(UtilsForTesting.getBasicCommandName(command))
                 .cap(cap)
                 .argument(new StringArgument().getOptional()
                                               .shortName("v").identifier("value").label("val").summary("random value")
@@ -61,13 +63,20 @@ class CommandParserTest
             subcommands.add(generic);
         }
 
-        final Command subSubSubCommand = Command.commandBuilder().name("subsubsubcommand").cap(cap).virtual(true)
-                                                .build();
-        final Command subSubCommand = Command.commandBuilder().name("subsubcommand").cap(cap).virtual(true)
-                                             .subCommand(subSubSubCommand).build();
+        final Command subSubSubCommand = Command
+            .commandBuilder()
+            .nameSpec(UtilsForTesting.getBasicCommandName("subsubsubcommand"))
+            .cap(cap).virtual(true)
+            .build();
+        final Command subSubCommand = Command
+            .commandBuilder()
+            .nameSpec(UtilsForTesting.getBasicCommandName("subsubcommand"))
+            .cap(cap).virtual(true)
+            .subCommand(subSubSubCommand).build();
 
         final Command numerical = Command
-            .commandBuilder().name("numerical")
+            .commandBuilder()
+            .nameSpec(UtilsForTesting.getBasicCommandName("numerical"))
             .cap(cap)
             .argument(new StringArgument().getOptional()
                                           .shortName("value").label("val").identifier("value").summary("random value")
@@ -99,10 +108,13 @@ class CommandParserTest
         final Command addOwner = Command
             .commandBuilder()
             .cap(cap)
-            .name("addowner")
+            .nameSpec(CommandNamingSpec.RawStrings
+                          .builder()
+                          .name("addowner")
+                          .description("Add 1 or more players or groups of players as owners of a door.")
+                          .summary("Add another owner to a door.")
+                          .build())
             .addDefaultHelpArgument(true)
-            .description("Add 1 or more players or groups of players as owners of a door.")
-            .summary("Add another owner to a door.")
             .argument(new StringArgument()
                           .getRequired()
                           .shortName("doorID")
@@ -142,7 +154,7 @@ class CommandParserTest
             .commandBuilder()
             .cap(cap)
             .addDefaultHelpSubCommand(true)
-            .name("bigdoors")
+            .nameSpec(UtilsForTesting.getBasicCommandName("bigdoors"))
             .subCommand(addOwner)
             .subCommand(numerical)
             .subCommands(subcommands)
@@ -150,10 +162,8 @@ class CommandParserTest
             .build();
 
         subcommands.forEach(cap::addCommand);
-        cap.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical).addCommand(subSubCommand)
-           .addCommand(subSubSubCommand);
-
-        return cap;
+        return cap.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical).addCommand(subSubCommand)
+                  .addCommand(subSubSubCommand);
     }
 
     @Test
@@ -320,7 +330,6 @@ class CommandParserTest
         final @NonNull Command addowner = cap.getCommand("addowner", null).orElseThrow(
             () -> new RuntimeException("Failed to find command \"addowner\"!!"));
 
-        // TODO: Maybe check the number of argument prefixes? "-".
         Assertions.assertTrue(CommandParser.isFreeArgumentName(commandSender, addowner, "--group"));
         Assertions.assertTrue(CommandParser.isFreeArgumentName(commandSender, addowner, "-g"));
         Assertions.assertFalse(CommandParser.isFreeArgumentName(commandSender, addowner, "aaaaa"));

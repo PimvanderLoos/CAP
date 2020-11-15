@@ -28,7 +28,7 @@ public class CommandMap extends LocalizedMap<Command>
     /**
      * Gets a {@link Command} from its name.
      *
-     * @param nameKey The key for the name of the {@link Command}. See {@link Command#getNameKey()}.
+     * @param nameKey The key for the name of the {@link Command}. See {@link Command#getIdentifier()}.
      * @param locale  The {@link Locale} for which to get the {@link Command}.
      * @return The {@link Command)} with the given name, if it is registered here.
      */
@@ -44,6 +44,6 @@ public class CommandMap extends LocalizedMap<Command>
      */
     public void addCommand(final @NonNull Command command)
     {
-        addEntry(command.getNameKey(), command, cap::getCommandNameCaseCheck);
+        addEntry(command::getName, command, cap::getCommandNameCaseCheck);
     }
 }

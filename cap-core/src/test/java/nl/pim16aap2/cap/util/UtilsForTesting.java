@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.command.CommandNamingSpec;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import org.junit.jupiter.api.Assertions;
@@ -22,6 +23,18 @@ public class UtilsForTesting
         CAP.getDefault().toBuilder()
            .localizationSpecification(new LocalizationSpecification("CAPCore", Locale.US))
            .build();
+
+    /**
+     * Creates a new {@link CommandNamingSpec.RawStrings} using only a name (the other values aren't set; they are
+     * optional).
+     *
+     * @param name The name of the specification.
+     * @return The newly created specification.
+     */
+    public @NonNull CommandNamingSpec.RawStrings getBasicCommandName(final @NonNull String name)
+    {
+        return CommandNamingSpec.RawStrings.builder().name(name).build();
+    }
 
     /**
      * Sleeps the thread for a defined amount of time.

@@ -22,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.OptionalInt;
 import java.util.function.Function;
 
@@ -42,9 +41,8 @@ public class DefaultHelpCommand extends Command
     private static final boolean ADD_DEFAULT_HELP_ARGUMENT = false;
     private static final boolean ADD_DEFAULT_HELP_SUB_COMMAND = false;
     private static final String PERMISSION = null;
-
     @Getter(AccessLevel.PRIVATE)
-    private final boolean enableLocalization;
+    private final boolean localized;
 
     /**
      * The default help argument. This is the non-localized version. If you want to enable localization, see {@link
@@ -72,49 +70,71 @@ public class DefaultHelpCommand extends Command
             .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
             .build();
 
+    public static final @NonNull CommandNamingSpec DEFAULT_COMMAND_NAMING_SPECIFICATION_LOCALIZED =
+        new CommandNamingSpec.Localized("default.helpCommand");
+
+    public static final @NonNull CommandNamingSpec DEFAULT_COMMAND_NAMING_SPECIFICATION_RAW =
+        CommandNamingSpec.RawStrings
+            .builder()
+            .name("help")
+            .summary("Displays help information for this plugin and specific commands.")
+            .header("When no command or a page number is given, the usage help for the main command is displayed.\n" +
+                        "  If a command is specified, the help for that command is shown.")
+            .build();
+
     /**
-     * @param name                The name of the command.
-     * @param description         The description of the command. This is the longer description shown in the help menu
-     *                            for this command.
      * @param descriptionSupplier The supplier that is used to build the description. Note that this isn't used in case
      *                            the description is provided.
-     * @param summary             The summary of the command. This is the short description shown in the list of
-     *                            commands.
      * @param summarySupplier     The supplier that is used to build the summary. Note that this isn't used in case a
      *                            summary is provided.
-     * @param header              The header of the command. This is text shown at the top of the help menu for this
-     *                            command.
      * @param headerSupplier      The supplier that is used to build the header. Note that this isn't used in case a
      *                            header is provided.
      * @param commandExecutor     The function that will be executed by {@link CommandResult#run()}.
      * @param cap                 The {@link CAP} instance that manages this command.
-     * @param enableLocalization  Set to true to use localized names for this help command and its arguments. When set
-     *                            to true, the name will be 'default.helpCommand.name', when false it will be 'help'.
-     *                            <p>
-     *                            For the command name, this doesn't apply if the name was explicitly specified.
+     * @param localized           Whether or not to use the default localized naming specifications and arguments (if
+     *                            none are manually specified).
      */
-    protected DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
+    protected DefaultHelpCommand(final @Nullable CommandNamingSpec commandNamingSpec,
                                  final @Nullable Function<ICommandSender, String> descriptionSupplier,
-                                 final @Nullable String summary,
                                  final @Nullable Function<ICommandSender, String> summarySupplier,
-                                 final @Nullable String header,
                                  final @Nullable Function<ICommandSender, String> headerSupplier,
-                                 final @Nullable String sectionTitle,
                                  final @Nullable Argument<?> helpArgument,
                                  final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
-                                 final @NonNull CAP cap,
-                                 final boolean enableLocalization)
+                                 final @NonNull CAP cap, final boolean localized)
     {
-        super(Util.valOrDefault(name, enableLocalization ? "default.helpCommand.name" : "help"), description,
-              descriptionSupplier, summary, summarySupplier, header,
-              headerSupplier, sectionTitle, SUB_COMMANDS, HELP_COMMAND, ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT,
-              ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
-              Collections.singletonList(Util.valOrDefault(helpArgument,
-                                                          enableLocalization ? DEFAULT_HELP_ARGUMENT_LOCALIZED :
-                                                          DEFAULT_HELP_ARGUMENT)), VIRTUAL, cap,
+        super(Util.valOrDefault(commandNamingSpec, localized ?
+                                                   DEFAULT_COMMAND_NAMING_SPECIFICATION_LOCALIZED :
+                                                   DEFAULT_COMMAND_NAMING_SPECIFICATION_RAW),
+              descriptionSupplier, summarySupplier, headerSupplier, SUB_COMMANDS, HELP_COMMAND,
+              ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT, ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
+              Collections.singletonList(Util.valOrDefault(helpArgument, DEFAULT_HELP_ARGUMENT)), VIRTUAL, cap,
               ((commandSender, command) -> true));
+        this.localized = localized;
+    }
 
-        this.enableLocalization = enableLocalization;
+    /**
+     * @param nameSpec            See {@link Command#nameSpec}.
+     * @param descriptionSupplier The supplier that is used to build the description. Note that this isn't used in case
+     *                            the description is provided.
+     * @param summarySupplier     The supplier that is used to build the summary. Note that this isn't used in case a
+     *                            summary is provided.
+     * @param headerSupplier      The supplier that is used to build the header. Note that this isn't used in case a
+     *                            header is provided.
+     * @param cap                 The {@link CAP} instance that manages this command.
+     * @param localized           Whether or not to use the default localized naming specifications and arguments (if
+     *                            none are manually specified).
+     */
+    @Builder(builderMethodName = "helpCommandBuilder", toBuilder = true)
+    public DefaultHelpCommand(final @Nullable CommandNamingSpec nameSpec,
+                              final @Nullable Function<ICommandSender, String> descriptionSupplier,
+                              final @Nullable Function<ICommandSender, String> summarySupplier,
+                              final @Nullable Function<ICommandSender, String> headerSupplier,
+                              final @Nullable Argument<?> helpArgument,
+                              final @NonNull CAP cap,
+                              final @Nullable Boolean localized)
+    {
+        this(nameSpec, descriptionSupplier, summarySupplier, headerSupplier, helpArgument,
+             DefaultHelpCommand::defaultHelpCommandExecutor, cap, Util.valOrDefault(localized, true));
     }
 
     /**
@@ -133,60 +153,6 @@ public class DefaultHelpCommand extends Command
 
         final @NonNull Command superCommand = command.getSuperCommand().get();
         return new ArrayList<>(superCommand.getSubCommandNames(request.getCommandSender().getLocale()));
-    }
-
-    /**
-     * Recursively adds all sub{@link Command}s of a {@link Command} to a target list.
-     *
-     * @param locale       The {@link Locale} to use for the name localization.
-     * @param target       The target list to add all sub{@link Command}s to.
-     * @param superCommand The super{@link Command} whose sub{@link Command}s to add to the target list.
-     * @param helpCommand  The {@link DefaultHelpCommand} that will be ignored for the target list.
-     */
-    private static void addAllSubCommands(final @Nullable Locale locale, final @NonNull List<String> target,
-                                          final @NonNull Command superCommand,
-                                          final @NonNull DefaultHelpCommand helpCommand)
-    {
-        if (superCommand.getName(locale).equals(helpCommand.getName(locale)))
-            return;
-        target.add(superCommand.getName(locale));
-        superCommand.getSubCommands().forEach(subCommand -> addAllSubCommands(locale, target, subCommand, helpCommand));
-    }
-
-    /**
-     * @param name                The name of the command.
-     * @param description         The description of the command. This is the longer description shown in the help menu
-     *                            for this command.
-     * @param descriptionSupplier The supplier that is used to build the description. Note that this isn't used in case
-     *                            the description is provided.
-     * @param summary             The summary of the command. This is the short description shown in the list of
-     *                            commands.
-     * @param summarySupplier     The supplier that is used to build the summary. Note that this isn't used in case a
-     *                            summary is provided.
-     * @param header              The header of the command. This is text shown at the top of the help menu for this
-     *                            command.
-     * @param headerSupplier      The supplier that is used to build the header. Note that this isn't used in case a
-     *                            header is provided.
-     * @param cap                 The {@link CAP} instance that manages this command.
-     * @param enableLocalization  Set to true to use localized names for this help command and its arguments. When set
-     *                            to true, the name will be 'default.helpCommand.name', when false it will be 'help'.
-     *                            <p>
-     *                            For the command name, this doesn't apply if the name was explicitly specified.
-     */
-    @Builder(builderMethodName = "helpCommandBuilder", toBuilder = true)
-    public DefaultHelpCommand(final @Nullable String name, final @Nullable String description,
-                              final @Nullable Function<ICommandSender, String> descriptionSupplier,
-                              final @Nullable String summary,
-                              final @Nullable Function<ICommandSender, String> summarySupplier,
-                              final @Nullable String header,
-                              final @Nullable Function<ICommandSender, String> headerSupplier,
-                              final @Nullable String sectionTitle,
-                              final @Nullable Argument<?> helpArgument,
-                              final @NonNull CAP cap,
-                              final boolean enableLocalization)
-    {
-        this(name, description, descriptionSupplier, summary, summarySupplier, header, headerSupplier, sectionTitle,
-             helpArgument, DefaultHelpCommand::defaultHelpCommandExecutor, cap, enableLocalization);
     }
 
     /**
@@ -215,10 +181,7 @@ public class DefaultHelpCommand extends Command
     public static @NonNull DefaultHelpCommand getDefault(final @NonNull CAP cap, final boolean enableLocalization)
     {
         return DefaultHelpCommand
-            .helpCommandBuilder().cap(cap)
-            .enableLocalization(enableLocalization)
-            .summary("default.helpCommand.summary")
-            .header("default.helpCommand.header")
+            .helpCommandBuilder().cap(cap).localized(enableLocalization)
             .build();
     }
 
@@ -257,13 +220,13 @@ public class DefaultHelpCommand extends Command
         throws ValidationFailureException, CommandNotFoundException
     {
         if (!(commandResult.getCommand() instanceof DefaultHelpCommand))
-            throw new IllegalArgumentException("Command " + commandResult.getCommand().getNameKey() +
+            throw new IllegalArgumentException("Command " + commandResult.getCommand().getIdentifier() +
                                                    " is not a help command!");
 
         final @NonNull DefaultHelpCommand helpCommand = (DefaultHelpCommand) commandResult.getCommand();
         final @NonNull Command superCommand = helpCommand.getSuperCommand().orElseThrow(
             () -> new IllegalStateException(
-                "HelpCommand " + helpCommand.getNameKey() + " does not have a super command!"));
+                "HelpCommand " + helpCommand.getIdentifier() + " does not have a super command!"));
 
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 

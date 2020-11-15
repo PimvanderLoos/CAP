@@ -184,9 +184,11 @@ public class ArgumentManager
          */
         public void addArgument(final @NonNull Argument<?> argument)
         {
-            addEntry(argument.getShortNameKey(), argument, argumentManager::getArgumentNameCaseCheck);
+            addEntry((locale) -> cap.getMessage(argument.getShortNameKey(), locale), argument,
+                     argumentManager::getArgumentNameCaseCheck);
             if (argument.getLongNameKey() != null)
-                addEntry(argument.getLongNameKey(), argument, argumentManager::getArgumentNameCaseCheck);
+                addEntry((locale) -> cap.getMessage(argument.getLongNameKey(), locale), argument,
+                         argumentManager::getArgumentNameCaseCheck);
         }
 
         /**
@@ -197,7 +199,7 @@ public class ArgumentManager
          */
         public void addEntry(final @NonNull String name, final @NonNull Argument<?> argument)
         {
-            addEntry(name, argument, argumentManager::getArgumentNameCaseCheck);
+            addEntry((locale) -> cap.getMessage(name, locale), argument, argumentManager::getArgumentNameCaseCheck);
         }
 
         /**

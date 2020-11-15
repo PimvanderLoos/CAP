@@ -6,6 +6,7 @@ import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.command.CommandNamingSpec;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
@@ -50,6 +51,7 @@ public class Main
 
     private static void testSubStrings()
     {
+        // TODO: This should really be a unit test....
         ColorScheme colorScheme = ColorScheme.builder().build();
         Text text = new Text(colorScheme);
         text.add("123456789");
@@ -155,19 +157,17 @@ public class Main
         final List<Command> subsubcommands = new ArrayList<>(subSubCommandCount);
         for (int idx = 0; idx < subSubCommandCount; ++idx)
         {
-            final String base = "example.sub.sub.command." + idx;
-            final String commandName = base + ".name";
-
             final Command generic = Command
-                .commandBuilder().name(commandName)
+                .commandBuilder()
+                .nameSpec(new CommandNamingSpec.Localized("example.sub.sub.command." + idx))
                 .addDefaultHelpArgument(true)
                 .cap(cap)
-                .summary(base + ".summary")
                 .argument(
                     new StringArgument().getRequired().shortName("value").identifier("value").summary("random value")
                                         .build())
                 .commandExecutor(commandResult ->
-                                     new GenericCommand(commandName, commandResult.getParsedArgument("value"))
+                                     new GenericCommand(commandResult.getCommand().getIdentifier(),
+                                                        commandResult.getParsedArgument("value"))
                                          .runCommand())
                 .build();
             subsubcommands.add(generic);
@@ -176,10 +176,8 @@ public class Main
         final Command addOwner = Command
             .commandBuilder()
             .cap(cap)
-            .name("example.command.addowner.name")
+            .nameSpec(new CommandNamingSpec.Localized("example.command.addowner"))
             .addDefaultHelpArgument(true)
-            .description("example.command.addowner.description")
-            .summary("example.command.addowner.summary")
             .subCommands(subsubcommands)
             .permission(((commandSender, command) -> true))
             .argument(new StringArgument()
@@ -233,7 +231,7 @@ public class Main
         final Command required = Command
             .commandBuilder()
             .cap(cap)
-            .name("required")
+            .nameSpec(CommandNamingSpec.RawStrings.builder().name("required").build())
             .addDefaultHelpArgument(true)
             .argument(new StringArgument()
                           .getRequired()
@@ -261,7 +259,8 @@ public class Main
         {
             final String command = "subcommand_" + idx;
             final Command generic = Command
-                .commandBuilder().name(command)
+                .commandBuilder()
+                .nameSpec(CommandNamingSpec.RawStrings.builder().name(command).build())
                 .addDefaultHelpArgument(true)
                 .cap(cap)
                 .argument(
@@ -277,7 +276,7 @@ public class Main
             .commandBuilder()
             .cap(cap)
             .addDefaultHelpSubCommand(true)
-            .name("example.command.bigdoors")
+            .nameSpec(new CommandNamingSpec.Localized("example.command.bigdoors"))
             .headerSupplier(commandSender -> new Text(commandSender.getColorScheme())
                 .add("Parameters in angled brackets are required: ", TextType.HEADER)
                 .add("<", TextType.REQUIRED_PARAMETER)

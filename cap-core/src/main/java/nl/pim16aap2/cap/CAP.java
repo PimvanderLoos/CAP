@@ -165,6 +165,23 @@ public class CAP
     }
 
     /**
+     * Checks if a message can be localized in the provided {@link Locale}.
+     *
+     * @param key    The key of the message to check.
+     * @param locale The {@link Locale} to check in.
+     * @return True if the provided key can be localized.
+     */
+    public boolean isMessageLocalizable(final @Nullable String key, @Nullable Locale locale)
+    {
+        if (key == null || localizationSpecification == null || defaultLocale == null)
+            return false;
+
+        final @NonNull ResourceBundle bundle = ResourceBundle.getBundle(localizationSpecification.getBaseName(),
+                                                                        Util.valOrDefault(locale, defaultLocale));
+        return bundle.containsKey(key);
+    }
+
+    /**
      * Gets the translated message for a locale.
      * <p>
      * If {@link #localizationSpecification} is not available, the key itself is used.
@@ -179,9 +196,9 @@ public class CAP
     {
         if (localizationSpecification == null || defaultLocale == null)
             return key;
-        locale = Util.valOrDefault(locale, defaultLocale);
-        final @NonNull ResourceBundle bundle = ResourceBundle
-            .getBundle(localizationSpecification.getBaseName(), locale);
+
+        final @NonNull ResourceBundle bundle = ResourceBundle.getBundle(localizationSpecification.getBaseName(),
+                                                                        Util.valOrDefault(locale, defaultLocale));
         return bundle.containsKey(key) ? bundle.getString(key) : key;
     }
 
@@ -367,7 +384,7 @@ public class CAP
      */
     public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap(final @Nullable Locale locale)
     {
-        return topLevelCommandMap.get(locale);
+        return topLevelCommandMap.getLocaleMap(locale);
     }
 
     /**

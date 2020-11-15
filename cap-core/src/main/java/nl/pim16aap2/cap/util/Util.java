@@ -34,6 +34,25 @@ public class Util
     /**
      * Gets a {@link NonNull} value from a {@link Nullable} one, with a provided fallback in case the value is null.
      *
+     * @param fallback The fallback to return in case the value is null.
+     * @param values   The values that may or may not be null. The first non-null will be returned.
+     * @param <T>      The type of the value.
+     * @return The value if it is not null, otherwise the fallback.
+     */
+    @Contract("!null, _ -> !null")
+    public <T> T firstNonNull(final T fallback, final @Nullable T... values)
+    {
+        if (values == null)
+            return fallback;
+        for (T value : values)
+            if (value != null)
+                return value;
+        return fallback;
+    }
+
+    /**
+     * Gets a {@link NonNull} value from a {@link Nullable} one, with a provided fallback in case the value is null.
+     *
      * @param value    The value that may or may not be null.
      * @param fallback A {@link Supplier} to supply a fallback to return in case the value is null.
      * @param <T>      The type of the value.

@@ -46,16 +46,17 @@ public abstract class LocalizedMap<T>
     /**
      * Adds the entry for every locale.
      *
-     * @param key         The key of the entry to register to register.
+     * @param keyFinder   The fun
+     * @param value       The value to add for the provided key.
      * @param caseChecker The function to use to make sure the case is correct. (e.g. {@link
      *                    CAP#getCommandNameCaseCheck(String)}.
      */
-    protected void addEntry(final @NonNull String key, final @NonNull T value,
+    protected void addEntry(final @NonNull Function<@NonNull Locale, @NonNull String> keyFinder, final @NonNull T value,
                             final @NonNull Function<@NonNull String, @NonNull String> caseChecker)
     {
         for (final @NonNull Locale locale : cap.getLocales())
         {
-            final @NonNull String name = caseChecker.apply(cap.getMessage(key, locale));
+            final @NonNull String name = caseChecker.apply(cap.getMessage(keyFinder.apply(locale), locale));
             localizedMap.get(locale).put(name, value);
         }
     }
@@ -96,15 +97,26 @@ public abstract class LocalizedMap<T>
         return Optional.ofNullable(map.get(locale)).map(entry -> entry.get(key));
     }
 
-    public @NonNull Map<@NonNull String, @NonNull T> get()
+    /**
+     * Gets the entry map for the default locale. See {@link #getLocaleMap(Locale)}.
+     *
+     * @return The entry map for the default {@link Locale}
+     */
+    public @NonNull Map<@NonNull String, @NonNull T> getLocaleMap()
     {
-        return get(null);
+        return getLocaleMap(null);
     }
 
-    public @NonNull Map<@NonNull String, @NonNull T> get(final @Nullable Locale locale)
+    /**
+     * Gets the entry map for a specific {@link Locale}.
+     *
+     * @param locale The specific {@link Locale}.
+     * @return The entry map for the {@link Locale}
+     */
+    public @NonNull Map<@NonNull String, @NonNull T> getLocaleMap(final @Nullable Locale locale)
     {
-        final @NonNull Map<@NonNull String, @NonNull T> map = localizedMap.get(Util.valOrDefault(locale,
-                                                                                                 cap.getDefaultLocale()));
+        final @NonNull Map<@NonNull String, @NonNull T> map =
+            localizedMap.get(Util.valOrDefault(locale, cap.getDefaultLocale()));
         return map;
     }
 }

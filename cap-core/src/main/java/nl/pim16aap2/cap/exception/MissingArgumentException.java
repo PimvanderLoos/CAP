@@ -15,7 +15,7 @@ public class MissingArgumentException extends CAPException
                                     final @NonNull String localizedMessage, final boolean stacktrace)
     {
         super(localizedMessage, "No value found for argument \"" + missingArgument.getIdentifier() +
-            "\" of command: " + command.getNameKey(), stacktrace);
+            "\" of command: " + command.getIdentifier(), stacktrace);
         this.missingArgument = missingArgument;
         this.command = command;
     }

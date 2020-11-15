@@ -2,8 +2,10 @@ package nl.pim16aap2.cap;
 
 import lombok.NonNull;
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.util.UtilsForTesting;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
 
 class CAPTest
 {
@@ -14,8 +16,10 @@ class CAPTest
             CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').caseSensitive(true).build();
         Assertions.assertEquals("caseSensitive", cap.getCommandNameCaseCheck("caseSensitive"));
 
-        cap.addCommand(Command.commandBuilder().name("commanda").virtual(true).cap(cap).build());
-        cap.addCommand(Command.commandBuilder().name("commandB").virtual(true).cap(cap).build());
+        cap.addCommand(Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commanda"))
+                              .virtual(true).cap(cap).build());
+        cap.addCommand(Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commandB"))
+                              .virtual(true).cap(cap).build());
 
         Assertions.assertTrue(cap.getCommand("commanda", null).isPresent());
         Assertions.assertFalse(cap.getCommand("commandA", null).isPresent());
@@ -31,8 +35,10 @@ class CAPTest
             CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').caseSensitive(false).build();
         Assertions.assertEquals("caseinsensitive", cap.getCommandNameCaseCheck("caseInsensitive"));
 
-        cap.addCommand(Command.commandBuilder().name("commanda").virtual(true).cap(cap).build());
-        cap.addCommand(Command.commandBuilder().name("commandB").virtual(true).cap(cap).build());
+        cap.addCommand(Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commanda"))
+                              .virtual(true).cap(cap).build());
+        cap.addCommand(Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commandB"))
+                              .virtual(true).cap(cap).build());
 
         Assertions.assertTrue(cap.getCommand("commanda", null).isPresent());
         Assertions.assertTrue(cap.getCommand("commandA", null).isPresent());
