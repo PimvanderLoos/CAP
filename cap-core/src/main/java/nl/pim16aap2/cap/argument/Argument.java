@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.experimental.Delegate;
 import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.parser.ValuelessParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
@@ -19,7 +21,6 @@ import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -33,33 +34,16 @@ import java.util.function.Supplier;
 public class Argument<T>
 {
     /**
-     * The short name of this {@link Argument}.
+     * The {@link ArgumentNamingSpec} for this {@link Argument}.
      */
-    protected final @NonNull String shortName;
-
-    /**
-     * The (optional) long name of this {@link Argument}. For example, a help command usually has the short name '-h'
-     * and the long name '--help'.
-     */
-    protected final @Nullable String longName;
-
-    /**
-     * A short summary to describe what this argument does and/or how it is used.
-     */
-    protected @NonNull String summary;
+    @Delegate
+    protected final @NonNull ArgumentNamingSpec nameSpec;
 
     /**
      * The {@link ArgumentParser} that is used to parse the argument into the desired type.
      */
     @Getter(AccessLevel.PROTECTED)
     protected @NonNull ArgumentParser<T> parser;
-
-    /**
-     * The label of the this {@link Argument}. For example, in the case of '[-p=player]', "player" would be the label.
-     * <p>
-     * This is also the name by which this Argument's result can be retrieved.
-     */
-    protected final @NonNull String label;
 
     /**
      * The default value for this {@link Argument}.
@@ -105,7 +89,8 @@ public class Argument<T>
     /**
      * The {@link Supplier} to use to provide completion suggestions.
      * <p>
-     * For example, if this {@link Argument} requires a playername, it could provide a list of names of nearby players.
+     * For example, if this {@link Argument} requires a player name, it could provide a list of names of nearby
+     * players.
      */
     @Getter
     protected final @Nullable ITabCompleteFunction tabCompleteFunction;
@@ -126,12 +111,9 @@ public class Argument<T>
     protected final @NonNull String identifier;
 
     /**
-     * @param shortName           {@link #shortName}.
-     * @param longName            {@link #longName}.
-     * @param summary             {@link #summary}.
+     * @param nameSpec            {@link #nameSpec}.
      * @param parser              {@link #parser}.
      * @param defaultValue        {@link #defaultValue}.
-     * @param label               {@link #label}.
      * @param valuesLess          {@link #valuesLess}.
      * @param repeatable          {@link #repeatable}.
      * @param positional          {@link #positional}.
@@ -140,19 +122,15 @@ public class Argument<T>
      * @param argumentValidator   {@link #argumentValidator}.
      * @param identifier          {@link #identifier}.
      */
-    protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
-                       final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
-                       final @NonNull String label, final boolean valuesLess, final boolean repeatable,
+    protected Argument(final @NonNull ArgumentNamingSpec nameSpec, final @NonNull ArgumentParser<T> parser,
+                       final @Nullable T defaultValue, final boolean valuesLess, final boolean repeatable,
                        final boolean positional, final boolean required,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
-        this.shortName = shortName;
-        this.longName = longName;
-        this.summary = summary;
+        this.nameSpec = nameSpec;
         this.parser = parser;
         this.defaultValue = defaultValue;
-        this.label = label;
         this.valuesLess = valuesLess;
         this.repeatable = repeatable;
         this.positional = positional;
@@ -165,85 +143,71 @@ public class Argument<T>
     /**
      * Creates a new required and positional {@link Argument}.
      *
-     * @param shortName           {@link #shortName}.
-     * @param longName            {@link #longName}.
-     * @param summary             {@link #summary}.
+     * @param nameSpec            {@link #nameSpec}.
      * @param parser              {@link #parser}.
      * @param tabCompleteFunction {@link #tabCompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
      * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "requiredBuilder", builderClassName = "RequiredBuilder")
-    protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
-                       final @NonNull ArgumentParser<T> parser,
+    protected Argument(final @NonNull ArgumentNamingSpec nameSpec, final @NonNull ArgumentParser<T> parser,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
-        this(shortName, longName, summary, parser, null, "", false, false, true, true, tabCompleteFunction,
-             argumentValidator, identifier);
+        this(nameSpec, parser, null, false, false, true, true, tabCompleteFunction, argumentValidator, identifier);
     }
 
     /**
      * Creates a new optional and positional {@link Argument}.
      *
-     * @param shortName           {@link #shortName}.
-     * @param longName            {@link #longName}.
-     * @param summary             {@link #summary}.
+     * @param nameSpec            {@link #nameSpec}.
      * @param parser              {@link #parser}.
      * @param tabCompleteFunction {@link #tabCompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
      * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "optionalPositionalBuilder", builderClassName = "OptionalPositionalBuilder")
-    protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
+    protected Argument(final @NonNull ArgumentNamingSpec nameSpec,
                        final @Nullable ITabCompleteFunction tabCompleteFunction,
-                       final @NonNull ArgumentParser<T> parser,
-                       final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
+                       final @NonNull ArgumentParser<T> parser, final @Nullable IArgumentValidator<T> argumentValidator,
+                       final @NonNull String identifier)
     {
-        this(shortName, longName, summary, parser, null, "", false, false, true, false, tabCompleteFunction,
-             argumentValidator, identifier);
+        this(nameSpec, parser, null, false, false, true, false, tabCompleteFunction, argumentValidator, identifier);
     }
 
     /**
      * Creates a new optional {@link Argument}.
      *
-     * @param shortName           {@link #shortName}.
-     * @param longName            {@link #longName}.
-     * @param summary             {@link #summary}.
+     * @param nameSpec            {@link #nameSpec}.
      * @param parser              {@link #parser}.
      * @param defaultValue        {@link #defaultValue}.
-     * @param label               {@link #label}.
      * @param tabCompleteFunction {@link #tabCompleteFunction}.
      * @param argumentValidator   {@link #argumentValidator}.
      * @param identifier          {@link #identifier}.
      */
     @Builder(builderMethodName = "optionalBuilder", builderClassName = "OptionalBuilder")
-    protected Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
-                       final @NonNull ArgumentParser<T> parser, final @Nullable T defaultValue,
-                       final @NonNull String label, final @Nullable ITabCompleteFunction tabCompleteFunction,
+    protected Argument(final @NonNull ArgumentNamingSpec nameSpec, final @NonNull ArgumentParser<T> parser,
+                       final @Nullable T defaultValue, final @Nullable ITabCompleteFunction tabCompleteFunction,
                        final @Nullable IArgumentValidator<T> argumentValidator, final @NonNull String identifier)
     {
-        this(shortName, longName, summary, parser, defaultValue, label, false, false, false, false, tabCompleteFunction,
-             argumentValidator, identifier);
+        this(nameSpec, parser, defaultValue, false, false, false, false, tabCompleteFunction, argumentValidator,
+             identifier);
     }
 
     /**
      * Creates a new valueless {@link Argument}. See {@link #valuesLess}.
      *
-     * @param shortName  {@link #shortName}.
-     * @param longName   {@link #longName}.
-     * @param summary    {@link #summary}.
+     * @param nameSpec   {@link #nameSpec}.
      * @param value      Whether the presence of this flag means 'true' or 'false'. Default: True
      * @param identifier {@link #identifier}.
      */
     @SuppressWarnings("unchecked")
     @Builder(builderMethodName = "privateValuesLessBuilder", builderClassName = "ValuesLessBuilder")
-    private Argument(final @NonNull String shortName, final @Nullable String longName, final @NonNull String summary,
-                     final @Nullable Boolean value, final @NonNull String identifier)
+    private Argument(final @NonNull ArgumentNamingSpec nameSpec, final @Nullable Boolean value,
+                     final @NonNull String identifier)
     {
-        this(shortName, longName, summary,
-             (ArgumentParser<T>) ValuelessParser.create(Util.valOrDefault(value, Boolean.TRUE)),
-             (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), "", true, false, false, false, null, null,
+        this(nameSpec, (ArgumentParser<T>) ValuelessParser.create(Util.valOrDefault(value, Boolean.TRUE)),
+             (T) (Boolean) (!Util.valOrDefault(value, Boolean.TRUE)), true, false, false, false, null, null,
              identifier);
     }
 
@@ -267,78 +231,6 @@ public class Argument<T>
     public static @NonNull ValuesLessBuilder<Boolean> valuesLessBuilder()
     {
         return Argument.privateValuesLessBuilder();
-    }
-
-    /**
-     * Gets the short name of this {@link Argument}.
-     *
-     * @param cap    The {@link CAP} instance to use for localization.
-     * @param locale The {@link Locale} to use.
-     * @return The localized short name.
-     */
-    public final @NonNull String getShortName(final @NonNull CAP cap, final @Nullable Locale locale)
-    {
-        return cap.getMessage(shortName, locale);
-    }
-
-    /**
-     * Gets the (optional) long name of this {@link Argument}. For example, a help command usually has the short name
-     * '-h' and the long name '--help'.
-     *
-     * @param cap    The {@link CAP} instance to use for localization.
-     * @param locale The {@link Locale} to use.
-     * @return The localized long name.
-     */
-    public final @Nullable String getLongName(final @NonNull CAP cap, final @Nullable Locale locale)
-    {
-        return longName == null ? null : cap.getMessage(longName, locale);
-    }
-
-    /**
-     * Gets the key for the short name of this {@link Argument}.
-     *
-     * @return The key for the short name.
-     */
-    public final @NonNull String getShortNameKey()
-    {
-        return shortName;
-    }
-
-    /**
-     * Gets the key for the long name of this {@link Argument}.
-     *
-     * @return The key for the long name.
-     */
-    public final @Nullable String getLongNameKey()
-    {
-        return longName;
-    }
-
-    /**
-     * Gets the short summary to describe what this argument does and/or how it is used.
-     *
-     * @param cap    The {@link CAP} instance to use for localization.
-     * @param locale The {@link Locale} to use.
-     * @return The localized summary.
-     */
-    public final @NonNull String getSummary(final @NonNull CAP cap, final @Nullable Locale locale)
-    {
-        return cap.getMessage(summary, locale);
-    }
-
-    /**
-     * Gets the label of the this {@link Argument}. For example, in the case of '[-p=player]', "player" would be the
-     * label.
-     * <p>
-     * This is also the name by which this Argument's result can be retrieved.
-     *
-     * @param cap    The {@link CAP} instance to use for localization.
-     * @param locale The {@link Locale} to use.
-     * @return The localized label.
-     */
-    public final @NonNull String getLabel(final @NonNull CAP cap, final @Nullable Locale locale)
-    {
-        return cap.getMessage(label, locale);
     }
 
     /**

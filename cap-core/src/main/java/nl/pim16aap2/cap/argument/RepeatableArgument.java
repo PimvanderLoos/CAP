@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -23,15 +24,13 @@ public class RepeatableArgument<T> extends Argument<T>
     private static final boolean POSITION = false;
 
     @Builder(builderMethodName = "repeatableBuilder")
-    private RepeatableArgument(final @NonNull String shortName, final @Nullable String longName,
-                               final @NonNull String summary, final @NonNull ArgumentParser<T> parser,
-                               final @NonNull String label, final boolean required,
-                               final @Nullable ITabCompleteFunction tabCompleteFunction,
+    private RepeatableArgument(final @NonNull ArgumentNamingSpec nameSpec, final @NonNull ArgumentParser<T> parser,
+                               final boolean required, final @Nullable ITabCompleteFunction tabCompleteFunction,
                                final @Nullable IArgumentValidator<T> argumentValidator,
                                final @NonNull String identifier)
     {
-        super(shortName, longName, summary, parser, null, label, VALUE_LESS, REPEATABLE, POSITION, required,
-              tabCompleteFunction, argumentValidator, identifier);
+        super(nameSpec, parser, null, VALUE_LESS, REPEATABLE, POSITION, required, tabCompleteFunction,
+              argumentValidator, identifier);
     }
 
     @Override

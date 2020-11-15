@@ -1,12 +1,13 @@
 package nl.pim16aap2.cap;
 
 import lombok.NonNull;
+import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
+import nl.pim16aap2.cap.Localization.CommandNamingSpec;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
-import nl.pim16aap2.cap.command.CommandNamingSpec;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
@@ -162,9 +163,11 @@ public class Main
                 .nameSpec(new CommandNamingSpec.Localized("example.sub.sub.command." + idx))
                 .addDefaultHelpArgument(true)
                 .cap(cap)
-                .argument(
-                    new StringArgument().getRequired().shortName("value").identifier("value").summary("random value")
-                                        .build())
+                .argument(new StringArgument()
+                              .getRequired().identifier("value")
+                              .nameSpec(ArgumentNamingSpec.RawStrings
+                                            .builder().shortName("value").summary("random value").build())
+                              .build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(commandResult.getCommand().getIdentifier(),
                                                         commandResult.getParsedArgument("value"))
@@ -182,41 +185,29 @@ public class Main
             .permission(((commandSender, command) -> true))
             .argument(new StringArgument()
                           .getRequired()
-                          .shortName("example.command.addowner.argument.doorid.shortname")
-                          .summary("example.command.addowner.argument.doorid.summary")
+                          .nameSpec(new ArgumentNamingSpec.Localized("example.command.addowner.argument.doorid"))
                           .identifier("doorID")
                           .tabCompleteFunction(request -> Arrays.asList("test a", "test_b"))
                           .build())
             .argument(Argument.valuesLessBuilder()
                               .value(true)
-                              .shortName("example.command.addowner.argument.admin.shortname")
-                              .longName("example.command.addowner.argument.admin.longname")
-                              .summary("example.command.addowner.argument.admin.summary")
+                              .nameSpec(new ArgumentNamingSpec.Localized("example.command.addowner.argument.admin"))
                               .identifier("admin")
                               .build())
             .argument(new StringArgument()
                           .getRepeatable()
-                          .shortName("example.command.addowner.argument.player.shortname")
-                          .longName("example.command.addowner.argument.player.longname")
-                          .label("example.command.addowner.argument.player.label")
-                          .summary("example.command.addowner.argument.player.summary")
+                          .nameSpec(new ArgumentNamingSpec.Localized("example.command.addowner.argument.player"))
                           .identifier("players")
                           .tabCompleteFunction(request -> Arrays.asList("pim", "pim16aap2", "mip"))
                           .build())
             .argument(new StringArgument()
                           .getRepeatable()
-                          .shortName("example.command.addowner.argument.group.shortname")
-                          .longName("example.command.addowner.argument.group.longname")
-                          .label("example.command.addowner.argument.group.label")
-                          .summary("example.command.addowner.argument.group.summary")
+                          .nameSpec(new ArgumentNamingSpec.Localized("example.command.addowner.argument.player"))
                           .identifier("groups")
                           .build())
             .argument(new IntegerArgument()
                           .getOptional()
-                          .shortName("example.command.addowner.argument.range.shortname")
-                          .longName("example.command.addowner.argument.range.longname")
-                          .label("example.command.addowner.argument.range.label")
-                          .summary("example.command.addowner.argument.range.summary")
+                          .nameSpec(new ArgumentNamingSpec.Localized("example.command.addowner.argument.player"))
                           .identifier("range")
                           .argumentValidator(RangeValidator.integerRangeValidator(10, 20))
                           .build())
@@ -234,17 +225,15 @@ public class Main
             .nameSpec(CommandNamingSpec.RawStrings.builder().name("required").build())
             .addDefaultHelpArgument(true)
             .argument(new StringArgument()
-                          .getRequired()
-                          .shortName("doorID")
-                          .identifier("ID")
-                          .summary("The name or UID of the door")
+                          .getRequired().identifier("ID")
+                          .nameSpec(ArgumentNamingSpec.RawStrings
+                                        .builder().shortName("doorID").summary("The name or UID of the door").build())
                           .tabCompleteFunction(request -> Arrays.asList("test a", "test_b"))
                           .build())
             .argument(new IntegerArgument()
-                          .getRequired()
-                          .shortName("doorUID")
-                          .identifier("UID")
-                          .summary("The UID of the door")
+                          .getRequired().identifier("UID")
+                          .nameSpec(ArgumentNamingSpec.RawStrings
+                                        .builder().shortName("doorUID").summary("The UID of the door").build())
                           .tabCompleteFunction(request -> Arrays.asList("0", "1", "1", "2", "3", "5", "8", "13", "21"))
                           .build())
             .commandExecutor(
@@ -264,7 +253,9 @@ public class Main
                 .addDefaultHelpArgument(true)
                 .cap(cap)
                 .argument(
-                    new StringArgument().getRequired().shortName("value").identifier("value").summary("random value")
+                    new StringArgument().getRequired().identifier("value")
+                                        .nameSpec(ArgumentNamingSpec.RawStrings
+                                                      .builder().shortName("value").summary("random value").build())
                                         .build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())

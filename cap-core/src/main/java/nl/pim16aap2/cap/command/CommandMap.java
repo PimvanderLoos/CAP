@@ -44,6 +44,6 @@ public class CommandMap extends LocalizedMap<Command>
      */
     public void addCommand(final @NonNull Command command)
     {
-        addEntry(command::getName, command, cap::getCommandNameCaseCheck);
+        addEntry((IGNORED, locale) -> command.getName(locale), command, cap::getCommandNameCaseCheck);
     }
 }

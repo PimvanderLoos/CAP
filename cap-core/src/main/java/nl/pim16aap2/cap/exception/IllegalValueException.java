@@ -14,8 +14,7 @@ public class IllegalValueException extends CAPException
                                  final @NonNull String localizedMessage, final boolean stacktrace)
     {
         super(localizedMessage,
-              "Received illegal value \"" + illegalValue + "\" for argument: " + argument.getShortNameKey(),
-              stacktrace);
+              "Received illegal value \"" + illegalValue + "\" for argument: " + argument.getIdentifier(), stacktrace);
         this.illegalValue = illegalValue;
         this.argument = argument;
     }

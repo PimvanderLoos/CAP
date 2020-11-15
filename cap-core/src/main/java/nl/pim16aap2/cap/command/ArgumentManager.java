@@ -95,7 +95,7 @@ public class ArgumentManager
     }
 
     /**
-     * Gets an argument from its name. See {@link Argument#getShortNameKey()}.
+     * Gets an argument from its name. See {@link Argument#getShortName(CAP, Locale)}.
      *
      * @param argumentName  The name of the {@link Argument}.
      * @param commandSender The {@link ICommandSender} for which to get the {@link Command}. See {@link
@@ -109,7 +109,7 @@ public class ArgumentManager
     }
 
     /**
-     * Gets an argument from its name. See {@link Argument#getShortNameKey()}.
+     * Gets an argument from its name. See {@link Argument#getShortName(CAP, Locale)}.
      *
      * @param argumentName The name of the {@link Argument}.
      * @param locale       The {@link Locale} for which to get the {@link Command}.
@@ -184,29 +184,16 @@ public class ArgumentManager
          */
         public void addArgument(final @NonNull Argument<?> argument)
         {
-            addEntry((locale) -> cap.getMessage(argument.getShortNameKey(), locale), argument,
-                     argumentManager::getArgumentNameCaseCheck);
-            if (argument.getLongNameKey() != null)
-                addEntry((locale) -> cap.getMessage(argument.getLongNameKey(), locale), argument,
-                         argumentManager::getArgumentNameCaseCheck);
-        }
-
-        /**
-         * Adds the provided command for every locale.
-         *
-         * @param name     The (long or short) name to use as the key for the {@link Argument}.
-         * @param argument The {@link Argument} to register.
-         */
-        public void addEntry(final @NonNull String name, final @NonNull Argument<?> argument)
-        {
-            addEntry((locale) -> cap.getMessage(name, locale), argument, argumentManager::getArgumentNameCaseCheck);
+            addEntry(argument::getShortName, argument, argumentManager::getArgumentNameCaseCheck);
+            if (argument.getLongName(cap, null) != null)
+                addEntry(argument::getLongName, argument, argumentManager::getArgumentNameCaseCheck);
         }
 
         /**
          * Gets a {@link Argument} from its name.
          *
-         * @param name   The name of the {@link Argument}. See {@link Argument#getShortNameKey()} and {@link
-         *               Argument#getLongNameKey()}.
+         * @param name   The name of the {@link Argument}. See {@link Argument#getShortName(CAP, Locale)} and {@link
+         *               Argument#getLongName(CAP, Locale)}.
          * @param locale The {@link Locale} for which to get the {@link Argument}.
          * @return The {@link Argument} with the given name, if it is registered.
          */

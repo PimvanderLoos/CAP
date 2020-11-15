@@ -6,6 +6,8 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.Singular;
 import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
+import nl.pim16aap2.cap.Localization.CommandNamingSpec;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -36,8 +38,12 @@ public class Command
      * enable localization, see {@link #DEFAULT_HELP_ARGUMENT_LOCALIZED}.
      */
     static final @NonNull Argument<Boolean> DEFAULT_HELP_ARGUMENT =
-        Argument.valuesLessBuilder().shortName("h").longName("help").identifier("help")
-                .summary("Displays the help menu for this command.").build();
+        Argument.valuesLessBuilder()
+                .nameSpec(ArgumentNamingSpec.RawStrings
+                              .builder()
+                              .shortName("h").longName("help")
+                              .summary("Displays the help menu for this command.").build())
+                .identifier("help").build();
 
     /**
      * The default help argument to use in case that is required. This is the localized version. If you want to get a
@@ -45,25 +51,27 @@ public class Command
      */
     static final @NonNull Argument<Boolean> DEFAULT_HELP_ARGUMENT_LOCALIZED =
         Argument.valuesLessBuilder().identifier("help")
-                .shortName("default.helpArgument.shortName")
-                .longName("default.helpArgument.longName")
-                .summary("default.helpArgument.summary").build();
+                .nameSpec(new ArgumentNamingSpec.Localized("default.helpArgument")).build();
 
     /**
      * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s. This is the non-localized
      * version. If you want to * enable localization, see {@link #DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED}.
      */
     static final @NonNull Argument<Integer> DEFAULT_VIRTUAL_ARGUMENT =
-        new IntegerArgument().getOptionalPositional().shortName("page").identifier("page")
-                             .summary("The page number of the help menu to display").build();
+        new IntegerArgument().getOptionalPositional()
+                             .nameSpec(ArgumentNamingSpec.RawStrings
+                                           .builder()
+                                           .shortName("page")
+                                           .summary("The page number of the help menu to display").build())
+                             .identifier("page").build();
 
     /**
      * The default virtual {@link Argument} to use for {@link #virtual} {@link Command}s. This is the localized version.
      * If you want to get a * non-localized version, see {@link #DEFAULT_VIRTUAL_ARGUMENT}.
      */
     static final @NonNull Argument<Integer> DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED =
-        new IntegerArgument().getOptionalPositional().shortName("default.virtualArgument.shortName").identifier("page")
-                             .summary("default.virtualArgument.summary").build();
+        new IntegerArgument().getOptionalPositional().identifier("page")
+                             .nameSpec(new ArgumentNamingSpec.Localized("default.virtualArgument")).build();
 
     /**
      * The {@link CommandNamingSpec} for this {@link Command}.

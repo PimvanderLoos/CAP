@@ -2,6 +2,7 @@ package nl.pim16aap2.cap.command;
 
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import org.junit.jupiter.api.Assertions;
@@ -17,10 +18,11 @@ class ArgumentManagerTest
     void caseSensitive()
     {
         final @NonNull List<Argument<?>> arguments = Arrays.asList(
-            new IntegerArgument().getOptional().shortName("argumenta").identifier("argumenta")
-                                 .label("argumenta").summary("").build(),
-            new IntegerArgument().getOptional().shortName("argumentB").identifier("argumentB")
-                                 .label("argumentB").summary("").build()
+            new IntegerArgument().getOptional().identifier("argumenta").nameSpec(
+                ArgumentNamingSpec.RawStrings.builder().shortName("argumenta").label("argumenta").build()).build(),
+
+            new IntegerArgument().getOptional().identifier("argumentB").nameSpec(
+                ArgumentNamingSpec.RawStrings.builder().shortName("argumentB").label("argumentB").build()).build()
         );
 
         final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, true);
@@ -37,10 +39,11 @@ class ArgumentManagerTest
     void caseInsensitive()
     {
         final @NonNull List<Argument<?>> arguments = Arrays.asList(
-            new IntegerArgument().getOptional().shortName("argumenta").identifier("argumenta")
-                                 .label("argumenta").summary("").build(),
-            new IntegerArgument().getOptional().shortName("argumentB").identifier("argumentB")
-                                 .label("argumentB").summary("").build()
+            new IntegerArgument().getOptional().identifier("argumenta").nameSpec(
+                ArgumentNamingSpec.RawStrings.builder().shortName("argumenta").label("argumenta").build()).build(),
+
+            new IntegerArgument().getOptional().identifier("argumentB").nameSpec(
+                ArgumentNamingSpec.RawStrings.builder().shortName("argumentB").label("argumentB").build()).build()
         );
 
         final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, false);

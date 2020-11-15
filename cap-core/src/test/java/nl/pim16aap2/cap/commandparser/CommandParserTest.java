@@ -3,6 +3,8 @@ package nl.pim16aap2.cap.commandparser;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
+import nl.pim16aap2.cap.Localization.CommandNamingSpec;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.DoubleArgument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
@@ -11,7 +13,6 @@ import nl.pim16aap2.cap.argument.validator.number.MaximumValidator;
 import nl.pim16aap2.cap.argument.validator.number.MinimumValidator;
 import nl.pim16aap2.cap.argument.validator.number.RangeValidator;
 import nl.pim16aap2.cap.command.Command;
-import nl.pim16aap2.cap.command.CommandNamingSpec;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.exception.IllegalValueException;
@@ -54,9 +55,13 @@ class CommandParserTest
                 .commandBuilder()
                 .nameSpec(UtilsForTesting.getBasicCommandName(command))
                 .cap(cap)
-                .argument(new StringArgument().getOptional()
-                                              .shortName("v").identifier("value").label("val").summary("random value")
-                                              .build())
+                .argument(new StringArgument()
+                              .getOptional()
+                              .nameSpec(ArgumentNamingSpec.RawStrings.builder()
+                                                                     .shortName("v").label("val")
+                                                                     .summary("random value").build())
+                              .identifier("value")
+                              .build())
                 .commandExecutor(commandResult ->
                                      new GenericCommand(command, commandResult.getParsedArgument("value")).runCommand())
                 .build();
@@ -78,29 +83,59 @@ class CommandParserTest
             .commandBuilder()
             .nameSpec(UtilsForTesting.getBasicCommandName("numerical"))
             .cap(cap)
-            .argument(new StringArgument().getOptional()
-                                          .shortName("value").label("val").identifier("value").summary("random value")
-                                          .build())
-            .argument(new IntegerArgument().getOptional()
-                                           .shortName("min").label("min").identifier("min")
-                                           .summary("Must be more than 10!")
-                                           .argumentValidator(MinimumValidator.integerMinimumValidator(10)).build())
-            .argument(new IntegerArgument().getOptional()
-                                           .shortName("unbound").label("unbound").identifier("unbound")
-                                           .summary("This value is not bound by anything!")
-                                           .build())
-            .argument(new IntegerArgument().getOptional()
-                                           .shortName("max").label("max").identifier("max")
-                                           .summary("Must be less than 10!")
-                                           .argumentValidator(MaximumValidator.integerMaximumValidator(10)).build())
-            .argument(new DoubleArgument().getOptional()
-                                          .shortName("maxd").label("maxd").identifier("maxd")
-                                          .summary("Must be less than 10.0!")
-                                          .argumentValidator(MaximumValidator.doubleMaximumValidator(10.0)).build())
-            .argument(new IntegerArgument().getOptional()
-                                           .shortName("range").label("range").identifier("range")
-                                           .summary("Must be between 10 and 20!")
-                                           .argumentValidator(RangeValidator.integerRangeValidator(10, 20)).build())
+            .argument(new StringArgument()
+                          .getOptional()
+                          .nameSpec(ArgumentNamingSpec
+                                        .RawStrings
+                                        .builder()
+                                        .shortName("value").label("val")
+                                        .summary("random value").build())
+                          .identifier("value")
+                          .build())
+            .argument(new IntegerArgument()
+                          .getOptional().identifier("min")
+                          .nameSpec(ArgumentNamingSpec
+                                        .RawStrings
+                                        .builder()
+                                        .shortName("min").label("min")
+                                        .summary("Must be more than 10!")
+                                        .build())
+                          .argumentValidator(MinimumValidator.integerMinimumValidator(10)).build())
+            .argument(new IntegerArgument()
+                          .getOptional().identifier("unbound")
+                          .nameSpec(ArgumentNamingSpec
+                                        .RawStrings
+                                        .builder()
+                                        .shortName("unbound").label("unbound")
+                                        .summary("This value is not bound by anything!")
+                                        .build())
+                          .build())
+            .argument(new IntegerArgument()
+                          .getOptional().identifier("max")
+                          .nameSpec(ArgumentNamingSpec.RawStrings
+                                        .builder()
+                                        .shortName("max").label("max")
+                                        .summary("Must be less than 10!")
+                                        .build())
+                          .argumentValidator(MaximumValidator.integerMaximumValidator(10)).build())
+            .argument(new DoubleArgument()
+                          .getOptional().identifier("maxd")
+                          .nameSpec(ArgumentNamingSpec
+                                        .RawStrings
+                                        .builder()
+                                        .shortName("maxd").label("maxd")
+                                        .summary("Must be less than 10.0!")
+                                        .build())
+                          .argumentValidator(MaximumValidator.doubleMaximumValidator(10.0)).build())
+            .argument(new IntegerArgument()
+                          .getOptional().identifier("range")
+                          .nameSpec(ArgumentNamingSpec
+                                        .RawStrings
+                                        .builder()
+                                        .shortName("range").label("range")
+                                        .summary("Must be between 10 and 20!")
+                                        .build())
+                          .argumentValidator(RangeValidator.integerRangeValidator(10, 20)).build())
             .commandExecutor(commandResult ->
                                  new GenericCommand("numerical", commandResult.getParsedArgument("value")).runCommand())
             .build();
@@ -116,35 +151,44 @@ class CommandParserTest
                           .build())
             .addDefaultHelpArgument(true)
             .argument(new StringArgument()
-                          .getRequired()
-                          .shortName("doorID")
-                          .identifier("doorID")
+                          .getRequired().identifier("doorID")
                           .tabCompleteFunction((request) -> doorIDs)
-                          .summary("The name or UID of the door")
+                          .nameSpec(ArgumentNamingSpec.RawStrings
+                                        .builder()
+                                        .shortName("doorID")
+                                        .summary("The name or UID of the door")
+                                        .build())
                           .build())
-            .argument(Argument.valuesLessBuilder()
+            .argument(Argument.valuesLessBuilder().identifier("admin")
                               .value(true)
-                              .shortName("a")
-                              .longName("admin")
-                              .identifier("admin")
-                              .summary("Make the user an admin for the given door. Only applies to players.")
+                              .nameSpec(ArgumentNamingSpec.RawStrings
+                                            .builder()
+                                            .shortName("a")
+                                            .longName("admin")
+                                            .summary(
+                                                "Make the user an admin for the given door. Only applies to players.")
+                                            .build())
                               .build())
             .argument(new StringArgument()
-                          .getRepeatable()
-                          .shortName("p")
-                          .longName("player")
-                          .identifier("player")
-                          .label("player")
+                          .getRepeatable().identifier("player")
                           .tabCompleteFunction((request) -> playerNames)
-                          .summary("The name of the player to add as owner")
+                          .nameSpec(ArgumentNamingSpec.RawStrings
+                                        .builder()
+                                        .shortName("p")
+                                        .longName("player")
+                                        .label("player")
+                                        .summary("The name of the player to add as owner")
+                                        .build())
                           .build())
             .argument(new StringArgument()
-                          .getRepeatable()
-                          .shortName("g")
-                          .longName("group")
-                          .identifier("group")
-                          .label("player")
-                          .summary("The name of the group to add as owner")
+                          .getRepeatable().identifier("group")
+                          .nameSpec(ArgumentNamingSpec.RawStrings
+                                        .builder()
+                                        .shortName("g")
+                                        .longName("group")
+                                        .label("player")
+                                        .summary("The name of the group to add as owner")
+                                        .build())
                           .build())
             .subCommand(subSubCommand)
             .commandExecutor(CommandResult::sendHelpMenu)

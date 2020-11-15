@@ -1,4 +1,4 @@
-package nl.pim16aap2.cap.command;
+package nl.pim16aap2.cap.Localization;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.command.Command;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -71,43 +72,36 @@ public abstract class CommandNamingSpec
 
         if (!cap.isMessageLocalizable(name, null))
             throw new IllegalStateException("Failed to find localization entry for key: \"" + name + "\"");
-        description = cap.isMessageLocalizable(description, null) ? description : null;
-        summary = cap.isMessageLocalizable(summary, null) ? summary : null;
-        header = cap.isMessageLocalizable(header, null) ? header : null;
-        sectionTitle = cap.isMessageLocalizable(sectionTitle, null) ? sectionTitle : null;
+
+        description = NamingSpec.checkMessage(cap, description);
+        summary = NamingSpec.checkMessage(cap, summary);
+        header = NamingSpec.checkMessage(cap, header);
+        sectionTitle = NamingSpec.checkMessage(cap, sectionTitle);
     }
 
     public @NonNull String getName(final @NonNull CAP cap, final @Nullable Locale locale)
     {
-        return localized ? cap.getMessage(name, locale) : name;
+        return NamingSpec.getMessage(cap, locale, localized, name);
     }
 
     public @Nullable String getDescription(final @NonNull CAP cap, final @Nullable Locale locale)
     {
-        if (description == null)
-            return null;
-        return localized ? cap.getMessage(description, locale) : description;
+        return NamingSpec.getMessage(cap, locale, localized, description);
     }
 
     public @Nullable String getSummary(final @NonNull CAP cap, final @Nullable Locale locale)
     {
-        if (summary == null)
-            return null;
-        return localized ? cap.getMessage(summary, locale) : summary;
+        return NamingSpec.getMessage(cap, locale, localized, summary);
     }
 
     public @Nullable String getHeader(final @NonNull CAP cap, final @Nullable Locale locale)
     {
-        if (header == null)
-            return null;
-        return localized ? cap.getMessage(header, locale) : header;
+        return NamingSpec.getMessage(cap, locale, localized, header);
     }
 
     public @Nullable String getSectionTitle(final @NonNull CAP cap, final @Nullable Locale locale)
     {
-        if (sectionTitle == null)
-            return null;
-        return localized ? cap.getMessage(sectionTitle, locale) : sectionTitle;
+        return NamingSpec.getMessage(cap, locale, localized, sectionTitle);
     }
 
     /**

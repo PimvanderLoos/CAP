@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -51,12 +52,13 @@ public abstract class LocalizedMap<T>
      * @param caseChecker The function to use to make sure the case is correct. (e.g. {@link
      *                    CAP#getCommandNameCaseCheck(String)}.
      */
-    protected void addEntry(final @NonNull Function<@NonNull Locale, @NonNull String> keyFinder, final @NonNull T value,
+    protected void addEntry(final @NonNull BiFunction<@NonNull CAP, @NonNull Locale, @NonNull String> keyFinder,
+                            final @NonNull T value,
                             final @NonNull Function<@NonNull String, @NonNull String> caseChecker)
     {
         for (final @NonNull Locale locale : cap.getLocales())
         {
-            final @NonNull String name = caseChecker.apply(cap.getMessage(keyFinder.apply(locale), locale));
+            final @NonNull String name = caseChecker.apply(cap.getMessage(keyFinder.apply(cap, locale), locale));
             localizedMap.get(locale).put(name, value);
         }
     }

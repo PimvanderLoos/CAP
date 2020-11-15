@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
+import nl.pim16aap2.cap.Localization.CommandNamingSpec;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -51,8 +53,8 @@ public class DefaultHelpCommand extends Command
     public static final @NonNull Argument<@NonNull String> DEFAULT_HELP_ARGUMENT =
         new StringArgument()
             .getOptionalPositional()
-            .shortName("page/command")
-            .summary("A page number of the name of a command.")
+            .nameSpec(ArgumentNamingSpec.RawStrings.builder().shortName("page/command")
+                                                   .summary("A page number of the name of a command.").build())
             .identifier("helpArg")
             .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
             .build();
@@ -64,8 +66,7 @@ public class DefaultHelpCommand extends Command
     public static final @NonNull Argument<@NonNull String> DEFAULT_HELP_ARGUMENT_LOCALIZED =
         new StringArgument()
             .getOptionalPositional()
-            .shortName("default.helpCommand.helpArgument.shortName")
-            .summary("default.helpCommand.helpArgument.summary")
+            .nameSpec(new ArgumentNamingSpec.Localized("default.helpCommand.helpArgument"))
             .identifier("helpArg")
             .tabCompleteFunction((DefaultHelpCommand::getSuggestions))
             .build();

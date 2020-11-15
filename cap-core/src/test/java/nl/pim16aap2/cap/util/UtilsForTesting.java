@@ -3,8 +3,9 @@ package nl.pim16aap2.cap.util;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
+import nl.pim16aap2.cap.Localization.CommandNamingSpec;
 import nl.pim16aap2.cap.argument.Argument;
-import nl.pim16aap2.cap.command.CommandNamingSpec;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import org.junit.jupiter.api.Assertions;
@@ -17,8 +18,9 @@ public class UtilsForTesting
 {
 
     public static final @NonNull ICommandSender DEFAULT_COMMAND_SENDER = new DefaultCommandSender();
-    public static final @NonNull Argument<?> DUMMY_ARGUMENT = Argument.valuesLessBuilder().shortName("a").summary("")
-                                                                      .identifier("a").build();
+    public static final @NonNull Argument<?> DUMMY_ARGUMENT = Argument.valuesLessBuilder().nameSpec(
+        ArgumentNamingSpec.RawStrings.builder().shortName("a").build()).identifier("a").build();
+
     public static final @NonNull CAP LOCALIZED_CAP =
         CAP.getDefault().toBuilder()
            .localizationSpecification(new LocalizationSpecification("CAPCore", Locale.US))
