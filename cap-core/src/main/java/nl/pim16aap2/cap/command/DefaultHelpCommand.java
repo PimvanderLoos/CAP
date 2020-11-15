@@ -34,8 +34,6 @@ import java.util.function.Function;
 @Getter
 public class DefaultHelpCommand extends Command
 {
-    protected @NonNull IHelpCommandRenderer helpCommandRenderer;
-
     // These are the default values passed to the super constructor.
     private static final List<Command> SUB_COMMANDS = Collections.emptyList();
     private static final Command HELP_COMMAND = null;
@@ -105,7 +103,6 @@ public class DefaultHelpCommand extends Command
                                  final @Nullable Argument<?> helpArgument,
                                  final @NonNull CheckedConsumer<@NonNull CommandResult, CAPException> commandExecutor,
                                  final @NonNull CAP cap,
-                                 final @Nullable IHelpCommandRenderer helpCommandRenderer,
                                  final boolean enableLocalization)
     {
         super(Util.valOrDefault(name, enableLocalization ? "default.helpCommand.name" : "help"), description,
@@ -117,7 +114,6 @@ public class DefaultHelpCommand extends Command
                                                           DEFAULT_HELP_ARGUMENT)), VIRTUAL, cap,
               ((commandSender, command) -> true));
 
-        this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, cap.getHelpCommandRenderer());
         this.enableLocalization = enableLocalization;
     }
 
@@ -187,12 +183,10 @@ public class DefaultHelpCommand extends Command
                               final @Nullable String sectionTitle,
                               final @Nullable Argument<?> helpArgument,
                               final @NonNull CAP cap,
-                              final @Nullable IHelpCommandRenderer helpCommandRenderer,
                               final boolean enableLocalization)
     {
         this(name, description, descriptionSupplier, summary, summarySupplier, header, headerSupplier, sectionTitle,
-             helpArgument, DefaultHelpCommand::defaultHelpCommandExecutor, cap, helpCommandRenderer,
-             enableLocalization);
+             helpArgument, DefaultHelpCommand::defaultHelpCommandExecutor, cap, enableLocalization);
     }
 
     /**
@@ -274,7 +268,7 @@ public class DefaultHelpCommand extends Command
         final @NonNull ICommandSender commandSender = commandResult.getCommandSender();
 
         commandSender.sendMessage(renderHelpText(commandSender, commandSender.getColorScheme(), superCommand,
-                                                 helpCommand.helpCommandRenderer,
+                                                 helpCommand.getCap().getHelpCommandRenderer(),
                                                  commandResult.getParsedArgument("helpArg")));
     }
 }
