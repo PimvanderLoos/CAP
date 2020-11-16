@@ -14,8 +14,8 @@ import java.util.Map;
  */
 public class ColorScheme
 {
-    private final Map<TextType, TextComponent> styleMap;
-    private final @Nullable String defaultDisable;
+    protected final Map<TextType, TextComponent> styleMap;
+    protected final @Nullable String defaultDisable;
 
     protected ColorScheme(final @NonNull Map<TextType, TextComponent> styleMap, final @Nullable String defaultDisable)
     {

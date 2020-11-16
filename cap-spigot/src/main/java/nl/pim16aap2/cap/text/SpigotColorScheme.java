@@ -21,6 +21,23 @@ public class SpigotColorScheme extends ColorScheme
         super(styleMap, defaultDisable);
     }
 
+    /**
+     * Updates the style for a given {@link TextType}.
+     * <p>
+     * The {@link ChatColor}s will be combined into a single style.
+     *
+     * @param type       The {@link TextType} of the style to update.
+     * @param chatColors The {@link ChatColor}s to use as the style for this {@link TextType}.
+     * @return The current {@link ColorScheme} instance.
+     */
+    @Contract("_, _ -> this")
+    public SpigotColorScheme setStyle(final @NonNull TextType type, final @NonNull ChatColor... chatColors)
+    {
+        styleMap.put(type, new TextComponent(SpigotColorSchemeBuilder.flattenChatColors(chatColors),
+                                             ChatColor.RESET.toString()));
+        return this;
+    }
+
     public static SpigotColorSchemeBuilder spigotColorSchemeBuilder()
     {
         return new SpigotColorSchemeBuilder();
@@ -95,7 +112,7 @@ public class SpigotColorScheme extends ColorScheme
             return this;
         }
 
-        private @NonNull String flattenChatColors(final @NonNull ChatColor... styles)
+        private static @NonNull String flattenChatColors(final @NonNull ChatColor... styles)
         {
             String style = "";
             for (final ChatColor chatColor : styles)

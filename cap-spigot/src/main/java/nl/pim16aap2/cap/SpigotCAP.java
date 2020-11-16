@@ -87,7 +87,7 @@ public class SpigotCAP extends CAP
               Util.valOrDefault(separator, ' '), debug, caseSensitive, localizer);
 
         this.plugin = plugin;
-        this.colorScheme = Util.valOrDefault(colorScheme, generateColorScheme());
+        this.colorScheme = Util.valOrDefault(colorScheme, getDefaultColorScheme());
         Bukkit.getPluginManager().registerEvents(new CommandListener(this), plugin);
 
         if (exceptionHandler == null && getExceptionHandler() != null)
@@ -116,11 +116,11 @@ public class SpigotCAP extends CAP
     }
 
     /**
-     * Generates the default {@link ColorScheme}.
+     * Generates the default {@link SpigotColorScheme}.
      *
-     * @return The default {@link ColorScheme}.
+     * @return The default {@link SpigotColorScheme}.
      */
-    protected @NonNull ColorScheme generateColorScheme()
+    public static @NonNull SpigotColorScheme getDefaultColorScheme()
     {
         return SpigotColorScheme
             .spigotColorSchemeBuilder()
