@@ -2,8 +2,8 @@ package nl.pim16aap2.cap.util;
 
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
-import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.command.Command;
+import nl.pim16aap2.cap.localization.Localizer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

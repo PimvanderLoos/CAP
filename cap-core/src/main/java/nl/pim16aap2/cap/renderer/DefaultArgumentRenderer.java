@@ -2,8 +2,8 @@ package nl.pim16aap2.cap.renderer;
 
 import lombok.Builder;
 import lombok.NonNull;
-import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
+import nl.pim16aap2.cap.localization.Localizer;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextType;

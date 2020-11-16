@@ -1,4 +1,4 @@
-package nl.pim16aap2.cap.Localization;
+package nl.pim16aap2.cap.localization;
 
 import lombok.Getter;
 import lombok.NonNull;

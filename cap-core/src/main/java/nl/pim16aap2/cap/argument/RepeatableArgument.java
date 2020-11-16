@@ -4,12 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
-import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
 import nl.pim16aap2.cap.argument.parser.ArgumentParser;
 import nl.pim16aap2.cap.argument.validator.IArgumentValidator;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.IllegalValueException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
+import nl.pim16aap2.cap.localization.ArgumentNamingSpec;
 import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 

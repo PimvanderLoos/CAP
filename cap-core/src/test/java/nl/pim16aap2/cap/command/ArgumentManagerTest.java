@@ -1,10 +1,10 @@
 package nl.pim16aap2.cap.command;
 
 import lombok.NonNull;
-import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
-import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
+import nl.pim16aap2.cap.localization.ArgumentNamingSpec;
+import nl.pim16aap2.cap.localization.Localizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

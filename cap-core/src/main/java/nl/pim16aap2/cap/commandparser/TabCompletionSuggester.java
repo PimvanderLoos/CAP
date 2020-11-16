@@ -3,11 +3,11 @@ package nl.pim16aap2.cap.commandparser;
 import lombok.Getter;
 import lombok.NonNull;
 import nl.pim16aap2.cap.CAP;
-import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CommandNotFoundException;
+import nl.pim16aap2.cap.localization.Localizer;
 import nl.pim16aap2.cap.util.TabCompletionRequest;
 import org.jetbrains.annotations.Nullable;
 

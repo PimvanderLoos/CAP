@@ -3,12 +3,12 @@ package nl.pim16aap2.cap.util;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import nl.pim16aap2.cap.CAP;
-import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
-import nl.pim16aap2.cap.Localization.CommandNamingSpec;
-import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.localization.ArgumentNamingSpec;
+import nl.pim16aap2.cap.localization.CommandNamingSpec;
+import nl.pim16aap2.cap.localization.Localizer;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.Locale;

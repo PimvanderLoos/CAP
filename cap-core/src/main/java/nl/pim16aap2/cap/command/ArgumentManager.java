@@ -2,9 +2,9 @@ package nl.pim16aap2.cap.command;
 
 import lombok.Getter;
 import lombok.NonNull;
-import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
+import nl.pim16aap2.cap.localization.Localizer;
 import nl.pim16aap2.cap.util.LocalizedMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
