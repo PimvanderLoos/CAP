@@ -96,7 +96,7 @@ public class TabCompletionCache
         final @NonNull ICommandSender commandSender, final @NonNull List<@NonNull String> args,
         final @NonNull String lastArg, final @NonNull Supplier<List<@NonNull String>> fun, final boolean openEnded)
     {
-        final @NonNull Pair<List<@NonNull String>, CompletableFuture<List<@NonNull String>>> result =
+        final @NonNull Triple<List<@NonNull String>, CompletableFuture<List<@NonNull String>>, @NonNull AsyncCacheEntry> result =
             getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun, openEnded);
 
         if (result.first != null)
@@ -113,8 +113,8 @@ public class TabCompletionCache
      * return a {@link CompletableFuture} with the results if they had to be retrieved async, but instead, it will
      * return an empty list.
      * <p>
-     * Successive calls will keep returning empty lists until the async supplier has supplied the cache with a result.
-     * From then on, it will retrieve any values
+     * Successive calls will keep returning empty Optionals until the async supplier has supplied the cache with a
+     * result. From then on, it will retrieve any values it can find in the cache.
      *
      * @param commandSender The {@link ICommandSender} for which to get the list of suggested tab completions.
      * @param args          The current list of arguments.
@@ -124,18 +124,19 @@ public class TabCompletionCache
      *                      retrieved from cache.
      * @param openEnded     Whether the cached results are openEnded or not. See {@link TabCompletionSuggester#isOpenEnded()}.
      * @return The list of suggested tab completions if one could be found. If no results are in the cache yet an empty
-     * list is returned.
+     * optional is returned.
      */
-    public @NonNull List<@NonNull String> getDelayedTabCompleteOptions(
+    public @NonNull Optional<List<@NonNull String>> getDelayedTabCompleteOptions(
         final @NonNull ICommandSender commandSender, final @NonNull List<@NonNull String> args,
         final @NonNull String lastArg, final @NonNull Supplier<List<@NonNull String>> fun, final boolean openEnded)
     {
-        final @NonNull Pair<List<@NonNull String>, CompletableFuture<List<@NonNull String>>> result =
+        final @NonNull Triple<List<@NonNull String>, CompletableFuture<List<@NonNull String>>, @NonNull AsyncCacheEntry> result =
             getAsyncCachedEntrySuggestions(commandSender, args, lastArg, fun, openEnded);
 
-        if (result.first != null)
-            return result.first;
-        return new ArrayList<>(0);
+        // Only return the list if the result
+        if (result.first != null && result.third.entryStatus == ENTRY_STATUS.AVAILABLE)
+            return Optional.of(result.first);
+        return Optional.empty();
     }
 
     /**
@@ -159,7 +160,7 @@ public class TabCompletionCache
      * and null for the future one. If no list of suggestions could be found, the future suggestions will be returned
      * and the list will be null.
      */
-    private @NonNull Pair<List<@NonNull String>, CompletableFuture<List<@NonNull String>>> getAsyncCachedEntrySuggestions(
+    private @NonNull Triple<List<@NonNull String>, CompletableFuture<List<@NonNull String>>, @NonNull AsyncCacheEntry> getAsyncCachedEntrySuggestions(
         final @NonNull ICommandSender commandSender, final @NonNull List<@NonNull String> args,
         final @NonNull String lastArg, final @NonNull Supplier<List<@NonNull String>> fun, final boolean openEnded)
     {
@@ -175,12 +176,12 @@ public class TabCompletionCache
             cacheEntry.suggestionsSubSelection(args.size(), lastArg, openEnded, commandSender.getLocale());
 
         if (suggestions.isPresent())
-            return new Pair<>(suggestions.get(), null);
+            return new Triple<>(suggestions.get(), null, cacheEntry);
 
         final @NonNull CompletableFuture<List<@NonNull String>> newSuggestions = CompletableFuture.supplyAsync(fun);
         cacheEntry.prepare(newSuggestions, args.size(), lastArg, openEnded, commandSender.getLocale());
 
-        return new Pair<>(null, newSuggestions);
+        return new Triple<>(null, newSuggestions, cacheEntry);
     }
 
     /**

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -182,16 +183,16 @@ class TabCompletionCacheTest
     @Test
     void testDelayedSuggestions()
     {
-        final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
+        final TabCompletionCache tabCompletionCache = new TabCompletionCache();
 
         // Make sure that all suggestions are returned properly.
         @NonNull List<String> input = new ArrayList<>(Arrays.asList("mycommand ", "t"));
 
         // Make sure that the output is empty while it hasn't been accessed yet.
-        @NonNull List<String> output = tabCompletionCache
+        @NonNull Optional<List<String>> output = tabCompletionCache
             .getDelayedTabCompleteOptions(commandSender, input, "t",
                                           () -> delayedSupplier(suggestions, "t", 30), false);
-        Assertions.assertEquals(0, output.size());
+        Assertions.assertFalse(output.isPresent());
         UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
@@ -200,7 +201,7 @@ class TabCompletionCacheTest
         output = tabCompletionCache
             .getDelayedTabCompleteOptions(commandSender, input, "t",
                                           () -> delayedSupplier(suggestions, "t", 30), false);
-        Assertions.assertEquals(0, output.size());
+        Assertions.assertFalse(output.isPresent());
         UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
@@ -209,7 +210,8 @@ class TabCompletionCacheTest
         output = tabCompletionCache
             .getDelayedTabCompleteOptions(commandSender, input, "t",
                                           () -> delayedSupplier(suggestions, "t", 30), false);
-        Assertions.assertEquals(suggestions.size(), output.size());
+        Assertions.assertTrue(output.isPresent());
+        Assertions.assertEquals(suggestions.size(), output.get().size());
         UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
@@ -218,7 +220,7 @@ class TabCompletionCacheTest
         output = tabCompletionCache
             .getDelayedTabCompleteOptions(commandSender, input, "t",
                                           () -> delayedSupplier(suggestions, "t", 30), false);
-        Assertions.assertEquals(0, output.size());
+        Assertions.assertFalse(output.isPresent());
         UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(2, usedSupplier);
 
@@ -230,7 +232,8 @@ class TabCompletionCacheTest
                                           () -> delayedSupplier(suggestions, "testCom", 30), false);
         UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(2, usedSupplier);
-        Assertions.assertEquals(2, output.size());
+        Assertions.assertTrue(output.isPresent());
+        Assertions.assertEquals(2, output.get().size());
     }
 
     @SneakyThrows

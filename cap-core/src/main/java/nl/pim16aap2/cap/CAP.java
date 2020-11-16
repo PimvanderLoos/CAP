@@ -251,6 +251,36 @@ public class CAP
     }
 
     /**
+     * Gets a list of suggestions for tab complete based on the current set of arguments.
+     * <p>
+     * This only works when caching is enabled!
+     * <p>
+     * When requesting a value that does not exist in the cache yet, it will be loaded asynchronously and return an
+     * empty list. Every subsequent call to this method will return an empty list until the asynchronous call is
+     * completed. From then on, it will load the results from the cache.
+     *
+     * @param commandSender The {@link ICommandSender} to get the suggestions for.
+     * @param input         The current set of (potentially incomplete) input arguments.
+     * @return The list of suggestions based on the current set of input arguments.
+     */
+    public Optional<List<String>> getDelayedTabCompleteOptions(final @NonNull ICommandSender commandSender,
+                                                               final @NonNull String input)
+    {
+        if (!cacheTabCompletionSuggestions)
+            return Optional.empty();
+
+        final @NonNull TabCompletionSuggester suggester =
+            new TabCompletionSuggester(this, commandSender, input, separator);
+        final @NonNull Supplier<List<String>> supplier = () -> suggester.getTabCompleteOptions(false);
+
+        final @NonNull Pair<@NonNull String, @NonNull String> lastArgument = suggester.getLastArgumentData();
+
+        return tabCompletionCache.getDelayedTabCompleteOptions(commandSender, suggester.getArgs(),
+                                                               lastArgument.first + lastArgument.second, supplier,
+                                                               suggester.isOpenEnded());
+    }
+
+    /**
      * Asynchronously gets a list of suggestions for tab complete based on the current set of arguments.
      *
      * @param commandSender The {@link ICommandSender} to get the suggestions for.
