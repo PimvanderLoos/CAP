@@ -1,9 +1,9 @@
 package nl.pim16aap2.cap.renderer;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.DefaultHelpCommand;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -22,9 +22,6 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
 {
-    @Builder.Default
-    @NonNull String hoverMessage = "Click to see the help menu for this command!";
-
     /**
      * Gets a new instance of this {@link SpigotHelpCommandRenderer} using the default values.
      * <p>
@@ -49,6 +46,7 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
     protected void renderPageCountHeader(final @NonNull ICommandSender commandSender, final @NonNull Text text,
                                          final int page, final int pageCount, @NonNull Command command)
     {
+        final @NonNull Localizer localizer = command.getCap().getLocalizer();
         @Nullable Command helpCommand = command.getHelpCommand();
         if (helpCommand == null)
         {
@@ -73,7 +71,9 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
             SpigotTextUtility.addClickableCommandText(text, "<<<", TextType.COMMAND, String
                                                           .format("/%s %s %d", command.getName(commandSender.getLocale()),
                                                                   helpCommand.getName(commandSender.getLocale()), page - 1),
-                                                      "§cPrevious help page");
+                                                      "§c" + // TODO: Use ColorScheme!
+                                                          localizer.getMessage("command.help.clickable.previousPage",
+                                                                               commandSender.getLocale()));
 
         text.add(String.format("---- Page (%2d / %2d) ----", page, pageCount), TextType.REGULAR_TEXT);
 
@@ -82,7 +82,9 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
         else
             SpigotTextUtility.addClickableCommandText(text, ">>>", TextType.COMMAND, String
                 .format("/%s %s %d", command.getName(commandSender.getLocale()),
-                        helpCommand.getName(commandSender.getLocale()), page + 1), "§cNext help page");
+                        helpCommand.getName(commandSender.getLocale()), page + 1), "§c" + // TODO: Use ColorScheme!
+                                                          localizer.getMessage("command.help.clickable.nextPage",
+                                                                               commandSender.getLocale()));
 
         text.add("\n");
     }
@@ -92,6 +94,7 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
                                  final @NonNull Text text, final @NonNull Command command,
                                  final @NonNull String superCommands)
     {
+        final @NonNull Localizer localizer = command.getCap().getLocalizer();
         final @NonNull Command topCommand = command.getTopLevelCommand();
         final @Nullable Command helpCommand = topCommand.getHelpCommand();
 
@@ -105,10 +108,13 @@ public class SpigotHelpCommandRenderer extends DefaultHelpCommandRenderer
             final String commandName =
                 command.getName(commandSender.getLocale()).equals(helpCommand.getName(commandSender.getLocale())) ? "" :
                 " " + command.getName(commandSender.getLocale());
+
             final String clickableCommand =
                 "/" + topCommand.getName(commandSender.getLocale()) + " " +
                     helpCommand.getName(commandSender.getLocale()) + commandName;
-            SpigotTextUtility.makeClickableCommand(commandText, clickableCommand, "§cClick me for more information!");
+
+            SpigotTextUtility.makeClickableCommand(commandText, clickableCommand, "§c" + // TODO: Use ColorScheme!
+                localizer.getMessage("command.help.clickable.hover", commandSender.getLocale()));
         }
         text.add(commandText);
 

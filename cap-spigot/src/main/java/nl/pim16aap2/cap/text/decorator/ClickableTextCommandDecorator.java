@@ -63,7 +63,6 @@ public class ClickableTextCommandDecorator implements ISpigotTextDecorator
     }
 
     @Override
-    @Contract("_ -> this")
     public @NonNull ITextDecorator duplicate()
     {
         return new ClickableTextCommandDecorator(start, end, command, hoverMessage);
