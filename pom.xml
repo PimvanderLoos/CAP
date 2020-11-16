@@ -9,10 +9,8 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
-
     <modules>
         <module>cap-core</module>
-        <module>cap-examples</module>
         <module>cap-spigot</module>
     </modules>
 
