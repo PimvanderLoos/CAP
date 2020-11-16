@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
+import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
@@ -31,6 +32,9 @@ import java.util.OptionalInt;
 @Getter
 public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
 {
+    protected static final @NonNull String DEFAULT_PAGE_NAME = "Click me for more information!";
+    protected static final @NonNull String DEFAULT_PAGE_NAME_LOCALIZED = "default.helpCommand.page";
+
     protected static final @NonNull IArgumentRenderer DEFAULT_ARGUMENT_RENDERER = DefaultArgumentRenderer.getDefault();
 
     // TODO: Make this configurable?
@@ -73,28 +77,14 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     protected @NonNull IArgumentRenderer argumentRenderer = DEFAULT_ARGUMENT_RENDERER;
 
     /**
-     * @param pageSize                  The number of subcommands on the first page. Default = 1.
-     * @param firstPageSize             The number of subcommands to display per page. Default = 5.
-     * @param displayHeader             Whether or not to display the header of the command on the first page. Default =
-     *                                  true.
-     * @param descriptionIndent         The string to prepend before every description. Default = "  ".
-     * @param displayArgumentsForSimple Whether or not to display the arguments of each command on the list page.
-     *                                  Default = False.
-     * @param argumentRenderer          The {@link IArgumentRenderer} renderer that will be used to render arguments.
-     *                                  When this value is not provided, {@link DefaultArgumentRenderer} will be used.
+     * The entry to use for the "page" value in the header. I.e. "--- Page (2 / 5) ---".
+     * <p>
+     * When left null, this value will either be {@link #DEFAULT_PAGE_NAME} or {@link #DEFAULT_PAGE_NAME_LOCALIZED}
+     * depending on whether or not localization is enabled in the provided {@link CAP} instance. See {@link
+     * CAP#localizationEnabled()}.
      */
-    protected DefaultHelpCommandRenderer(final int pageSize, final int firstPageSize, final boolean displayHeader,
-                                         final @NonNull String descriptionIndent,
-                                         final boolean displayArgumentsForSimple,
-                                         final @NonNull IArgumentRenderer argumentRenderer)
-    {
-        this.pageSize = pageSize;
-        this.firstPageSize = firstPageSize;
-        this.displayHeader = displayHeader;
-        this.displayArgumentsForSimple = displayArgumentsForSimple;
-        this.argumentRenderer = argumentRenderer;
-        this.descriptionIndent = descriptionIndent;
-    }
+    @Builder.Default
+    protected final @Nullable String pageName = null;
 
     /**
      * Gets a new instance of this {@link DefaultHelpCommandRenderer} using the default values.
@@ -106,6 +96,17 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     public static @NonNull DefaultHelpCommandRenderer getDefault()
     {
         return DefaultHelpCommandRenderer.builder().build();
+    }
+
+    protected final @NonNull String getLocalizedMessage(final @NonNull CAP cap,
+                                                        final @NonNull ICommandSender commandSender,
+                                                        final @Nullable String key,
+                                                        final @NonNull String keyFallBack,
+                                                        final @NonNull String keyFallBackLocalized)
+    {
+        if (!cap.localizationEnabled())
+            return Util.valOrDefault(key, keyFallBack);
+        return cap.getLocalizer().getMessage(Util.valOrDefault(key, keyFallBackLocalized), commandSender.getLocale());
     }
 
     /**
@@ -163,7 +164,10 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         else
             text.add("<<", TextType.COMMAND);
 
-        text.add(String.format("----- Page (%2d / %2d) -----", page, pageCount), TextType.REGULAR_TEXT);
+        final @NonNull String localizedPageName = getLocalizedMessage(command.getCap(), commandSender, pageName,
+                                                                      DEFAULT_PAGE_NAME, DEFAULT_PAGE_NAME_LOCALIZED);
+        text.add(String.format("----- %s (%2d / %2d) -----",
+                               localizedPageName, page, pageCount), TextType.REGULAR_TEXT);
 
         if (page == pageCount)
             text.add("--", TextType.REGULAR_TEXT);
