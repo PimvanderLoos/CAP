@@ -183,6 +183,22 @@ public class ColorScheme
         }
 
         /**
+         * Adds a style to a given {@link TextType}.
+         *
+         * @param type The {@link TextType} to add a style for.
+         * @param on   The String that is used to enable this component. E.g. {@code <it>}.
+         * @param off  The String that is used to disable this component. E.g. {@code </it>}.
+         * @return This {@link ColorSchemeBuilder} instance.
+         */
+        @Contract("_, _, _-> this")
+        public ColorSchemeBuilder addStyle(final @NonNull TextType type,
+                                           final @NonNull String on, final @NonNull String off)
+        {
+            styleMap.put(type, new TextComponent(on, off));
+            return this;
+        }
+
+        /**
          * See {@link TextType#COMMAND}.
          */
         @Contract("_ -> this")

@@ -50,24 +50,11 @@ public class Main
         System.out.println("=============\n");
     }
 
-    private static void testSubStrings()
-    {
-        // TODO: This should really be a unit test....
-        ColorScheme colorScheme = ColorScheme.builder().build();
-        Text text = new Text(colorScheme);
-        text.add("123456789");
-        System.out.println(text.subsection(0, 3));
-        System.out.println(text.subsection(3, 6));
-        System.out.println(text.subsection(6, 9));
-
-    }
-
     public static void main(final String... args)
     {
 //        testTextComponents();
         final @NonNull CAP cap = initCommandManager();
 //        testHelpRenderer(commandManager);
-//        testSubStrings();
 
         Text textA = new Text(getColorScheme()).add("D E F", TextType.COMMAND).add(" ");
         Text textB = new Text(getColorScheme()).add("A B C", TextType.REGULAR_TEXT).add(" ");

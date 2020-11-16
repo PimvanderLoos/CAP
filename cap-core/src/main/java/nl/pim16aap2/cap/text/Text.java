@@ -104,7 +104,7 @@ public class Text
         if (start == 0 && end == stringBuilder.length())
             return this;
 
-        if (end < start)
+        if (end <= start)
             throw new RuntimeException(String.format("The end (%d) of a substring cannot be before it (%d)!",
                                                      end, start));
 
