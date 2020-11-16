@@ -209,6 +209,7 @@ public class Command
     {
         if (commandExecutor == null && !virtual)
             throw new IllegalArgumentException("CommandExecutor may not be null for non-virtual commands!");
+        this.cap = cap;
 
         this.nameSpec = nameSpec;
         nameSpec.verify(cap);
@@ -235,7 +236,6 @@ public class Command
             subCommands.forEach(this.subCommands::addCommand);
 
         this.subCommands.getLocaleMap().values().forEach(subCommand -> subCommand.superCommand = Optional.of(this));
-        this.cap = cap;
 
         this.helpArgument = helpArgument;
         if (helpArgument == null && Util.valOrDefault(addDefaultHelpArgument, false))
@@ -250,6 +250,7 @@ public class Command
             arguments.add(cap.localizationEnabled() ? DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED : DEFAULT_VIRTUAL_ARGUMENT);
 
         argumentManager = new ArgumentManager(cap.getLocalizer(), arguments, cap.isCaseSensitive());
+        this.cap.addCommand(this);
     }
 
     /**

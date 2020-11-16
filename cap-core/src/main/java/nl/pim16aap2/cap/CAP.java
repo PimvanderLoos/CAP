@@ -179,11 +179,22 @@ public class CAP
     public @NonNull CAP addCommand(final @NonNull Command command)
     {
         commandMap.addCommand(command);
-
-        if (!command.getSuperCommand().isPresent())
-            topLevelCommandMap.addCommand(command);
-
+        resetTopLevelCommands();
         return this;
+    }
+
+    /**
+     * Resets the {@link #topLevelCommandMap} to make sure that it only contains top-level commands.
+     */
+    private void resetTopLevelCommands()
+    {
+        topLevelCommandMap.clear();
+        commandMap.getLocaleMap().values().forEach(
+            command ->
+            {
+                if (!command.getSuperCommand().isPresent())
+                    topLevelCommandMap.addCommand(command);
+            });
     }
 
     /**

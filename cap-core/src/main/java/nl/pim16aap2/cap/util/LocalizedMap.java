@@ -46,6 +46,14 @@ public abstract class LocalizedMap<T>
     }
 
     /**
+     * Removes all entries from every localized map.
+     */
+    public void clear()
+    {
+        localizedMap.values().forEach(Map::clear);
+    }
+
+    /**
      * Adds the entry for every locale.
      *
      * @param keyFinder   The fun

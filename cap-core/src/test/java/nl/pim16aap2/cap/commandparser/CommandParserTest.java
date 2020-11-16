@@ -205,9 +205,7 @@ class CommandParserTest
             .virtual(true)
             .build();
 
-        subcommands.forEach(cap::addCommand);
-        return cap.addCommand(addOwner).addCommand(bigdoors).addCommand(numerical).addCommand(subSubCommand)
-                  .addCommand(subSubSubCommand);
+        return cap;
     }
 
     @Test

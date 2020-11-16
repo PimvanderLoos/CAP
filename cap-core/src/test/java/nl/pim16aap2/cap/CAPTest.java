@@ -16,10 +16,10 @@ class CAPTest
             CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').caseSensitive(true).build();
         Assertions.assertEquals("caseSensitive", cap.getCommandNameCaseCheck("caseSensitive"));
 
-        cap.addCommand(Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commanda"))
-                              .virtual(true).cap(cap).build());
-        cap.addCommand(Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commandB"))
-                              .virtual(true).cap(cap).build());
+        Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commanda"))
+               .virtual(true).cap(cap).build();
+        Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commandB"))
+               .virtual(true).cap(cap).build();
 
         Assertions.assertTrue(cap.getCommand("commanda", null).isPresent());
         Assertions.assertFalse(cap.getCommand("commandA", null).isPresent());
@@ -35,10 +35,10 @@ class CAPTest
             CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').caseSensitive(false).build();
         Assertions.assertEquals("caseinsensitive", cap.getCommandNameCaseCheck("caseInsensitive"));
 
-        cap.addCommand(Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commanda"))
-                              .virtual(true).cap(cap).build());
-        cap.addCommand(Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commandB"))
-                              .virtual(true).cap(cap).build());
+        Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commanda"))
+               .virtual(true).cap(cap).build();
+        Command.commandBuilder().nameSpec(UtilsForTesting.getBasicCommandName("commandB"))
+               .virtual(true).cap(cap).build();
 
         Assertions.assertTrue(cap.getCommand("commanda", null).isPresent());
         Assertions.assertTrue(cap.getCommand("commandA", null).isPresent());
