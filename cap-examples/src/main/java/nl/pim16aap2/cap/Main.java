@@ -3,6 +3,7 @@ package nl.pim16aap2.cap;
 import lombok.NonNull;
 import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
 import nl.pim16aap2.cap.Localization.CommandNamingSpec;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import nl.pim16aap2.cap.argument.specialized.StringArgument;
@@ -15,7 +16,6 @@ import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextComponent;
 import nl.pim16aap2.cap.text.TextType;
-import nl.pim16aap2.cap.util.LocalizationSpecification;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,7 +127,7 @@ public class Main
         tryArgs(cap, "bigdoors required my_door 12");
 //        tryArgs(cap, "bigdoors required 12 my_door"); // Invalid
 
-        cap.setDefaultLocale(LOCALE_DUTCH);
+        cap.getLocalizer().setDefaultLocale(LOCALE_DUTCH);
         tryArgs(cap, "grotedeuren help");
         tryArgs(cap, "grotedeuren help 1");
         tryArgs(cap, "grotedeuren help 2");
@@ -138,9 +138,9 @@ public class Main
         tryArgs(cap, "grotedeuren help 6");
 
 
-        cap.setDefaultLocale(LOCALE_ENGLISH);
+        cap.getLocalizer().setDefaultLocale(LOCALE_ENGLISH);
         tryArgs(cap, "bigdoors addowner myDoor -p=pim16aap2 -p=pim16aap3 -p=pim16aap4 --admin");
-        cap.setDefaultLocale(LOCALE_DUTCH);
+        cap.getLocalizer().setDefaultLocale(LOCALE_DUTCH);
         tryArgs(cap, "grotedeuren eigenaartoevoegen myDoor --speler=pim16aap2 --speler=pim16aap3 -s=pim16aap4 --admin");
     }
 
@@ -148,7 +148,7 @@ public class Main
     {
         final CAP cap = CAP
             .builder()
-            .localizationSpecification(new LocalizationSpecification("CAPExample", LOCALE_ENGLISH, LOCALE_DUTCH))
+            .localizer(new Localizer("CAPExample", LOCALE_ENGLISH, LOCALE_DUTCH))
             .separator('=')
             .debug(true)
             .helpCommandRenderer(DefaultHelpCommandRenderer.builder().firstPageSize(1).build())

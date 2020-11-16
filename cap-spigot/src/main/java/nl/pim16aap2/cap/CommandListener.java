@@ -34,7 +34,8 @@ class CommandListener implements Listener
         try
         {
             final String superCommand = SPACE_PATTERN.split(message, 2)[0];
-            return cap.getTopLevelCommand(superCommand).isPresent();
+            // TODO: Localization.
+            return cap.getTopLevelCommand(superCommand, cap.getLocalizer().getDefaultLocale()).isPresent();
         }
         catch (Throwable t)
         {

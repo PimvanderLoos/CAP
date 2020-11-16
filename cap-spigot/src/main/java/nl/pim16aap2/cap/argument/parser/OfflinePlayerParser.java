@@ -34,7 +34,7 @@ public class OfflinePlayerParser extends ArgumentParser<OfflinePlayer>
         {
             // TODO: Spigot-specific error messages.
             final @NonNull String localizedMessage =
-                MessageFormat.format(cap.getMessage("error.valueParser.integer", commandSender), value);
+                MessageFormat.format(cap.getLocalizer().getMessage("error.valueParser.integer", commandSender), value);
             throw new IllegalValueException(argument, value, localizedMessage, cap.isDebug());
         }
     }

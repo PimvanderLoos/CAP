@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
-import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -183,7 +183,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (page > pageCount || page < 1)
         {
             final @NonNull String localizedMessage = MessageFormat
-                .format(command.getCap().getMessage("error.validation.range", commandSender), page, 1, pageCount);
+                .format(command.getCap().getLocalizer().getMessage("error.validation.range", commandSender),
+                        page, 1, pageCount);
             throw new ValidationFailureException(Integer.toString(page), localizedMessage, command.getCap().isDebug());
         }
 
@@ -216,8 +217,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         if (!subCommand.isPresent())
         {
             final @NonNull String localizedMessage =
-                MessageFormat.format(command.getCap().getMessage("error.exception.commandNotFound",
-                                                                 commandSender), val);
+                MessageFormat.format(command.getCap().getLocalizer().getMessage("error.exception.commandNotFound",
+                                                                                commandSender), val);
             throw new CommandNotFoundException(val, localizedMessage, command.getCap().isDebug());
         }
 
@@ -409,7 +410,8 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
     }
 
     /**
-     * Renders the arguments in short format, see {@link IArgumentRenderer#render(CAP, Locale, ColorScheme, Argument)}.
+     * Renders the arguments in short format, see {@link IArgumentRenderer#render(Localizer, Locale, ColorScheme,
+     * Argument)}.
      * <p>
      * The arguments are separated by spaces.
      *
@@ -422,12 +424,12 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
                                         final @NonNull Text text, final @NonNull Command command)
     {
         for (final Argument<?> argument : command.getArgumentManager().getArguments())
-            text.add(" ").add(argumentRenderer.render(command.getCap(), locale, colorScheme, argument));
+            text.add(" ").add(argumentRenderer.render(command.getCap().getLocalizer(), locale, colorScheme, argument));
     }
 
     /**
-     * Renders the arguments in short format, see {@link IArgumentRenderer#renderLongFormat(CAP, Locale, ColorScheme,
-     * Argument, String)}.
+     * Renders the arguments in short format, see {@link IArgumentRenderer#renderLongFormat(Localizer, Locale,
+     * ColorScheme, Argument, String)}.
      * <p>
      * The arguments (and their summaries) are separated by newlines.
      *
@@ -442,6 +444,7 @@ public class DefaultHelpCommandRenderer implements IHelpCommandRenderer
         for (final Argument<?> argument : command.getArgumentManager().getArguments())
             text.add("\n")
                 .add(argumentRenderer
-                         .renderLongFormat(command.getCap(), locale, colorScheme, argument, descriptionIndent));
+                         .renderLongFormat(command.getCap().getLocalizer(), locale, colorScheme,
+                                           argument, descriptionIndent));
     }
 }

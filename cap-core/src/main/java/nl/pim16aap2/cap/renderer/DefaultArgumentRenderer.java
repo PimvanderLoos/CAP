@@ -2,7 +2,7 @@ package nl.pim16aap2.cap.renderer;
 
 import lombok.Builder;
 import lombok.NonNull;
-import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
@@ -59,44 +59,44 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
     }
 
     @Override
-    public @NonNull Text render(final @NonNull CAP cap, final @Nullable Locale locale,
+    public @NonNull Text render(final @NonNull Localizer localizer, final @Nullable Locale locale,
                                 final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument)
     {
-        return render(cap, locale, colorScheme, argument, false);
+        return render(localizer, locale, colorScheme, argument, false);
     }
 
     @Override
-    public @NonNull Text renderLongFormat(final @NonNull CAP cap, final @Nullable Locale locale,
+    public @NonNull Text renderLongFormat(final @NonNull Localizer localizer, final @Nullable Locale locale,
                                           final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                           final @NonNull String summaryIndent)
     {
-        final Text text = render(cap, locale, colorScheme, argument);
-        if (argument.getLongName(cap, locale) != null)
-            text.add(", ").add(render(cap, locale, colorScheme, argument, true));
+        final Text text = render(localizer, locale, colorScheme, argument);
+        if (argument.getLongName(localizer, locale) != null)
+            text.add(", ").add(render(localizer, locale, colorScheme, argument, true));
 
-        if (!argument.getSummary(cap, locale).equals(""))
+        if (!argument.getSummary(localizer, locale).equals(""))
             text.add("\n").add(summaryIndent)
-                .add(cap.getMessage(argument.getSummary(cap, locale), locale), TextType.SUMMARY);
+                .add(localizer.getMessage(argument.getSummary(localizer, locale), locale), TextType.SUMMARY);
         return text;
     }
 
     /**
-     * Renders an argument. See {@link #render(CAP, Locale, ColorScheme, Argument)}.
+     * Renders an argument. See {@link #render(Localizer, Locale, ColorScheme, Argument)}.
      *
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
-     * @param useLongName Whether to use {@link Argument#getLongName(CAP, Locale)}. Please ensure that the {@link
+     * @param useLongName Whether to use {@link Argument#getLongName(Localizer, Locale)}. Please ensure that the {@link
      *                    Argument} has a long name before using this! When this value is false, {@link
-     *                    Argument#getShortName(CAP, Locale)} is used.
+     *                    Argument#getShortName(Localizer, Locale)} is used.
      * @return The {@link Text} representing the {@link Argument}.
      */
-    protected @NonNull Text render(final @NonNull CAP cap, final @Nullable Locale locale,
+    protected @NonNull Text render(final @NonNull Localizer localizer, final @Nullable Locale locale,
                                    final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                    final boolean useLongName)
     {
         return argument.isRequired() ?
-               renderRequired(cap, locale, colorScheme, argument, useLongName) :
-               renderOptional(cap, locale, colorScheme, argument, useLongName);
+               renderRequired(localizer, locale, colorScheme, argument, useLongName) :
+               renderOptional(localizer, locale, colorScheme, argument, useLongName);
     }
 
     /**
@@ -104,18 +104,18 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      *
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
-     * @param useLongName Whether to use {@link Argument#getLongName(CAP, Locale)}. Please ensure that the {@link
+     * @param useLongName Whether to use {@link Argument#getLongName(Localizer, Locale)}. Please ensure that the {@link
      *                    Argument} has a long name before using this! When this value is false, {@link
-     *                    Argument#getShortName(CAP, Locale)} is used.
+     *                    Argument#getShortName(Localizer, Locale)} is used.
      * @return The {@link Text} representing an optional {@link Argument}.
      */
-    protected @NonNull Text renderOptional(final @NonNull CAP cap, final @Nullable Locale locale,
+    protected @NonNull Text renderOptional(final @NonNull Localizer localizer, final @Nullable Locale locale,
                                            final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                            final boolean useLongName)
     {
         final String suffix = argument.isRepeatable() ? "+" : "";
         return new Text(colorScheme).add(optionalBrackets.first, TextType.OPTIONAL_PARAMETER)
-                                    .add(renderArgument(cap, locale, colorScheme, argument, useLongName))
+                                    .add(renderArgument(localizer, locale, colorScheme, argument, useLongName))
                                     .add(optionalBrackets.second + suffix, TextType.OPTIONAL_PARAMETER);
     }
 
@@ -124,18 +124,18 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      *
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
-     * @param useLongName Whether to use {@link Argument#getLongName(CAP, Locale)}. Please ensure that the {@link
+     * @param useLongName Whether to use {@link Argument#getLongName(Localizer, Locale)}. Please ensure that the {@link
      *                    Argument} has a long name before using this! When this value is false, {@link
-     *                    Argument#getShortName(CAP, Locale)} is used.
+     *                    Argument#getShortName(Localizer, Locale)} is used.
      * @return The {@link Text} representing a required {@link Argument}.
      */
-    protected @NonNull Text renderRequired(final @NonNull CAP cap, final @Nullable Locale locale,
+    protected @NonNull Text renderRequired(final @NonNull Localizer localizer, final @Nullable Locale locale,
                                            final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                            final boolean useLongName)
     {
         final String suffix = argument.isRepeatable() ? "+" : "";
         return new Text(colorScheme).add(requiredBrackets.first, TextType.REQUIRED_PARAMETER)
-                                    .add(renderArgument(cap, locale, colorScheme, argument, useLongName))
+                                    .add(renderArgument(localizer, locale, colorScheme, argument, useLongName))
                                     .add(requiredBrackets.second + suffix, TextType.REQUIRED_PARAMETER);
     }
 
@@ -145,19 +145,20 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
      *
      * @param colorScheme The {@link ColorScheme} to use to render the argument.
      * @param argument    The {@link Argument} to render.
-     * @param useLongName Whether to use {@link Argument#getLongName(CAP, Locale)}. Please ensure that the {@link
+     * @param useLongName Whether to use {@link Argument#getLongName(Localizer, Locale)}. Please ensure that the {@link
      *                    Argument} has a long name before using this! When this value is false, {@link
-     *                    Argument#getShortName(CAP, Locale)}  is used.
+     *                    Argument#getShortName(Localizer, Locale)}  is used.
      * @return The {@link Text} representing the {@link Argument}.
      */
-    protected @NonNull Text renderArgument(final @NonNull CAP cap, final @Nullable Locale locale,
+    protected @NonNull Text renderArgument(final @NonNull Localizer localizer, final @Nullable Locale locale,
                                            final @NonNull ColorScheme colorScheme, final @NonNull Argument<?> argument,
                                            final boolean useLongName)
     {
         final @NonNull Text text = new Text(colorScheme);
-        @NonNull String argLabel = argument.getLabel(cap, locale).equals("") ? argument.getShortName(cap, locale) :
-                                   argument.getLabel(cap, locale);
-        argLabel = cap.getMessage(argLabel, locale);
+        @NonNull String argLabel = argument.getLabel(localizer, locale).equals("") ?
+                                   argument.getShortName(localizer, locale) :
+                                   argument.getLabel(localizer, locale);
+        argLabel = localizer.getMessage(argLabel, locale);
 
         if (argument.isPositional())
             return text.add(argLabel, (argument.isRequired() ?
@@ -180,9 +181,9 @@ public class DefaultArgumentRenderer implements IArgumentRenderer
 
         // TODO: The '-' should be configurable, right?
         @NonNull String argumentName = useLongName ?
-                                       ("--" + argument.getLongName(cap, locale)) :
-                                       ("-" + argument.getShortName(cap, locale));
-        argumentName = cap.getMessage(argumentName, locale);
+                                       ("--" + argument.getLongName(localizer, locale)) :
+                                       ("-" + argument.getShortName(localizer, locale));
+        argumentName = localizer.getMessage(argumentName, locale);
 
         text.add(argumentName, name);
 

@@ -1,8 +1,8 @@
 package nl.pim16aap2.cap.command;
 
 import lombok.NonNull;
-import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +25,7 @@ class ArgumentManagerTest
                 ArgumentNamingSpec.RawStrings.builder().shortName("argumentB").label("argumentB").build()).build()
         );
 
-        final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, true);
+        final @NonNull ArgumentManager argumentManager = new ArgumentManager(new Localizer.Disabled(), arguments, true);
         Assertions.assertEquals("caseSensitive", argumentManager.getArgumentNameCaseCheck("caseSensitive"));
 
         Assertions.assertTrue(argumentManager.getArgument("argumenta", (Locale) null).isPresent());
@@ -46,7 +46,8 @@ class ArgumentManagerTest
                 ArgumentNamingSpec.RawStrings.builder().shortName("argumentB").label("argumentB").build()).build()
         );
 
-        final @NonNull ArgumentManager argumentManager = new ArgumentManager(CAP.getDefault(), arguments, false);
+        final @NonNull ArgumentManager argumentManager = new ArgumentManager(new Localizer.Disabled(),
+                                                                             arguments, false);
         Assertions.assertEquals("caseinsensitive", argumentManager.getArgumentNameCaseCheck("caseInsensitive"));
 
         Assertions.assertTrue(argumentManager.getArgument("argumenta", (Locale) null).isPresent());

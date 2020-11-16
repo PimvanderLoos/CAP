@@ -18,6 +18,7 @@ import nl.pim16aap2.cap.exception.NonExistingArgumentException;
 import nl.pim16aap2.cap.exception.UnmatchedQuoteException;
 import nl.pim16aap2.cap.exception.ValidationFailureException;
 import nl.pim16aap2.cap.util.Pair;
+import nl.pim16aap2.cap.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
@@ -109,7 +110,8 @@ public class CommandParser
         this(cap, commandSender, new CommandLineInput(input), separator);
 
         if (!this.input.isCompleteQuotationMarks())
-            throw new UnmatchedQuoteException(input, cap.getMessage("error.exception.unmatchedQuotes", commandSender),
+            throw new UnmatchedQuoteException(input, cap.getLocalizer()
+                                                        .getMessage("error.exception.unmatchedQuotes", commandSender),
                                               cap.isDebug());
     }
 
@@ -178,7 +180,8 @@ public class CommandParser
         final @NonNull ParsedCommand parsedCommand = getLastCommand();
         if (!parsedCommand.getCommand().hasPermission(commandSender))
         {
-            final @NonNull String localizedMessage = cap.getMessage("error.exception.noPermission", commandSender);
+            final @NonNull String localizedMessage = cap.getLocalizer()
+                                                        .getMessage("error.exception.noPermission", commandSender);
             throw new NoPermissionException(commandSender, parsedCommand.getCommand(), localizedMessage, cap.isDebug());
         }
 
@@ -256,7 +259,8 @@ public class CommandParser
                                       () ->
                                       {
                                           final @NonNull String localizedMessage =
-                                              MessageFormat.format(cap.getMessage("error.exception.nonExistingArgument",
+                                              MessageFormat.format(cap.getLocalizer()
+                                                                      .getMessage("error.exception.nonExistingArgument",
                                                                                   commandSender), argumentName);
                                           return new NonExistingArgumentException(command, argumentName,
                                                                                   localizedMessage, cap.isDebug());
@@ -294,8 +298,8 @@ public class CommandParser
                     if (foundValue == null)
                     {
                         final @NonNull String localizedMessage =
-                            MessageFormat.format(cap.getMessage("error.exception.missingValue",
-                                                                commandSender), argumentName);
+                            MessageFormat.format(cap.getLocalizer().getMessage("error.exception.missingValue",
+                                                                               commandSender), argumentName);
                         throw new MissingValueException(command, argument, localizedMessage, cap.isDebug());
                     }
                     value = foundValue;
@@ -309,7 +313,8 @@ public class CommandParser
                                       () ->
                                       {
                                           final @NonNull String localizedMessage =
-                                              MessageFormat.format(cap.getMessage("error.exception.nonExistingArgument",
+                                              MessageFormat.format(cap.getLocalizer()
+                                                                      .getMessage("error.exception.nonExistingArgument",
                                                                                   commandSender), nextArg);
                                           return new NonExistingArgumentException(command, nextArg,
                                                                                   localizedMessage, cap.isDebug());
@@ -343,8 +348,9 @@ public class CommandParser
             if (argument.isRequired() && missing)
             {
                 final @NonNull String localizedMessage =
-                    MessageFormat.format(cap.getMessage("error.exception.missingArgument", commandSender),
-                                         argument.getLongName(cap, commandSender.getLocale()));
+                    MessageFormat.format(cap.getLocalizer()
+                                            .getMessage("error.exception.missingArgument", commandSender),
+                                         argument.getLongName(cap.getLocalizer(), commandSender.getLocale()));
                 throw new MissingArgumentException(command, argument, localizedMessage, cap.isDebug());
             }
 
@@ -368,18 +374,18 @@ public class CommandParser
      * Recursively gets the last command in the {@link #input}.
      * <p>
      * For example, in "<b><u>supercommand</u> <u>subcommand</u> -opt=val</b>" with <u>supercommand</u> and
-     * <u>subcommand</u> being registered commands, it would return the {@link Command} object for <u>subcommand</u>.
+     * <u>subCommand</u> being registered commands, it would return the {@link Command} object for <u>subCommand</u>.
      * <p>
      * Note that you can repeat a command more than once, e.g. "<b><u>supercommand</u> <u>subcommand</u>
-     * <u>subcommand</u> <u>subcommand</u> -opt=val</b>" without any effects, it'll still return the {@link Command}
-     * object for <u>subcommand</u>, just a little bit slower.
+     * <u>subCommand</u> <u>subCommand</u> -opt=val</b>" without any effects, it'll still return the {@link Command}
+     * object for <u>subCommand</u>, just a little bit slower.
      *
      * @param command The latest {@link Command} that has been found so far.
      * @param idx     The index of the latest command in {@link #input}.
      * @return The last {@link Command} that can be parsed from the arguments in {@link #input}.
      *
      * @throws CommandNotFoundException If a command is found at an index that is not registered as subcommand of the
-     *                                  previous command or if the subcommand has not registered the supercommand as
+     *                                  previous command or if the subcommand has not registered the super command as
      *                                  such.
      */
     protected @NonNull ParsedCommand getLastCommand(final @Nullable Command command, final int idx)
@@ -389,19 +395,21 @@ public class CommandParser
         {
             if (idx != 0)
                 throw new IllegalStateException(
-                    String.format("Command was null at idx %d for inupt: \n%s", idx, input.toString()));
+                    String.format("Command was null at idx %d for input: \n%s", idx, input.toString()));
 
             final @Nullable String commandName = input.size() > idx ? input.getArgs().get(idx).trim() : null;
 
             // Gets the first argument in the arguments list.
             final Command baseCommand =
-                cap.getTopLevelCommand(commandName)
+                cap.getTopLevelCommand(commandName, commandSender.getLocale())
                    .orElseThrow(() ->
                                 {
                                     final @NonNull String localizedMessage =
-                                        MessageFormat.format(cap.getMessage("error.exception.commandNotFound",
+                                        MessageFormat.format(cap.getLocalizer()
+                                                                .getMessage("error.exception.commandNotFound",
                                                                             commandSender), commandName);
-                                    return new CommandNotFoundException(commandName, localizedMessage, cap.isDebug());
+                                    return new CommandNotFoundException(Util.valOrDefault(commandName, "NULL"),
+                                                                        localizedMessage, cap.isDebug());
                                 });
 
             return getLastCommand(baseCommand, 0);

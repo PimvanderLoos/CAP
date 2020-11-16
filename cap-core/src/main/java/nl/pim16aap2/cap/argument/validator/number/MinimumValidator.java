@@ -78,7 +78,7 @@ public class MinimumValidator<T extends Number> implements IArgumentValidator<T>
         if (input == null || !rangeValidator.moreThanMin(cap, commandSender, argument, min, input))
         {
             final @NonNull String localizedMessage = MessageFormat
-                .format(cap.getMessage("error.validation.minimum", commandSender), input, min);
+                .format(cap.getLocalizer().getMessage("error.validation.minimum", commandSender), input, min);
             throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), localizedMessage,
                                                  cap.isDebug());
         }

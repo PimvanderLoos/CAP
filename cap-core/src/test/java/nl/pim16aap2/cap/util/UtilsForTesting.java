@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
 import nl.pim16aap2.cap.Localization.CommandNamingSpec;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.DefaultCommandSender;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -23,7 +24,7 @@ public class UtilsForTesting
 
     public static final @NonNull CAP LOCALIZED_CAP =
         CAP.getDefault().toBuilder()
-           .localizationSpecification(new LocalizationSpecification("CAPCore", Locale.US))
+           .localizer(new Localizer("CAPCore", Locale.US))
            .build();
 
     /**

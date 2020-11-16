@@ -30,7 +30,7 @@ public class IntegerParser extends ArgumentParser<Integer>
         catch (NumberFormatException e)
         {
             final @NonNull String localizedMessage =
-                MessageFormat.format(cap.getMessage("error.valueParser.integer", commandSender), value);
+                MessageFormat.format(cap.getLocalizer().getMessage("error.valueParser.integer", commandSender), value);
             throw new IllegalValueException(argument, value, localizedMessage, cap.isDebug());
         }
     }

@@ -2,7 +2,7 @@ package nl.pim16aap2.cap.command;
 
 import lombok.Getter;
 import lombok.NonNull;
-import nl.pim16aap2.cap.CAP;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.util.LocalizedMap;
@@ -55,10 +55,11 @@ public class ArgumentManager
      */
     protected final boolean caseSensitive;
 
-    ArgumentManager(final @NonNull CAP cap, final @NonNull List<Argument<?>> arguments, final boolean caseSensitive)
+    ArgumentManager(final @NonNull Localizer localizer, final @NonNull List<Argument<?>> arguments,
+                    final boolean caseSensitive)
     {
         this.caseSensitive = caseSensitive;
-        argumentsMap = new ArgumentMap(this, cap, arguments.size());
+        argumentsMap = new ArgumentMap(this, localizer, arguments.size());
         argumentsList = new ArrayList<>(arguments);
 
         // First sort the arguments we received so they are put in the arguments map in the right order.
@@ -95,7 +96,7 @@ public class ArgumentManager
     }
 
     /**
-     * Gets an argument from its name. See {@link Argument#getShortName(CAP, Locale)}.
+     * Gets an argument from its name. See {@link Argument#getShortName(Localizer, Locale)}.
      *
      * @param argumentName  The name of the {@link Argument}.
      * @param commandSender The {@link ICommandSender} for which to get the {@link Command}. See {@link
@@ -109,7 +110,7 @@ public class ArgumentManager
     }
 
     /**
-     * Gets an argument from its name. See {@link Argument#getShortName(CAP, Locale)}.
+     * Gets an argument from its name. See {@link Argument#getShortName(Localizer, Locale)}.
      *
      * @param argumentName The name of the {@link Argument}.
      * @param locale       The {@link Locale} for which to get the {@link Command}.
@@ -164,16 +165,16 @@ public class ArgumentManager
     {
         protected final @NonNull ArgumentManager argumentManager;
 
-        protected ArgumentMap(final @NonNull ArgumentManager argumentManager, final @NonNull CAP cap,
+        protected ArgumentMap(final @NonNull ArgumentManager argumentManager, final @NonNull Localizer localizer,
                               final int initialCapacity)
         {
-            super(cap, initialCapacity);
+            super(localizer, initialCapacity);
             this.argumentManager = argumentManager;
         }
 
-        protected ArgumentMap(final @NonNull ArgumentManager argumentManager, final @NonNull CAP cap)
+        protected ArgumentMap(final @NonNull ArgumentManager argumentManager, final @NonNull Localizer localizer)
         {
-            super(cap);
+            super(localizer);
             this.argumentManager = argumentManager;
         }
 
@@ -185,15 +186,15 @@ public class ArgumentManager
         public void addArgument(final @NonNull Argument<?> argument)
         {
             addEntry(argument::getShortName, argument, argumentManager::getArgumentNameCaseCheck);
-            if (argument.getLongName(cap, null) != null)
+            if (argument.getLongName(localizer, null) != null)
                 addEntry(argument::getLongName, argument, argumentManager::getArgumentNameCaseCheck);
         }
 
         /**
          * Gets a {@link Argument} from its name.
          *
-         * @param name   The name of the {@link Argument}. See {@link Argument#getShortName(CAP, Locale)} and {@link
-         *               Argument#getLongName(CAP, Locale)}.
+         * @param name   The name of the {@link Argument}. See {@link Argument#getShortName(Localizer, Locale)} and
+         *               {@link Argument#getLongName(Localizer, Locale)}.
          * @param locale The {@link Locale} for which to get the {@link Argument}.
          * @return The {@link Argument} with the given name, if it is registered.
          */

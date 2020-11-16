@@ -8,6 +8,7 @@ import lombok.Singular;
 import nl.pim16aap2.cap.CAP;
 import nl.pim16aap2.cap.Localization.ArgumentNamingSpec;
 import nl.pim16aap2.cap.Localization.CommandNamingSpec;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.argument.Argument;
 import nl.pim16aap2.cap.argument.specialized.IntegerArgument;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -103,21 +104,21 @@ public class Command
 
     /**
      * The supplier that is used to build the description. Note that this isn't used in case the {@link
-     * CommandNamingSpec#getDescription(CAP, Locale)} is not null.
+     * CommandNamingSpec#getDescription(Localizer, Locale)} is not null.
      */
     @Setter
     protected @Nullable Function<ICommandSender, String> descriptionSupplier;
 
     /**
      * The supplier that is used to build the summary. Note that this isn't used in case the {@link
-     * CommandNamingSpec#getSummary(CAP, Locale)} is not null.
+     * CommandNamingSpec#getSummary(Localizer, Locale)} is not null.
      */
     @Setter
     protected @Nullable Function<ICommandSender, String> summarySupplier;
 
     /**
      * The supplier that is used to build the summary. Note that this isn't used in case the {@link
-     * CommandNamingSpec#getHeader(CAP, Locale)} is not null.
+     * CommandNamingSpec#getHeader(Localizer, Locale)} is not null.
      */
     @Setter
     protected @Nullable Function<ICommandSender, String> headerSupplier;
@@ -248,7 +249,7 @@ public class Command
         if (this.virtual)
             arguments.add(cap.localizationEnabled() ? DEFAULT_VIRTUAL_ARGUMENT_LOCALIZED : DEFAULT_VIRTUAL_ARGUMENT);
 
-        argumentManager = new ArgumentManager(cap, arguments, cap.isCaseSensitive());
+        argumentManager = new ArgumentManager(cap.getLocalizer(), arguments, cap.isCaseSensitive());
     }
 
     /**
@@ -330,13 +331,13 @@ public class Command
      */
     public @NonNull String getName(final @Nullable Locale locale)
     {
-        return nameSpec.getName(cap, locale);
+        return nameSpec.getName(cap.getLocalizer(), locale);
     }
 
     /**
      * Gets the description for this command.
      * <p>
-     * First, it tries to return {@link CommandNamingSpec#getName(CAP, Locale)}. If that is null, {@link
+     * First, it tries to return {@link CommandNamingSpec#getName(Localizer, Locale)} . If that is null, {@link
      * #descriptionSupplier} is used instead. If that is null as well, an empty String is returned.
      *
      * @param commandSender The {@link ICommandSender} to use in case {@link #descriptionSupplier} is needed.
@@ -345,14 +346,14 @@ public class Command
     public @NonNull String getDescription(final @NonNull ICommandSender commandSender)
     {
         return Util.firstNonNull("",
-                                 nameSpec.getDescription(cap, commandSender.getLocale()),
+                                 nameSpec.getDescription(cap.getLocalizer(), commandSender.getLocale()),
                                  (descriptionSupplier == null ? null : descriptionSupplier.apply(commandSender)));
     }
 
     /**
      * Gets the summary for this command.
      * <p>
-     * First, it tries to return {@link CommandNamingSpec#getSummary(CAP, Locale)}. If that is null, {@link
+     * First, it tries to return {@link CommandNamingSpec#getSummary(Localizer, Locale)}. If that is null, {@link
      * #summarySupplier} is used instead. If that is null as well, an empty String is returned.
      *
      * @param commandSender The {@link ICommandSender} to use in case {@link #summarySupplier} is needed.
@@ -361,14 +362,14 @@ public class Command
     public @NonNull String getSummary(final @NonNull ICommandSender commandSender)
     {
         return Util.firstNonNull("",
-                                 nameSpec.getSummary(cap, commandSender.getLocale()),
+                                 nameSpec.getSummary(cap.getLocalizer(), commandSender.getLocale()),
                                  (summarySupplier == null ? null : summarySupplier.apply(commandSender)));
     }
 
     /**
      * Gets the header for this command.
      * <p>
-     * First, it tries to return {@link CommandNamingSpec#getHeader(CAP, Locale)}. If that is null, {@link
+     * First, it tries to return {@link CommandNamingSpec#getHeader(Localizer, Locale)}. If that is null, {@link
      * #headerSupplier} is used instead. If that is null as well, an empty String is returned.
      *
      * @param commandSender The {@link ICommandSender} to use in case {@link #summarySupplier} is needed.
@@ -377,7 +378,7 @@ public class Command
     public @NonNull String getHeader(final @NonNull ICommandSender commandSender)
     {
         return Util.firstNonNull("",
-                                 nameSpec.getHeader(cap, commandSender.getLocale()),
+                                 nameSpec.getHeader(cap.getLocalizer(), commandSender.getLocale()),
                                  (headerSupplier == null ? null : headerSupplier.apply(commandSender)));
     }
 
@@ -389,7 +390,7 @@ public class Command
      */
     public @NonNull String getSectionTitle(final @NonNull ICommandSender commandSender)
     {
-        return Util.valOrDefault(nameSpec.getSectionTitle(cap, commandSender.getLocale()), "");
+        return Util.valOrDefault(nameSpec.getSectionTitle(cap.getLocalizer(), commandSender.getLocale()), "");
     }
 
     /**

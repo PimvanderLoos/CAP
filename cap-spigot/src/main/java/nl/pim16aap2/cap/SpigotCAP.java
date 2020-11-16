@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.AllowedCommandSenderType;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -18,7 +19,6 @@ import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.SpigotColorScheme;
 import nl.pim16aap2.cap.text.Text;
 import nl.pim16aap2.cap.text.TextType;
-import nl.pim16aap2.cap.util.LocalizationSpecification;
 import nl.pim16aap2.cap.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -65,7 +65,7 @@ public class SpigotCAP extends CAP
      * @param separator                     See {@link CAP#separator}.
      * @param cacheTabCompletionSuggestions See {@link CAP#cacheTabCompletionSuggestions}.
      * @param caseSensitive                 See {@link CAP#caseSensitive}.
-     * @param localizationSpecification     See {@link CAP#localizationSpecification}.
+     * @param localizer                     See {@link CAP#localizer}.
      * @param commandSenderFactory          The factory for creating {@link ICommandSender}s for the Spigot platform.
      *                                      Defaults to {@link SpigotCommandSenderFactory}.
      * @param localeProvider                The {@link ILocaleProvider}. When null, all {@link CommandSender}s will use
@@ -77,14 +77,14 @@ public class SpigotCAP extends CAP
                         final @Nullable ExceptionHandler exceptionHandler,
                         final @Nullable Character separator, final @Nullable Boolean cacheTabCompletionSuggestions,
                         final boolean caseSensitive,
-                        final @Nullable LocalizationSpecification localizationSpecification,
+                        final @Nullable Localizer localizer,
                         final @Nullable SpigotCommandSenderFactory commandSenderFactory,
                         final @Nullable ILocaleProvider localeProvider)
     {
         super(Util.valOrDefault(helpCommandRenderer, SpigotHelpCommandRenderer.getDefault()),
               Util.valOrDefault(cacheTabCompletionSuggestions, true),
               Util.valOrDefault(exceptionHandler, ExceptionHandler.getDefault()),
-              Util.valOrDefault(separator, ' '), debug, caseSensitive, localizationSpecification);
+              Util.valOrDefault(separator, ' '), debug, caseSensitive, localizer);
 
         this.plugin = plugin;
         this.colorScheme = Util.valOrDefault(colorScheme, generateColorScheme());

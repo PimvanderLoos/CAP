@@ -21,26 +21,26 @@ class NamingSpec
      * <p>
      * If localization is enabled, the translation of the value is returned.
      *
-     * @param cap       The {@link CAP} instance to use for localization if localization is enabled.
+     * @param localizer The {@link Localizer} instance to use for localization (if localization is enabled).
      * @param locale    The {@link Locale} to search in if localization is enabled.
      * @param localized Whether or not to enabled localization.
      * @param val       The value to look up.
-     * @return If localization is disabled, the value itself is returned. Otherwise we use {@link CAP#getMessage(String,
-     * Locale)}. If the input value is null, null is returned.
+     * @return If localization is disabled, the value itself is returned. Otherwise we use {@link
+     * Localizer#getMessage(String, Locale)}. If the input value is null, null is returned.
      */
     @Contract("_, _, _, !null -> !null")
-    String getMessage(final @NonNull CAP cap, final @Nullable Locale locale,
+    String getMessage(final @NonNull Localizer localizer, final @Nullable Locale locale,
                       final boolean localized, final @Nullable String val)
     {
         if (val == null)
             return null;
-        return localized ? cap.getMessage(val, locale) : val;
+        return localized ? localizer.getMessage(val, locale) : val;
     }
 
     /**
      * Checks if a message can be localized.
      * <p>
-     * See {@link CAP#isMessageLocalizable(String, Locale)}.
+     * See {@link Localizer#isMessageLocalizable(String, Locale)}.
      *
      * @param cap The {@link CAP} instance to use for localization.
      * @param val The key of the entry to check.
@@ -48,6 +48,6 @@ class NamingSpec
      */
     @Nullable String checkMessage(final @NonNull CAP cap, final @Nullable String val)
     {
-        return cap.isMessageLocalizable(val, null) ? val : null;
+        return cap.getLocalizer().isMessageLocalizable(val, null) ? val : null;
     }
 }

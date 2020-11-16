@@ -15,14 +15,18 @@ import java.util.Optional;
  */
 public class CommandMap extends LocalizedMap<Command>
 {
+    protected final @NonNull CAP cap;
+
     public CommandMap(final @NonNull CAP cap, final int initialCapacity)
     {
-        super(cap, initialCapacity);
+        super(cap.getLocalizer(), initialCapacity);
+        this.cap = cap;
     }
 
     public CommandMap(final @NonNull CAP cap)
     {
-        super(cap);
+        super(cap.getLocalizer());
+        this.cap = cap;
     }
 
     /**
@@ -44,6 +48,6 @@ public class CommandMap extends LocalizedMap<Command>
      */
     public void addCommand(final @NonNull Command command)
     {
-        addEntry((IGNORED, locale) -> command.getName(locale), command, cap::getCommandNameCaseCheck);
+        addEntry((IGNOREME, locale) -> command.getName(locale), command, cap::getCommandNameCaseCheck);
     }
 }

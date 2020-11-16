@@ -30,7 +30,7 @@ public class DoubleParser extends ArgumentParser<Double>
         catch (NumberFormatException e)
         {
             final @NonNull String localizedMessage =
-                MessageFormat.format(cap.getMessage("error.valueParser.double", commandSender), value);
+                MessageFormat.format(cap.getLocalizer().getMessage("error.valueParser.double", commandSender), value);
             throw new IllegalValueException(argument, value, localizedMessage, cap.isDebug());
         }
     }

@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import nl.pim16aap2.cap.Localization.Localizer;
 import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandMap;
 import nl.pim16aap2.cap.command.CommandResult;
@@ -13,7 +14,6 @@ import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.exception.CAPException;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
 import nl.pim16aap2.cap.renderer.DefaultHelpCommandRenderer;
-import nl.pim16aap2.cap.util.LocalizationSpecification;
 import nl.pim16aap2.cap.util.Pair;
 import nl.pim16aap2.cap.util.TabCompletionCache;
 import nl.pim16aap2.cap.util.Util;
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -35,12 +34,6 @@ import java.util.function.Supplier;
  */
 public class CAP
 {
-    /**
-     * The default {@link Locale} to use when none is explicitly specified.
-     */
-    @Getter
-    private @Nullable Locale defaultLocale;
-
     private final @NonNull TabCompletionCache tabCompletionCache = new TabCompletionCache();
 
     /**
@@ -100,23 +93,16 @@ public class CAP
     @Getter
     protected final boolean caseSensitive;
 
-    /**
-     * The array of registered locales.
-     */
     @Getter
-    protected final Locale[] locales;
+    protected final @NonNull Localizer localizer;
 
-    /**
-     * The localization to use. When set to null, the raw values will be used instead.
-     */
-    protected final @Nullable LocalizationSpecification localizationSpecification;
 
     @Builder(toBuilder = true)
     protected CAP(final @Nullable DefaultHelpCommandRenderer helpCommandRenderer,
                   final @Nullable Boolean cacheTabCompletionSuggestions,
                   final @Nullable ExceptionHandler exceptionHandler, final @Nullable Character separator,
                   final boolean debug, final boolean caseSensitive,
-                  final @Nullable LocalizationSpecification localizationSpecification)
+                  final @Nullable Localizer localizer)
     {
         this.helpCommandRenderer = Util.valOrDefault(helpCommandRenderer, DefaultHelpCommandRenderer.getDefault());
         this.cacheTabCompletionSuggestions = Util.valOrDefault(cacheTabCompletionSuggestions, true);
@@ -124,19 +110,7 @@ public class CAP
         this.separator = Util.valOrDefault(separator, ' ');
         this.debug = debug;
         this.caseSensitive = caseSensitive;
-        this.localizationSpecification = localizationSpecification;
-
-        if (localizationSpecification == null)
-        {
-            // Use null, so the hashcode is 0 (and fast!), minimizing the overhead.
-            defaultLocale = null;
-            locales = new Locale[]{getDefaultLocale()};
-        }
-        else
-        {
-            locales = localizationSpecification.getLocales();
-            defaultLocale = localizationSpecification.getDefaultLocale();
-        }
+        this.localizer = Util.valOrDefault(localizer, new Localizer.Disabled());
 
         commandMap = new CommandMap(this);
         topLevelCommandMap = new CommandMap(this);
@@ -161,61 +135,7 @@ public class CAP
      */
     public boolean localizationEnabled()
     {
-        return localizationSpecification != null;
-    }
-
-    /**
-     * Checks if a message can be localized in the provided {@link Locale}.
-     *
-     * @param key    The key of the message to check.
-     * @param locale The {@link Locale} to check in.
-     * @return True if the provided key can be localized.
-     */
-    public boolean isMessageLocalizable(final @Nullable String key, @Nullable Locale locale)
-    {
-        if (key == null || localizationSpecification == null || defaultLocale == null)
-            return false;
-
-        final @NonNull ResourceBundle bundle = ResourceBundle.getBundle(localizationSpecification.getBaseName(),
-                                                                        Util.valOrDefault(locale, defaultLocale));
-        return bundle.containsKey(key);
-    }
-
-    /**
-     * Gets the translated message for a locale.
-     * <p>
-     * If {@link #localizationSpecification} is not available, the key itself is used.
-     * <p>
-     * If the value for the key cannot be found, it returns the key as well.
-     *
-     * @param key    The key.
-     * @param locale The locale to use. Leave null to use the {@link #getDefaultLocale()}.
-     * @return The localized message, if it can be found.
-     */
-    public @NonNull String getMessage(final @NonNull String key, @Nullable Locale locale)
-    {
-        if (localizationSpecification == null || defaultLocale == null)
-            return key;
-
-        final @NonNull ResourceBundle bundle = ResourceBundle.getBundle(localizationSpecification.getBaseName(),
-                                                                        Util.valOrDefault(locale, defaultLocale));
-        return bundle.containsKey(key) ? bundle.getString(key) : key;
-    }
-
-    /**
-     * Gets the translated message for the locale of an {@link ICommandSender}. See {@link ICommandSender#getLocale()}.
-     * <p>
-     * If {@link #localizationSpecification} is not available, the key itself is used.
-     * <p>
-     * If the value for the key cannot be found, it returns the key as well.
-     *
-     * @param key           The key.
-     * @param commandSender The {@link ICommandSender} for which to get the {@link Locale}.
-     * @return The localized message, if it can be found.
-     */
-    public @NonNull String getMessage(final @NonNull String key, final @NonNull ICommandSender commandSender)
-    {
-        return getMessage(key, commandSender.getLocale());
+        return !(localizer instanceof Localizer.Disabled);
     }
 
     /**
@@ -241,9 +161,9 @@ public class CAP
         catch (Throwable t)
         {
             if (exceptionHandler != null)
-                exceptionHandler.handleException(commandSender,
-                                                 new CAPException(getMessage("error.exception.generic", commandSender),
-                                                                  debug));
+                exceptionHandler.handleException(
+                    commandSender, new CAPException(localizer.getMessage("error.exception.generic", commandSender),
+                                                    debug));
             throw new RuntimeException("An error occurred parsing input: '" + input + "'", t);
         }
         return Optional.empty();
@@ -292,18 +212,6 @@ public class CAP
     public @NonNull Optional<Command> getCommand(final @Nullable String name, final @Nullable Locale locale)
     {
         return commandMap.getCommand(name, locale);
-    }
-
-    /**
-     * Gets a super{@link Command} from its name (i.e. a {@link Command} without any supers of its own) for the {@link
-     * #getDefaultLocale()}.
-     *
-     * @param name The name of the super{@link Command}. See {@link Command#getName(Locale)}.
-     * @return The super{@link Command#getName(Locale)} with the given name, if it is registered in the {@link CAP}.
-     */
-    public @NonNull Optional<Command> getTopLevelCommand(final @Nullable String name)
-    {
-        return getTopLevelCommand(name, null);
     }
 
     /**
@@ -367,13 +275,14 @@ public class CAP
     }
 
     /**
-     * Gets all the top-level {@link Command}s for the provided {@link Locale} for the {@link #getDefaultLocale()}.
+     * Gets all the top-level {@link Command}s for the provided {@link Locale} for the {@link
+     * Localizer#getDefaultLocale()}.
      *
      * @return All the top-level {@link Command}s
      */
     public @NonNull Map<@NonNull String, @NonNull Command> getTopLevelCommandMap()
     {
-        return getTopLevelCommandMap(getDefaultLocale());
+        return getTopLevelCommandMap(localizer.getDefaultLocale());
     }
 
     /**
@@ -387,34 +296,6 @@ public class CAP
         return topLevelCommandMap.getLocaleMap(locale);
     }
 
-    /**
-     * The default {@link Locale} to use when none is explicitly specified.
-     *
-     * @param newDefaultLocale The new default {@link Locale} to use. If this is a non-null value, it needs to be
-     *                         registered in {@link #locales} on initialization!
-     */
-    public void setDefaultLocale(final @Nullable Locale newDefaultLocale)
-    {
-        if (newDefaultLocale == null)
-        {
-            defaultLocale = null;
-            return;
-        }
-
-        // Make sure that the new default locale
-        // is an already-registered one.
-        for (final @NonNull Locale locale : locales)
-            if (locale.equals(newDefaultLocale))
-            {
-                defaultLocale = newDefaultLocale;
-                return;
-            }
-
-        throw new IllegalArgumentException(
-            "Trying to register new default locale: " + newDefaultLocale.toString() +
-                ", but this locale was not registered! Please register all desired locales on CAP initialization");
-    }
-
     public static class CAPBuilder
     {
         private DefaultHelpCommandRenderer helpCommandRenderer;
@@ -423,6 +304,6 @@ public class CAP
         private Character separator;
         private boolean debug;
         private boolean caseSensitive;
-        private LocalizationSpecification localizationSpecification;
+        private Localizer localizer;
     }
 }

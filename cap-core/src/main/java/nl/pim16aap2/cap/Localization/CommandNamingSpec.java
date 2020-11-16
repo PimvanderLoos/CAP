@@ -59,7 +59,7 @@ public abstract class CommandNamingSpec
     private @Nullable String sectionTitle;
 
     /**
-     * Verifies the entries. See {@link CAP#isMessageLocalizable(String, Locale)}.
+     * Verifies the entries. See {@link Localizer#isMessageLocalizable(String, Locale)}.
      * <p>
      * Only applies to localized messages.
      *
@@ -70,7 +70,7 @@ public abstract class CommandNamingSpec
         if (!localized)
             return;
 
-        if (!cap.isMessageLocalizable(name, null))
+        if (!cap.getLocalizer().isMessageLocalizable(name, null))
             throw new IllegalStateException("Failed to find localization entry for key: \"" + name + "\"");
 
         description = NamingSpec.checkMessage(cap, description);
@@ -79,29 +79,29 @@ public abstract class CommandNamingSpec
         sectionTitle = NamingSpec.checkMessage(cap, sectionTitle);
     }
 
-    public @NonNull String getName(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @NonNull String getName(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, name);
+        return NamingSpec.getMessage(localizer, locale, localized, name);
     }
 
-    public @Nullable String getDescription(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @Nullable String getDescription(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, description);
+        return NamingSpec.getMessage(localizer, locale, localized, description);
     }
 
-    public @Nullable String getSummary(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @Nullable String getSummary(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, summary);
+        return NamingSpec.getMessage(localizer, locale, localized, summary);
     }
 
-    public @Nullable String getHeader(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @Nullable String getHeader(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, header);
+        return NamingSpec.getMessage(localizer, locale, localized, header);
     }
 
-    public @Nullable String getSectionTitle(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @Nullable String getSectionTitle(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, sectionTitle);
+        return NamingSpec.getMessage(localizer, locale, localized, sectionTitle);
     }
 
     /**
@@ -121,7 +121,7 @@ public abstract class CommandNamingSpec
          *                        <p>
          *                        A value for the name key is required, the others are optional.
          *                        <p>
-         *                        See {@link CAP#isMessageLocalizable(String, Locale)}.
+         *                        See {@link Localizer#isMessageLocalizable(String, Locale)}.
          */
         public Localized(final @NonNull String localizationKey)
         {

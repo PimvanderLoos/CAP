@@ -51,7 +51,7 @@ public abstract class ArgumentNamingSpec
     private @Nullable String summary;
 
     /**
-     * Verifies the entries. See {@link CAP#isMessageLocalizable(String, Locale)}.
+     * Verifies the entries. See {@link Localizer#isMessageLocalizable(String, Locale)}.
      * <p>
      * Only applies to localized messages.
      *
@@ -62,32 +62,32 @@ public abstract class ArgumentNamingSpec
         if (!localized)
             return;
 
-        if (!cap.isMessageLocalizable(shortName, null))
+        if (!cap.getLocalizer().isMessageLocalizable(shortName, null))
             throw new IllegalStateException("Failed to find localization entry for key: \"" + shortName + "\"");
 
         longName = NamingSpec.checkMessage(cap, longName);
-        summary = cap.isMessageLocalizable(summary, null) ? summary : null;
-        label = cap.isMessageLocalizable(label, null) ? label : null;
+        summary = cap.getLocalizer().isMessageLocalizable(summary, null) ? summary : null;
+        label = cap.getLocalizer().isMessageLocalizable(label, null) ? label : null;
     }
 
-    public @NonNull String getShortName(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @NonNull String getShortName(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, shortName);
+        return NamingSpec.getMessage(localizer, locale, localized, shortName);
     }
 
-    public @Nullable String getLongName(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @Nullable String getLongName(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, longName);
+        return NamingSpec.getMessage(localizer, locale, localized, longName);
     }
 
-    public @Nullable String getSummary(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @Nullable String getSummary(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, summary);
+        return NamingSpec.getMessage(localizer, locale, localized, summary);
     }
 
-    public @Nullable String getLabel(final @NonNull CAP cap, final @Nullable Locale locale)
+    public @Nullable String getLabel(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
-        return NamingSpec.getMessage(cap, locale, localized, label);
+        return NamingSpec.getMessage(localizer, locale, localized, label);
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class ArgumentNamingSpec
          *                        <p>
          *                        A value for the name key is required, the others are optional.
          *                        <p>
-         *                        See {@link CAP#isMessageLocalizable(String, Locale)}.
+         *                        See {@link Localizer#isMessageLocalizable(String, Locale)}.
          */
         public Localized(final @NonNull String localizationKey)
         {

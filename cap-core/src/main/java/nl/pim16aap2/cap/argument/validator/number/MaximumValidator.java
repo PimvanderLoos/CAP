@@ -78,7 +78,7 @@ public class MaximumValidator<T extends Number> implements IArgumentValidator<T>
         if (input == null || !rangeValidator.lessThanMax(cap, commandSender, argument, max, input))
         {
             final @NonNull String localizedMessage = MessageFormat
-                .format(cap.getMessage("error.validation.maximum", commandSender), input, max);
+                .format(cap.getLocalizer().getMessage("error.validation.maximum", commandSender), input, max);
             throw new ValidationFailureException(argument, input == null ? "NULL" : input.toString(), localizedMessage,
                                                  cap.isDebug());
         }

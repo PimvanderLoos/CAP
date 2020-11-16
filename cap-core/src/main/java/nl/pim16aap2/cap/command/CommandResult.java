@@ -167,8 +167,9 @@ public class CommandResult
             if (command.getCap().getExceptionHandler() != null)
                 command.getCap().getExceptionHandler().handleException(
                     commandSender,
-                    new CAPException(command.getCap().getMessage("error.exception.generic", commandSender),
-                                     command.getCap().isDebug()));
+                    new CAPException(
+                        command.getCap().getLocalizer().getMessage("error.exception.generic", commandSender),
+                        command.getCap().isDebug()));
 
             throw new RuntimeException("An error occurred trying to execute a command!\n" + toString(), t);
         }
