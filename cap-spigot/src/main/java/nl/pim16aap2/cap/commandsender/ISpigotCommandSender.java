@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 public interface ISpigotCommandSender extends ICommandSender
 {
     /**
-     * Gets the Spigot {@link CommandSender} represented by this {@link ICommandSender}..
+     * Gets the Spigot {@link CommandSender} represented by this {@link ICommandSender}.
      *
      * @return The {@link CommandSender} represented by this object.
      */

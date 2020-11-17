@@ -71,10 +71,9 @@ class CommandListener implements Listener
     @EventHandler(ignoreCancelled = true)
     void onPlayerCommandSendEvent(final @NonNull PlayerCommandSendEvent event)
     {
-        // Disabled, because Bukkit is dumb af here and adding stuff is 'undefined' (it really isn't,
-        // it just does nothing other than waste RAM and CPU cycles).
-//        cap.getTopLevelCommandMap(cap.getCommandSenderFactory().getLocale(event.getPlayer()))
-//           .keySet().forEach(cmdName -> event.getCommands().add("/" + cmdName));
+        final @Nullable Locale locale = cap.getCommandSenderFactory().getLocale(event.getPlayer());
+        event.getCommands()
+             .removeIf(s -> cap.isValidTopLevelCommand(s, locale) == SpigotCAP.TopLevelCommandStatus.INVALID_LOCALE);
     }
 
     @EventHandler(ignoreCancelled = true)

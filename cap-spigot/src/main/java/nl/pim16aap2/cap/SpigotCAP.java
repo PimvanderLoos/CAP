@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import nl.pim16aap2.cap.command.Command;
 import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.AllowedCommandSenderType;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
@@ -28,8 +29,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents a specialized class of {@link CAP} for the Spigot platform.
@@ -61,6 +65,13 @@ public class SpigotCAP extends CAP
 
     @Getter
     private final @NonNull SpigotCommandSenderFactory commandSenderFactory;
+
+    private final @NonNull CommandRegistrator commandRegistrator = new CommandRegistrator();
+
+    /**
+     * Contains the names of all top-level-commands for every locale.
+     */
+    private final @NonNull Set<@NonNull String> topLevelCommandNames = new HashSet<>();
 
     /**
      * @param helpCommandRenderer           See {@link CAP#helpCommandRenderer}.
@@ -102,6 +113,46 @@ public class SpigotCAP extends CAP
         this.commandSenderFactory = Util.valOrDefault(commandSenderFactory,
                                                       new SpigotCommandSenderFactory());
         this.commandSenderFactory.setLocaleProvider(localeProvider);
+
+        plugin.getServer().getPluginManager();
+    }
+
+    /**
+     * Registers all commands in the {@link #topLevelCommandMap} with Spigot so they can be used for tab-completion
+     * suggestions.
+     * <p>
+     * If you do not call this method, all tab-completion suggestions will be broken.
+     */
+    public void registerTopLevelCommands()
+    {
+        for (final @NonNull Locale locale : localizer.getLocales())
+        {
+            final @NonNull Map<@NonNull String, @NonNull Command> localeMap = topLevelCommandMap.getLocaleMap(locale);
+            commandRegistrator.registerCommands(plugin, localeMap);
+            topLevelCommandNames.addAll(localeMap.keySet());
+        }
+    }
+
+    /**
+     * Checks if a top-level-command with the provided name is valid in the provided {@link Locale}.
+     * <p>
+     * If the provided name cannot be mapped to a top-level-command managed by this instance, it doesn't count as
+     * valid.
+     * <p>
+     * Only top-level-commands that do exist and also in the provided locale are considered valid.
+     *
+     * @param name   The name of the potential top-level-command to look for.
+     * @param locale The {@link Locale} the top-level-command must exist in (if it exists) for it to be valid.
+     * @return True if the provided name can be mapped to a top-level-command in the provided locale.
+     */
+    public @NonNull TopLevelCommandStatus isValidTopLevelCommand(final @Nullable String name,
+                                                                 final @Nullable Locale locale)
+    {
+        if (!topLevelCommandNames.contains(name))
+            return TopLevelCommandStatus.UNMAPPED;
+
+        return topLevelCommandMap.getLocaleMap(locale).containsKey(name) ?
+               TopLevelCommandStatus.VALID : TopLevelCommandStatus.INVALID_LOCALE;
     }
 
     /**
@@ -202,5 +253,23 @@ public class SpigotCAP extends CAP
         }
         else
             ExceptionHandler.handleCAPException(commandSender, e);
+    }
+
+    enum TopLevelCommandStatus
+    {
+        /**
+         * The provided string cannot be mapped to a top-level-command.
+         */
+        UNMAPPED,
+
+        /**
+         * A top-level-command was found, but not in the desired locale.
+         */
+        INVALID_LOCALE,
+
+        /**
+         * A top-level-command was found in the desired locale.
+         */
+        VALID
     }
 }
