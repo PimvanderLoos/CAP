@@ -127,18 +127,17 @@ public class SpigotCAP extends CAP
             throw new IllegalArgumentException(
                 commandSender.getClass().getCanonicalName() + " is not a ISpigotCommandSender!");
 
-        final @Nullable CommandSender spigotCommandSender = ((ISpigotCommandSender) commandSender).getCommandSender();
+        final @NonNull CommandSender spigotCommandSender = ((ISpigotCommandSender) commandSender).getCommandSender();
         updateLocale(spigotCommandSender, locale);
     }
 
     /**
      * Updates the {@link Locale} for a {@link CommandSender}.
      *
-     * @param commandSender The {@link CommandSender} for which to update the {@link Locale}. You can use null to update
-     *                      it for the server.
+     * @param commandSender The {@link CommandSender} for which to update the {@link Locale}.
      * @param locale        The new {@link Locale}. When null, the default {@link Locale} will be used.
      */
-    public void updateLocale(final @Nullable CommandSender commandSender, final @Nullable Locale locale)
+    public void updateLocale(final @NonNull CommandSender commandSender, final @Nullable Locale locale)
     {
         commandSenderFactory.updateLocale(commandSender, locale);
         // Updating the command ensures that the client knows the top-level commands exist.

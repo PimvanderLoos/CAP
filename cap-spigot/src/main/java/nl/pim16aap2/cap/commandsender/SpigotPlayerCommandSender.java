@@ -8,6 +8,7 @@ import nl.pim16aap2.cap.text.SpigotTextUtility;
 import nl.pim16aap2.cap.text.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -48,7 +49,7 @@ public class SpigotPlayerCommandSender implements ISpigotCommandSender
     }
 
     @Override
-    public @Nullable CommandSender getCommandSender()
+    public @NotNull CommandSender getCommandSender()
     {
         return player;
     }

@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import nl.pim16aap2.cap.text.ColorScheme;
 import nl.pim16aap2.cap.text.Text;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -49,8 +51,8 @@ public class SpigotServerCommandSender implements ISpigotCommandSender
     }
 
     @Override
-    public @Nullable CommandSender getCommandSender()
+    public @NotNull CommandSender getCommandSender()
     {
-        return null;
+        return Bukkit.getServer().getConsoleSender();
     }
 }
