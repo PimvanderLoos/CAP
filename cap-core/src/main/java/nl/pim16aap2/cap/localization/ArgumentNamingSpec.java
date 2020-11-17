@@ -39,16 +39,16 @@ public abstract class ArgumentNamingSpec
     private @Nullable String longName;
 
     /**
+     * A short summary to describe what this {@link Argument} does and/or how it is used.
+     */
+    private @Nullable String summary;
+
+    /**
      * The label of the this {@link Argument}. For example, in the case of '[-p=player]', "player" would be the label.
      * <p>
      * This is also the name by which this Argument's result can be retrieved.
      */
     private @Nullable String label;
-
-    /**
-     * A short summary to describe what this {@link Argument} does and/or how it is used.
-     */
-    private @Nullable String summary;
 
     /**
      * Verifies the entries. See {@link Localizer#isMessageLocalizable(String, Locale)}.
@@ -87,6 +87,7 @@ public abstract class ArgumentNamingSpec
 
     public @Nullable String getLabel(final @NonNull Localizer localizer, final @Nullable Locale locale)
     {
+        System.out.println("Trying to get label for argument: " + shortName);
         return NamingSpec.getMessage(localizer, locale, localized, label);
     }
 

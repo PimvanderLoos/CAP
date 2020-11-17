@@ -20,7 +20,7 @@ import java.util.WeakHashMap;
 @RequiredArgsConstructor
 class LocaleCache
 {
-    private final @NonNull Map<@NonNull CommandSender, Locale> localeMap = new WeakHashMap<>();
+    private final @NonNull Map<CommandSender, Locale> localeMap = new WeakHashMap<>();
 
     @Setter
     @Getter
@@ -50,7 +50,7 @@ class LocaleCache
      * @param commandSender The {@link CommandSender} for which to update their locale.
      * @param locale        The {@link Locale} to use for the {@link CommandSender}.
      */
-    public void put(final @NonNull CommandSender commandSender, final @Nullable Locale locale)
+    public void put(final @Nullable CommandSender commandSender, final @Nullable Locale locale)
     {
         localeMap.put(commandSender, locale);
     }

@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.jetbrains.annotations.Nullable;
@@ -34,8 +35,7 @@ class CommandListener implements Listener
         try
         {
             final String superCommand = SPACE_PATTERN.split(message, 2)[0];
-            // TODO: Localization.
-            return cap.getTopLevelCommand(superCommand, cap.getLocalizer().getDefaultLocale()).isPresent();
+            return cap.getTopLevelCommand(superCommand, locale).isPresent();
         }
         catch (Throwable t)
         {
@@ -44,7 +44,7 @@ class CommandListener implements Listener
         return false;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerCommand(final @NonNull PlayerCommandPreprocessEvent event)
     {
         if (event.isCancelled())
@@ -58,7 +58,7 @@ class CommandListener implements Listener
         cap.parseInput(event.getPlayer(), message).ifPresent(CommandResult::run);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onServerCommand(final @NonNull ServerCommandEvent event)
     {
         if (!startsWithSuperCommand(getLocale(event.getSender()), event.getCommand()))
@@ -68,7 +68,16 @@ class CommandListener implements Listener
         cap.parseInput(event.getSender(), event.getCommand()).ifPresent(CommandResult::run);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
+    void onPlayerCommandSendEvent(final @NonNull PlayerCommandSendEvent event)
+    {
+        // Disabled, because Bukkit is dumb af here and adding stuff is 'undefined' (it really isn't,
+        // it just does nothing other than waste RAM and CPU cycles).
+//        cap.getTopLevelCommandMap(cap.getCommandSenderFactory().getLocale(event.getPlayer()))
+//           .keySet().forEach(cmdName -> event.getCommands().add("/" + cmdName));
+    }
+
+    @EventHandler(ignoreCancelled = true)
     void onTabCompletion(final @NonNull TabCompleteEvent event)
     {
         if (event.getBuffer().isEmpty() || !event.getBuffer().startsWith("/"))

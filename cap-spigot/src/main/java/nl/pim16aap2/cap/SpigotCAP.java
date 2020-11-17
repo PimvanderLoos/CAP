@@ -8,6 +8,7 @@ import nl.pim16aap2.cap.command.CommandResult;
 import nl.pim16aap2.cap.commandsender.AllowedCommandSenderType;
 import nl.pim16aap2.cap.commandsender.ICommandSender;
 import nl.pim16aap2.cap.commandsender.ILocaleProvider;
+import nl.pim16aap2.cap.commandsender.ISpigotCommandSender;
 import nl.pim16aap2.cap.commandsender.SpigotCommandSenderFactory;
 import nl.pim16aap2.cap.commandsender.SpigotServerCommandSender;
 import nl.pim16aap2.cap.exception.ExceptionHandler;
@@ -27,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -41,8 +43,12 @@ public class SpigotCAP extends CAP
     {
         final String defaultPackage = new String(
             new byte[]{'n', 'l', '.', 'p', 'i', 'm', '1', '6', 'a', 'a', 'p', '2', '.', 'c', 'a', 'p'});
+        final String examplePackage = new String(
+            new byte[]{'n', 'l', '.', 'p', 'i', 'm', '1', '6', 'a', 'a', 'p', '2', '.', 't', 'e', 's', 't', '.',
+                       'l', 'i', 'b'});
 
-        if (CAP.class.getPackage().getName().equals(defaultPackage))
+        if (CAP.class.getPackage().getName().equals(defaultPackage) ||
+            CAP.class.getPackage().getName().equals(examplePackage))
             throw new IllegalStateException("CAP was not relocated properly!");
     }
 
@@ -108,6 +114,41 @@ public class SpigotCAP extends CAP
         return SpigotCAP.spigotCAPBuilder().build();
     }
 
+    /**
+     * Updates the {@link Locale} for an {@link ICommandSender}.
+     *
+     * @param commandSender The {@link ICommandSender} for which to update the {@link Locale}.
+     * @param locale        The new {@link Locale}. When null, the default {@link Locale} will be used.
+     */
+    public void updateLocale(final @NonNull ICommandSender commandSender, final @Nullable Locale locale)
+    {
+        // We're on the Spigot platform, so this should never trigger, but just in case.
+        if (!(commandSender instanceof ISpigotCommandSender))
+            throw new IllegalArgumentException(
+                commandSender.getClass().getCanonicalName() + " is not a ISpigotCommandSender!");
+
+        final @Nullable CommandSender spigotCommandSender = ((ISpigotCommandSender) commandSender).getCommandSender();
+        updateLocale(spigotCommandSender, locale);
+    }
+
+    /**
+     * Updates the {@link Locale} for a {@link CommandSender}.
+     *
+     * @param commandSender The {@link CommandSender} for which to update the {@link Locale}. You can use null to update
+     *                      it for the server.
+     * @param locale        The new {@link Locale}. When null, the default {@link Locale} will be used.
+     */
+    public void updateLocale(final @Nullable CommandSender commandSender, final @Nullable Locale locale)
+    {
+        commandSenderFactory.updateLocale(commandSender, locale);
+        // Updating the command ensures that the client knows the top-level commands exist.
+        if (commandSender instanceof Player)
+            ((Player) commandSender).updateCommands();
+    }
+
+    /**
+     * See {@link CAP#parseInput(ICommandSender, String)}.
+     */
     public @NonNull Optional<CommandResult> parseInput(final @NonNull CommandSender sender,
                                                        final @NonNull String message)
     {

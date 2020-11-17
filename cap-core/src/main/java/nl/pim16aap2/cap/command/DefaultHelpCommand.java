@@ -108,7 +108,10 @@ public class DefaultHelpCommand extends Command
                                                    DEFAULT_COMMAND_NAMING_SPECIFICATION_RAW),
               descriptionSupplier, summarySupplier, headerSupplier, SUB_COMMANDS, HELP_COMMAND,
               ADD_DEFAULT_HELP_ARGUMENT, HELP_ARGUMENT, ADD_DEFAULT_HELP_SUB_COMMAND, commandExecutor,
-              Collections.singletonList(Util.valOrDefault(helpArgument, DEFAULT_HELP_ARGUMENT)), VIRTUAL, cap,
+              Collections.singletonList(Util.valOrDefault(helpArgument, localized ?
+                                                                        DEFAULT_HELP_ARGUMENT_LOCALIZED :
+                                                                        DEFAULT_HELP_ARGUMENT)),
+              VIRTUAL, cap,
               ((commandSender, command) -> true));
         this.localized = localized;
     }

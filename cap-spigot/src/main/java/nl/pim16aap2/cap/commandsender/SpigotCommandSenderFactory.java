@@ -1,6 +1,7 @@
 package nl.pim16aap2.cap.commandsender;
 
 import lombok.NonNull;
+import nl.pim16aap2.cap.SpigotCAP;
 import nl.pim16aap2.cap.text.ColorScheme;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,11 +22,14 @@ public class SpigotCommandSenderFactory
 
     /**
      * Updates the {@link Locale} for a given {@link CommandSender}.
+     * <p>
+     * Note that this will not directly update the locale of top-level commands for the command sender. If you want to
+     * do that as well, use {@link SpigotCAP#updateLocale(CommandSender, Locale)} instead.
      *
      * @param commandSender The {@link CommandSender} for which to update their locale.
      * @param locale        The {@link Locale} to use for the {@link CommandSender}.
      */
-    public void updateLocale(final @NonNull CommandSender commandSender, final @Nullable Locale locale)
+    public void updateLocale(final @Nullable CommandSender commandSender, final @Nullable Locale locale)
     {
         localeCache.put(commandSender, locale);
     }
