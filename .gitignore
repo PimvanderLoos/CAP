@@ -27,7 +27,7 @@ hs_err_pid*
 *.DS_Store
 
 # General stuff #
-*.idea/*
+.idea/
 *.iml
 /Servers/*
 /bin/*
@@ -43,4 +43,3 @@ dependency-reduced-pom.xml
 ignoredFiles
 TODOList
 *lombok.config
-cap-private/*
