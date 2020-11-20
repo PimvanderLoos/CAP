@@ -254,11 +254,11 @@ class TimedCacheTest
         timedCache.put("key", "value");
         Assertions.assertTrue(timedCache.get("key").isPresent());
         Assertions.assertEquals(1, timedCache.getSize());
-        UtilsForTesting.sleep(3);
+        UtilsForTesting.sleep(6);
         Assertions.assertEquals(1, timedCache.getSize());
 
         clock.setCurrentMillis(200);
-        UtilsForTesting.sleep(3);
+        UtilsForTesting.sleep(6);
         Assertions.assertEquals(0, timedCache.getSize());
     }
 

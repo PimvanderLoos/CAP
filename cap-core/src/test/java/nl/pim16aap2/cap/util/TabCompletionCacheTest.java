@@ -217,7 +217,7 @@ class TabCompletionCacheTest
             .getDelayedTabCompleteOptions(commandSender, input, "t",
                                           () -> delayedSupplier(suggestions, "t", 30), false);
         Assertions.assertFalse(output.isPresent());
-        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        UtilsForTesting.sleep(2); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
         // Make sure that requesting the same input before the supplier has completed doesn't query the supplier again.
@@ -226,7 +226,7 @@ class TabCompletionCacheTest
             .getDelayedTabCompleteOptions(commandSender, input, "t",
                                           () -> delayedSupplier(suggestions, "t", 30), false);
         Assertions.assertFalse(output.isPresent());
-        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        UtilsForTesting.sleep(2); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
         // Make sure that once the supplier has completed, the result is available without querying the supplier again.
@@ -236,7 +236,7 @@ class TabCompletionCacheTest
                                           () -> delayedSupplier(suggestions, "t", 30), false);
         Assertions.assertTrue(output.isPresent());
         Assertions.assertEquals(suggestions.size(), output.get().size());
-        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        UtilsForTesting.sleep(2); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
         // Add another argument, this should invalidate the cache (i.e., it should be empty again).
@@ -245,7 +245,7 @@ class TabCompletionCacheTest
             .getDelayedTabCompleteOptions(commandSender, input, "t",
                                           () -> delayedSupplier(suggestions, "t", 30), false);
         Assertions.assertFalse(output.isPresent());
-        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        UtilsForTesting.sleep(2); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(2, usedSupplier);
 
         // Make sure that after completion, we can retrieve a narrower result without querying the cache again.
@@ -254,7 +254,7 @@ class TabCompletionCacheTest
         output = tabCompletionCache
             .getDelayedTabCompleteOptions(commandSender, input, "testCom",
                                           () -> delayedSupplier(suggestions, "testCom", 30), false);
-        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        UtilsForTesting.sleep(2); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(2, usedSupplier);
         Assertions.assertTrue(output.isPresent());
         Assertions.assertEquals(2, output.get().size());
@@ -272,13 +272,13 @@ class TabCompletionCacheTest
         // Place a request that takes 30ms to complete.
         tabCompletionCache
             .getTabCompleteOptionsAsync(commandSender, input, "t", () -> delayedSupplier(suggestions, "t", 30), false);
-        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        UtilsForTesting.sleep(2); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
         // Make sure that placing another request before the 30ms are over doesn't result in querying the supplier again.
         tabCompletionCache
             .getTabCompleteOptionsAsync(commandSender, input, "t", () -> delayedSupplier(suggestions, "t", 30), false);
-        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        UtilsForTesting.sleep(2); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
 
         // Make sure that the output is correct once the supplier does complete (and that the supplier isn't queried again).
@@ -286,7 +286,7 @@ class TabCompletionCacheTest
         @NonNull CompletableFuture<List<String>> output = tabCompletionCache
             .getTabCompleteOptionsAsync(commandSender, input, "t", () -> delayedSupplier(suggestions, "t", 30), false);
         Assertions.assertEquals(suggestions.size(), output.get(1, TimeUnit.MILLISECONDS).size());
-        UtilsForTesting.sleep(1); // Make sure to take any overhead of the async call into account.
+        UtilsForTesting.sleep(2); // Make sure to take any overhead of the async call into account.
         Assertions.assertEquals(1, usedSupplier);
     }
 }
