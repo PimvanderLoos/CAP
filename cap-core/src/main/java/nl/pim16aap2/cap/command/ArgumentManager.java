@@ -89,17 +89,31 @@ public class ArgumentManager
         // First sort the arguments we received so they are put in the arguments map in the right order.
         argumentsList.sort(COMPARATOR);
 
+        // Optional positional arguments are only allowed AFTER all required optional positional arguments.
+        // So, in other words, we can keep adding required positional arguments until we encounter an optional one.
+        boolean requiredPositionalAllowed = true;
         for (final @NonNull Argument<?> argument : argumentsList)
         {
             argumentsMap.addArgument(argument);
 
-            if (argument.isRequired())
+            final boolean required = argument.isRequired();
+            if (required)
                 requiredArguments.add(argument);
             else
                 optionalArguments.add(argument);
 
             if (argument.isPositional())
+            {
+                if (required && !requiredPositionalAllowed)
+                    throw new IllegalArgumentException("Trying to add an optional positional argument before " +
+                                                           "the last required positional argument! This is " +
+                                                           "not supported: All optional positional arguments " +
+                                                           "must come AFTER all required optional " +
+                                                           "positional arguments!");
+                else
+                    requiredPositionalAllowed = false;
                 positionalArguments.add(argument);
+            }
         }
     }
 
