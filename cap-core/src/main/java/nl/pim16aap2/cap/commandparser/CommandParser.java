@@ -209,13 +209,62 @@ public class CommandParser
             throw new NoPermissionException(commandSender, parsedCommand.getCommand(), localizedMessage, cap.isDebug());
         }
 
-        if (parsedCommand.getIndex() == (input.size() - 1) &&
-            parsedCommand.getCommand().getArgumentManager().getRequiredArguments().size() > 0)
-            return new CommandResult(commandSender, parsedCommand.getCommand());
+        final int argCount = input.size() - 1 - parsedCommand.index;
+        final int requiredArgCount = parsedCommand.getCommand().getArgumentManager().getRequiredArguments().size();
+        if (argCount == 0 && requiredArgCount == 0)
+            return new CommandResult(commandSender, parsedCommand.getCommand(),
+                                     fillDefaultValues(parsedCommand.getCommand()));
+
+        // If there aren't enough arguments to populate all required arguments,
+        // We don't have to parse anything to know that it won't work. Instead, just
+        // abort and complain about missing the required argument that was supposed to
+        // come after the last provided one.
+        if (argCount < requiredArgCount)
+        {
+            final @NonNull Argument<?> missingArgument = parsedCommand.getCommand().getArgumentManager()
+                                                                      .getRequiredArguments().get(argCount);
+            final @NonNull String argumentName = missingArgument.getShortName(cap.getLocalizer(),
+                                                                              commandSender.getLocale());
+            final @NonNull String localizedMessage =
+                MessageFormat.format(cap.getLocalizer().getMessage("error.exception.missingValue",
+                                                                   commandSender), argumentName);
+            throw new MissingValueException(parsedCommand.getCommand(), missingArgument,
+                                            localizedMessage, cap.isDebug());
+        }
 
         return new CommandResult(commandSender, parsedCommand.getCommand(),
                                  parseArguments(parsedCommand.getCommand(),
                                                 parsedCommand.getIndex()));
+    }
+
+    /**
+     * Supplements a map of {@link Argument} values with any missing values for which a default value exists. See {@link
+     * Argument#getDefault()}.
+     *
+     * @param command The {@link Command} for which to get all {@link Argument}s.
+     * @param current The current map of {@link Argument} values.
+     * @return The supplemented map of {@link Argument} values.
+     */
+    private @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> fillDefaultValues(
+        final @NonNull Command command,
+        final @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> current)
+    {
+        command.getArgumentManager().getArguments().forEach(
+            argument -> current.putIfAbsent(argument.getIdentifier(), argument.getDefault()));
+        return current;
+    }
+
+    /**
+     * Gets a map of all available default values for all {@link Argument}s of the provided {@link Command}.
+     * <p>
+     * See {@link Argument#getDefault()}.
+     *
+     * @param command The {@link Command} to check the {@link Argument}s from.
+     * @return The map with all available default values.
+     */
+    private @NonNull Map<@NonNull String, Argument.IParsedArgument<?>> fillDefaultValues(final @NonNull Command command)
+    {
+        return fillDefaultValues(command, new HashMap<>());
     }
 
     /**
@@ -377,11 +426,10 @@ public class CommandParser
                                          argument.getLongName(cap.getLocalizer(), commandSender.getLocale()));
                 throw new MissingArgumentException(command, argument, localizedMessage, cap.isDebug());
             }
-
-            // Add default values for missing optional parameters.
-            if (missing)
-                results.put(argument.getIdentifier(), argument.getDefault());
         }
+
+        fillDefaultValues(command, results);
+
         return results;
     }
 

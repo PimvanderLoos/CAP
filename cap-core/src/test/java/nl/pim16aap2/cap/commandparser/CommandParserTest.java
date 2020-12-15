@@ -81,6 +81,7 @@ class CommandParserTest
                 .cap(cap)
                 .argument(new StringArgument()
                               .getOptional()
+                              .defaultValue(String.valueOf(idx))
                               .nameSpec(ArgumentNamingSpec.RawStrings.builder()
                                                                      .shortName("v").label("val")
                                                                      .summary("random value").build())
@@ -91,6 +92,29 @@ class CommandParserTest
                 .build();
             subcommands.add(generic);
         }
+
+        final Command requiredArgumentSubCommand = Command
+            .commandBuilder()
+            .nameSpec(UtilsForTesting.getBasicCommandName("requiredArgumentSubCommand"))
+            .argument(new StringArgument()
+                          .getRequired()
+                          .nameSpec(ArgumentNamingSpec.RawStrings.builder()
+                                                                 .shortName("r").label("required")
+                                                                 .summary("A required argument").build())
+                          .identifier("required_0")
+                          .build())
+            .argument(new StringArgument()
+                          .getRequired()
+                          .nameSpec(ArgumentNamingSpec.RawStrings.builder()
+                                                                 .shortName("r1").label("required")
+                                                                 .summary("A required argument").build())
+                          .identifier("required_1")
+                          .build())
+            .commandExecutor(commandResult ->
+                             {
+                             })
+            .cap(cap)
+            .build();
 
         final Command subSubSubCommand = Command
             .commandBuilder()
@@ -225,6 +249,7 @@ class CommandParserTest
             .nameSpec(UtilsForTesting.getBasicCommandName("bigdoors"))
             .subCommand(addOwner)
             .subCommand(numerical)
+            .subCommand(requiredArgumentSubCommand)
             .subCommands(subcommands)
             .virtual(true)
             .build();
@@ -253,9 +278,11 @@ class CommandParserTest
      *
      * @param clazz      The type of the exception expected inside the {@link RuntimeException}.
      * @param executable The method to execute.
+     * @return The exception that was wrapped in the {@link RuntimeException}.
      */
     @SneakyThrows
-    private static void assertWrappedThrows(final @NonNull Class<?> clazz, final @NonNull Executable executable)
+    private static <T> T assertWrappedThrows(final @NonNull Class<T> clazz,
+                                             final @NonNull Executable executable)
     {
         final RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class, executable);
         Assertions.assertNotNull(runtimeException.getCause());
@@ -263,6 +290,7 @@ class CommandParserTest
         if (!clazz.isInstance(runtimeException.getCause()))
             Assertions.fail("Exception " + runtimeException.getCause().getClass().getCanonicalName() +
                                 " is not of expected type: " + clazz.getCanonicalName());
+        return (T) runtimeException.getCause();
     }
 
     private <T> void assertParseResult(final @NonNull CAP cap, final @NonNull String command,
@@ -359,6 +387,26 @@ class CommandParserTest
     void testNumericalInputSpaceSeparator()
     {
         testNumericalInput(setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build()));
+    }
+
+    @Test
+    void testMissingArguments()
+    {
+        final @NonNull CAP cap = setUp(CAP.getDefault().toBuilder().exceptionHandler(null).separator(' ').build());
+        // Ensure that default values are applied properly for optional arguments.
+        assertParseResult(cap, "bigdoors subcommand_4", "value", "4");
+
+        MissingValueException exception = assertWrappedThrows(MissingValueException.class, () ->
+            cap.parseInput(commandSender, "bigdoors requiredArgumentSubCommand"));
+        // Make sure the error message complains about the first
+        // required argument (as no required arguments are provided)
+        Assertions.assertEquals("required_0", exception.getArgument().getIdentifier());
+
+        exception = assertWrappedThrows(MissingValueException.class, () ->
+            cap.parseInput(commandSender, "bigdoors requiredArgumentSubCommand a"));
+        // Make sure the error message complains about the second
+        // required argument (as a single required arguments was provided)
+        Assertions.assertEquals("required_1", exception.getArgument().getIdentifier());
     }
 
     @Test

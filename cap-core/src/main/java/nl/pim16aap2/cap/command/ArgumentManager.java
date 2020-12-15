@@ -110,7 +110,7 @@ public class ArgumentManager
                                                            "not supported: All optional positional arguments " +
                                                            "must come AFTER all required optional " +
                                                            "positional arguments!");
-                else
+                if (!required)
                     requiredPositionalAllowed = false;
                 positionalArguments.add(argument);
             }

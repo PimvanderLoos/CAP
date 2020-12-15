@@ -46,7 +46,7 @@ class TabCompletionSuggesterTest
 
         Assertions.assertEquals(1, cap.getTabCompleteOptions(commandSender, "bigdoors").size());
 
-        Assertions.assertEquals(23, cap.getTabCompleteOptions(commandSender, "bigdoors ").size());
+        Assertions.assertEquals(24, cap.getTabCompleteOptions(commandSender, "bigdoors ").size());
 
         Assertions.assertEquals("bigdoors", cap.getTabCompleteOptions(commandSender, "big").get(0));
 

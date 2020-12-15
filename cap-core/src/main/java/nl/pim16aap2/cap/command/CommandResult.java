@@ -80,17 +80,6 @@ public class CommandResult
     }
 
     /**
-     * Creates a new {@link CommandResult}, but without any {@link #parsedArguments}.
-     *
-     * @param commandSender See {@link #commandSender}.
-     * @param command       See {@link #command}.
-     */
-    public CommandResult(final @NonNull ICommandSender commandSender, final @NonNull Command command)
-    {
-        this(commandSender, command, null);
-    }
-
-    /**
      * Sends the text rendered by {@link IHelpCommandRenderer#renderHelpMenu(ICommandSender, ColorScheme, Command)} to
      * the {@link #commandSender} for the {@link #command}.
      * <p>
